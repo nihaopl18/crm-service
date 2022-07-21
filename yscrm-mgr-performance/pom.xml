@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>crm-service</artifactId>
+        <groupId>cn.com.yusys.yscrm</groupId>
+        <version>2.0.0-SNAPSHOT</version>
+    </parent>
+  <modelVersion>4.0.0</modelVersion>
+    <!-- 当前工程信息 -->
+  <groupId>cn.com.yusys.yscrm.mgr</groupId>
+  <artifactId>yscrm-mgr-performance</artifactId>
+  <description>YUSP应用框架</description>
+  <packaging>pom</packaging>  
+  <!-- 包含的子模块 -->  
+  <modules>
+      <module>uimp-app-need</module>
+      <module>uimp-app-oca</module>
+      <!--<module>uimp-app-common</module>-->
+      <module>uimp-business-pma-scheme</module>
+      <module>uimp-business-pma-dstr</module>
+      <module>uimp-service-app-single-starter</module>
+  </modules>
+</project>

@@ -1,0 +1,332 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper
+	namespace="cn.com.yusys.yscrm.info.workreport.repository.mapper.OcrmFwpWorkReportMapper">
+	<!-- 条件列表查询 -->
+	<select id="listByModel" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+		resultType="java.util.HashMap">
+		select
+		WORK_REPORT_ID,
+		WORK_REPORT_BUSI_TYPE,
+		START_DATE,
+		WORK_SUMMARY,
+		WORK_CONTENT,
+		LATER_PLAN,
+		IS_DELETE,
+		IS_DRAFT,
+		CREATOR_ID,
+		CREATOR_NAME,
+		CREATOR_ORG,
+		CREATOR_ORG_NAME,
+		CREATE_DATE,
+		LAST_CHG_USR_ID,
+		LAST_CHG_USR_NAME,
+		LAST_CHG_USR_ORG_ID,
+		LAST_CHG_USR_ORG_NAME,
+		LAST_CHG_DATE,
+		ANNEX,
+		END_DATE,
+		INSTANCE_ID
+		from OCRM_F_WP_WORK_REPORT
+		<where>
+			IS_DELETE = 'N'
+			<if test="condition.isDraft != null and condition.isDraft !=''">
+				AND IS_DRAFT like #{condition.isDraft,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.workReportIds != null">
+				AND WORK_REPORT_ID in
+				<foreach collection="condition.workReportIds" item="workReportId"
+					index="index" open="(" close=")" separator=",">
+					#{workReportId}
+				</foreach>
+			</if>
+			<if test="condition.workReportBusiTypes != null">
+				AND WORK_REPORT_BUSI_TYPE in
+				<foreach collection="condition.workReportBusiTypes" item="workReportBusiType"
+					index="index" open="(" close=")" separator=",">
+					#{workReportBusiType}
+				</foreach>
+			</if>
+			<if test="condition.workSummary != null and condition.workSummary != ''">
+				AND WORK_SUMMARY Like
+				#{condition.workSummary,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.creatorId != null and condition.creatorId != ''">
+				AND CREATOR_ID = #{condition.creatorId,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.creatorOrg != null and condition.creatorOrg != ''">
+				AND CREATOR_ORG =
+				#{condition.creatorOrg,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.createDate != null and condition.createDate != ''">
+                <![CDATA[
+	                AND TO_CHAR(CREATE_DATE,'yyyy-MM-dd') = #{condition.createDate,jdbcType=VARCHAR}
+	            ]]>
+			</if>
+			<if
+				test="condition.startDate != null and condition.startDate != '' and condition.endDate != null and condition.endDate != ''">
+                <![CDATA[
+	                AND TO_CHAR(CREATE_DATE,'yyyy-MM-dd hh24:mi:ss') >= #{condition.startDate,jdbcType=VARCHAR}
+	                AND TO_CHAR(CREATE_DATE,'yyyy-MM-dd hh24:mi:ss') <= #{condition.endDate,jdbcType=VARCHAR}
+	            ]]>
+			</if>
+		</where>
+		order by CREATE_DATE desc
+	</select>
+
+	<select id="queryDetail" parameterType="java.lang.String"
+			resultType="java.util.HashMap">
+		select
+		WORK_REPORT_ID,
+		WORK_REPORT_BUSI_TYPE,
+		START_DATE,
+		WORK_SUMMARY,
+		WORK_CONTENT,
+		LATER_PLAN,
+		IS_DELETE,
+		IS_DRAFT,
+		CREATOR_ID,
+		CREATOR_NAME,
+		CREATOR_ORG,
+		CREATOR_ORG_NAME,
+		CREATE_DATE,
+		LAST_CHG_USR_ID,
+		LAST_CHG_USR_NAME,
+		LAST_CHG_USR_ORG_ID,
+		LAST_CHG_USR_ORG_NAME,
+		LAST_CHG_DATE,
+		ANNEX,
+		END_DATE,
+		INSTANCE_ID
+		from OCRM_F_WP_WORK_REPORT
+		where WORK_REPORT_ID = #{workReportId,jdbcType=VARCHAR}
+	</select>
+
+	<select id="queryMlist" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+		resultType="java.util.HashMap">
+		select
+		T.WORK_REPORT_ID,
+		T.WORK_REPORT_BUSI_TYPE,
+		T.START_DATE,
+		T.WORK_SUMMARY,
+		T.WORK_CONTENT,
+		T.LATER_PLAN,
+		T.IS_DELETE,
+		T.IS_DRAFT,
+		T.CREATOR_ID,
+		T.CREATOR_NAME,
+		T.CREATOR_ORG,
+		T.CREATOR_ORG_NAME,
+		T.CREATE_DATE,
+		T.LAST_CHG_USR_ID,
+		T.LAST_CHG_USR_NAME,
+		T.LAST_CHG_USR_ORG_ID,
+		T.LAST_CHG_USR_ORG_NAME,
+		T.LAST_CHG_DATE,
+		T.ANNEX,
+		T.END_DATE,
+		T.INSTANCE_ID
+		from OCRM_F_WP_WORK_REPORT T
+		INNER JOIN ADMIN_SM_USER U ON T.CREATOR_ID = U.USER_ID
+		INNER JOIN ADMIN_SM_USER_ROLE_REL UR ON U.USER_ID = UR.USER_ID
+		INNER JOIN ADMIN_SM_ROLE SS ON SS.ROLE_ID = UR.ROLE_ID
+		<where>
+			T.IS_DELETE = 'N'
+			<if test="dataAuth != null">
+				<!-- INNER JOIN ADMIN_SM_USER S ON T.CREATOR_ID=S.USER_ID -->
+				${dataAuth}
+			</if>
+			<if test="condition.roleType != null and condition.roleType !=''">
+				AND SS.ROLE_TYPE = #{condition.roleType,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.isDraft != null and condition.isDraft !=''">
+				AND T.IS_DRAFT = #{condition.isDraft,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.workReportBusiType != null  and condition.workReportBusiType != ''">
+				AND T.WORK_REPORT_BUSI_TYPE =
+				#{condition.workReportBusiType,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.workSummary != null and condition.workSummary != ''">
+				AND T.WORK_SUMMARY Like
+				#{condition.workSummary,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.creatorId != null and condition.creatorId != ''">
+				AND T.CREATOR_ID != #{condition.creatorId,jdbcType=VARCHAR}
+			</if>
+			<if
+				test="condition.startDate != null and condition.startDate != '' and condition.endDate != null and condition.endDate != ''">
+                <![CDATA[
+	                AND TO_CHAR(T.CREATE_DATE,'yyyy-MM-dd hh24:mi:ss') >= #{condition.startDate,jdbcType=VARCHAR}
+	                AND TO_CHAR(T.CREATE_DATE,'yyyy-MM-dd hh24:mi:ss') <= #{condition.endDate,jdbcType=VARCHAR}
+	            ]]>
+			</if>
+		</where>
+		order by T.CREATE_DATE desc
+	</select>
+	<!-- 导出 -->
+	<select id="getDay" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="cn.com.yusys.yscrm.info.workreport.domain.WorkReportExcle">
+		SELECT
+		WR.WORK_REPORT_ID,
+		WR.CREATOR_NAME,
+		TO_CHAR(WR.CREATE_DATE, 'yyyy-MM-dd HH24:mi:ss') CREATE_DATE,
+		'工作日报' WORK_REPORT_BUSI_TYPE,
+		TO_CHAR(WR.START_DATE, 'yyyy-MM-dd') START_DATE,
+		WR.WORK_SUMMARY,
+		WR.WORK_CONTENT,
+		CC.CONTACT_CUST_NAME,
+		LI1.LOOKUP_ITEM_NAME CONTACT_TYPE,
+		LI2.LOOKUP_ITEM_NAME CONTACT_GOAL,
+		CC.PRODUCT ,
+		CC.CONTACT_BACK ,
+		TO_CHAR(CC.NEXT_CONTACT_DATE, 'yyyy-MM-dd') NEXT_CONTACT_DATE,
+		WR.ANNEX,
+		WR.LATER_PLAN,
+		LI3.LOOKUP_ITEM_NAME IS_DRAFT
+		FROM
+		OCRM_F_WP_WORK_REPORT WR
+		LEFT JOIN OCRM_F_WP_CUSTOMER_CONTACT CC ON
+		WR.WORK_REPORT_ID = CC.WORK_REPORT_ID
+		AND CC.IS_DELETE = 'N'
+		LEFT JOIN ADMIN_SM_LOOKUP_ITEM LI1 ON
+		CC.CONTACT_TYPE = LI1.LOOKUP_ITEM_CODE
+		AND LI1.LOOKUP_CODE = 'DY0006'
+		LEFT JOIN ADMIN_SM_LOOKUP_ITEM LI2 ON
+		CC.CONTACT_GOAL = LI2.LOOKUP_ITEM_CODE
+		AND LI2.LOOKUP_CODE = 'DY0005'
+		LEFT JOIN ADMIN_SM_LOOKUP_ITEM LI3 ON
+		WR.IS_DRAFT = LI3.LOOKUP_ITEM_CODE
+		AND LI3.LOOKUP_CODE = 'IS_DRAFT'
+		WHERE
+		WR.WORK_REPORT_BUSI_TYPE = '1'
+		AND WR.WORK_REPORT_ID IN
+		<foreach collection="condition.workReportIds" item="workReportId" index="index" open="(" close=")" separator=",">
+			#{workReportId}
+		</foreach>
+		order by WR.CREATE_DATE desc
+	</select>
+
+	<select id="getWeek" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="cn.com.yusys.yscrm.info.workreport.domain.WorkReportExcle">
+		select W.*, ROWNUM WORK_REPORT_ID from (SELECT
+		WR.CREATOR_NAME,
+		TO_CHAR(WR.CREATE_DATE, 'yyyy-MM-dd HH24:mi:ss') CREATE_DATE,
+		TO_CHAR(WR.START_DATE, 'yyyy-MM-dd') START_DATE,
+		TO_CHAR(WR.END_DATE, 'yyyy_MM-DD') END_DATE ,
+		WR.ANNEX,
+		WR.LATER_PLAN,
+		LI3.LOOKUP_ITEM_NAME IS_DRAFT
+		FROM
+		OCRM_F_WP_WORK_REPORT WR
+		LEFT JOIN ADMIN_SM_LOOKUP_ITEM LI3 ON
+		WR.IS_DRAFT = LI3.LOOKUP_ITEM_CODE
+		AND LI3.LOOKUP_CODE = 'IS_DRAFT'
+		WHERE
+		WORK_REPORT_BUSI_TYPE = '2'
+		AND WORK_REPORT_ID IN
+		<foreach collection="condition.workReportIds" item="workReportId" index="index" open="(" close=")"
+				 separator=",">
+			#{workReportId}
+		</foreach>
+		order by WR.CREATE_DATE desc) W
+	</select>
+
+	<select id="getMonth" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="cn.com.yusys.yscrm.info.workreport.domain.WorkReportExcle">
+		select W.*, ROWNUM WORK_REPORT_ID from (SELECT
+		WR.CREATOR_NAME,
+		TO_CHAR(WR.CREATE_DATE, 'yyyy-MM-dd HH24:mi:ss') CREATE_DATE,
+		TO_CHAR(WR.START_DATE, 'yyyy-MM-dd') START_DATE,
+		TO_CHAR(WR.END_DATE, 'yyyy_MM-DD') END_DATE ,
+		WR.ANNEX ,
+		WR.LATER_PLAN,
+		LI3.LOOKUP_ITEM_NAME IS_DRAFT
+		FROM
+		OCRM_F_WP_WORK_REPORT WR
+		LEFT JOIN ADMIN_SM_LOOKUP_ITEM LI3 ON
+		WR.IS_DRAFT = LI3.LOOKUP_ITEM_CODE
+		AND LI3.LOOKUP_CODE = 'IS_DRAFT'
+		WHERE
+		WORK_REPORT_BUSI_TYPE = '3'
+		AND WORK_REPORT_ID IN
+		<foreach collection="condition.workReportIds" item="workReportId" index="index" open="(" close=")"
+				 separator=",">
+			#{workReportId}
+		</foreach>
+		order by WR.CREATE_DATE desc) W
+	</select>
+
+	<!-- 添加校验 -->
+	<select id="chkData" parameterType="java.util.HashMap" resultType="java.lang.String">
+		select IS_DRAFT from OCRM_F_WP_WORK_REPORT
+		where CREATOR_ID = #{creatorId,jdbcType=VARCHAR}
+		  and WORK_REPORT_BUSI_TYPE = #{workReportBusiType,jdbcType=VARCHAR}
+		  and START_DATE = #{startDate,jdbcType=VARCHAR}
+		  and IS_DELETE = 'N'
+	</select>
+
+	<select id="getUserName" parameterType="java.lang.String" resultType="java.lang.String">
+		select USER_NAME from ADMIN_SM_USER where USER_ID = #{userId}
+	</select>
+
+	<!-- 根据主键删除 逻辑删除 -->
+	<update id="deleteByWorkReportIds" parameterType="java.util.HashMap">
+		update OCRM_F_WP_WORK_REPORT set
+		IS_DELETE =
+		#{workReport.isDelete,jdbcType=VARCHAR},
+		LAST_CHG_USR_ID =
+		#{workReport.lastChgUsrId,jdbcType=VARCHAR},
+		LAST_CHG_USR_NAME =
+		#{workReport.lastChgUsrName,jdbcType=VARCHAR},
+		LAST_CHG_USR_ORG_ID =
+		#{workReport.lastChgUsrOrgId,jdbcType=VARCHAR},
+		LAST_CHG_USR_ORG_NAME =
+		#{workReport.lastChgUsrOrgName,jdbcType=VARCHAR},
+		LAST_CHG_DATE =
+		#{workReport.lastChgDate,jdbcType=VARCHAR}
+		where WORK_REPORT_ID in
+		<foreach collection="workReportIds" item="workReportkId"
+			index="index" open="(" close=")" separator=",">
+			#{workReportkId}
+		</foreach>
+	</update>
+
+	<!-- 根据主键更新 -->
+	<update id="updateWorkReport"
+		parameterType="cn.com.yusys.yusp.dycrm.todowork.domain.OcrmFwpTodoWork">
+		update OCRM_F_WP_WORK_REPORT set
+		WORK_REPORT_BUSI_TYPE =
+		#{workReportBusiType,jdbcType=VARCHAR},
+		START_DATE =
+		#{startDate,jdbcType=VARCHAR},
+		WORK_SUMMARY =
+		#{workSummary,jdbcType=VARCHAR},
+		WORK_CONTENT =
+		#{workContent,jdbcType=VARCHAR},
+		LATER_PLAN =
+		#{laterPlan,jdbcType=VARCHAR},
+		IS_DRAFT = #{isDraft,jdbcType=VARCHAR},
+		ANNEX = #{annex,jdbcType=VARCHAR},
+		END_DATE =
+		#{endDate,jdbcType=VARCHAR},
+		LAST_CHG_USR_ID =
+		#{lastChgUsrId,jdbcType=VARCHAR},
+		LAST_CHG_USR_NAME =
+		#{lastChgUsrName,jdbcType=VARCHAR},
+		LAST_CHG_USR_ORG_ID =
+		#{lastChgUsrOrgId,jdbcType=VARCHAR},
+		LAST_CHG_USR_ORG_NAME =
+		#{lastChgUsrOrgName,jdbcType=VARCHAR},
+		LAST_CHG_DATE =
+		#{lastChgDate,jdbcType=VARCHAR}
+		where WORK_REPORT_ID =
+		#{workReportId,jdbcType=VARCHAR}
+	</update>
+
+	<update id="updateStatus" parameterType="java.util.HashMap">
+		update OCRM_F_WP_WORK_REPORT set IS_DRAFT = #{isDraft,jdbcType=VARCHAR}
+		where WORK_REPORT_ID = #{workReportId,jdbcType=VARCHAR}
+	</update>
+
+	<update id="saveIntanceId" parameterType="java.util.HashMap">
+		update OCRM_F_WP_WORK_REPORT set INSTANCE_ID = #{instanceId,jdbcType=VARCHAR}
+		where WORK_REPORT_ID = #{workReportId,jdbcType=VARCHAR}
+	</update>
+</mapper>

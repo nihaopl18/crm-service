@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.climp.qypool.repository.mapper.LoyQyGiftInfoMapper">
+    <resultMap id="BaseResultMap" type="cn.com.yusys.climp.qypool.domain.LoyQyGiftInfo">
+		<result column="GIFT_ID" jdbcType="VARCHAR" property="giftId" />
+		<result column="GIFT_NO" jdbcType="VARCHAR" property="giftNo" />
+		<result column="GIFT_NAME" jdbcType="VARCHAR" property="giftName" />
+		<result column="SOURCE" jdbcType="VARCHAR" property="source" />
+		<result column="GIFT_TYPE_ID" jdbcType="VARCHAR" property="giftTypeId" />
+		<result column="GIFT_PRICE" jdbcType="NUMERIC" property="giftPrice" />
+		<result column="GIFT_COST" jdbcType="NUMERIC" property="giftCost" />
+		<result column="GIFT_NUM" jdbcType="NUMERIC" property="giftNum" />
+		<result column="GIFT_STATUS" jdbcType="VARCHAR" property="giftStatus" />
+		<result column="UPPER_FLAG" jdbcType="VARCHAR" property="upperFlag" />
+		<result column="REMARK" jdbcType="VARCHAR" property="remark" />
+		<result column="DELETE_SIGN" jdbcType="VARCHAR" property="deleteSign" />
+		<result column="CREATE_USER" jdbcType="VARCHAR" property="createUser" />
+		<result column="CREATE_DATE" jdbcType="VARCHAR" property="createDate" />
+		<result column="CREATE_ORG" jdbcType="VARCHAR" property="createOrg" />
+		<result column="TARGET_ORG" jdbcType="VARCHAR" property="targetOrg" />
+		<result column="UPDATE_USER" jdbcType="VARCHAR" property="updateUser" />
+		<result column="UPDATE_DATE" jdbcType="VARCHAR" property="updateDate" />
+		<result column="UPDATE_ORG" jdbcType="VARCHAR" property="updateOrg" />
+    </resultMap>
+    <sql id="Base_Column_List">
+	    GIFT_ID,GIFT_NO,GIFT_NAME,SOURCE,GIFT_TYPE_ID,GIFT_PRICE,GIFT_COST,GIFT_NUM,GIFT_STATUS,UPPER_FLAG,REMARK,DELETE_SIGN,CREATE_USER,CREATE_DATE,CREATE_ORG,TARGET_ORG,UPDATE_USER,UPDATE_DATE,UPDATE_ORG
+    </sql>
+    <!-- 礼品列表查询 -->
+    <select id="getGift" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+		resultType="java.util.Map">
+		SELECT t.*
+		  FROM LOY_QY_GIFT_INFO t 
+		  where (t.DELETE_SIGN is null or t.DELETE_SIGN != '1')
+		  order by t.CREATE_DATE desc
+	</select>
+</mapper>

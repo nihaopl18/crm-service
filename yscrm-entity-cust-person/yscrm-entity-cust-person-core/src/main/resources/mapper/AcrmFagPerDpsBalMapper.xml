@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.cust.person.repository.mapper.AcrmFagPerDpsBalMapper">
+    <sql id="Base_Column_List">
+	    CORP_ORG_CODE,DATA_DATE,SUBACCT_NO,CUST_ID,ACCT_NO,ACCT_NAME,ACCT_TYPE,PROD_CD,TERM_FLG,PROD_NAME,CURR_CD,FCY_CASH_FLG,OPEN_BRCH_NO,OWN_BRCH_NO,SUBJECT_CD,ACCT_STATUS,ACCT_BAL,LAST_D_BAL,LAST_M_BAL,LAST_Q_BAL,LAST_Y_BAL,M_ACCUM,Q_ACCUM,Y_ACCUM,LAST_Y_ACCUM,M_AVG,Q_AVG,Y_AVG,LAST_Y_AVG,LAST_1M_ACCUM,LAST_3M_ACCUM,LAST_6M_ACCUM,LAST_12M_ACCUM,LAST_1M_AVG,LAST_3M_AVG,LAST_6M_AVG,LAST_12M_AVG,TERM_TYPE,ROLL_FLAG,LDB_FLAG,LXC_FLAG
+    </sql>
+        
+    <!-- <select id="queryCustDepositByCustId" parameterType="java.util.Map"  resultType="java.util.HashMap">
+		  select t.CORP_ORG_CODE,
+		  	   to_char(t.DATA_DATE,'yyyy-mm-dd') as DATA_DATE,
+		       t.SUBACCT_NO,
+		       t.CUST_ID,
+		       t.ACCT_NO,
+		       t.ACCT_NAME,
+		       t.ACCT_TYPE,
+		       t.PROD_CD,
+		       t.TERM_FLG,
+		       t.PROD_NAME,
+		       t.CURR_CD,
+		       t.FCY_CASH_FLG,
+		       t.OPEN_BRCH_NO,
+		       t.OWN_BRCH_NO,
+		       t.SUBJECT_CD,
+		       t.ACCT_STATUS,
+		       t.ACCT_BAL,
+		       t.LAST_D_BAL,
+		       t.LAST_M_BAL,
+		       t.LAST_Q_BAL,
+		       t.LAST_Y_BAL,
+		       t.M_ACCUM,
+		       t.Q_ACCUM,
+		       t.Y_ACCUM,
+		       t.LAST_Y_ACCUM,
+		       t.M_AVG,
+		       t.Q_AVG,
+		       t.Y_AVG,
+		       t.LAST_Y_AVG,
+		       t.LAST_1M_ACCUM,
+		       t.LAST_3M_ACCUM,
+		       t.LAST_6M_ACCUM,
+		       t.LAST_12M_ACCUM,
+		       t.LAST_1M_AVG,
+		       t.LAST_3M_AVG,
+		       t.LAST_6M_AVG,
+		       t.LAST_12M_AVG,
+		       t.TERM_TYPE,
+		       t.ROLL_FLAG,
+		       t.LDB_FLAG,
+		       t.LXC_FLAG
+		  from ACRM_F_AG_PER_DPS_BAL t
+
+		  <if  test="custId != null and custId != ''">
+	       		where t.CUST_ID =#{custId,jdbcType=VARCHAR} 
+		  </if>
+	</select> -->
+	
+</mapper>

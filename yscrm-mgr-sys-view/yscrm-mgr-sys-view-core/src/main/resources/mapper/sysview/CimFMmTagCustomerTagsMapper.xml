@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.sysview.repository.mapper.CimFMmTagCustomerTagsMapper">
+        <resultMap id="custSysTagMap" type="cn.com.yusys.yscrm.sysview.domain.CustSysGroup">
+            <result column="GROUP_NAME" property="groupName"/>
+            <collection property="custSysTagList" ofType="cn.com.yusys.yscrm.sysview.domain.CustSysTag">
+                <result column="TAG_NAME" property="tagName"/>
+                <result column="TAG_NO" property="tagNo"/>
+            </collection>
+        </resultMap>
+<!--    <update id="updateTagDisplay" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel">-->
+<!--    UPDATE CIM_F_TAG_CUST_TAGS SET DISPLAY='1' WHERE CUST_ID=#{condition.custId, jdbcType=VARCHAR}-->
+<!--        <if test="list != null and list.size > 0">-->
+<!--            AND TAG_NO IN-->
+<!--            <foreach item="item" index="index" collection="list" open="(" separator="," close=")">-->
+<!--                #{item}-->
+<!--            </foreach>-->
+<!--        </if>-->
+<!--	</update>-->
+
+    <update id="updateTagDisplay" parameterType="java.util.Map">
+        UPDATE CIM_F_TAG_CUST_TAGS_SELF SET DISPLAY=#{display, jdbcType=VARCHAR}
+        WHERE TAG_NO =#{tagNo, jdbcType=VARCHAR}  AND CUST_ID=#{custId, jdbcType=VARCHAR}
+    </update>
+
+    <select id="custSysTag" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultMap="custSysTagMap">
+        SELECT T.TAG_NAME,T.TAG_NO,G.GROUP_NAME,G.GROUP_NO FROM CIM_F_TAG_CUST_TAGS C
+        INNER JOIN (SELECT TAG_NO,TAG_NAME,GROUP_NO,TAG_PRI FROM CIM_F_MM_TAG_TAGS WHERE GROUP_NO IN(SELECT GROUP_NO FROM CIM_F_MM_TAG_GROUP
+        START WITH GROUP_NO='1' CONNECT BY PRIOR GROUP_NO = PARENT_NO)) T ON C.TAG_NO=T.TAG_NO
+        LEFT JOIN CIM_F_MM_TAG_GROUP G ON G.GROUP_NO=T.GROUP_NO
+        WHERE CUST_ID=#{condition.custId, jdbcType=VARCHAR}
+        ORDER BY TAG_PRI
+    </select>
+
+    <delete id="removecusttag" parameterType="java.util.Map">
+        DELETE FROM CIM_F_TAG_CUST_TAGS_SELF
+        WHERE TAG_NO =#{tagNo, jdbcType=VARCHAR}  AND CUST_ID=#{custId, jdbcType=VARCHAR}
+    </delete>
+</mapper>

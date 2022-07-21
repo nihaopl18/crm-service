@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.custpub.repository.mapper.OcrmFciPreGradeApplyInfoMapper">
+   <select id="queryServiceGradeList" parameterType="java.util.Map"  resultType="java.util.HashMap">
+	  select        t.ID                                   ,        
+					t.CUST_ID                              ,        
+				
+					to_char(t.APP_HOURS,'yyyy-mm-dd') as APP_HOURS    ,   
+					t.APPLICANT                            ,        
+					t.APPL_INS                             ,        
+					t.CUR_SER_LEVEL                        ,        
+					t.APP_SER_LEVEL                        ,        
+					t.APP_REA                              ,        
+					t.RAT_VAL                              ,        
+					t.LAST_THREE_MON_DAY_TOTAL_ASS         ,        
+					t.LAST_THREE_MON_DAY_TOTAL_LIA         ,        
+					t.LATE_YEAR_MID_BUS_DEGREE             ,        
+					t.LATE_YEAR_SET_VOL                    ,        
+					t.LATE_YEAR_CRE_CARD_CON_AMO           ,        
+					t.CORP_ORG_CODE                                 
+	         
+	  from  OCRM_F_CI_PRE_GRADE_APPLY_INFO t
+	  where 1=1
+	   <if  test="custId != null and custId != ''">
+		       and 		 t.CUST_ID =#{custId,jdbcType=VARCHAR} 
+	   </if>
+	
+	</select>
+    	<!--评级调整 -->
+  <update id="updateServiceGrade" parameterType="java.util.Map">
+			UPDATE OCRM_F_CI_PRE_GRADE_APPLY_INFO t SET 
+			
+			t.APP_SER_LEVEL=#{appSerLevel,jdbcType=VARCHAR}
+			,t.APP_REA=#{appRea,jdbcType=VARCHAR}
+			
+			,t.RAT_VAL=#{ratVal,jdbcType=VARCHAR}
+			WHERE t.CUST_ID = #{custId,jdbcType=VARCHAR}
+	</update>
+</mapper>

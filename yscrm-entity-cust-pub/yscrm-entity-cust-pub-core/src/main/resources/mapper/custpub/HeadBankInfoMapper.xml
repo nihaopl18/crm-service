@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.custpub.repository.mapper.HeadBankInfoMapper">
+    <select id="getBusiView" resultType="java.util.HashMap">
+        SELECT * FROM (
+                          SELECT
+                              DATA_DATE,
+                              AUM_BALANCE,
+                              AUM_BALANCE_RMB_YOY,
+                              AUM_BALANCE_RMB_QOQ,
+                              AUM_MONTH_AVG,
+                              AUM_YEAR_AVG,
+                              DEPOSIT_BALANCE_RMB,
+                              DEPOSIT_BALANCE_RMB_YOY,
+                              DEPOSIT_BALANCE_RMB_QOQ,
+                              DEMAND_DEPOSIT_BALANCE,
+                              TIME_DEPOSIT_BALANCE,
+                              FIN_BALANCE_RMB,
+                              FIN_BALANCE_RMB_YOY,
+                              FIN_BALANCE_RMB_QOQ,
+                              SELF_FIN_BALANCE_RMB,
+                              AGENT_FIN_BALANCE_RMB,
+                              LOAN_BALANCE,
+                              LOAN_BALANCE_RMB_YOY,
+                              LOAN_BALANCE_RMB_QOQ,
+                              MORTGAGE_LOAN_BALANCE,
+                              PARKING_LOAN_BALANCE
+                          FROM ACRM_F_PD_HEAD_BANK_INDEX where ORG_NO = '500' order by data_date DESC)
+        WHERE rownum=1
+    </select>
+    <select id="getCustType" resultType="java.util.HashMap">
+        SELECT * FROM (
+                          SELECT
+                              DATA_DATE,
+                              CUST_NUMBER,
+                              CUST_NUMBER_QOQ,
+                              LOAN_CUST_NUMBER,
+                              LOAN_CUST_NUMBER_QOQ,
+                              FIN_CUST_NUMBER,
+                              FIN_CUST_NUMBER_QOQ,
+                              LOAN_FIN_CUST_NUMBER,
+                              LOAN_FIN_CUST_NUMBER_QOQ,
+                              OTHER_CUST_NUMBER,
+                              OTHER_CUST_NUMBER_QOQ
+                          FROM ACRM_F_PD_HEAD_BANK_INDEX where ORG_NO = '500'  order by data_date DESC)
+        WHERE rownum=1
+    </select>
+    <select id="getCustGrade" resultType="java.util.HashMap">
+        SELECT * FROM (
+                          SELECT
+                              DATA_DATE,
+                              CUST_GRADE_5_NUMBER,
+                              CUST_GRADE_5_NUMBER_QOQ,
+                              CUST_GRADE_6_NUMBER,
+                              CUST_GRADE_6_NUMBER_QOQ,
+                              CUST_GRADE_4_NUMBER,
+                              CUST_GRADE_4_NUMBER_QOQ,
+                              CUST_GRADE_3_NUMBER,
+                              CUST_GRADE_3_NUMBER_QOQ,
+                              CUST_GRADE_2_NUMBER,
+                              CUST_GRADE_2_NUMBER_QOQ,
+                              CUST_GRADE_1_NUMBER,
+                              CUST_GRADE_1_NUMBER_QOQ
+                          FROM ACRM_F_PD_HEAD_BANK_INDEX where ORG_NO = '500' order by data_date DESC)
+        WHERE rownum=1
+    </select>
+    <select id="getCustOrg" resultType="java.util.HashMap">
+        SELECT
+            OI.ORG_NO,
+            OI.DATA_DATE,
+            O.ORG_NAME,
+            OI.CUST_NUMBER,
+            OI.CUST_NUMBER_QOQ
+        FROM
+            (
+                SELECT
+                    OI1.ORG_NO,
+                    OI1.DATA_DATE,
+                    CASE WHEN OI1.CUST_GRADE_3_UP_NUMBER is null THEN 0 ELSE OI1.CUST_GRADE_3_UP_NUMBER END CUST_NUMBER,
+                    CASE WHEN OI1.CUST_GRADE_3_UP_NUMBER_QOQ is null THEN 0 ELSE OI1.CUST_GRADE_3_UP_NUMBER_QOQ END CUST_NUMBER_QOQ
+                FROM ACRM_F_PD_ORG_INDEXS OI1
+                RIGHT JOIN (
+                    SELECT ORG_NO, MAX(DATA_DATE) DATA_DATE
+                    FROM ACRM_F_PD_ORG_INDEXS
+                    WHERE ORG_LEVEL = 2 AND BUSINESS_LINE = '0'
+                    GROUP BY ORG_NO
+                ) OI2 ON OI1.ORG_NO = OI2.ORG_NO AND OI1.DATA_DATE = OI2.DATA_DATE
+                WHERE ORG_LEVEL = 2 AND BUSINESS_LINE = '0') OI
+                LEFT JOIN ADMIN_SM_ORG O ON OI.ORG_NO = O.ORG_ID
+    </select>
+    <select id="getCardInfo" resultType="java.util.HashMap">
+        SELECT * FROM (
+                          SELECT
+                              DATA_DATE,
+                              DGM_NUMBER,
+                              DGM_NUMBER_QOQ,
+                              TEAM_AND_SUBBRANCH_NUMBER,
+                              TEAM_AND_SUBBRANCH_NUMBER_QOQ,
+                              FIN_CUST_MANAGER_NUMBER,
+                              FIN_CUST_MANAGER_NUMBER_QOQ,
+                              LOAN_CUST_MANAGER_NUMBER,
+                              LOAN_CUST_MANAGER_NUMBER_QOQ
+                          FROM ACRM_F_PD_HEAD_BANK_INDEX where ORG_NO = '500' order by data_date DESC)
+        WHERE rownum =1
+    </select>
+    <select id="getTableInfo" resultType="java.util.HashMap">
+        SELECT * FROM (
+                          SELECT
+                              DATA_DATE,
+                              AVG_AUM_BALANCE,
+                              AVG_AUM_BALANCE_QOQ,
+                              AVG_AUM_BALANCE_YOY,
+                              AVG_CUST_NUMBER,
+                              AVG_CUST_NUMBER_QOQ,
+                              AVG_CUST_NUMBER_YOY,
+                              AVG_FIN_CUST_NUMBER,
+                              AVG_FIN_CUST_NUMBER_QOQ,
+                              AVG_FIN_CUST_NUMBER_YOY,
+                              AVG_LOAN_CUST_NUMBER,
+                              AVG_LOAN_CUST_NUMBER_QOQ,
+                              AVG_LOAN_CUST_NUMBER_YOY
+                          FROM ACRM_F_PD_HEAD_BANK_INDEX where ORG_NO = '500' order by data_date DESC)
+        WHERE rownum =1
+    </select>
+</mapper>

@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.uimp.distribution.repository.mapper.PmaFperformanceTobatchInfMapper">
+    <resultMap id="BaseResultMap" type="cn.com.yusys.yusp.uimp.distribution.domain.PmaFperformanceTobatchInf">
+		<id column="BATCH_ID" jdbcType="VARCHAR" property="batchId" />
+		<result column="FUN_CODE" jdbcType="VARCHAR" property="funCode" />
+		<result column="CREATE_TIME" jdbcType="TIMESTAMP" property="createTime" />
+		<result column="STATUS" jdbcType="VARCHAR" property="status" />
+    </resultMap>
+    <sql id="Base_Column_List">
+	    BATCH_ID,FUN_CODE,CREATE_TIME,STATUS
+    </sql>
+    
+    <select id="queryList" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.Map">
+    	select * from PMA_F_PERFORMANCE_TOBATCH_INF
+    	<where>
+    		<if test="condition.status != null and condition.status != ''">
+				and STATUS = #{condition.status}
+			</if>
+    	</where>
+    	order by CREATE_TIME desc
+    </select>
+    
+    <select id="getBatchIdsByStatus" parameterType="java.lang.String" resultType="java.lang.String">
+    	select BATCH_ID from PMA_F_PERFORMANCE_TOBATCH_INF where STATUS = #{status}
+    </select>
+    
+    <select id="getEarlyBatchInfByCount" parameterType="java.lang.Integer" resultType="cn.com.yusys.yusp.uimp.distribution.domain.PmaFperformanceTobatchInf">
+    	select * from (
+			select * from PMA_F_PERFORMANCE_TOBATCH_INF where STATUS = '0' order by CREATE_TIME
+		) where rownum &lt;= :{count}
+    </select>
+    
+    <delete id="deleteByBatchId" parameterType="java.lang.String">
+    	delete from PMA_F_PERFORMANCE_TOBATCH_INF where BATCH_ID = #{batchId}
+    </delete>
+    
+    <update id="updateStatusByBatchId" parameterType="java.lang.String">
+    	update PMA_F_PERFORMANCE_TOBATCH_INF set STATUS = #{status} where BATCH_ID = #{batchId}
+    </update>
+</mapper>

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.uimp.base.repository.mapper.AdminBaseDisplayInfoMapper">
+    <resultMap id="BaseResultMap" type="cn.com.yusys.yusp.uimp.base.domain.AdminBaseDisplayInfo">
+		<id column="ID" jdbcType="VARCHAR" property="id" />
+		<result column="TITLE" jdbcType="VARCHAR" property="title" />
+		<result column="ADDR" jdbcType="VARCHAR" property="addr" />
+		<result column="IMG" jdbcType="VARCHAR" property="img" />
+		<result column="TAGS" jdbcType="VARCHAR" property="tags" />
+		<result column="STAR" jdbcType="VARCHAR" property="star" />
+    </resultMap>
+    <sql id="Base_Column_List">
+	    ID,TITLE,ADDR,IMG,TAGS,STAR
+    </sql>
+    
+    <select id="querylist" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+		SELECT <include refid="Base_Column_List" /> FROM ADMIN_BASE_DISPLAY_INFO T ORDER BY TO_NUMBER(T.ID)
+	</select>
+	
+	<update id="star" >
+		UPDATE ADMIN_BASE_DISPLAY_INFO T SET T.star = '1' where T.ID = #{id}
+	</update>
+	
+	<update id="unstar" >
+		UPDATE ADMIN_BASE_DISPLAY_INFO T SET T.star = '0' where T.ID = #{id}
+	</update>
+    
+</mapper>

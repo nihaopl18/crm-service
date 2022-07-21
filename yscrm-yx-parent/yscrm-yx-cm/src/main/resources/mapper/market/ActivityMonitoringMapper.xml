@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.cm.monitoring.repository.mapper.MergeActivityMonitoringMapper">
+
+	<!-- 营销监控查询 -->
+	<select id="getList" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+		resultType="java.util.Map">
+		select n1.activity_id,
+		       n1.activity_name,
+		       n2.total_no,
+		       n4.product_no,
+		       nvl(n5.imp_no, 0) as imping_no,
+		       nvl(n6.success_no, 0) as success_no,
+		       nvl(n7.failed_no, 0) as fail_no,
+		       nvl(n6.success_no, 0) /
+		       (nvl(n6.success_no, 0) + nvl(n7.failed_no, 1)) as success_rate,
+		       nvl(n7.failed_no, 0) /
+		       (nvl(n6.success_no, 0) + nvl(n7.failed_no, 1)) as fail_rate 
+		  from (select t1.activity_id, t2.activity_name
+		          from CIMP_TC_TASKPOOL_INFO t1
+		          left join CIMP_CM_MARKETPLAN t2
+		            on t1.activity_id = t2.temp_id
+		         where t1.task_type = 'BO'
+		         group by t1.activity_id, t2.activity_name) n1
+		  left join (select c.activity_id, count(*) as total_no
+		               from CIMP_TC_TASKPOOL_INFO c
+		              group by c.activity_id) n2
+		    on n1.activity_id = n2.activity_id
+		  left join (select length(n3.form_out_val) -
+		                    length(replace(n3.form_out_val, ',')) + 1 as product_no,
+		                    n1.temp_id
+		               from (select s.node_id, s.temp_id
+		                       from CIMP_CM_NODEINFO s
+		                      where assembly_id in
+		                            (select d.assembly_id
+		                               from CIMP_CM_ASSEMINFO d
+		                              where class_id = '3')) n1
+		               left join CIMP_CM_NODES_DISPLAY n2
+		                 on n1.node_id = n2.node_id
+		               left join CIMP_CM_NODES_DISPLAY_OUTPUT n3
+		                 on n2.form_id = n3.form_id) n4
+		    on n1.activity_id = n4.temp_id
+		  left join (select v1.activity_id, count(*) as imp_no
+		               from CIMP_TC_TASKPOOL_INFO v1
+		              where v1.task_state = 'IMPLEMENTING'
+		              group by v1.activity_id) n5
+		    on n5.activity_id = n1.activity_id
+		  left join (select v1.activity_id, count(*) as success_no
+		               from CIMP_TC_TASKPOOL_INFO v1
+		              where v1.task_state = 'SUCCESSEND'
+		              group by v1.activity_id) n6
+		    on n6.activity_id = n1.activity_id
+		  left join (select v1.activity_id, count(*) as failed_no
+		               from CIMP_TC_TASKPOOL_INFO v1
+		              where v1.task_state = 'FAILEND'
+		              group by v1.activity_id) n7
+		    on n7.activity_id = n1.activity_id 
+		    <where>
+			<if test="condition.activityName != null and condition.activityName !=''">
+				and n1.activity_name like '%'||#{condition.activityName}||'%'
+			</if>
+		</where>
+	</select>
+	<!-- 新增获取id -->
+	<select id="getSeq" resultType="String">
+		select ysc_sequence.nextval from dual
+	</select>	
+	<!-- 客户经理监控-执行中 查询 -->
+	<select id="getImpList" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.Map">
+		select v1.activity_id, v3.user_name, v4.activity_name, v6.prod_name,v7.customer_name
+		  from CIMP_TC_TASKPOOL_INFO v1
+		  left join CIMP_TC_MYTASK_INFO v2
+		    on v1.task_id = v2.task_id
+		  left join admin_sm_user v3
+		    on v2.duty_user = v3.login_code
+		  left join CIMP_CM_MARKETPLAN v4
+		    on v1.activity_id = v4.temp_id
+		  left join cm_f_rc_market_back v5
+		    on v1.task_id = v5.task_id
+		  left join CM_F_RC_PROD_INFO v6
+		    on v5.product_id = v6.prod_name
+		      left join CIMP_TC_NICHE_INFO v7 on v1.task_id=v7.task_id
+		 where v1.activity_id is not null
+		   and v1.task_state = 'IMPLEMENTING'
+		   and v1.task_type = 'BO'
+			<if test="condition.activityId != null and condition.activityId !=''">
+				and v1.activity_id = #{condition.activityId}
+			</if>
+	</select>
+	<!-- 客户经理监控-执行成功 查询 -->
+	<select id="getSuccessList" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.Map">
+		select v1.activity_id, v3.user_name, v4.activity_name, v6.prod_name,v7.customer_name
+		  from CIMP_TC_TASKPOOL_INFO v1
+		  left join CIMP_TC_MYTASK_INFO v2
+		    on v1.task_id = v2.task_id
+		  left join admin_sm_user v3
+		    on v2.duty_user = v3.login_code
+		  left join CIMP_CM_MARKETPLAN v4
+		    on v1.activity_id = v4.temp_id
+		  left join cm_f_rc_market_back v5
+		    on v1.task_id = v5.task_id
+		  left join CM_F_RC_PROD_INFO v6
+		    on v5.product_id = v6.prod_name
+		      left join CIMP_TC_NICHE_INFO v7 on v1.task_id=v7.task_id
+		 where v1.activity_id is not null
+		   and v1.task_state = 'SUCCESSEND'
+		   and v1.task_type = 'BO'
+			<if test="condition.activityId != null and condition.activityId !=''">
+				and v1.activity_id = #{condition.activityId}
+			</if>
+	</select>
+	<!-- 客户经理监控-执行失败 查询 -->
+	<select id="getFailedList" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.Map">
+				select v1.activity_id, v3.user_name, v4.activity_name, v6.prod_name,v7.customer_name
+		  from CIMP_TC_TASKPOOL_INFO v1
+		  left join CIMP_TC_MYTASK_INFO v2
+		    on v1.task_id = v2.task_id
+		  left join admin_sm_user v3
+		    on v2.duty_user = v3.login_code
+		  left join CIMP_CM_MARKETPLAN v4
+		    on v1.activity_id = v4.temp_id
+		  left join cm_f_rc_market_back v5
+		    on v1.task_id = v5.task_id
+		  left join CM_F_RC_PROD_INFO v6
+		    on v5.product_id = v6.prod_name
+		      left join CIMP_TC_NICHE_INFO v7 on v1.task_id=v7.task_id
+		 where v1.activity_id is not null
+		   and v1.task_state = 'FAILEND'
+		   and v1.task_type = 'BO'
+			<if test="condition.activityId != null and condition.activityId !=''">
+				and v1.activity_id = #{condition.activityId}
+			</if>
+	</select>
+</mapper>

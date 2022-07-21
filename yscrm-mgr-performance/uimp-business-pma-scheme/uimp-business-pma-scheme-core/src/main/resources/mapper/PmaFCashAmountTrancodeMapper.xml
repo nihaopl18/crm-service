@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.uimp.business.pma.coefficient.repository.mapper.PmaFCashAmountTrancodeMapper">
+    <resultMap id="BaseResultMap" type="cn.com.yusys.yusp.uimp.business.pma.coefficient.domain.PmaFCashAmountTrancode">
+		<id column="ID" jdbcType="VARCHAR" property="id" />
+		<result column="TRANCODE" jdbcType="VARCHAR" property="trancode" />
+		<result column="TRANNAME" jdbcType="VARCHAR" property="tranname" />
+		<result column="ORG_ID" jdbcType="CHAR" property="orgId" />
+		<result column="SYS_ID" jdbcType="VARCHAR" property="sysId" />
+		<result column="SYS_NAME" jdbcType="VARCHAR" property="sysName" />
+    </resultMap>
+    <sql id="Base_Column_List">
+	    ID,TRANCODE,TRANNAME,ORG_ID,SYS_ID,SYS_NAME
+    </sql>
+             <!-- 查询基础指标列表数据 -->
+    <select id="querylist" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+      SELECT COE.ID,COE.TRANCODE,COE.TRANNAME FROM PMA_F_CASH_AMOUNT_TRANCODE COE 
+      		<where>
+			<if test="condition.trancode != null and condition.trancode  != ''">
+	      		AND COE.TRANCODE=#{condition.trancode,jdbcType=VARCHAR}
+		    </if>
+		    
+		   	<if test="condition.tranname != null and condition.tranname  != ''">
+	      		AND COE.TRANNAME=#{condition.tranname,jdbcType=VARCHAR}
+		    </if>
+		    </where>
+	</select>
+	             <!-- 查询基础指标列表数据 -->
+    <select id="selectCount" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="String">
+      SELECT count(*) FROM PMA_F_CASH_AMOUNT_TRANCODE COE 
+      		<where>
+			<if test="condition.trancode != null and condition.trancode  != ''">
+	      		AND COE.TRANCODE=#{condition.trancode,jdbcType=VARCHAR}
+		    </if>
+		    </where>
+	</select>
+	<insert id="insertData" parameterType="cn.com.yusys.yusp.uimp.business.pma.coefficient.domain.PmaFCashAmountTrancode">
+    	insert into PMA_F_CASH_AMOUNT_TRANCODE
+    		(TRANCODE,TRANNAME,ID)
+   		values(#{trancode}, #{tranname},sys_guid())
+    </insert>
+    <delete id="deleteData" parameterType="cn.com.yusys.yusp.uimp.business.pma.coefficient.domain.PmaFCashAmountTrancode">
+    	delete from PMA_F_CASH_AMOUNT_TRANCODE
+    	where TRANCODE = #{trancode}
+    </delete>
+</mapper>

@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.cust.org.repository.mapper.OcrmFciOrgRelatInfoMapper">
+    <sql id="Base_Column_List">
+	    ID,CUST_ID,LAST_ORG_ID,LAST_CHG_USR,LAST_CHG_DT,PRO_COO_INDUS_LOGO,WHE_AGR_SCI_TEC_INN,WHE_HELP_SALE,WHE_HELP_JOB,PRO_COO_LOGO,WHE_THR_FAR_LEA_FIG,WHE_INDU_TECH,WHE_DUAL_BASE_WIN_CUS,WHE_INDU_KEY,WHE_INDU_VEGETABLES,WHE_TO_NEW_COU,WHE_TO_CON_OF_URB,WHE_DIS,DIS_LEVEL,WHE_NEW_AGR_MAN_SUB,PRI_TYPE,WHE_AGR_REL_CUS,AMO_OF_INS,INSURANCE,INS_TYPE,WHE_POV_ALL_LOAN_CUS,POV_ALL_CUS_TYPE,POV_ALL_PRO,PRO_LOC,WHE_REF_OF_AGR_LOA,MAIN_BUSI_VILLAGE,MAIN_BUSI_VILLAGE_NO,CAPITAL_DEMAND,CORP_ORG_CODE
+    </sql>
+    <!-- 对公涉农个性标识信息查询 -->
+	<select id="querylist" parameterType="java.util.Map" resultType="java.util.Map">
+		select t.CUST_ID  as RELAT_ID,
+		       t.CUST_ID,
+		       t.LAST_ORG_ID,
+		       t.LAST_CHG_USR,
+		       to_char(t.LAST_CHG_DT,'yyyy-mm-dd') as LAST_CHG_DT,
+		       t.PRO_COO_INDUS_LOGO,
+		       t.WHE_AGR_SCI_TEC_INN,
+		       t.WHE_HELP_SALE,
+		       t.WHE_HELP_JOB,
+		       t.PRO_COO_LOGO,
+		       t.WHE_THR_FAR_LEA_FIG,
+		       t.WHE_INDU_TECH,
+		       t.WHE_DUAL_BASE_WIN_CUS,
+		       t.WHE_INDU_KEY,
+		       t.WHE_INDU_VEGETABLES,
+		       t.WHE_TO_NEW_COU,
+		       t.WHE_TO_CON_OF_URB,
+		       t.WHE_DIS,
+		       t.DIS_LEVEL,
+		       t.WHE_NEW_AGR_MAN_SUB,
+		       t.PRI_TYPE,
+		       t.WHE_AGR_REL_CUS,
+		       t.AMO_OF_INS,
+		       t.INSURANCE,
+		       t.INS_TYPE,
+		       t.WHE_POV_ALL_LOAN_CUS,
+		       t.POV_ALL_CUS_TYPE,
+		       t.POV_ALL_PRO,
+		       t.PRO_LOC,
+		       t.WHE_REF_OF_AGR_LOA,
+		       t.MAIN_BUSI_VILLAGE,
+		       t.MAIN_BUSI_VILLAGE_NO,
+		       t.CAPITAL_DEMAND,
+		       t.CORP_ORG_CODE
+		  from OCRM_F_CI_ORG_RELAT_INFO t
+		  where 1=1
+		  
+		  <if  test="condition.custId != null and condition.custId != ''">
+       			and  t.CUST_ID =#{condition.custId,jdbcType=VARCHAR} 
+	  	  </if>
+	</select>
+	<!-- 涉农个性标识修改 -->
+	 <update id="updaterelatInfo" parameterType="java.util.Map">
+			UPDATE OCRM_F_CI_ORG_RELAT_INFO t SET
+			t.PRO_COO_INDUS_LOGO=#{proCooIndusLogo,jdbcType=VARCHAR}
+			,t.MAIN_BUSI_VILLAGE=#{mainBusiVillage,jdbcType=VARCHAR}
+			,t.MAIN_BUSI_VILLAGE_NO=#{mainBusiVillageNo,jdbcType=VARCHAR}
+			,t.CAPITAL_DEMAND=#{capitalDemand,jdbcType=VARCHAR}
+			,t.WHE_AGR_REL_CUS=#{wheAgrRelCus,jdbcType=VARCHAR}
+			,t.WHE_HELP_JOB=#{wheHelpJob,jdbcType=VARCHAR}
+			,t.WHE_HELP_SALE=#{wheHelpSale,jdbcType=VARCHAR}
+			,t.WHE_INDU_KEY =#{wheInduKey,jdbcType=VARCHAR}
+			,t.WHE_INDU_TECH=#{wheInduTech,jdbcType=VARCHAR}
+			,t.WHE_INDU_VEGETABLES=#{wheInduVegetables,jdbcType=VARCHAR}
+			,t.WHE_THR_FAR_LEA_FIG=#{wheThrFarLeaFig,jdbcType=VARCHAR}
+			,t.WHE_DUAL_BASE_WIN_CUS=#{wheDualBaseWinCus,jdbcType=VARCHAR}
+			,t.WHE_DIS=#{wheDis,jdbcType=VARCHAR}
+			,t.DIS_LEVEL=#{disLevel,jdbcType=VARCHAR}
+			,t.WHE_AGR_SCI_TEC_INN=#{wheAgrSciTecInn,jdbcType=VARCHAR}
+			,t.WHE_NEW_AGR_MAN_SUB=#{wheNewAgrManSub,jdbcType=VARCHAR}
+			,t.PRI_TYPE=#{priType,jdbcType=VARCHAR}
+			,t.AMO_OF_INS=#{amoOfIns,jdbcType=VARCHAR}
+			,t.INSURANCE=#{insurance,jdbcType=VARCHAR}
+			,t.INS_TYPE=#{insType,jdbcType=VARCHAR}
+			,t.WHE_POV_ALL_LOAN_CUS=#{whePovAllLoanCus,jdbcType=VARCHAR}
+			,t.POV_ALL_CUS_TYPE=#{povAllCusType,jdbcType=VARCHAR}
+			,t.POV_ALL_PRO=#{povAllPro,jdbcType=VARCHAR}
+			,t.PRO_LOC=#{proLoc,jdbcType=VARCHAR}
+			,t.WHE_REF_OF_AGR_LOA=#{wheRefOfAgrLoa,jdbcType=VARCHAR}
+			,t.PRO_COO_LOGO=#{proCooLogo,jdbcType=VARCHAR}
+			,t.WHE_TO_NEW_COU=#{wheToNewCou,jdbcType=VARCHAR}
+			,t.WHE_TO_CON_OF_URB=#{wheToConOfUrb,jdbcType=VARCHAR}
+			,t.LAST_ORG_ID=#{lastOrgId,jdbcType=VARCHAR}
+			,t.LAST_CHG_USR=#{lastChgUsr,jdbcType=VARCHAR}
+			,t.LAST_CHG_DT=TO_DATE(#{lastChgDt,jdbcType=DATE}, 'yyyy-MM-dd')
+			WHERE t.CUST_ID = #{custId,jdbcType=VARCHAR}
+	</update>
+</mapper>

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.custflexEs.repository.mapper.CrmFCiFqDbcolMapper">
+    <resultMap id="BaseResultMap" type="cn.com.yusys.yscrm.custflexEs.domain.CrmFCiFqDbcol">
+		<id column="ID" jdbcType="NUMERIC" property="id" />
+		<result column="COL_NAME_E" jdbcType="VARCHAR" property="colNameE" />
+		<result column="COL_NAME_C" jdbcType="VARCHAR" property="colNameC" />
+		<result column="COL_SIZE" jdbcType="NUMERIC" property="colSize" />
+		<result column="COL_TYPE" jdbcType="VARCHAR" property="colType" />
+		<result column="DEFAULT_VALUE" jdbcType="VARCHAR" property="defaultValue" />
+		<result column="IS_NULL" jdbcType="VARCHAR" property="isNull" />
+		<result column="PRIMARY_KEY_FLAG" jdbcType="VARCHAR" property="primaryKeyFlag" />
+		<result column="DBTABLE_ID" jdbcType="NUMERIC" property="dbtableId" />
+		<result column="NOTES" jdbcType="VARCHAR" property="notes" />
+		<result column="IS_ENABLE" jdbcType="VARCHAR" property="isEnable" />
+		<result column="COL_SORT" jdbcType="NUMERIC" property="colSort" />
+		<result column="DBTABLE_NAME" jdbcType="VARCHAR" property="dbtableName" />
+		<result column="GROUP_ID" jdbcType="NUMERIC" property="groupId" />
+		<result column="FIELD_TYPE" jdbcType="VARCHAR" property="fieldType" />
+		<result column="F_NAME" jdbcType="VARCHAR" property="fName" />
+		<result column="OBJ_ID" jdbcType="NUMERIC" property="objId" />
+		<result column="ALIAS" jdbcType="VARCHAR" property="alias" />
+		<result column="NO_SENSI" jdbcType="VARCHAR" property="noSensi" />
+    </resultMap>
+    <sql id="Base_Column_List">
+	    ID,COL_NAME_E,COL_NAME_C,COL_SIZE,COL_TYPE,DEFAULT_VALUE,IS_NULL,PRIMARY_KEY_FLAG,DBTABLE_ID,NOTES,IS_ENABLE,COL_SORT,DBTABLE_NAME,GROUP_ID,FIELD_TYPE,F_NAME,OBJ_ID,ALIAS,NO_SENSI
+    </sql>
+    
+    <!-- 手机号  证件号 分行以上不查询 -->
+    <select id="queryFqDbcolDataByObjId" parameterType="java.lang.String" resultType="cn.com.yusys.yscrm.custflexEs.vo.CrmFCiFqObjNodeVo">
+    	SELECT id AS nodeid, col_name_c AS name, group_id AS parent_id,'2' AS tables,col_name_e AS ename,DBTABLE_NAME AS value, COL_TYPE AS ctype,
+    		NOTES, F_NAME, FIELD_TYPE
+    	FROM CRM_F_CI_FQ_DBCOL
+    	WHERE IS_ENABLE = 'TRUE' and group_id in (
+    		select id from CRM_F_CI_FQ_GROUP where obj_id in(select id from CRM_F_CI_FQ_OBJ where id = #{objId, jdbcType=VARCHAR})
+    	)
+    		<if test="orglevel != null and orglevel != '' and orglevel=='orglevel' ">
+				and id not in ('80313','80300')
+			</if>
+    	
+    	order by COL_SORT
+    </select>
+</mapper>

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.climp.score.repository.mapper.ScoreGameMapper">
+    <delete id="deleteByImportCode" parameterType="java.lang.String">
+        delete
+        from LOY_SR_SCORE_GAME_FT_TMP
+        where IMPORT_CODE = #{importCode,jdbcType=VARCHAR}
+    </delete>
+    <delete id="deleteExcel" parameterType="java.lang.String">
+        delete
+        from LOY_SR_SCORE_GAME_FT
+        where IMPORT_CODE = #{importCode,jdbcType=VARCHAR}
+    </delete>
+    <delete id="deleteTmp" parameterType="java.lang.String">
+        delete from T_CUST_POINT_SUB_ACCT_INF_TMP where IMPORT_CODE = #{importCode}
+    </delete>
+    <delete id="deleteDateTmp" parameterType="java.lang.String">
+        delete from LOY_SR_SCORE_GAME_FT_TMP where IMPORT_CODE = #{importCode,jdbcType=VARCHAR}
+    </delete>
+    <insert id="insertExcel" parameterType="java.util.Map">
+        insert into LOY_SR_SCORE_GAME_FT (
+            IMPORT_CODE,SYS_CODE,CUSTOMER_NO,CUSTMER_NAME,DONATE_SCORES,DISABLED_DT,GAME_DESC,UPDATE_USER,UPDATE_TIME,ECIF_CUST_NO
+        )
+        select FT.IMPORT_CODE,FT.SYS_CODE,FT.CUSTOMER_NO,FT.CUSTMER_NAME,FT.DONATE_SCORES,FT.DISABLED_DT,FT.GAME_DESC,#{updateUser,jdbcType=VARCHAR},sysdate,SI.ECIF_SYSTEM_ID
+        from LOY_SR_SCORE_GAME_FT_TMP FT
+        left ACRM_F_CUST_SYSTEM_INDEX SI on FT.SYS_CODE = SI.EXT_SYSTEM_ID and FT.CUSTOMER_NO = SI.EXT_CLIENT_NO
+        where FT.IMPORT_CODE = #{importCode,jdbcType=VARCHAR}
+    </insert>
+    <insert id="insertTmp" parameterType="java.lang.String">
+        insert into T_CUST_POINT_SUB_ACCT_INF_TMP (
+            SDA_ID,CUST_NO,ACCT_TYPE,SD_STATUS,ORI_SCORE,CREATE_DT,DISABLED_DT,USEABLE_SCORE,GAME_DESC,IMPORT_CODE
+        )
+        select 'Q' || T.CUSTOMER_NO || to_char(sysdate,'yyyymmddhh24miss')||3,
+               T.ECIF_CUST_NO,'40','10',T.DONATE_SCORES,sysdate,T.DISABLED_DT,T.DONATE_SCORES as USEABLE_SCORE,T.GAME_DESC,T.IMPORT_CODE
+        from LOY_SR_SCORE_GAME_FT where T.IMPORT_CODE = #{importCode}
+    </insert>
+    <insert id="insertAccount">
+        insert into prcm_data.T_CUST_POINT_SUB_ACCT_INF (
+            SDA_ID,CUST_NO,ACCT_TYPE,SD_STATUS,ORI_SCORE,CREATE_DT,DISABLED_DT,USEABLE_SCORE,GAME_DESC
+        )
+        select SDA_ID,CUST_NO,ACCT_TYPE,SD_STATUS,ORI_SCORE,CREATE_DT,DISABLED_DT,USEABLE_SCORE,GAME_DESC
+        from T_CUST_POINT_SUB_ACCT_INF_TMP
+    </insert>
+</mapper>

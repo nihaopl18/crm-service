@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.uimp.business.pma.scheme.postParam.repository.mapper.AdminSmPostMapper">
+    <resultMap id="BaseResultMap" type="cn.com.yusys.yusp.uimp.business.pma.scheme.postParam.domain.AdminSmPost">
+		<id column="ID" jdbcType="VARCHAR" property="id" />
+		<result column="LAW_ORG_NB" jdbcType="VARCHAR" property="lawOrgNb" />
+		<result column="SYS_POST_CODE" jdbcType="VARCHAR" property="sysPostCode" />
+		<result column="SYS_POST_NAME" jdbcType="VARCHAR" property="sysPostName" />
+		<result column="SYS_LV" jdbcType="VARCHAR" property="sysLv" />
+    </resultMap>
+    <sql id="Base_Column_List">
+	    ID,LAW_ORG_NB,SYS_POST_CODE,SYS_POST_NAME,SYS_LV
+    </sql>
+      <!-- 查询岗位信息 -->
+	<select id="querylist"   resultType="java.util.HashMap">
+		 SELECT T.DUTY_ID as ID,T.DUTY_CDE as SYS_POST_CODE,T.DUTY_NAME as SYS_POST_NAME,T.BELONG_ORG_ID
+		,T.DUTY_REMARK,T.DUTY_STS,T.LAST_CHG_USR,T.LAST_CHG_DT
+		 FROM ADMIN_SM_DUTY T	
+	</select>
+	   <!-- 通过岗位编号查询岗位信息 -->
+	<select id="querylistbyid" parameterType="String"   resultType="java.util.HashMap">
+		SELECT T.DUTY_ID as ID,T.DUTY_CDE as SYS_POST_CODE,T.DUTY_NAME as SYS_POST_NAME,T.BELONG_ORG_ID
+		,T.DUTY_REMARK,T.DUTY_STS,T.LAST_CHG_USR,T.LAST_CHG_DT
+		 FROM ADMIN_SM_DUTY T	
+		 where  T.DUTY_CDE =#{postId}
+	</select>
+</mapper>

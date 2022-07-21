@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.admin.repository.mapper.AdminSmDutyMapper">
+
+	<!-- 修改岗位状态 -->
+	<update id="updateSts" >
+		update ADMIN_SM_DUTY set DUTY_STS=#{dutySts,jdbcType=VARCHAR} 
+				,LAST_CHG_USR=#{lastChgUsr, jdbcType=VARCHAR},
+		 		LAST_CHG_DT=#{lastChgDt, jdbcType=VARCHAR} 
+		where DUTY_ID=#{dutyId,jdbcType=VARCHAR}
+	</update>
+
+	<!-- 检出岗位编号是否重复-->
+	<select id="checkDutyCode" parameterType="String" resultType="integer">
+		SELECT count(t.duty_cde) from ADMIN_SM_DUTY t where t.duty_cde = #{dutyCde}
+	</select>
+	
+	<!-- 检出岗位编号是否重复-->
+	<select id="checkHasUser" parameterType="String" resultType="integer">
+		SELECT count(t.USER_DUTY_REL_ID) from admin_sm_user_duty_rel t where t.duty_id in
+		 <foreach item="dutyIds" index="index" collection="array" open="(" separator="," close=")">  
+ 			#{dutyIds} 
+ 		</foreach>
+	</select>
+
+    <!-- 检出岗位是否有用户-->
+    <select id="getUserByDuty" parameterType="String" resultType="integer">
+        SELECT count(t.USER_DUTY_REL_ID) from admin_sm_user_duty_rel t where t.duty_id = #{dutyId,jdbcType=VARCHAR}
+    </select>
+    <!-- 查询所有岗位信息，用于用户导出提示-->
+    <select id="getDutyInfo"  resultType="java.util.Map">
+        SELECT DUTY_CDE||'-'||DUTY_NAME   as DUTY_NO_NAME from admin_sm_duty t where t.DUTY_STS='A'
+    </select>
+    
+      <!-- 根据岗位编码查询岗位id-->
+    <select id="getDutyIdByDutycod" parameterType="java.util.Map" resultType="java.util.Map">
+        SELECT DUTY_ID   from admin_sm_duty t where t.DUTY_CDE = #{postNo, jdbcType=VARCHAR}
+    </select>
+</mapper>

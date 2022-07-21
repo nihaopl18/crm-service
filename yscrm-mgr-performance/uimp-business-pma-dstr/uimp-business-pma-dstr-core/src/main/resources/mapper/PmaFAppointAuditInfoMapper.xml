@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.uimp.audit.repository.mapper.PmaFAppointAuditInfoMapper">
+    <resultMap id="BaseResultMap" type="cn.com.yusys.yusp.uimp.audit.domain.PmaFAppointAuditInfo">
+		<id column="ID" jdbcType="VARCHAR" property="id" />
+		<result column="APPOINT_ORG_ID" jdbcType="VARCHAR" property="appointOrgId" />
+		<result column="CARD_TYPE" jdbcType="VARCHAR" property="cardType" />
+		<result column="CARD_ID" jdbcType="VARCHAR" property="cardId" />
+		<result column="START_DATE" jdbcType="VARCHAR" property="startDate" />
+		<result column="END_DATE" jdbcType="VARCHAR" property="endDate" />
+		<result column="AMT" jdbcType="NUMERIC" property="amt" />
+		<result column="BUS_TYPE" jdbcType="VARCHAR" property="busType" />
+		<result column="APPLY_TIME" jdbcType="VARCHAR" property="applyTime" />
+		<result column="APPLY_USER_ID" jdbcType="VARCHAR" property="applyUserId" />
+		<result column="APPLY_USER_NAME" jdbcType="VARCHAR" property="applyUserName" />
+		<result column="AUDIT_TIME" jdbcType="VARCHAR" property="auditTime" />
+		<result column="AUDIT_STATUS" jdbcType="VARCHAR" property="auditStatus" />
+		<result column="AUDIT_BAKE" jdbcType="VARCHAR" property="auditBake" />
+		<result column="AUDIT_USER_ID" jdbcType="VARCHAR" property="auditUserId" />
+		<result column="AUDIT_USER_NAME" jdbcType="VARCHAR" property="auditUserName" />
+		<result column="ETL_RES" jdbcType="VARCHAR" property="etlRes" />
+		<result column="STATE" jdbcType="VARCHAR" property="state" />
+		<result column="CUST_NAME" jdbcType="VARCHAR" property="custName" />
+		<result column="CUST_TYPE" jdbcType="VARCHAR" property="custType" />
+		<result column="CUST_NO" jdbcType="VARCHAR" property="custNo" />
+    </resultMap>
+    <sql id="Base_Column_List">
+	    ID,APPOINT_ORG_ID,CARD_TYPE,CARD_ID,START_DATE,END_DATE,AMT,BUS_TYPE,APPLY_TIME,APPLY_USER_ID,APPLY_USER_NAME,AUDIT_TIME,AUDIT_STATUS,AUDIT_BAKE,AUDIT_USER_ID,AUDIT_USER_NAME,ETL_RES,STATE,DEP_TYPE,CUST_NAME,CUST_TYPE,CUST_NO,LOWER_AMT,UPPER_AMT
+    </sql>
+    <select id="listByModel" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+    	 SELECT T.ID, T.APPOINT_ORG_ID, T.CARD_TYPE, T.CARD_ID,t.APPOINT_PHONE, TO_CHAR(to_date(T.START_DATE,'yyyy-mm-dd'),'yyyy-mm-dd') as START_DATE,TO_CHAR(to_date(T.END_DATE,'yyyy-mm-dd'),'yyyy-mm-dd') as END_DATE,
+    	  TO_CHAR(to_date(T.START_DATE,'yyyy-mm-dd'),'yyyy-mm-dd') || ' 至 ' || TO_CHAR(to_date(T.END_DATE,'yyyy-mm-dd'),'yyyy-mm-dd') AS EXSIS_TIME,T.CUST_NO, T.CUST_TYPE,T.CUST_NAME,T.STATE, T.BUS_TYPE, 
+    	   T.APPLY_TIME,  T.APPLY_USER_ID, T.APPLY_USER_NAME, T.AUDIT_TIME, 
+    	    T.AUDIT_STATUS, T.AUDIT_BAKE, T.AUDIT_USER_ID, T.AUDIT_USER_NAME, T.AMT,T.AMT_START,T.AMT_END,T.AMT_FLOAT,T.BUS_TYPE_DETAIL,
+    	     T.ETL_RES, T1.ORG_NAME,T1.Province,t1.city,t1.county
+    	      FROM PMA_F_APPOINT_AUDIT_INFO T
+    	       INNER JOIN ADMIN_SM_ORG T1 
+    	        ON T.APPOINT_ORG_ID = T1.ORG_ID  
+    	<where>
+			<if test="condition.applyUserId != null and condition.applyUserId != ''">
+				AND T.APPLY_USER_ID = #{condition.applyUserId}
+			</if>
+			<if test="condition.applyOrgId != null and condition.applyOrgId != ''">
+				AND T.APPOINT_ORG_ID = #{condition.applyOrgId}
+			</if>
+			<if test="condition.cardId != null and condition.cardId != ''">
+				AND T.CARD_ID = #{condition.cardId}
+			</if>
+			<if test="condition.cardType != null and condition.cardType != ''">
+				AND T.CARD_TYPE = #{condition.cardType}
+			</if>
+			<if test="condition.busType != null and condition.busType != ''">
+				AND T.BUS_TYPE = #{condition.busType}
+			</if>
+			<if test="condition.custNo != null and condition.custNo != ''">
+				AND T.CUST_NO = #{condition.custNo}
+			</if>
+			<if test="condition.custName != null and condition.custName != ''">
+			    AND T.CUST_NAME LIKE concat(concat('%',#{condition.custName}),'%')
+			</if>
+			<if test="condition.etlRes != null and condition.etlRes != '' and condition.etlRes != '99'">
+				AND T.ETL_RES = #{condition.etlRes}
+			</if>
+			<if test="condition.appointPhone != null and condition.appointPhone != ''">
+			    AND T.APPOINT_PHONE = #{condition.appointPhone}
+			</if>
+		</where>
+		order by to_date(T.START_DATE,'yyyymmdd')
+    </select>
+    <select id="selectCount" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="string">
+    	 SELECT count(*)
+    	      FROM PMA_F_APPOINT_AUDIT_INFO T
+    	<where>
+			<if test="condition.appointOrgId != null and condition.appointOrgId != ''">
+				AND T.APPOINT_ORG_ID = #{condition.appointOrgId}
+			</if>
+			<if test="condition.cardId != null and condition.cardId != ''">
+				AND T.CARD_ID = #{condition.cardId}
+			</if>
+			<if test="condition.busType != null and condition.busType != ''">
+				AND T.BUS_TYPE = #{condition.busType}
+			</if>
+			<if test="condition.etlRes != null and condition.etlRes != '' and condition.etlRes != '99'">
+				AND T.ETL_RES = #{condition.etlRes}
+			</if>
+			<if test="condition.appointPhone != null and condition.appointPhone != ''">
+			    AND T.APPOINT_PHONE = #{condition.appointPhone}
+			</if>
+		</where>
+    </select>
+    
+    <select id ="queryByOrg" resultType="java.lang.Integer">
+    	select count(1)
+    	from admin_sm_org
+    	where org_type = '01'
+    	and org_id = #{orgId}
+    </select>
+</mapper>

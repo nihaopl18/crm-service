@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.cust.org.repository.mapper.AcrmFciOrgKeyFlagMapper">
+    <sql id="Base_Column_List">
+	    DATA_DATE,LAST_CHG_SYS,LAST_CHG_USR,LAST_CHG_DT,CORP_ORG_CODE,CUST_ID,LIST_FLG,FAM_FLG,GROUP_CUST_FLG,LIMIT_INDUS_FLG,CREDIT_CUST_FLG,ASSOC_PARTY_FLG,IR_RIGHT_FLG,HOLDER_FLG,MINI_COM_FLG,DHGH_FLG,FEXC_PRM_NO,INTER_BUSI_FLG,LOAN_FLG,GAT_FLG,VIP_FLG,INDUS_LEV,COR_CUST_FLG,KEY_SUPPORT_FLG,GOV_COR_FLG,SHLM_FLG,XTH_FLG,TSYW_FLG,TSYW_DESC,ACT_COR_FLG,ACT_DESC,TECH_COR_FLG,ASSOC_FLG,ASSOC_NAME,SELT_TAB
+    </sql>
+    <!-- 对公重要标志信息查询 -->
+	<select id="querylist" parameterType="java.util.Map" resultType="java.util.Map">
+		select t.CUST_ID as IMPORT_ID,
+			   t.DATA_DATE,
+		       t.LAST_CHG_SYS,
+		       t.LAST_CHG_USR,
+		       to_char(t.LAST_CHG_DT,'yyyy-mm-dd') as LAST_CHG_DT,
+		       t.CORP_ORG_CODE,
+		       t.CUST_ID,
+		       t.LIST_FLG,
+		       t.FAM_FLG,
+		       t.GROUP_CUST_FLG,
+		       t.LIMIT_INDUS_FLG,
+		       t.CREDIT_CUST_FLG,
+		       t.ASSOC_PARTY_FLG,
+		       t.IR_RIGHT_FLG,
+		       t.HOLDER_FLG,
+		       t.MINI_COM_FLG,
+		       t.DHGH_FLG,
+		       t.FEXC_PRM_NO,
+		       t.INTER_BUSI_FLG,
+		       t.LOAN_FLG,
+		       t.GAT_FLG,
+		       t.VIP_FLG,
+		       t.INDUS_LEV,
+		       t.COR_CUST_FLG,
+		       t.KEY_SUPPORT_FLG,
+		       t.GOV_COR_FLG,
+		       t.SHLM_FLG,
+		       t.XTH_FLG,
+		       t.TSYW_FLG,
+		       t.TSYW_DESC,
+		       t.ACT_COR_FLG,
+		       t.ACT_DESC,
+		       t.TECH_COR_FLG,
+		       t.ASSOC_FLG,
+		       t.ASSOC_NAME,
+		       t.SELT_TAB
+		  from ACRM_F_CI_ORG_KEY_FLAG t
+		  where 1=1
+		  
+		  <if  test="condition.custId != null and condition.custId != ''">
+       			and  t.CUST_ID =#{condition.custId,jdbcType=VARCHAR} 
+	  	  </if>
+	</select>
+	
+</mapper>

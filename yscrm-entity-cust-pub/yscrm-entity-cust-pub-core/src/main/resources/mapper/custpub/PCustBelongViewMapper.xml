@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.custpub.repository.mapper.PCustBelongViewMapper">
+   <select id="queryBelongGroup" parameterType="java.util.Map" resultType="java.util.Map">
+		select  t.ID,t.CUST_GROUP_ID,t.CUST_ID,t.CORP_ORG_CODE,t.CREATE_USER,t.CREATE_DATE,t.UPDATE_USER,t.UPDATE_DATE,a.CUST_GROUP_NAME
+		from OCRM_F_CI_CG_MEMBER t
+		left join OCRM_F_CI_CG_BASE a on a.CUST_GROUP_ID=t.CUST_GROUP_ID
+		  <if  test="custId != null and custId != ''">
+		       		where t.CUST_ID =#{custId,jdbcType=VARCHAR} 
+		    </if>
+	</select>
+    	<!-- 查询当前客户的机构、客户经理 -->
+	<select id="queryBelongMgr" parameterType="java.util.Map" resultType="java.util.Map">
+		select t.BELONG_ID,t.DATA_DATE,t.LAST_UPDATE_SYS,t.LAST_UPDATE_USER,t.LAST_UPDATE_TM,t.LAST_UPDATE_ORG
+		,t.CORP_ORG_CODE,t.CUST_ID,t.ORG_TYPE,t.ORG_ID,t.ORG_NAME,t.MGR_TYPE,t.MGR_ID,t.MGR_NAME,a.MOBILE as MGR_TEL
+		from OCRM_F_CI_ADMIT_BELONG t
+		 left join ACRM_F_CM_CUST_MGR_INFO  a  on a.CUST_MANAGER_ID=t.MGR_ID
+		  <if  test="custId != null and custId != ''">
+		       		where t.CUST_ID =#{custId,jdbcType=VARCHAR} 
+		    </if>
+	</select>
+		<!-- 查询移交历史-->
+	<select id="qryBelongHis" parameterType="java.util.Map" resultType="java.util.Map">
+		select t.HIS_ID,
+       t.DATA_DATE,
+       t.LAST_UPDATE_SYS,
+       t.LAST_UPDATE_USER,
+       to_char(t.LAST_UPDATE_TM, 'yyyy-mm-dd hh24:mi:ss') as LAST_UPDATE_TM,
+       t.LAST_UPDATE_ORG,
+       t.CORP_ORG_CODE,
+       t.CUST_ID,
+       t.ORG_TYPE_PRE,
+       t.ORG_ID_PRE,
+       t.ORG_NAME_PRE,
+       t.MGR_TYPE_PRE,
+       t.MGR_ID_PRE,
+       t.MGR_NAME_PRE,
+       t.ORG_TYPE,
+       t.ORG_ID,
+       n.cust_name,
+       t.ORG_NAME,
+       t.MGR_TYPE,
+       t.MGR_ID,
+       t.MGR_NAME,
+       t.ASSIGN_USER,
+       to_char(t.ASSIGN_DATE, 'yyyy-mm-dd hh24:mi:ss') as ASSIGN_DATE,
+       t.WORK_TRAN_REASON,
+       t.WORK_TRAN_LEVEL,
+       t.WORK_TRAN_DATE,
+       org.ORG_NAME as ASSIGN_ORG_NAME,
+       cust.USER_NAME as ASSIGN_USER_NAME
+  from OCRM_F_CI_BELONG_HIS t
+  <!-- LEFT JOIN ACRM_F_CI_CUST_ADMIT_ALL n -->
+  LEFT JOIN ACRM_F_CI_CUST_ALL n
+    on n.cust_id = t.cust_id
+  left join ADMIN_SM_USER cust
+    on t.ASSIGN_USER = cust.LOGIN_CODE
+  left join ADMIN_SM_ORG org
+    on org.ORG_ID = cust.ORG_ID
+		
+		  <if  test="custId != null and custId != ''">
+		       		where t.CUST_ID =#{custId,jdbcType=VARCHAR} 
+		    </if>
+	</select>
+</mapper>

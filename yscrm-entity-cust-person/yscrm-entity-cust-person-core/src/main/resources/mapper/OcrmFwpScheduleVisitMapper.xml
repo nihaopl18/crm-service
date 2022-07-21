@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.cust.person.repository.mapper.OcrmFwpOrgScheduleVisitMapper">
+    <sql id="Base_Column_List">
+	    V_ID,SCHEDULE_ID,CUST_ID,CUST_TYPE,CUST_NAME,ARANGE_ID,ARANGE_NAME,VISIT_STAT,VISIT_TYPE,VISITOR_ID,VISITOR_NAME,VISIT_NOTE,PHONE,MGR_ID,MGR_NAME,VISIT_AIMS,VISIT_EFFECT,VISIT_START_DATE,VISIT_END_DATE,NEXT_VISIT_DATE,NEXT_VISIT_TYPE,IS_REMIND,REMIND_DATE,CORP_ORG_CODE,IS_DELETE,LAST_CHG_USR,LAST_CHG_DT
+    </sql>
+    
+    <select id="querylist" parameterType="java.util.Map" resultType="java.util.Map">
+		select t.V_ID,
+		       t.SCHEDULE_ID,
+		       t.CUST_ID,
+		       t.CUST_TYPE,
+		       t.CUST_NAME,
+		       t.ARANGE_ID,
+		       t.ARANGE_NAME,
+		       t.VISIT_STAT,
+		       t.VISIT_TYPE,
+		       t.VISITOR_ID,
+		       t.VISITOR_NAME,
+		       t.VISIT_NOTE,
+		       t.PHONE,
+		       t.MGR_ID,
+		       t.MGR_NAME,
+		       t.VISIT_AIMS,
+		       t.VISIT_EFFECT,
+		       t.VISIT_START_DATE,
+		       t.VISIT_END_DATE,
+		       t.NEXT_VISIT_DATE,
+		       t.NEXT_VISIT_TYPE,
+		       t.IS_REMIND,
+		       t.REMIND_DATE,
+		       t.CORP_ORG_CODE,
+		       t.IS_DELETE,
+		       t.LAST_CHG_USR,
+		       t.LAST_CHG_DT
+		  from OCRM_F_WP_SCHEDULE_VISIT t
+		  where 1=1
+		  
+		  <if  test="condition.custId != null and condition.custId != ''">
+       			and  t.CUST_ID =#{condition.custId,jdbcType=VARCHAR} 
+	  	  </if>
+	</select>
+</mapper>

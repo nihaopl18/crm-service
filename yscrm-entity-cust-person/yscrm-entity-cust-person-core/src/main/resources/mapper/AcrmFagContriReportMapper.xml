@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.cust.person.repository.mapper.AcrmFagContriReportMapper">
+    <select id="queryContriList" parameterType="java.util.Map"  resultType="java.util.HashMap">
+	  select    t.CORP_ORG_CODE             ,   
+				t.DATA_DATE                 ,   
+				t.CUST_ID                   ,   
+				t.M_DEP_CONTRIBU            ,   
+				t.M_LOAN_CONTRIBU           ,   
+				t.M_MID_CONTRIBU            ,   
+				t.M_SUM_CONTRIBU            ,   
+				t.DEP_12M_CONTRIBU          ,   
+				t.LOAN_12M_CONTRIBU         ,   
+				t.MID_12M_CONTRIBU          ,   
+				t.SUM_12M_CONTRIBU              
+
+	  from  ACRM_F_AG_CONTRI_REPORT t
+	   <if  test="custId != null and custId != ''">
+		       		where t.CUST_ID =#{custId,jdbcType=VARCHAR} 
+	   </if>
+	</select>
+     <select id="queryContriDetailList" parameterType="java.util.Map"  resultType="java.util.HashMap">
+	  select     t.ID                  ,   
+				 t.CUST_ID             ,   
+				 t.ORG_ID              ,   
+				 to_char(to_date(t.DATA_DATE,'yyyy-MM-dd'),'yyyy-MM-dd') as ETL_DATE,	  
+				 t.ACCT_ID             ,   
+				 t.SIM_PROF            ,   
+				 t.BUS_CAT             ,   
+				 t.CORP_ORG_CODE       , 
+				 B.PROD_NAME  AS PRODUCTS 
+	  			
+	  from  ACRM_F_CI_COMM_CONTRI_INFO t
+	  left join ACRM_F_PD_PROD_INFO B on t.PRODUCTS=B.SOURCE_PRD_NO
+	     where  1=1
+
+	   <if  test="condition.custId != null and condition.custId != ''">
+		       		and t.CUST_ID =#{condition.custId,jdbcType=VARCHAR} 
+	   </if>
+	   <if  test="condition.orgId != null and condition.orgId != ''">
+		       		and t.ORG_ID =#{condition.orgId,jdbcType=VARCHAR} 
+	   </if>
+	   <if  test="condition.etlDate != null and condition.etlDate != ''">
+		       		and t.DATA_DATE =#{condition.etlDate,jdbcType=DATE}
+		       		 
+	   </if>
+	</select>
+</mapper>

@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.cust.person.repository.mapper.AcrmFevtPerCcdTransMapper">
+   <!--  <sql id="Base_Column_List">
+	    DATA_DATE,TRAN_DATE,TRAN_TIME,TRAN_NO,ACCT_NO,CARD_NO,CCY_CD,AMT,CD_FLAG,TRAN_CD,TRAN_REF_NO,BILL_DESC,AUTH_CD,ACCT_DATE,ACCT_AMT,ACCT_CCY_CD,POINTS_VALUE,ORG_NO,ASSIGNEE_CD,ORG_ADDR,MERCHANT_TYPE,CHENL_CD,ENTER_ORG,TERMINAL_ID,RMK
+    </sql> -->
+    
+    <select id="queryccdListByCustId" parameterType="java.util.Map"  resultType="java.util.HashMap">
+		select to_char(to_date(t.DATA_DATE, 'yyyy-mm-dd'), 'yyyy-mm-dd') as DATA_DT,
+       to_char(to_date(t.TRAN_DATE, 'yyyy-mm-dd'), 'yyyy-mm-dd') as TRAN_DATE,
+       t.TRAN_TIME,
+       t.TRAN_NO,
+       t.ACCT_NO,
+       t.CARD_NO,
+       t.CCY_CD,
+       t.AMT,
+       t.CD_FLAG,
+       t.TRAN_CD,
+       t.TRAN_REF_NO,
+       t.BILL_DESC,
+       t.AUTH_CD,
+       to_char(t.ACCT_DATE, 'yyyy-mm-dd') as ACCT_DATE,
+       t.ACCT_AMT,
+       t.ACCT_CCY_CD,
+       t.POINTS_VALUE,
+       t.ORG_NO,
+       t.ASSIGNEE_CD,
+       t.ORG_ADDR,
+       t.MERCHANT_TYPE,
+       t.CHENL_CD,
+       t.ENTER_ORG,
+       t.TERMINAL_ID,
+       t.RMK
+		  from ACRM_F_EVT_CCD_TRANS t
+		  where 1=1
+		  
+	  <if  test="condition.acctNo != null and condition.acctNo != ''">
+       		and t.ACCT_NO =#{condition.acctNo,jdbcType=VARCHAR} 
+	  </if>
+	  <if  test="condition.startTM3 != null and condition.startTM3 != ''">
+       		and  to_char(to_date(t.TRAN_DATE,'yyyy-mm-dd'),'yyyy-mm-dd') &gt;= #{condition.startTM3,jdbcType=VARCHAR} 
+	  </if>
+	  <if  test="condition.endTM3 != null and condition.endTM3 != ''">
+       		and  to_char(to_date(t.TRAN_DATE,'yyyy-mm-dd'),'yyyy-mm-dd') &lt;= #{condition.endTM3,jdbcType=VARCHAR} 
+	  </if>
+	  <if  test="condition.startAmt3 != null and condition.startAmt3 != ''">
+       		and t.AMT &gt;=#{condition.startAmt3,jdbcType=VARCHAR} 
+	  </if>
+	  <if  test="condition.endAmt3 != null and condition.endAmt3 != ''">
+       		and t.AMT &lt;= #{condition.endAmt3,jdbcType=VARCHAR} 
+	  </if>
+	</select>
+	<resultMap id="BaseResultMap" type="cn.com.yusys.yscrm.cust.person.domain.OcrmAciReportApply">
+		<id column="BIZSEQNO" jdbcType="VARCHAR" property="bizseqno" />
+		
+		<result column="PARAMS" jdbcType="CLOB" property="params" />
+    </resultMap>
+    <sql id="Bases_Column_List">
+	    BIZSEQNO,PARAMS
+    </sql>
+    <select id="getParams" parameterType="string" resultMap="BaseResultMap" >
+		select  <include refid="Bases_Column_List"/>  from ocrm_a_ci_report_apply where bizseqno=#{bizseqno, jdbcType=VARCHAR}
+	</select>
+</mapper>

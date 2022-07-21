@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.climp.qypool.repository.mapper.LoyQyMerchantInfoTempMapper">
+    <resultMap id="BaseResultMap" type="cn.com.yusys.climp.qypool.domain.LoyQyMerchantInfoTemp">
+		<id column="MERCHANT_ID" jdbcType="VARCHAR" property="merchantId" />
+		<result column="MERCHANT_NAME" jdbcType="VARCHAR" property="merchantName" />
+		<result column="MER_IAC_NAME" jdbcType="VARCHAR" property="merIacName" />
+		<result column="MER_STROE_NAME" jdbcType="VARCHAR" property="merStroeName" />
+		<result column="LEGAL_PERSON_NM" jdbcType="VARCHAR" property="legalPersonNm" />
+		<result column="CERT_TYPE" jdbcType="VARCHAR" property="certType" />
+		<result column="CERT_NO" jdbcType="VARCHAR" property="certNo" />
+		<result column="MANAGE_A_TYPE" jdbcType="VARCHAR" property="manageAtype" />
+		<result column="MANAGE_B_TYPE" jdbcType="VARCHAR" property="manageBtype" />
+		<result column="CONTACT_INFO" jdbcType="VARCHAR" property="contactInfo" />
+		<result column="ADDRESS_INFO" jdbcType="VARCHAR" property="addressInfo" />
+		<result column="MER_REMARK" jdbcType="VARCHAR" property="merRemark" />
+		<result column="MANAGE_CONTENT" jdbcType="VARCHAR" property="manageContent" />
+		<result column="DATA_STS" jdbcType="VARCHAR" property="dataSts" />
+		<result column="WF_APPR_STS" jdbcType="VARCHAR" property="wfApprSts" />
+		<result column="CREATE_USER" jdbcType="VARCHAR" property="createUser" />
+		<result column="CREATE_DATE" jdbcType="DATE" property="createDate" />
+		<result column="CREATE_ORG" jdbcType="VARCHAR" property="createOrg" />
+		<result column="UPDATE_USER" jdbcType="VARCHAR" property="updateUser" />
+		<result column="UPDATE_DATE" jdbcType="DATE" property="updateDate" />
+		<result column="UPDATE_ORG" jdbcType="VARCHAR" property="updateOrg" />
+		<result column="BATCH_NO" jdbcType="VARCHAR" property="batchNo" />
+    </resultMap>
+    <sql id="Base_Column_List">
+	    MERCHANT_ID,MERCHANT_NAME,MER_IAC_NAME,MER_STROE_NAME,LEGAL_PERSON_NM,CERT_TYPE,CERT_NO,MANAGE_A_TYPE,MANAGE_B_TYPE,CONTACT_INFO,ADDRESS_INFO,MER_REMARK,MANAGE_CONTENT,DATA_STS,WF_APPR_STS,CREATE_USER,CREATE_DATE,CREATE_ORG,UPDATE_USER,UPDATE_DATE,UPDATE_ORG,BATCH_NO
+    </sql>
+    
+</mapper>

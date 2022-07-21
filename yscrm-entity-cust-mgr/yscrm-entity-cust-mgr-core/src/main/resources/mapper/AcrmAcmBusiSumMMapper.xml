@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.custmgr.repository.mapper.AcrmAcmBusiSumMMapper">
+    <select id="getXaxisArray" resultType="java.lang.String">
+    	SELECT TO_CHAR(TO_DATE(T.DATA_DATE,'yyyy-MM-dd'),'yyyy-MM') AS DATA_DT FROM ACRM_A_CM_BUSI_SUM T
+		<where>
+			AND T.TARGET_TYPE = '1' AND TO_CHAR((select last_day(add_months(sysdate,-1))  date1 from dual),'yyyy-MM-dd')
+			>= TO_CHAR(TO_DATE(T.DATA_DATE,'yyyy-MM-dd'),'yyyy-MM-dd')
+			<if  test="mgrId != null and mgrId != ''">
+	       		AND T.TARGET_ID = #{mgrId,jdbcType=VARCHAR}
+		    </if>
+		</where>
+		GROUP BY DATA_DATE ORDER BY T.DATA_DATE ASC 
+	</select>
+	<!-- 个人横坐标 -->
+	<select id="getXaxisArrayPer" resultType="java.lang.String">
+    	SELECT TO_CHAR(TO_DATE(T.DATA_DATE,'yyyy-MM-dd'),'yyyy-MM') AS DATA_DT FROM ACRM_A_CM_BUSI_SUM T
+		<where>
+			AND T.TARGET_TYPE = '1' AND CUST_TYPE='1' AND TO_CHAR((select last_day(add_months(sysdate,-1))  date1 from dual),'yyyy-MM-dd')
+			>= TO_CHAR(TO_DATE(T.DATA_DATE,'yyyy-MM-dd'),'yyyy-MM-dd')
+			<if  test="mgrId != null and mgrId != ''">
+	       		AND T.TARGET_ID = #{mgrId,jdbcType=VARCHAR}
+		    </if>
+		</where>
+		GROUP BY DATA_DATE ORDER BY T.DATA_DATE ASC 
+	</select>
+	<!-- 对公横坐标 -->
+	<select id="getXaxisArrayOrg" resultType="java.lang.String">
+    	SELECT TO_CHAR(TO_DATE(T.DATA_DATE,'yyyy-MM-dd'),'yyyy-MM') AS DATA_DT FROM ACRM_A_CM_BUSI_SUM T
+		<where>
+			AND T.TARGET_TYPE = '1' AND CUST_TYPE='2' AND TO_CHAR((select last_day(add_months(sysdate,-1))  date1 from dual),'yyyy-MM-dd')
+			>= TO_CHAR(TO_DATE(T.DATA_DATE,'yyyy-MM-dd'),'yyyy-MM-dd')
+			<if  test="mgrId != null and mgrId != ''">
+	       		AND T.TARGET_ID = #{mgrId,jdbcType=VARCHAR}
+		    </if>
+		</where>
+		GROUP BY DATA_DATE ORDER BY T.DATA_DATE ASC 
+	</select>
+	<select id="getPerCustAum" resultType="java.util.Map">
+    	SELECT T.AUM_BAL, T.AUM_M_AVG_BAL, T.AUM_Y_AVG_BAL
+  		FROM ACRM_A_CM_BUSI_SUM T
+		<where>
+			AND T.TARGET_TYPE = '1' AND CUST_TYPE = '1'  AND TO_CHAR((select last_day(add_months(sysdate,-1))  date1 from dual),'yyyy-MM-dd')
+			>= TO_CHAR(TO_DATE(T.DATA_DATE,'yyyy-MM-dd'),'yyyy-MM-dd')
+			<if  test="mgrId != null and mgrId != ''">
+	       		AND T.TARGET_ID = #{mgrId,jdbcType=VARCHAR}
+		    </if>
+		</where>
+		ORDER BY T.DATA_DATE ASC
+	</select>
+	<select id="getOrgCustAum" resultType="java.util.Map">
+    	SELECT T.AUM_BAL, T.AUM_M_AVG_BAL, T.AUM_Y_AVG_BAL
+  		FROM ACRM_A_CM_BUSI_SUM T
+		<where>
+			AND T.TARGET_TYPE = '1' AND CUST_TYPE = '2' AND TO_CHAR((select last_day(add_months(sysdate,-1))  date1 from dual),'yyyy-MM-dd')
+			>= TO_CHAR(TO_DATE(T.DATA_DATE,'yyyy-MM-dd'),'yyyy-MM-dd')
+			<if  test="mgrId != null and mgrId != ''">
+	       		AND T.TARGET_ID = #{mgrId,jdbcType=VARCHAR}
+		    </if>
+		</where>
+		ORDER BY T.DATA_DATE ASC
+	</select>
+	<select id="getPerCustLoanBal" resultType="java.util.Map">
+    	SELECT T.LOAN_BAL, T.LOAN_M_AVG_BAL, T.LOAN_Y_AVG_BAL
+  		FROM ACRM_A_CM_BUSI_SUM T
+		<where>
+			AND T.TARGET_TYPE = '1' AND CUST_TYPE = '1' AND TO_CHAR((select last_day(add_months(sysdate,-1))  date1 from dual),'yyyy-MM-dd')
+			>= TO_CHAR(TO_DATE(T.DATA_DATE,'yyyy-MM-dd'),'yyyy-MM-dd')
+			<if  test="mgrId != null and mgrId != ''">
+	       		AND T.TARGET_ID = #{mgrId,jdbcType=VARCHAR}
+		    </if>
+		</where>
+		ORDER BY T.DATA_DATE ASC
+	</select>
+	<select id="getOrgCustLoanBal" resultType="java.util.Map">
+    	SELECT T.LOAN_BAL, T.LOAN_M_AVG_BAL, T.LOAN_Y_AVG_BAL
+  		FROM ACRM_A_CM_BUSI_SUM T
+		<where>
+			AND T.TARGET_TYPE = '1' AND CUST_TYPE = '2' AND TO_CHAR((select last_day(add_months(sysdate,-1))  date1 from dual),'yyyy-MM-dd')
+			>= TO_CHAR(TO_DATE(T.DATA_DATE,'yyyy-MM-dd'),'yyyy-MM-dd')
+			<if  test="mgrId != null and mgrId != ''">
+	       		AND T.TARGET_ID = #{mgrId,jdbcType=VARCHAR}
+		    </if>
+		</where>
+		ORDER BY T.DATA_DATE ASC
+	</select>
+<!-- 	客户AUM月日均 -->
+	<select id="getCustAumBal" resultType="java.util.Map">
+    	SELECT T.AUM_M_AVG_BAL ,TO_CHAR(TO_DATE(T.DATA_DATE,'yyyy-MM-dd'),'yyyy-MM') AS DATA_DT
+  		FROM ACRM_A_CM_BUSI_SUM T
+		<where>
+			AND T.TARGET_TYPE = '1'  AND TO_CHAR((select last_day(add_months(sysdate,-1))  date1 from dual),'yyyy-MM-dd')
+			>= TO_CHAR(TO_DATE(T.DATA_DATE,'yyyy-MM-dd'),'yyyy-MM-dd')
+			<if  test="mgrId != null and mgrId != ''">
+	       		AND T.TARGET_ID = #{mgrId,jdbcType=VARCHAR} 
+		    </if>
+		</where>
+		ORDER BY T.DATA_DATE ASC
+	</select>
+<!-- 	贷款12月月日均余额 -->
+	<select id="getCustLoanBal" resultType="java.util.Map">
+    	SELECT T.LOAN_M_AVG_BAL,TO_CHAR(TO_DATE(T.DATA_DATE,'yyyy-MM-dd'),'yyyy-MM') AS DATA_DT
+  		FROM ACRM_A_CM_BUSI_SUM T
+		<where>
+			AND T.TARGET_TYPE = '1' AND TO_CHAR((select last_day(add_months(sysdate,-1))  date1 from dual),'yyyy-MM-dd')
+			>= TO_CHAR(TO_DATE(T.DATA_DATE,'yyyy-MM-dd'),'yyyy-MM-dd')
+			<if  test="mgrId != null and mgrId != ''">
+	       		AND T.TARGET_ID = #{mgrId,jdbcType=VARCHAR}
+		    </if>
+		</where>
+		ORDER BY T.DATA_DATE ASC
+	</select>
+</mapper>

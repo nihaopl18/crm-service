@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.uimp.base.repository.mapper.PmaFremindRuleMapper">
+    <resultMap id="BaseResultMap" type="cn.com.yusys.yusp.uimp.base.domain.PmaFremindRule">
+    	<id column="ID" jdbcType="VARCHAR" property="id" />
+		<result column="RULE_ID" jdbcType="VARCHAR" property="ruleId" />
+		<result column="RULE_NAME" jdbcType="VARCHAR" property="ruleName" />
+		<result column="RECE_ROLE_ID" jdbcType="VARCHAR" property="receRoleId" />
+		<result column="RECE_ROLE_NAME" jdbcType="VARCHAR" property="receRoleName" />
+		<result column="ADJUST_ORG_ID" jdbcType="VARCHAR" property="adjustOrgId" />
+		<result column="ADJUST_ORG_NAME" jdbcType="VARCHAR" property="adjustOrgName" />
+		<result column="BEFORE_DAYS" jdbcType="NUMERIC" property="beforeDays" />
+		<result column="LAST_DAYS" jdbcType="NUMERIC" property="lastDays" />
+		<result column="CRAT_USER" jdbcType="VARCHAR" property="cratUser" />
+		<result column="CRAT_ORG_ID" jdbcType="VARCHAR" property="cratOrgId" />
+		<result column="CRAT_DT" jdbcType="TIMESTAMP" property="cratDt" />
+		<result column="LAST_CHG_USR" jdbcType="VARCHAR" property="lastChgUsr" />
+		<result column="LAST_CHG_ORG_ID" jdbcType="VARCHAR" property="lastChgOrgId" />
+		<result column="LAST_CHG_DT" jdbcType="TIMESTAMP" property="lastChgDt" />
+		<result column="IS_ENABLE" jdbcType="VARCHAR" property="isEnable" />
+		<result column="THRESHHOLD" jdbcType="NUMERIC" property="threshhold" />
+    </resultMap>
+    <sql id="Base_Column_List">
+	    ID,RULE_ID,RULE_NAME,RECE_ROLE_ID,RECE_ROLE_NAME,ADJUST_ORG_ID,ADJUST_ORG_NAME,BEFORE_DAYS,LAST_DAYS,CRAT_USER,CRAT_ORG_ID,CRAT_DT,LAST_CHG_USR,LAST_CHG_ORG_ID,LAST_CHG_DT,IS_ENABLE,THRESHHOLD
+    </sql>
+    
+    <select id="queryList" parameterType="cn.com.yusys.yusp.uimp.base.domain.PmaFremindRule" resultMap="BaseResultMap">
+    	select <include refid="Base_Column_List"/> from PMA_F_REMIND_RULE
+    	<where>
+    		<if test="condition.ruleId != null and condition.ruleId != ''">
+    			and RULE_ID = #{condition.ruleId}
+    		</if>
+    	</where>
+    	order by LAST_CHG_DT desc, CRAT_DT desc
+    </select>
+    <update id="pushSql">
+	  UPDATE PMA_F_REMIND_RULE P SET P.IS_ENABLE =#{status} WHERE p.ID =#{id}
+	</update>
+</mapper>

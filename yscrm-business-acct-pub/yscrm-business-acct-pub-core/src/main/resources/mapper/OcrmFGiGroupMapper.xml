@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper
+        namespace="cn.com.yusys.yscrm.fiexdstatement.repository.mapper.OcrmFGiGroupMapper">
+    <!-- 条件列表查询 -->
+    <select id="queryList" parameterType="java.util.Map"
+            resultType="java.util.HashMap">
+        select gr.ECIF_CUST_NO,gr.NDS_CUST_NO,gr.CUST_NAME,gr.CUST_ENG_NAME,gr.BELONG_BRCH_NAME,gr.MANAGE_MGR_NAME,LI5.LOOKUP_ITEM_NAME AS MANAGE_NO,
+        gr.AUM_BALANCE_MONTH,gr.AUM_BALANCE,gr.AUM_BALANCE_AVG_RMB,gr.DEMAND_DEPOSIT_BALANCE,gr.TIME_DEPOSIT_BALANCE,
+        gr.MANAGE_COUNT_YEAR,gr.MANAGE_AMT_YEAR,gr.EXCHANGE_FIN_BALANCE,gr.NON_EXCHANGE_FIN_BALANCE,
+        gr.TRUST_BALANCE_RMB,gr.QDII_BALANCE_RMB,gr.RMB_FUND_BALANCE,gr.INSURRANCE_BALANCE,gr.AUM_BALANCE_YEAR,LI1.LOOKUP_ITEM_NAME AS ISSUING_COUNTRY,LI2.LOOKUP_ITEM_NAME AS FULL_NAME_NATIONALITY,
+        to_char(gr.FIRST_ACCOUNT_TIME,'YYYY-MM-DD') as firstAccountTime,
+        to_char(gr.FIRST_DNS_TIME,'YYYY-MM-DD') as firstDnsTime,
+        gr.AUM_BALANCE_AVG_MONTH_Y,LI6.LOOKUP_ITEM_NAME AS FIN_RISK_LEV,LI3.LOOKUP_ITEM_NAME AS OCCUPATION,AUM_BALANCE_MAX,LI4.LOOKUP_ITEM_NAME AS QUALIFIED_INVESTORS
+        from OCRM_F_GI_GROUP gr
+        LEFT JOIN ADMIN_SM_LOOKUP_ITEM LI1 ON LI1.LOOKUP_CODE = 'CD0069'  AND  LI1.LOOKUP_ITEM_CODE = ISSUING_COUNTRY
+        LEFT JOIN ADMIN_SM_LOOKUP_ITEM LI2 ON LI2.LOOKUP_CODE = 'CD0069'  AND  LI2.LOOKUP_ITEM_CODE = FULL_NAME_NATIONALITY
+        LEFT JOIN ADMIN_SM_LOOKUP_ITEM LI3 ON LI3.LOOKUP_CODE = 'CD0033'  AND  LI3.LOOKUP_ITEM_CODE = OCCUPATION
+        LEFT JOIN ADMIN_SM_LOOKUP_ITEM LI4 ON LI4.LOOKUP_CODE = 'YES_NO'  AND  LI4.LOOKUP_ITEM_CODE = QUALIFIED_INVESTORS
+        LEFT JOIN ADMIN_SM_LOOKUP_ITEM LI5 ON LI5.LOOKUP_CODE = 'YES_NO'  AND  LI5.LOOKUP_ITEM_CODE = MANAGE_NO
+        LEFT JOIN ADMIN_SM_LOOKUP_ITEM LI6 ON LI6.LOOKUP_CODE = 'FINANCIAL_RISK'  AND  LI6.LOOKUP_ITEM_CODE = FIN_RISK_LEV
+        <if test="orgCode != '500' ">
+            inner join OCRM_F_CI_ADMIT_BELONG S on gr.ECIF_CUST_NO = S.CUST_ID
+        </if>
+        <if test="sqlDataAuth != null and sqlDataAuth != ''">
+            ${sqlDataAuth}
+        </if>
+        <where>
+            <if test="ecifCustNo != null and ecifCustNo != ''">
+                AND gr.ECIF_CUST_NO= #{ecifCustNo,jdbcType=VARCHAR}
+            </if>
+            <if test="ndsCustNo != null and ndsCustNo != ''">
+                AND gr.NDS_CUST_NO= #{ndsCustNo,jdbcType=VARCHAR}
+            </if>
+            <if test="mktRespPerson != null and mktRespPerson != ''">
+                AND (gr.BELONG_BRCH_NO= #{mktRespPerson,jdbcType=VARCHAR} or gr.MANAGE_MGR_NO = #{mktRespPerson,jdbcType=VARCHAR})
+            </if>
+            <if test="manageMgr != null and manageMgr != ''">
+                AND gr.MANAGE_MGR= #{manageMgr,jdbcType=VARCHAR}
+            </if>
+            <if test="personalLoanMgr != null and personalLoanMgr != ''">
+                AND gr.PERSONAL_LOAN_MGR= #{personalLoanMgr,jdbcType=VARCHAR}
+            </if>
+
+            <if test="dataDate != null and dataDate != ''">
+                and gr.DATA_DATE=to_date(#{dataDate},'yyyy-MM-dd')
+            </if>
+            <if test="targetId != null and targetId !=''">
+                AND gr.MANAGE_MGR_NO=#{targetId}
+            </if>
+            <if test="aumBalanceStart != null and aumBalanceStart != ''">
+                and gr.AUM_BALANCE >= to_number(#{aumBalanceStart,jdbcType=VARCHAR})
+            </if>
+            <if test="aumBalanceEnd != null and aumBalanceEnd != ''">
+                and gr.AUM_BALANCE &lt;= to_number(#{aumBalanceEnd,jdbcType=VARCHAR})
+            </if>
+            <if test="exportIds != null and exportIds !='' ">
+                and gr.ECIF_CUST_NO ${exportIds}
+            </if>
+
+        </where>
+
+
+    </select>
+
+
+</mapper>

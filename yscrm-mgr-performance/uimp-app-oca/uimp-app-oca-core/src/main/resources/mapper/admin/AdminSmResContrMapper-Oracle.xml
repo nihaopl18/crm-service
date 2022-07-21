@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.admin.repository.mapper.AdminSmResContrMapper">
+
+	<!--查询控制点信息 -->
+	<select id="getContrInfo" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+			resultType="java.util.Map" databaseId="oracle">
+			select c.contr_id,c.func_id,c.contr_code,c.contr_name,c.contr_url,c.contr_remark,c.method_type,
+			substr(c.last_chg_dt,0,10) as last_chg_dt,u.user_name as last_chg_name
+			from admin_sm_res_contr c 
+			left join admin_sm_user u on u.user_id = c.last_chg_usr
+		<where>
+			<if test= "condition.funcId!= null and condition.funcId != ''">
+	    	    and c.func_id = #{condition.funcId, jdbcType=VARCHAR}
+	        </if>
+	        <if test= "condition.contrCode!= null and condition.contrCode!= ''">
+	    	    and c.contr_code like #{condition.contrCode, jdbcType=VARCHAR}
+	        </if>
+	        <if test= "condition.contrName!= null and condition.contrName != ''">
+	    	    and c.contr_name like #{condition.contrName, jdbcType=VARCHAR}
+	        </if>
+	        <if test= "condition.contrUrl!= null and condition.contrUrl != ''">
+	    	    and c.contr_url like #{condition.contrUrl, jdbcType=VARCHAR}
+	        </if>
+		</where>
+		order by c.last_chg_dt DESC	
+	</select>
+	
+
+</mapper>
+    

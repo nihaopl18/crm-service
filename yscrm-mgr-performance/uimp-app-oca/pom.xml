@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>yscrm-mgr-performance</artifactId>
+        <groupId>cn.com.yusys.yscrm.mgr</groupId>
+        <version>2.0.0-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>uimp-app-oca</artifactId>
+    <packaging>pom</packaging>
+    <description>机构、菜单、控制点、权限 Organization menu control point authorization</description>
+    <modules>
+        <module>uimp-app-oca-client</module>
+        <module>uimp-app-oca-core</module>
+    </modules>
+
+</project>

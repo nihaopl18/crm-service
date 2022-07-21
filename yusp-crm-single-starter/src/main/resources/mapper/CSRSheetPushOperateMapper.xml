@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.dycrm.complaintfeedback.repository.mapper.CSRSheetPushOperateMapper">
+
+    <insert id="sheetPushHandle">
+        insert into T_P_COMPLAINT_SHEET_INFO(sheet_id,cust_ecif_No,cust_name,cust_mgr_no,
+        Cust_mgr_nm,cust_mgr_org_no,cardnbr,issue_country,keytype,custid,mobilephone,callnum,
+        greyflag,custcategory,gender,ts_content,ts_depart,ts_type,ts_business,ts_channel,
+        ts_note,director_opinion,end_date,createtime,handle_state,complain_reason) values(
+            #{sheetId},#{ecifCustNo},#{custName},#{custMgrNo},#{custMgrName},#{custMgrOgrNo},#{cardnbr},#{issueCountry},#{keytype},
+            #{custId},#{mobilephone},#{callnum},#{greyflag},#{custcategory},#{gender},#{tsContent},#{tsDepart},#{tsType},#{tsBusiness},#{tsChannel},
+            #{tsNote},#{directorOpinion},#{endDate},to_date(#{createTime},'yyyy-mm-dd hh24:mi:ss'),'0',#{complainReason}
+        )
+    </insert>
+    <insert id="sheetPushHandleTest" parameterType="cn.com.yusys.yusp.dycrm.complaintfeedback.domain.CustomerInformationDTO">
+        insert into OCRM_F_CL_COMPLAINT_SHEET(sheet_id,cust_ecif_No,cust_name,cust_mgr_no,
+        Cust_mgr_nm,cust_mgr_org_no,cardnbr,issue_country,keytype,custid,mobilephone,callnum,
+        greyflag,custcategory,gender,ts_content,ts_depart,ts_type,ts_business,ts_channel,
+        ts_note,director_opinion,end_date,CREATETIME,handle_state,complain_reason) values(
+            #{sheetId,jdbcType=VARCHAR},#{custEcifNo,jdbcType=VARCHAR},#{custName,jdbcType=VARCHAR},#{custMgrNo,jdbcType=VARCHAR},#{custMgrNm,jdbcType=VARCHAR},#{custMgrOrgNo,jdbcType=VARCHAR},
+            #{cardnbr,jdbcType=VARCHAR},#{issueCountry,jdbcType=VARCHAR},#{keytype,jdbcType=VARCHAR},
+            #{custid,jdbcType=VARCHAR},#{mobilephone,jdbcType=VARCHAR},#{callnum,jdbcType=VARCHAR},#{greyflag,jdbcType=VARCHAR},#{custcategory,jdbcType=VARCHAR},#{gender,jdbcType=VARCHAR},
+            #{tsContent,jdbcType=VARCHAR},#{tsDepart,jdbcType=VARCHAR},#{tsType,jdbcType=VARCHAR},#{tsBusiness,jdbcType=VARCHAR},#{tsChannel,jdbcType=VARCHAR},
+            #{tsNote,jdbcType=VARCHAR},#{directorOpinion,jdbcType=VARCHAR},#{endDate,jdbcType=VARCHAR},to_date(#{createtime,jdbcType=VARCHAR},'yyyy-mm-dd hh24:mi:ss'),'0',#{complainReason,jdbcType=VARCHAR}
+        )
+    </insert>
+    <update id="coverSheet">
+        update  T_P_COMPLAINT_SHEET_INFO t  set t.cust_ecif_no = #{ecifCustNo},
+
+          t.cust_name = #{custName},t.cust_mgr_no = #{custMgrNo},
+
+          t.cust_mgr_nm =#{custMgrNm} ,
+
+          t.cust_mgr_org_no = #{custMgrOgrNo},
+
+          t.cardnbr =#{cardnbr} ,
+
+          t.issue_country = #{issueCountry},
+
+          t.keytype =#{keytype} ,
+
+          t.custid = #{custId},
+
+          t.mobilephone =#{mobilephone} ,
+
+          t.callnum =#{callnum},
+
+          t.greyflag = #{greyflag},
+
+         t.custcategory = #{custcategory},
+
+          t.gender = #{gender},
+
+          t.ts_content=#{tsContent},
+
+         t.ts_depart= #{tsDepart},
+          t.ts_type = #{tsType},
+
+          t.ts_business = #{tsBusiness},
+
+         t.ts_channel= #{tsChannel},
+
+          t.ts_note= #{tsNote},
+
+          t.director_opinion = #{directorOpinion},
+
+          t.end_date = #{endDate},
+
+         t.complain_reason = #{complainReason},
+
+          t.createtime = to_date(#{createTime},'yyyy-mm-dd hh24:mi:ss')
+
+where t.sheet_id = #{sheetId}
+    </update>
+    <update id="coverSheetTest" parameterType="cn.com.yusys.yusp.dycrm.complaintfeedback.domain.CustomerInformationDTO">
+        update  OCRM_F_CL_COMPLAINT_SHEET t  set t.cust_ecif_no = #{custEcifNo,jdbcType=VARCHAR},
+
+          t.cust_name = #{custName,jdbcType=VARCHAR},t.cust_mgr_no = #{custMgrNo,jdbcType=VARCHAR},
+
+          t.cust_mgr_nm =#{custMgrNm,jdbcType=VARCHAR} ,
+
+          t.cust_mgr_org_no = #{custMgrOrgNo,jdbcType=VARCHAR},
+
+          t.cardnbr =#{cardnbr,jdbcType=VARCHAR} ,
+
+          t.issue_country = #{issueCountry,jdbcType=VARCHAR},
+
+          t.keytype =#{keytype,jdbcType=VARCHAR} ,
+
+          t.custid = #{custid,jdbcType=VARCHAR},
+
+          t.mobilephone =#{mobilephone,jdbcType=VARCHAR} ,
+
+          t.callnum =#{callnum,jdbcType=VARCHAR},
+
+          t.greyflag = #{greyflag,jdbcType=VARCHAR},
+
+         t.custcategory = #{custcategory,jdbcType=VARCHAR},
+
+          t.gender = #{gender,jdbcType=VARCHAR},
+
+          t.ts_content=#{tsContent,jdbcType=VARCHAR},
+
+         t.ts_depart= #{tsDepart,jdbcType=VARCHAR},
+          t.ts_type = #{tsType,jdbcType=VARCHAR},
+
+          t.ts_business = #{tsBusiness,jdbcType=VARCHAR},
+
+         t.ts_channel= #{tsChannel,jdbcType=VARCHAR},
+
+          t.ts_note= #{tsNote,jdbcType=VARCHAR},
+
+          t.director_opinion = #{directorOpinion,jdbcType=VARCHAR},
+
+          t.end_date = #{endDate,jdbcType=VARCHAR},
+
+         t.complain_reason = #{complainReason,jdbcType=VARCHAR},
+
+          t.createtime = to_date(#{createtime,jdbcType=VARCHAR},'yyyy-mm-dd hh24:mi:ss')
+
+        where t.sheet_id = #{sheetId,jdbcType=VARCHAR}
+    </update>
+
+
+    <select id="queryCustMgrNo" resultType="java.util.Map">
+        select  t.mgr_id  as CUST_MGR_NO,
+         t.MGR_NAME  as CUST_MGR_NM,
+        t.ORG_ID as CUST_MGR_ORG_NO
+        from OCRM_F_CI_ADMIT_BELONG t
+        where t.mgr_type = '1' and length(t.mgr_id) = 8
+        <if test="ecifCustNo != null and ecifCustNo != ''">
+            and t.cust_id = #{ecifCustNo}
+        </if>
+    </select>
+    <select id="sheetIdIsExist" resultType="java.lang.Integer">
+        select count(sheet_id) as num from T_P_COMPLAINT_SHEET_INFO t
+        where t.SHEET_ID = #{sheetId}
+    </select>
+    <select id="queryEcifNo" resultType="java.util.Map">
+        SELECT t.CUST_NO FROM V_P_CIM_CUST_INDENT_INFO t
+        WHERE t.GOVE_IDEN_NUM_TYPE_CODE = #{keytype}
+        AND t.GOVE_IDEN_NUM=#{custId}
+        AND t.ISS_COUNTRY=#{issueCountry}
+    </select>
+    <select id="queryEcifNoByCust" resultType="java.util.Map">
+        select t.CUST_ID from ACRM_F_CI_CUST_IDENT_INFO t
+        WHERE t.CERT_TYPE = #{keytype} AND t.CERT_NO = #{custid} and t.iss_country = #{issueCountry}
+    </select>
+    <select id="sheetIdIsExistTest" resultType="java.lang.Integer">
+         select count(SHEET_ID) as num from OCRM_F_CL_COMPLAINT_SHEET t
+        where t.SHEET_ID = #{sheetId}
+    </select>
+</mapper>

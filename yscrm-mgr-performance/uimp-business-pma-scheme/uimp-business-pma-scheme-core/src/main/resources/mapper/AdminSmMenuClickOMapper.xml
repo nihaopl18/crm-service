@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.uimp.business.pma.menuClick.repository.mapper.AdminSmMenuClickOMapper">
+    <resultMap id="BaseResultMap" type="cn.com.yusys.yusp.uimp.business.pma.menuClick.domain.AdminSmMenuClickO">
+		<id column="ID" jdbcType="VARCHAR" property="id" />
+		<result column="DSTR_CLICK_NUM" jdbcType="NUMERIC" property="dstrClickNum" />
+		<result column="SEL_CLICK_NUM" jdbcType="NUMERIC" property="selClickNum" />
+		<result column="SCHEME_CLICK_NUM" jdbcType="NUMERIC" property="schemeClickNum" />
+		<result column="SM_CLICK_NUM" jdbcType="NUMERIC" property="smClickNum" />
+		<result column="ORG_ID" jdbcType="VARCHAR" property="orgId" />
+    </resultMap>
+    <sql id="Base_Column_List">
+	    ID,DSTR_CLICK_NUM,SEL_CLICK_NUM,SCHEME_CLICK_NUM,SM_CLICK_NUM,ORG_ID
+    </sql>
+	<select id="listByModel" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+ 			SELECT   A.ID,A.DSTR_CLICK_NUM,A.SEL_CLICK_NUM,A.SCHEME_CLICK_NUM,A.SM_CLICK_NUM,A.ORG_ID,SUT.UNITNAME AS ORG_NAME 
+ 			FROM ADMIN_SM_MENU_CLICK_O A
+ 			LEFT JOIN SYS_UNITS SUT ON A.ORG_ID = SUT.UNITID
+		<where>
+			<!-- 数据日期 -->
+			<if test="condition.orgId != null and condition.orgId  != ''">
+	      		AND SUT.UNITSEQ LIKE concat(concat('%',#{condition.orgId,jdbcType=VARCHAR}),'%')
+		    </if>
+		    <if test="condition.orgIdTwo != null and condition.orgIdTwo  != ''">
+	      		AND A.ORG_ID =#{condition.orgIdTwo,jdbcType=VARCHAR}
+		    </if>
+	    </where>
+	</select>
+</mapper>

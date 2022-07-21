@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.cust.org.repository.mapper.UnitAcrmFevtLoanLnsacctListMapper">
+   
+    <sql id="Base_Column_List">
+	    DATA_DATE,ORG_NO,TRANS_DT,EVENT_NO,ACCT_NO,ACCT_STAT_CD,ORD_QTY,INACCT_NO,ITEM_NO,ACCTYPE_IND,CCY_CD,CD_IND,TRAN_AMT,BAL,DAYS,ACCUM,VOU_KIND_CD,VOU_NO,MEMO_CD,MEMO,TOACCT_NO,CLS_NO,TRANS_TM,PTXN_SEQ_NO,SUBSERSEQ_NO,TRAN_CD,SUBTRAN_CD,TRANS_ORG_NO,TELLER_NO,AUTHTLR_NO,CHKTLR_NO,PAGE_NUM,PRINT_FLAG,TRAN_SOURCE_IND,RECORD_TYPE_CD,WASTE_BOOK_FLAG,WASH_FLAG,REMARK_FLAG,SEQ1,SEQ2
+    </sql>
+    
+    <select id="queryLoanLnsacctListByCustId" parameterType="java.util.Map"  resultType="java.util.HashMap">
+		 select to_char(to_date(t.DATA_DATE,'yyyy-mm-dd'),'yyyy-mm-dd') as DATA_DT,
+		       org.org_name as ORG_NO,
+		       to_char(to_date(t.TRANS_DT,'yyyy-mm-dd'),'yyyy-mm-dd') as TRANS_DT,
+		       t.EVENT_NO,
+		       t.ACCT_NO,
+		       t.ACCT_STAT_CD,
+		       t.ORD_QTY,
+		       t.INACCT_NO,
+		       t.ITEM_NO,
+		       t.ACCTYPE_IND,
+		       t.CCY_CD,
+		       t.CD_IND,
+		       t.TRAN_AMT,
+		       t.BAL,
+		       t.DAYS,
+		       t.ACCUM,
+		       t.VOU_KIND_CD,
+		       t.VOU_NO,
+		       t.MEMO_CD,
+		       t.MEMO,
+		       t.TOACCT_NO,
+		       t.CLS_NO,
+		       t.TRANS_TM,
+		       t.PTXN_SEQ_NO,
+		       t.SUBSERSEQ_NO,
+		       t.TRAN_CD,
+		       t.SUBTRAN_CD,
+		       t.TRANS_ORG_NO,
+		       t.TELLER_NO,
+		       t.AUTHTLR_NO,
+		       t.CHKTLR_NO,
+		       t.PAGE_NUM,
+		       t.PRINT_FLAG,
+		       t.TRAN_SOURCE_IND,
+		       t.RECORD_TYPE_CD,
+		       t.WASTE_BOOK_FLAG,
+		       t.WASH_FLAG,
+		       t.REMARK_FLAG,
+		       t.SEQ1,
+		       t.SEQ2
+		  from ACRM_F_EVT_LOAN_LNSACCT_LIST t
+		  left join admin_sm_org org
+          on org.org_code=t.org_no
+		  where 1=1
+		  
+	  <if  test="condition.loanAcctId != null and condition.loanAcctId != ''">
+       		and t.ACCT_NO =#{condition.loanAcctId,jdbcType=VARCHAR} 
+	  </if>
+	  <if  test="condition.startTM2 != null and condition.startTM2 != ''">
+       		and  to_char(to_date(t.DATA_DATE,'yyyy-mm-dd'),'yyyy-mm-dd') &gt;= #{condition.startTM2,jdbcType=VARCHAR} 
+	  </if>
+	  <if  test="condition.endTM2 != null and condition.endTM2 != ''">
+       		and  to_char(to_date(t.DATA_DATE,'yyyy-mm-dd'),'yyyy-mm-dd') &lt;= #{condition.endTM2,jdbcType=VARCHAR} 
+	  </if>
+	  <if  test="condition.startAmt2 != null and condition.startAmt2 != ''">
+       		and t.TRAN_AMT &gt;=#{condition.startAmt2,jdbcType=VARCHAR} 
+	  </if>
+	  <if  test="condition.endAmt2 != null and condition.endAmt2 != ''">
+       		and t.TRAN_AMT &lt;= #{condition.endAmt2,jdbcType=VARCHAR} 
+	  </if>
+	</select>
+	
+	<resultMap id="BaseResultMap" type="cn.com.yusys.yscrm.cust.org.domain.OcrmAciReportApply">
+		<id column="BIZSEQNO" jdbcType="VARCHAR" property="bizseqno" />
+		
+		<result column="PARAMS" jdbcType="CLOB" property="params" />
+    </resultMap>
+    <sql id="Bases_Column_List">
+	    BIZSEQNO,PARAMS
+    </sql>
+    <select id="getParams" parameterType="string" resultMap="BaseResultMap" >
+		select  <include refid="Bases_Column_List"/>  from ocrm_a_ci_report_apply where bizseqno=#{bizseqno, jdbcType=VARCHAR}
+	</select>
+</mapper>

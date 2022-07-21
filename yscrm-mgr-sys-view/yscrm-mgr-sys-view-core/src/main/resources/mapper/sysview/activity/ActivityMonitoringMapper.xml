@@ -1,0 +1,783 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper
+	namespace="cn.com.yusys.yscrm.sysview.repository.mapper.activity.ActivityMonitoringMapper">
+	<resultMap id="WorkReportMap"
+		type="cn.com.yusys.yscrm.sysview.domain.activity.WorkReportExcel">
+		<result property="workReportBusiType" column="WORK_REPORT_BUSI_TYPE"></result>
+		<result property="count" column="COUNT"></result>
+		<result property="workSummary" column="WORK_SUMMARY"></result>
+		<association property="activityKey"
+			javaType="cn.com.yusys.yscrm.sysview.domain.activity.ActivityKey">
+			<result property="upOrgId" column="UP_ORG_ID"></result>
+			<result property="upOrgName" column="UP_ORG_NAME"></result>
+			<result property="orgId" column="ORG_ID"></result>
+			<result property="orgName" column="ORG_NAME"></result>
+			<result property="creatorName" column="CREATOR_NAME"></result>
+		</association>
+	</resultMap>
+
+	<resultMap id="TodoWorkMap"
+		type="cn.com.yusys.yscrm.sysview.domain.activity.TodoWorkExcel">
+		<result property="todoWorkState" column="TODO_WORK_STATE"></result>
+		<result property="count" column="COUNT"></result>
+		<result property="todoWorkType" column="TODO_WORK_TYPE"></result>
+		<association property="activityKey"
+			javaType="cn.com.yusys.yscrm.sysview.domain.activity.ActivityKey">
+			<result property="upOrgId" column="UP_ORG_ID"></result>
+			<result property="upOrgName" column="UP_ORG_NAME"></result>
+			<result property="orgId" column="ORG_ID"></result>
+			<result property="orgName" column="ORG_NAME"></result>
+			<result property="creatorName" column="CREATOR_NAME"></result>
+		</association>
+	</resultMap>
+
+	<resultMap id="ChangeRemindMap"
+		type="cn.com.yusys.yscrm.sysview.domain.activity.ChangeRemindExcel">
+		<result property="typeId" column="TYPE_ID"></result>
+		<result property="count" column="COUNT"></result>
+		<result property="state" column="STATE"></result>
+		<result property="aging" column="AGING"></result>
+		<association property="activityKey"
+			javaType="cn.com.yusys.yscrm.sysview.domain.activity.ActivityKey">
+			<result property="upOrgId" column="UP_ORG_ID"></result>
+			<result property="upOrgName" column="UP_ORG_NAME"></result>
+			<result property="orgId" column="ORG_ID"></result>
+			<result property="orgName" column="ORG_NAME"></result>
+			<result property="creatorName" column="CREATOR_NAME"></result>
+		</association>
+	</resultMap>
+
+	<select id="changeRemindInfo" parameterType="java.util.Map"
+		resultType="cn.com.yusys.yscrm.sysview.domain.activity.ChangeRemindInfo">
+		SELECT
+		T.RULE_NAME,T.TYPE_NAME,T.AMT,T.IMPORT_DATE,T.OTHER_CONTENT,T.REMIND_CREATE_DATE,T.CUST_NAME,T.CUST_ID,T.STATE,U.USER_NAME
+		FROM ACRM_F_WP_REMIND T
+		LEFT JOIN ADMIN_SM_USER U ON
+		T.RECE_USER=U.USER_ID
+		WHERE REMIND_CREATE_DATE &lt;= SYSDATE
+		<if test="dataAuth != null">
+			${dataAuth}
+		</if>
+		<if test="dataAuth1 != null and dataAuth == null">
+			${dataAuth1}
+		</if>
+		<if test="dataAuth == null and dataAuth1 == null">
+			AND T.RECE_USER=#{userCode}
+		</if>
+		AND TYPE_ID=#{typeId}
+	</select>
+
+	<select id="todoWork" parameterType="java.util.Map"
+		resultType="cn.com.yusys.yscrm.sysview.domain.activity.TodoWork">
+		SELECT COUNT(*) AS COUNT,T.TODO_WORK_TYPE,TODO_WORK_STATE FROM
+		OCRM_F_WP_TODO_WORK T
+		WHERE 1=1
+		AND T.IS_DELETE = 'N'
+		AND T.IS_NOTICE = 'N'
+		<if test="dataAuth != null">
+			${dataAuth}
+		</if>
+		<if test="dataAuth1 != null and dataAuth == null">
+			${dataAuth1}
+		</if>
+		<if test="dataAuth == null and dataAuth1 == null">
+			AND T.CREATOR_ID=#{userCode}
+		</if>
+		<if test="startTime != null and startTime != ''">
+			AND T.START_DATE &gt;=TO_DATE(#{startTime}, 'yyyy-mm-dd
+			HH24:MI:SS')
+		</if>
+		<if test="endTime != null and endTime != ''">
+			AND T.START_DATE &lt; TO_DATE(#{endTime}, 'yyyy-mm-dd
+			HH24:MI:SS')
+		</if>
+		GROUP BY T.TODO_WORK_STATE,T.TODO_WORK_TYPE
+-- 		ORDER BY T.TODO_WORK_TYPE
+	</select>
+
+	<select id="todoWorkInfo" parameterType="java.util.Map"
+		resultType="cn.com.yusys.yscrm.sysview.domain.activity.TodoWorkInfo">
+		SELECT
+		TODO_WORK_ID,TODO_WORK_TYPE,START_DATE,END_DATE,TODO_WORK_STATE,TODO_WORK_CONTENT,CREATOR_NAME
+		FROM OCRM_F_WP_TODO_WORK T
+		WHERE TODO_WORK_TYPE=#{type}
+		<if test="dataAuth != null">
+			${dataAuth}
+		</if>
+		<if test="dataAuth1 != null and dataAUth == null">
+			${dataAuth1}
+		</if>
+		<if test="dataAuth == null and dataAuth1 == null">
+			AND T.CREATOR_ID=#{userCode}
+		</if>
+	</select>
+
+
+
+
+	<select id="workReportInfo" parameterType="java.util.Map"
+		resultType="cn.com.yusys.yscrm.sysview.domain.activity.WorkReportInfo">
+		SELECT
+		WORK_REPORT_ID,CREATOR_NAME,CREATE_DATE,WORK_REPORT_BUSI_TYPE,WORK_SUMMARY
+		FROM OCRM_F_WP_WORK_REPORT
+		WHERE WORK_SUMMARY=#{type}
+	</select>
+
+	<!--活动数据	-->
+	<select id="loanAvgCust" parameterType="java.util.Map" resultType="cn.com.yusys.yscrm.sysview.domain.activity.ActiveIndex">
+		SELECT *
+		FROM (
+			SELECT AVG_CUST_NUMBER num,AVG_CUST_NUMBER_QOQ hb
+			FROM ACRM_F_PD_ORG_INDEXS
+			WHERE ORG_NO = #{orgCode} AND BUSINESS_LINE = '2'
+			ORDER BY DATA_DATE DESC )
+		WHERE rownum = 1
+	</select>
+	<select id="financingAvgCust" parameterType="java.util.Map" resultType="cn.com.yusys.yscrm.sysview.domain.activity.ActiveIndex">
+		SELECT *
+		FROM (
+			SELECT AVG_CUST_NUMBER num,AVG_CUST_NUMBER_QOQ hb
+			FROM ACRM_F_PD_ORG_INDEXS
+			WHERE ORG_NO = #{orgCode} AND BUSINESS_LINE = '1'
+			ORDER BY DATA_DATE DESC)
+		WHERE rownum = 1
+	</select>
+	<select id="allAvgCust" parameterType="java.util.Map" resultType="cn.com.yusys.yscrm.sysview.domain.activity.ActiveIndex">
+		SELECT *
+		FROM (
+				 SELECT AVG_CUST_NUMBER num,AVG_CUST_NUMBER_QOQ hb
+				 FROM ACRM_F_PD_ORG_INDEXS
+				 WHERE ORG_NO = #{orgCode} AND BUSINESS_LINE = '0'
+				 ORDER BY DATA_DATE DESC)
+		WHERE rownum = 1
+	</select>
+	<select id="teamAvgCust" parameterType="java.util.Map" resultType="cn.com.yusys.yscrm.sysview.domain.activity.ActiveIndex">
+		SELECT *
+		FROM (
+				 SELECT AVG_CUST_NUMBER num,AVG_CUST_NUMBER_QOQ hb
+				 FROM ACRM_F_PD_TEAM_INDEXS
+				 WHERE TEAM_NO IN (
+					 SELECT MKT_TEAM_ID
+					 FROM OCRM_F_CM_MKT_TEAM
+					 WHERE TEAM_LEADER_ID = #{userCode,jdbcType=VARCHAR} )
+				 ORDER BY DATA_DATE DESC)
+		WHERE rownum = 1
+	</select>
+
+	<!--客户经理 -->
+	<select id="custManagerNum" parameterType="java.util.Map" resultType="integer">
+		SELECT *
+		FROM (
+		    SELECT MANAGER_NUMBER
+		    FROM ACRM_F_PD_ORG_INDEXS
+		    WHERE ORG_NO = #{orgCode, jdbcType=VARCHAR} AND BUSINESS_LINE = #{line, jdbcType=VARCHAR}
+		    ORDER BY DATA_DATE DESC)
+		WHERE rownum = 1
+	</select>
+	<select id="getTeamUserId" parameterType="java.util.Map" resultType="integer">
+		SELECT *
+		FROM (
+		    SELECT MANAGER_NUMBER
+		    FROM ACRM_F_PD_TEAM_INDEXS
+		    WHERE TEAM_NO IN (
+		        SELECT MKT_TEAM_ID
+		        FROM OCRM_F_CM_MKT_TEAM
+		        WHERE TEAM_LEADER_ID = #{userCode,jdbcType=VARCHAR} )
+		    ORDER BY DATA_DATE DESC)
+		WHERE rownum = 1
+	</select>
+
+	<!--管户 -->
+	<select id="branchBelong" parameterType="java.util.Map" resultType="cn.com.yusys.yscrm.sysview.domain.activity.BelongInfo">
+		SELECT
+		       SO.ORG_NAME NAME,
+		       CASE WHEN OI1.BELONG_MANAGER_CUST_NUMBER is null THEN 0 ELSE OI1.BELONG_MANAGER_CUST_NUMBER END COUNT,
+		       OI1.BUSINESS_LINE MGR_TYPE
+		FROM ACRM_F_PD_ORG_INDEXS OI1
+		RIGHT JOIN (
+			SELECT ORG_NO , MAX(DATA_DATE) DATA_DATE
+			FROM ACRM_F_PD_ORG_INDEXS
+			GROUP BY ORG_NO) OI2 ON OI1.ORG_NO = OI2.ORG_NO AND OI1.DATA_DATE = OI2.DATA_DATE
+		LEFT JOIN ADMIN_SM_ORG SO ON OI1.ORG_NO = SO.ORG_ID
+		WHERE OI1.BUSINESS_LINE = #{line, jdbcType=VARCHAR}
+			AND OI1.ORG_NO IN (
+				SELECT ORG_ID
+				FROM ADMIN_SM_ORG
+				WHERE UP_ORG_ID = #{orgCode, jdbcType=VARCHAR} )
+	</select>
+	<select id="subBranchBelong" parameterType="java.util.HashMap" resultType="cn.com.yusys.yscrm.sysview.domain.activity.BelongInfo">
+		SELECT Concat(Concat(U.USER_NAME, '/'), U.LOGIN_CODE) NAME,
+		       CASE WHEN MI1.CUST_NUMBER is null THEN 0 ELSE MI1.CUST_NUMBER END COUNT, AB.MGR_TYPE MGR_TYPE
+		FROM ACRM_F_PD_MGR_INDEXS MI1
+		RIGHT JOIN (
+			SELECT CUST_MANAGER_NO, MAX(DATA_DATE) DATA_DATE
+			FROM ACRM_F_PD_MGR_INDEXS
+			GROUP BY CUST_MANAGER_NO ) MI2 ON MI1.CUST_MANAGER_NO = MI2.CUST_MANAGER_NO AND MI1.DATA_DATE = MI2.DATA_DATE
+		LEFT JOIN ADMIN_SM_USER U ON U.USER_ID = MI1.CUST_MANAGER_NO
+		LEFT JOIN (
+			    SELECT MGR_ID, MGR_TYPE, COUNT(BELONG_ID)
+			    FROM OCRM_F_CI_ADMIT_BELONG
+			    GROUP BY MGR_ID, MGR_TYPE ) AB ON MI1.CUST_MANAGER_NO = AB.MGR_ID
+		WHERE MI1.CUST_MANAGER_NO IN (
+			SELECT USER_ID
+			FROM ADMIN_SM_USER
+			WHERE ORG_ID = #{orgCode, jdbcType=VARCHAR})
+	</select>
+	<select id="teamBelong" parameterType="java.util.HashMap" resultType="cn.com.yusys.yscrm.sysview.domain.activity.BelongInfo" >
+		SELECT Concat(Concat(U.USER_NAME, '/'), U.LOGIN_CODE) NAME,
+		       CASE WHEN MI1.CUST_NUMBER is null THEN 0 ELSE MI1.CUST_NUMBER END COUNT, AB.MGR_TYPE MGR_TYPE
+		FROM ACRM_F_PD_MGR_INDEXS MI1
+		RIGHT JOIN (
+			SELECT CUST_MANAGER_NO , MAX(DATA_DATE) DATA_DATE
+			FROM ACRM_F_PD_MGR_INDEXS
+			GROUP BY CUST_MANAGER_NO ) MI2 ON MI1.CUST_MANAGER_NO = MI2.CUST_MANAGER_NO AND MI1.DATA_DATE = MI2.DATA_DATE
+		LEFT JOIN ADMIN_SM_USER U ON U.USER_ID = MI1.CUST_MANAGER_NO
+		LEFT JOIN (
+			SELECT MGR_ID, MGR_TYPE, COUNT(BELONG_ID)
+			FROM OCRM_F_CI_ADMIT_BELONG
+			GROUP BY MGR_ID, MGR_TYPE ) AB ON MI1.CUST_MANAGER_NO = AB.MGR_ID
+		WHERE MI1.CUST_MANAGER_NO IN (
+			SELECT USER_ID
+			FROM OCRM_F_CM_TEAM_CUST_MANAGER
+			WHERE MKT_TEAM_ID =(
+				SELECT MKT_TEAM_ID
+				FROM OCRM_F_CM_MKT_TEAM
+				WHERE TEAM_LEADER_ID = #{userCode, jdbcType=VARCHAR}))
+	</select>
+
+	<!--待办	-->
+	<select id="todoWorkTotal" parameterType="java.util.Map" resultType="cn.com.yusys.yscrm.sysview.domain.activity.TodoWorkSRC">
+		SELECT DISTINCT T.COUNT, T.TODO_WORK_TYPE, T.CREATOR_ID, T.CREATOR_NAME,
+		       CONCAT(T.CREATOR_NAME, CONCAT('/', T.CREATOR_ID)) FINISHER,
+		       T.TODO_WORK_STATE, T.ORG_ID, T.ORG_NAME, T.ORG_LEVEL, T.UP_ORG_ID, T.UP_ORG_NAME, T.UP_ORG_LEVEL
+		FROM
+		(
+			SELECT
+			    COUNT(TW.TODO_WORK_ID) count, TW.TODO_WORK_TYPE,
+				SUBSTR(TW.FINISHER, INSTR(TW.FINISHER, '/') + 1) CREATOR_ID,
+				SUBSTR(TW.FINISHER, 0, INSTR(TW.FINISHER, '/') - 1) CREATOR_NAME,
+				TW.TODO_WORK_STATE, U.ORG_ID, O1.ORG_NAME, O1.ORG_LEVEL,
+				CASE WHEN O1.ORG_LEVEL = 3 THEN O1.UP_ORG_ID ELSE U.ORG_ID END UP_ORG_ID,
+				CASE WHEN O1.ORG_LEVEL = 3 THEN O2.ORG_NAME ELSE O1.ORG_NAME END UP_ORG_NAME,
+				CASE WHEN O1.ORG_LEVEL = 3 THEN O2.ORG_LEVEL ELSE O1.ORG_LEVEL END UP_ORG_LEVEL
+			FROM OCRM_F_WP_TODO_WORK TW
+			INNER JOIN ADMIN_SM_USER U ON SUBSTR(TW.FINISHER, INSTR(TW.FINISHER, '/') + 1) = U.USER_ID
+			INNER JOIN ADMIN_SM_ORG O1 ON U.ORG_ID = O1.ORG_ID
+			LEFT JOIN ADMIN_SM_ORG O2 ON O2.ORG_ID = O1.UP_ORG_ID
+			WHERE
+				TW.IS_NOTICE = 'N'
+				AND TW.IS_DELETE = 'N'
+				<if test="startTime != null and startTime != ''">
+					AND TW.START_DATE &gt;=TO_DATE(#{startTime}, 'yyyy-mm-dd HH24:MI:SS')
+				</if>
+				<if test="endTime != null and endTime != ''">
+					AND TW.START_DATE &lt; TO_DATE(#{endTime}, 'yyyy-mm-dd HH24:MI:SS')
+				</if>
+				<if test="task != null and task != ''">
+					AND SUBSTR(TW.FINISHER, INSTR(TW.FINISHER, '/') + 1) != TW.CREATOR_ID
+				</if>
+			GROUP BY TW.TODO_WORK_TYPE, TW.FINISHER, TW.TODO_WORK_STATE, U.ORG_ID, O1.ORG_NAME, O1.ORG_LEVEL, O1.UP_ORG_ID, O2.ORG_NAME, O2.ORG_LEVEL ) T
+		INNER JOIN ADMIN_SM_USER U ON T.CREATOR_ID = U.USER_ID
+		INNER JOIN ADMIN_SM_USER_ROLE_REL UR ON U.USER_ID = UR.USER_ID
+		INNER JOIN ADMIN_SM_ROLE SS ON SS.ROLE_ID = UR.ROLE_ID
+			<if test="roleType != null and roleType != ''">
+				AND SS.ROLE_TYPE =#{roleType}
+			</if>
+		where 1=1
+			<if test="dataAuth != null">
+				${dataAuth}
+			</if>
+			<if test="dataAuth1 != null and dataAuth == null">
+				${dataAuth1}
+			</if>
+			<if test="dataAuth == null and dataAuth1 == null">
+				AND T.CREATOR_ID=#{userCode}
+			</if>
+	</select>
+	<select id="todoWorkSonTotal" parameterType="java.util.Map" resultType="cn.com.yusys.yscrm.sysview.domain.activity.TodoWorkSRC">
+		SELECT DISTINCT T.COUNT, T.TODO_WORK_TYPE, T.CREATOR_ID, T.CREATOR_NAME,
+		       CONCAT(T.CREATOR_NAME, CONCAT('/', T.CREATOR_ID)) FINISHER,
+		       T.TODO_WORK_STATE, T.ORG_ID, T.ORG_NAME, T.ORG_LEVEL, T.UP_ORG_ID, T.UP_ORG_NAME, T.UP_ORG_LEVEL
+		FROM
+		(
+			SELECT
+			    COUNT(TW.TODO_WORK_ID) count, TW.TODO_WORK_TYPE,
+				SUBSTR(TW.FINISHER, INSTR(TW.FINISHER, '/') + 1) CREATOR_ID,
+				SUBSTR(TW.FINISHER, 0, INSTR(TW.FINISHER, '/') - 1) CREATOR_NAME,
+				TW.TODO_WORK_STATE, U.ORG_ID, O1.ORG_NAME, O1.ORG_LEVEL,
+				CASE WHEN O1.ORG_LEVEL = 3 THEN O1.UP_ORG_ID ELSE U.ORG_ID END UP_ORG_ID,
+				CASE WHEN O1.ORG_LEVEL = 3 THEN O2.ORG_NAME ELSE O1.ORG_NAME END UP_ORG_NAME,
+				CASE WHEN O1.ORG_LEVEL = 3 THEN O2.ORG_LEVEL ELSE O1.ORG_LEVEL END UP_ORG_LEVEL
+			FROM OCRM_F_WP_TODO_WORK_SON TW
+			INNER JOIN ADMIN_SM_USER U ON SUBSTR(TW.FINISHER, INSTR(TW.FINISHER, '/') + 1) = U.USER_ID
+			INNER JOIN ADMIN_SM_ORG O1 ON U.ORG_ID = O1.ORG_ID
+			LEFT JOIN ADMIN_SM_ORG O2 ON O2.ORG_ID = O1.UP_ORG_ID
+			WHERE
+				TW.IS_DELETE = 'N'
+				<if test="startTime != null and startTime != ''">
+					AND TW.START_DATE &gt;=TO_DATE(#{startTime}, 'yyyy-mm-dd HH24:MI:SS')
+				</if>
+				<if test="endTime != null and endTime != ''">
+					AND TW.START_DATE &lt; TO_DATE(#{endTime}, 'yyyy-mm-dd HH24:MI:SS')
+				</if>
+				<if test="task != null and task != ''">
+					AND SUBSTR(TW.FINISHER, INSTR(TW.FINISHER, '/') + 1) != TW.CREATOR_ID
+				</if>
+			GROUP BY TW.TODO_WORK_TYPE, TW.FINISHER, TW.TODO_WORK_STATE, U.ORG_ID, O1.ORG_NAME, O1.ORG_LEVEL, O1.UP_ORG_ID, O2.ORG_NAME, O2.ORG_LEVEL ) T
+		INNER JOIN ADMIN_SM_USER U ON T.CREATOR_ID = U.USER_ID
+		INNER JOIN ADMIN_SM_USER_ROLE_REL UR ON U.USER_ID = UR.USER_ID
+		INNER JOIN ADMIN_SM_ROLE SS ON SS.ROLE_ID = UR.ROLE_ID
+			<if test="roleType != null and roleType != ''">
+				AND SS.ROLE_TYPE =#{roleType}
+			</if>
+		where 1=1
+			<if test="dataAuth != null">
+				${dataAuth}
+			</if>
+			<if test="dataAuth1 != null and dataAuth == null">
+				${dataAuth1}
+			</if>
+			<if test="dataAuth == null and dataAuth1 == null">
+				AND T.CREATOR_ID=#{userCode}
+			</if>
+	</select>
+	<select id="todoWorkCount" parameterType="java.util.Map" resultType="integer">
+		SELECT COUNT(*)
+		FROM (
+			SELECT DISTINCT TW.TODO_WORK_ID, SUBSTR(TW.FINISHER, INSTR(TW.FINISHER, '/') + 1) CREATOR_ID, U.ORG_ID
+			FROM OCRM_F_WP_TODO_WORK TW
+			INNER JOIN ADMIN_SM_USER U ON U.USER_ID = SUBSTR(TW.FINISHER, INSTR(TW.FINISHER, '/') + 1)
+			INNER JOIN ADMIN_SM_USER_ROLE_REL UR ON U.USER_ID = UR.USER_ID
+			INNER JOIN ADMIN_SM_ROLE SS ON SS.ROLE_ID = UR.ROLE_ID
+				<if test="roleType != null and roleType != ''">
+					AND SS.ROLE_TYPE =#{roleType}
+				</if>
+			WHERE 1=1 AND IS_NOTICE = 'N' AND IS_DELETE = 'N'
+				<if test="startTime != null and startTime != ''">
+					AND TW.START_DATE &gt;=TO_DATE(#{startTime}, 'yyyy-mm-dd HH24:MI:SS')
+				</if>
+				<if test="endTime != null and endTime != ''">
+					AND TW.START_DATE &lt; TO_DATE(#{endTime}, 'yyyy-mm-dd HH24:MI:SS')
+				</if>
+				AND TW.TODO_WORK_STATE=#{state}) T
+		WHERE 1=1
+			<if test="dataAuth != null">
+				${dataAuth}
+			</if>
+			<if test="dataAuth1 != null and dataAuth == null">
+				${dataAuth1}
+			</if>
+			<if test="dataAuth == null and dataAuth1 == null">
+				AND T.CREATOR_ID=#{userCode}
+			</if>
+	</select>
+	<select id="todoWorkSonCount" parameterType="java.util.Map" resultType="integer">
+		SELECT COUNT(*)
+		FROM (
+		    SELECT DISTINCT TW.TODO_WORK_ID, SUBSTR(TW.FINISHER, INSTR(TW.FINISHER, '/') + 1) CREATOR_ID, U.ORG_ID
+		    FROM OCRM_F_WP_TODO_WORK_SON TW
+		    INNER JOIN ADMIN_SM_USER U ON U.USER_ID = SUBSTR(TW.FINISHER, INSTR(TW.FINISHER, '/') + 1)
+			INNER JOIN ADMIN_SM_USER_ROLE_REL UR ON U.USER_ID = UR.USER_ID
+			INNER JOIN ADMIN_SM_ROLE SS ON SS.ROLE_ID = UR.ROLE_ID
+				<if test="roleType != null and roleType != ''">
+					AND SS.ROLE_TYPE =#{roleType}
+				</if>
+		    WHERE 1=1 AND TW.IS_DELETE = 'N'
+				<if test="startTime != null and startTime != ''">
+					AND TW.START_DATE &gt;=TO_DATE(#{startTime}, 'yyyy-mm-dd HH24:MI:SS')
+				</if>
+				<if test="endTime != null and endTime != ''">
+					AND TW.START_DATE &lt; TO_DATE(#{endTime}, 'yyyy-mm-dd HH24:MI:SS')
+				</if>
+				AND TW.TODO_WORK_STATE=#{state}) T
+		WHERE 1=1
+			<if test="dataAuth != null">
+				${dataAuth}
+			</if>
+			<if test="dataAuth1 != null and dataAuth == null">
+				${dataAuth1}
+			</if>
+			<if test="dataAuth == null and dataAuth1 == null">
+				AND T.CREATOR_ID=#{userCode}
+			</if>
+	</select>
+	<select id="todoWorkDetail" parameterType="java.util.Map" resultType="cn.com.yusys.yscrm.sysview.domain.activity.TodoWorkInfo">
+		SELECT DISTINCT
+			T.TODO_WORK_ID,
+			T.TODO_WORK_TYPE,
+			to_char(T.START_DATE,'yyyy-MM-dd HH24:mi:ss') START_DATE,
+		    to_char(T.CREATE_DATE,'yyyy-MM-dd HH24:mi:ss') CREATE_DATE,
+			T.TODO_WORK_STATE,
+			T.TODO_WORK_CONTENT,
+			SUBSTR(T.FINISHER, 0, INSTR(T.FINISHER, '/') - 1) CREATOR_NAME
+		FROM
+		OCRM_F_WP_TODO_WORK T
+		INNER JOIN ADMIN_SM_USER U ON SUBSTR(T.FINISHER, INSTR(T.FINISHER, '/') + 1) = U.USER_ID
+		INNER JOIN ADMIN_SM_USER_ROLE_REL UR ON U.USER_ID = UR.USER_ID
+		INNER JOIN ADMIN_SM_ROLE SS ON SS.ROLE_ID = UR.ROLE_ID
+		<if test="roleType != null and roleType != ''">
+			AND SS.ROLE_TYPE =#{roleType}
+		</if>
+		WHERE
+			1 = 1
+			AND T.IS_DELETE = 'N'
+			AND T.IS_NOTICE = 'N'
+			<if test="startTime != null and startTime != ''">
+				AND T.START_DATE &gt;=TO_DATE(#{startTime}, 'yyyy-mm-dd
+				HH24:MI:SS')
+			</if>
+			<if test="endTime != null and endTime != ''">
+				AND T.START_DATE &lt; TO_DATE(#{endTime}, 'yyyy-mm-dd
+				HH24:MI:SS')
+			</if>
+			<if test="orgCode != null and orgCode != ''">
+				AND U.ORG_ID = #{orgCode}
+			</if>
+			<if test="creatorId != null and creatorId != ''">
+				AND SUBSTR(T.FINISHER, INSTR(T.FINISHER, '/') + 1)=#{creatorId}
+			</if>
+	</select>
+	<select id="todoWorkSonDetail" parameterType="java.util.Map" resultType="cn.com.yusys.yscrm.sysview.domain.activity.TodoWorkInfo">
+		SELECT DISTINCT
+			T.TODO_WORK_ID,
+			T.TODO_WORK_TYPE,
+			to_char(T.START_DATE,'yyyy-MM-dd HH24:mi:ss') START_DATE,
+			to_char(T.CREATE_DATE,'yyyy-MM-dd HH24:mi:ss') CREATE_DATE,
+			T.TODO_WORK_STATE,
+			T.TODO_WORK_CONTENT,
+			SUBSTR(T.FINISHER, 0, INSTR(T.FINISHER, '/') - 1) CREATOR_NAME
+		FROM
+		OCRM_F_WP_TODO_WORK_SON T
+		INNER JOIN ADMIN_SM_USER U ON SUBSTR(T.FINISHER, INSTR(T.FINISHER, '/') + 1) = U.USER_ID
+		INNER JOIN ADMIN_SM_USER_ROLE_REL UR ON U.USER_ID = UR.USER_ID
+		INNER JOIN ADMIN_SM_ROLE SS ON SS.ROLE_ID = UR.ROLE_ID
+			<if test="roleType != null and roleType != ''">
+				AND SS.ROLE_TYPE =#{roleType}
+			</if>
+		WHERE
+			1 = 1
+			AND T.IS_DELETE = 'N'
+			<if test="startTime != null and startTime != ''">
+				AND T.START_DATE &gt;=TO_DATE(#{startTime}, 'yyyy-mm-dd
+				HH24:MI:SS')
+			</if>
+			<if test="endTime != null and endTime != ''">
+				AND T.START_DATE &lt; TO_DATE(#{endTime}, 'yyyy-mm-dd
+				HH24:MI:SS')
+			</if>
+			<if test="orgCode != null and orgCode != ''">
+				AND U.ORG_ID = #{orgCode}
+			</if>
+			<if test="creatorId != null and creatorId != ''">
+				AND SUBSTR(T.FINISHER, INSTR(T.FINISHER, '/') + 1)=#{creatorId}
+			</if>
+	</select>
+	<select id="subBranchTodoWorkRate" parameterType="java.util.Map" resultType="cn.com.yusys.yscrm.sysview.domain.activity.TodoWorkRate">
+		SELECT
+			COUNT(TW.TODO_WORK_ID) count,
+			TW.ORG_ID,
+			TW.TODO_WORK_STATE,
+			CASE WHEN trim(O.ORG_NAME) IS NULL OR trim(O.ORG_NAME) = '' THEN TW.ORG_ID ELSE O.ORG_NAME END name,
+			O.ORG_LEVEL
+		FROM (
+			SELECT DISTINCT
+				TW.TODO_WORK_ID,
+				U.ORG_ID,
+				TW.TODO_WORK_STATE
+			FROM OCRM_F_WP_TODO_WORK TW
+			INNER JOIN ADMIN_SM_USER U ON SUBSTR(TW.FINISHER, INSTR(TW.FINISHER, '/') + 1) = U.USER_ID
+			INNER JOIN ADMIN_SM_USER_ROLE_REL UR ON U.USER_ID = UR.USER_ID
+			INNER JOIN ADMIN_SM_ROLE SS ON SS.ROLE_ID = UR.ROLE_ID
+			<if test="roleType != null and roleType != ''">
+				AND SS.ROLE_TYPE =#{roleType}
+			</if>
+			WHERE 1 = 1
+				AND TW.IS_DELETE = 'N'
+				AND TW.IS_NOTICE = 'N'
+				<if test="startTime != null and startTime != ''">
+					AND TW.START_DATE &gt;=TO_DATE(#{startTime}, 'yyyy-mm-dd HH24:MI:SS')
+				</if>
+				<if test="endTime != null and endTime != ''">
+					AND TW.START_DATE &lt; TO_DATE(#{endTime}, 'yyyy-mm-dd HH24:MI:SS')
+				</if>
+				<if test="task != null and task != ''">
+					AND SUBSTR(TW.FINISHER, INSTR(TW.FINISHER, '/') + 1) != TW.CREATOR_ID
+				</if>
+			) TW
+		LEFT JOIN ADMIN_SM_ORG O ON TW.ORG_ID = O.ORG_ID
+		WHERE 1=1
+			AND TW.ORG_ID IN (
+				SELECT ORG_ID FROM ADMIN_SM_ORG
+				WHERE ORG_LEVEL = '3'
+				START WITH ORG_ID = #{orgCode} CONNECT BY PRIOR ORG_ID = UP_ORG_ID)
+		GROUP BY TW.ORG_ID, TW.TODO_WORK_STATE, O.ORG_NAME, O.ORG_LEVEL
+	</select>
+	<select id="subBranchTodoWorkSonRate" parameterType="java.util.Map" resultType="cn.com.yusys.yscrm.sysview.domain.activity.TodoWorkRate">
+		SELECT
+			COUNT(TW.TODO_WORK_ID) count,
+			TW.ORG_ID,
+			TW.TODO_WORK_STATE,
+			CASE WHEN trim(O.ORG_NAME) IS NULL OR trim(O.ORG_NAME) = '' THEN TW.ORG_ID ELSE O.ORG_NAME END name,
+			O.ORG_LEVEL
+		FROM (
+			SELECT DISTINCT
+				TW.TODO_WORK_ID,
+				U.ORG_ID,
+				TW.TODO_WORK_STATE
+			FROM OCRM_F_WP_TODO_WORK_SON TW
+			INNER JOIN ADMIN_SM_USER U ON SUBSTR(TW.FINISHER, INSTR(TW.FINISHER, '/') + 1) = U.USER_ID
+			INNER JOIN ADMIN_SM_USER_ROLE_REL UR ON U.USER_ID = UR.USER_ID
+			INNER JOIN ADMIN_SM_ROLE SS ON SS.ROLE_ID = UR.ROLE_ID
+				<if test="roleType != null and roleType != ''">
+					AND SS.ROLE_TYPE =#{roleType}
+				</if>
+			WHERE 1 = 1
+				AND TW.IS_DELETE = 'N'
+				<if test="startTime != null and startTime != ''">
+					AND TW.START_DATE &gt;=TO_DATE(#{startTime}, 'yyyy-mm-dd HH24:MI:SS')
+				</if>
+				<if test="endTime != null and endTime != ''">
+					AND TW.START_DATE &lt; TO_DATE(#{endTime}, 'yyyy-mm-dd HH24:MI:SS')
+				</if>
+				<if test="task != null and task != ''">
+					AND SUBSTR(TW.FINISHER, INSTR(TW.TW.FINISHER, '/') + 1) != TW.CREATOR_ID
+				</if>
+			) TW
+		LEFT JOIN ADMIN_SM_ORG O ON TW.ORG_ID = O.ORG_ID
+		WHERE 1=1
+			AND TW.ORG_ID IN (
+				SELECT ORG_ID
+				FROM ADMIN_SM_ORG
+				WHERE ORG_LEVEL = '3'
+				START WITH ORG_ID = #{orgCode} CONNECT BY PRIOR ORG_ID = UP_ORG_ID)
+		GROUP BY TW.ORG_ID, TW.TODO_WORK_STATE, O.ORG_NAME, O.ORG_LEVEL
+	</select>
+
+	<!--异动	-->
+	<select id="changeRemindTotal" parameterType="java.util.Map" resultType="cn.com.yusys.yscrm.sysview.domain.activity.ChangeRemindSRC">
+		select CR.COUNT, CR.TYPE_ID,CR.STATE,  CR.CUST_ID,CR.CUST_NAME,CR.AGING,CR.FINANING_MGR_USER_NAME,CR.LOAN_MGR_USER_NAME
+		from (
+		    select COUNT(DISTINCT R.INFO_ID) count, R.TYPE_ID, R.STATE,R.CUST_ID,
+				 CASE WHEN R.CUST_NAME is null or R.CUST_NAME = '' THEN R.CUST_ID ELSE R.CUST_NAME END CUST_NAME,
+				 round(AVG(R.LAST_CHG_DT-R.REMIND_CREATE_DATE)* 24 * 60,0) AGING,
+				 case when length(AB1.MGR_ID) > 4 then CONCAT(AB1.MGR_NAME, CONCAT('/', AB1.MGR_ID)) else '-' end FINANING_MGR_USER_NAME,
+				 case when length(AB2.MGR_ID) > 4 then CONCAT(AB2.MGR_NAME, CONCAT('/', AB2.MGR_ID)) else '-' end LOAN_MGR_USER_NAME
+		    from ACRM_F_WP_REMIND R
+		    LEFT JOIN  OCRM_F_CI_ADMIT_BELONG AB1 ON R.CUST_ID  = AB1.CUST_ID AND AB1.MGR_TYPE='1'
+		    LEFT JOIN  OCRM_F_CI_ADMIT_BELONG AB2 ON R.CUST_ID  = AB2.CUST_ID AND AB2.MGR_TYPE='2'
+		    where 1=1
+				<if test="startTime != null and startTime != ''">
+					AND R.REMIND_CREATE_DATE &gt;=TO_DATE(#{startTime}, 'yyyy-mm-dd HH24:MI:SS')
+				</if>
+				<if test="endTime != null and endTime != ''">
+					AND R.REMIND_CREATE_DATE &lt; TO_DATE(#{endTime}, 'yyyy-mm-dd HH24:MI:SS')
+				</if>
+		    GROUP BY R.TYPE_ID, R.STATE,R.CUST_ID, R.CUST_NAME,AB1.MGR_ID,AB1.MGR_NAME,AB2.MGR_ID,AB2.MGR_NAME
+		) CR
+		where CR.CUST_ID in (
+		    select DISTINCT T.CUST_ID
+		    from(
+		        select CUST_ID,ORG_ID,MGR_ID CREATOR_ID from OCRM_F_CI_ADMIT_BELONG
+		        where 1=1
+					<if test="roleType != null and roleType != ''">
+						AND MGR_TYPE =#{roleType}
+					</if>
+		    ) T
+		    where 1=1
+			<if test="dataAuth != null">
+				${dataAuth}
+			</if>
+			<if test="dataAuth1 != null and dataAuth == null">
+				${dataAuth1}
+			</if>
+			<if test="dataAuth == null and dataAuth1 == null">
+				AND T.CREATOR_ID=#{userCode}
+			</if>
+		)
+	</select>
+	<select id="changeCount" parameterType="java.util.Map" resultType="integer">
+		select SUM(CR.count)
+		from (
+		    select count(DISTINCT R.INFO_ID) count,R.CUST_ID
+		    from ACRM_F_WP_REMIND R
+		    where 1=1
+				<if test="startTime != null and startTime != ''">
+					AND R.REMIND_CREATE_DATE &gt;=TO_DATE(#{startTime}, 'yyyy-mm-dd HH24:MI:SS')
+				</if>
+				<if test="endTime != null and endTime != ''">
+					AND R.REMIND_CREATE_DATE &lt;TO_DATE(#{endTime}, 'yyyy-mm-dd HH24:MI:SS')
+				</if>
+				<if test="endTime == null or endTime == ''">
+					AND R.REMIND_CREATE_DATE &lt;= SYSDATE
+				</if>
+				AND R.STATE=#{state}
+		    group by R.CUST_ID ) CR
+		where CR.CUST_ID in (
+			select DISTINCT T.CUST_ID
+			from(
+				select CUST_ID,ORG_ID,MGR_ID CREATOR_ID from OCRM_F_CI_ADMIT_BELONG
+				where 1=1
+				<if test="roleType != null and roleType != ''">
+					AND MGR_TYPE =#{roleType}
+				</if>
+				) T
+			where 1=1
+			<if test="dataAuth != null">
+				${dataAuth}
+			</if>
+			<if test="dataAuth1 != null and dataAuth == null">
+				${dataAuth1}
+			</if>
+			<if test="dataAuth == null and dataAuth1 == null">
+				AND T.CREATOR_ID=#{userCode}
+			</if>
+		)
+	</select>
+
+	<!--工作报告	-->
+	<select id="workReportTotal" parameterType="java.util.Map" resultType="cn.com.yusys.yscrm.sysview.domain.activity.WorkReportSRC">
+		SELECT DISTINCT T.COUNT, T.WORK_REPORT_BUSI_TYPE, T.CREATOR_ID, T.CREATOR_NAME,
+		       CONCAT(T.CREATOR_NAME, CONCAT('/', T.CREATOR_ID)) CREATOR,
+		       T.WORK_SUMMARY, T.ORG_ID, T.ORG_NAME, T.ORG_LEVEL, T.UP_ORG_ID, T.UP_ORG_NAME, T.UP_ORG_LEVEL
+		FROM
+		(
+		    SELECT
+		        COUNT(WR.WORK_REPORT_ID) count, WR.WORK_REPORT_BUSI_TYPE, WR.WORK_SUMMARY, WR.CREATOR_ID, WR.CREATOR_NAME, O1.ORG_ID, O1.ORG_NAME, O1.ORG_LEVEL,
+				CASE WHEN O1.ORG_LEVEL = 3 THEN O1.UP_ORG_ID ELSE O1.ORG_ID END UP_ORG_ID,
+				CASE WHEN O1.ORG_LEVEL = 3 THEN O2.ORG_NAME ELSE O1.ORG_NAME END UP_ORG_NAME,
+				CASE WHEN O1.ORG_LEVEL = 3 THEN O2.ORG_LEVEL ELSE O1.ORG_LEVEL END UP_ORG_LEVEL
+			FROM OCRM_F_WP_WORK_REPORT WR
+			INNER JOIN ADMIN_SM_USER U ON WR.CREATOR_ID= U.USER_ID
+			INNER JOIN ADMIN_SM_ORG O1 ON U.ORG_ID = O1.ORG_ID
+			LEFT JOIN ADMIN_SM_ORG O2 ON O2.ORG_ID = O1.UP_ORG_ID
+			where WR.IS_DELETE = 'N'
+				AND WR.IS_DRAFT = 'N'
+				<if test="startTime != null and startTime != '' ">
+					AND WR.CREATE_DATE &gt;= TO_DATE(#{startTime},'yyyy-MM-dd HH24:mi:ss')
+				</if>
+				<if test="endTime != null and endTime != '' ">
+					AND WR.CREATE_DATE &lt; TO_DATE(#{endTime},'yyyy-MM-dd HH24:mi:ss')
+				</if>
+			GROUP BY WR.WORK_REPORT_BUSI_TYPE, WR.WORK_SUMMARY, WR.CREATOR_NAME, WR.CREATOR_ID, O1.ORG_ID, O1.ORG_NAME, O1.ORG_LEVEL, O1.UP_ORG_ID, O2.ORG_NAME, O2.ORG_LEVEL ) T
+		INNER JOIN ADMIN_SM_USER U ON T.CREATOR_ID = U.USER_ID
+		INNER JOIN ADMIN_SM_USER_ROLE_REL UR ON U.USER_ID = UR.USER_ID
+		INNER JOIN ADMIN_SM_ROLE SS ON SS.ROLE_ID = UR.ROLE_ID
+			<if test="roleType != null and roleType != ''">
+				AND SS.ROLE_TYPE =#{roleType}
+			</if>
+		where 1=1
+			<if test="dataAuth != null">
+				${dataAuth}
+			</if>
+			<if test="dataAuth1 != null and dataAuth == null">
+				${dataAuth1}
+			</if>
+			<if test="dataAuth == null and dataAuth1 == null">
+				AND T.CREATOR_ID=#{userCode}
+			</if>
+	</select>
+	<select id="workReportCount" parameterType="java.util.Map" resultType="integer">
+		SELECT COUNT(*)
+		FROM (
+		    SELECT DISTINCT WR.WORK_REPORT_ID,WR.CREATOR_ID,O1.ORG_ID,WR.CREATE_DATE
+		    FROM OCRM_F_WP_WORK_REPORT WR
+			INNER JOIN ADMIN_SM_USER U ON WR.CREATOR_ID = U.USER_ID
+		        INNER JOIN ADMIN_SM_ORG O1 ON U.ORG_ID = O1.ORG_ID
+			INNER JOIN ADMIN_SM_USER_ROLE_REL UR ON U.USER_ID = UR.USER_ID
+			INNER JOIN ADMIN_SM_ROLE SS ON SS.ROLE_ID = UR.ROLE_ID
+			<if test="roleType != null and roleType != ''">
+				AND SS.ROLE_TYPE =#{roleType}
+			</if>
+		    WHERE 1=1 AND WR.IS_DRAFT = 'N' AND WR.IS_DELETE = 'N'
+				<if test="startTime != null and startTime != '' ">
+				AND WR.CREATE_DATE &gt;= TO_DATE(#{startTime},'yyyy-MM-dd HH24:mi:ss')
+				</if>
+				<if test="endTime != null and endTime != '' ">
+				AND WR.CREATE_DATE &lt; TO_DATE(#{endTime},'yyyy-MM-dd HH24:mi:ss')
+				</if> ) T
+		WHERE 1=1
+			<if test="dataAuth != null">
+				${dataAuth}
+			</if>
+			<if test="dataAuth1 != null and dataAuth == null">
+				${dataAuth1}
+			</if>
+			<if test="dataAuth == null and dataAuth1 == null">
+				AND T.CREATOR_ID=#{userCode}
+			</if>
+	</select>
+
+	<!--客户接触	-->
+	<select id="touchTotal" parameterType="java.util.Map" resultType="cn.com.yusys.yscrm.sysview.domain.activity.TouchSRC">
+		SELECT DISTINCT T.TIME, T.CONTACT_CUST_ID, T.CONTACT_TYPE, T.CREATOR_ID, T.CREATOR_NAME,
+		       CONCAT(T.CREATOR_NAME, CONCAT('/', T.CREATOR_ID)) CREATOR,
+		       T.ORG_ID, T.ORG_NAME, T.ORG_LEVEL, T.UP_ORG_ID, T.UP_ORG_NAME, T.UP_ORG_LEVEL
+		FROM
+		(
+		    SELECT
+		        COUNT(CC.CONTACT_CUST_ID) TIME, CC.CONTACT_CUST_ID, CC.CONTACT_TYPE, CC.CREATOR_ID, CC.CREATOR_NAME, O1.ORG_ID, O1.ORG_NAME, O1.ORG_LEVEL,
+				CASE WHEN O1.ORG_LEVEL = 3 THEN O1.UP_ORG_ID ELSE O1.ORG_ID END UP_ORG_ID,
+				CASE WHEN O1.ORG_LEVEL = 3 THEN O2.ORG_NAME ELSE O1.ORG_NAME END UP_ORG_NAME,
+				CASE WHEN O1.ORG_LEVEL = 3 THEN O2.ORG_LEVEL ELSE O1.ORG_LEVEL END UP_ORG_LEVEL
+		    FROM OCRM_F_WP_CUSTOMER_CONTACT CC
+		    INNER JOIN ADMIN_SM_USER U ON CC.CREATOR_ID= U.USER_ID
+			INNER JOIN ADMIN_SM_ORG O1 ON U.ORG_ID = O1.ORG_ID
+			LEFT JOIN ADMIN_SM_ORG O2 ON O2.ORG_ID = O1.UP_ORG_ID
+		    WHERE CC.IS_DELETE = 'N'
+		    	AND (CC.IS_DRAFT = 'N' or CC.SOURCE_TABLE != '0')
+				<if test="startTime != null and startTime != ''">
+					AND CC.CREATE_DATE &gt;=TO_DATE(#{startTime}, 'yyyy-mm-dd HH24:MI:SS')
+				</if>
+				<if test="endTime != null and endTime != ''">
+					AND CC.CREATE_DATE &lt; TO_DATE(#{endTime}, 'yyyy-mm-dd HH24:MI:SS')
+				</if>
+		    GROUP BY CC.CONTACT_CUST_ID, CC.CONTACT_TYPE, CC.CREATOR_NAME, CC.CREATOR_ID, O1.ORG_ID, O1.ORG_NAME, O1.ORG_LEVEL, O1.UP_ORG_ID, O2.ORG_NAME, O2.ORG_LEVEL ) T
+		INNER JOIN ADMIN_SM_USER U ON T.CREATOR_ID = U.USER_ID
+		INNER JOIN ADMIN_SM_USER_ROLE_REL UR ON U.USER_ID = UR.USER_ID
+		INNER JOIN ADMIN_SM_ROLE SS ON SS.ROLE_ID = UR.ROLE_ID
+			<if test="roleType != null and roleType != ''">
+				AND SS.ROLE_TYPE =#{roleType}
+			</if>
+		where 1=1
+			<if test="dataAuth != null">
+				${dataAuth}
+			</if>
+			<if test="dataAuth1 != null and dataAuth == null">
+				${dataAuth1}
+			</if>
+			<if test="dataAuth == null and dataAuth1 == null">
+				AND T.CREATOR_ID=#{userCode}
+			</if>
+	</select>
+	<select id="dataTouchCustCount" parameterType="java.util.Map" resultType="integer">
+		SELECT COUNT(*)
+		FROM (
+		    SELECT DISTINCT CC.CUSTOMER_CONTACT_ID,CC.CONTACT_CUST_ID,CC.CONTACT_DATE,CC.CREATOR_ID,O1.ORG_ID
+		    FROM OCRM_F_WP_CUSTOMER_CONTACT CC
+			INNER JOIN ADMIN_SM_USER U ON CC.CREATOR_ID = U.USER_ID
+		    INNER JOIN ADMIN_SM_ORG O1 ON U.ORG_ID = O1.ORG_ID
+			INNER JOIN ADMIN_SM_USER_ROLE_REL UR ON U.USER_ID = UR.USER_ID
+			INNER JOIN ADMIN_SM_ROLE SS ON SS.ROLE_ID = UR.ROLE_ID
+			<if test="roleType != null and roleType != ''">
+				AND SS.ROLE_TYPE =#{roleType}
+			</if>
+		    WHERE 1=1 AND CC.IS_DELETE = 'N' AND (CC.IS_DRAFT = 'N' or CC.SOURCE_TABLE != '0')
+				<if test="startTime != null and startTime != ''">
+					AND CC.CONTACT_DATE &gt;=TO_DATE(#{startTime}, 'yyyy-mm-dd HH24:MI:SS')
+				</if>
+				<if test="endTime != null and endTime != ''">
+					AND CC.CONTACT_DATE &lt; TO_DATE(#{endTime}, 'yyyy-mm-dd HH24:MI:SS')
+				</if> ) T
+		WHERE 1=1
+			<if test="dataAuth != null">
+				${dataAuth}
+			</if>
+			<if test="dataAuth1 != null and dataAuth == null">
+				${dataAuth1}
+			</if>
+			<if test="dataAuth == null and dataAuth1 == null">
+				AND T.CREATOR_ID=#{userCode}
+			</if>
+	</select>
+</mapper>

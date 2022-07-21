@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.cm.ruleConfig.repository.mapper.CmFRcRuleComparisonMapper">
+	<!-- 查询规则比较 -->
+	<select id="getComByEventId" parameterType="String"
+		resultType="cn.com.yusys.yusp.cm.ruleConfig.domain.CmFRcRuleComparison">
+		select T.* from cm_f_rc_rule_comparison T
+		where T.EVENT_ID = #{eventId, jdbcType=VARCHAR}
+		order by t.COL_GORDER asc, t.COL_ORDER asc 
+	</select>
+	<select id="getConditionByEventId" parameterType="String"
+		resultType="cn.com.yusys.yusp.cm.ruleConfig.domain.CmFRcRuleComparison">
+		select T.* from cm_f_rc_rule_comparison T
+		where T.EVENT_ID = #{eventId, jdbcType=VARCHAR}
+		and t.comparision_type = 1
+		order by t.COL_GORDER asc, t.COL_ORDER asc 
+	</select>
+	<select id="getParamByEventId" parameterType="String"
+		resultType="cn.com.yusys.yusp.cm.ruleConfig.domain.CmFRcRuleComparison">
+		select T.* from cm_f_rc_rule_comparison T
+		where T.EVENT_ID = #{eventId, jdbcType=VARCHAR}
+		and t.comparision_type = 2
+		order by t.COL_GORDER asc, t.COL_ORDER asc 
+	</select>
+</mapper>

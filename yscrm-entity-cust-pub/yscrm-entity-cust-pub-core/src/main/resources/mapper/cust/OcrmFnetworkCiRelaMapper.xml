@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.custpub.repository.mapper.OcrmFnetworkCiRelaMapper">
+    <delete id="delByNetId" parameterType="String">
+    	delete from OCRM_F_NETWORK_CI_RELA where NETWORK_RELA_ID = #{netId,jdbcType=VARCHAR}
+    </delete>
+       <!--查询关系图中的连接信息  -->
+    <select id="getRelaDetailByNetId" parameterType="java.lang.String"  resultType="java.util.HashMap">
+	 	SELECT * FROM OCRM_F_NETWORK_CI_RELA  WHERE NETWORK_RELA_ID = #{networkId, jdbcType=VARCHAR}
+	</select>
+</mapper>

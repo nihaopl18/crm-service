@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.cm.ruleConfig.repository.mapper.CmFRcRulePropertyMapper">
+	<!-- 查询表类别信息 -->
+	<select id="getTableType" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+		resultType="java.util.Map">
+		SELECT t.*, T1.TYPE_NAME AS TYPE_PARENT_NAME
+		  FROM cm_f_rc_table_type t
+		  LEFT JOIN cm_f_rc_table_type t1
+		    ON t1.TYPE_ID = t.TYPE_PARENT_ID
+		  where (t.DELETE_SIGN is null or t.DELETE_SIGN != '1')
+		  order by t.type_seq
+	</select>
+   <!-- 删除表 类型-->
+   <update id="updataTabTypeState" parameterType="java.util.Map">  
+         UPDATE cm_f_rc_table_type  
+            SET 
+			DELETE_SIGN = '1',
+			UPDATE_USER	= #{userCode,javaType=java.lang.String},
+			UPDATE_DATE	= #{upDate,javaType=java.lang.String},
+			UPDATE_ORG	= #{orgCode,javaType=java.lang.String}
+            WHERE TYPE_ID = #{typeId,javaType=java.lang.String}
+   </update> 
+	<!-- 根据表类型查询表-->
+	<select id="getTableByTypeId" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+		resultType="java.util.Map">
+		SELECT T.*,t1.type_name
+     FROM CM_F_RC_TABLE_EC_NAME T  
+      LEFT JOIN cm_f_rc_table_type t1
+        ON t1.TYPE_ID = t.type_id
+		where (t.DELETE_SIGN is null or t.DELETE_SIGN != '1' )
+		<if test="condition.typeId != null and condition.typeId !='' and condition.typeId !='P000' ">
+				and T.TYPE_ID  =#{condition.typeId, jdbcType=VARCHAR}
+		</if>
+	</select>
+	<!-- 根据表类型查询表-->
+	<select id="getAllTab" resultType="java.util.Map">
+		SELECT T.*,t1.type_name FROM CM_F_RC_TABLE_EC_NAME T    
+	      LEFT JOIN cm_f_rc_table_type t1
+	        ON t1.TYPE_ID = t.type_id
+		where (t.DELETE_SIGN is null or t.DELETE_SIGN != '1' )
+	</select>
+	<!-- 根据表id查询表字段-->
+	<select id="getFieldByTableId" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+		resultType="java.util.Map">
+		SELECT T.*
+		 FROM CM_F_RC_FIELD_EC_NAME T  where 1=1 
+		<if test="condition.tableId != null and condition.tableId !=''">
+			and T.TABLE_ID  =#{condition.tableId, jdbcType=VARCHAR}
+		</if>
+	</select>
+	<!-- 查询数据库表和视图 -->
+	<select id="searchtable" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+		resultType="java.util.HashMap">
+		select t.tb as TABLE_E_NAME, t.comments as TABLE_C_NAME, t.tv
+		  from (select a.TABLE_NAME as tb, b.COMMENTS, '1' as tv
+		          from user_tables a, user_tab_comments b
+		         WHERE a.TABLE_NAME = b.TABLE_NAME
+		        UNION
+		        select v.VIEW_NAME as tb, '' as comments, '2' as tv
+		          from user_views v) t where 1=1
+		<if test="condition.tableName != null and condition.tableName !=''">
+			and (T.tb like #{condition.tableName, jdbcType=VARCHAR} or t.COMMENTS like #{condition.tableName, jdbcType=VARCHAR})
+		</if>
+		<if test="condition.tv != null and condition.tv !=''">
+			and T.tv  = #{condition.tv, jdbcType=VARCHAR}
+		</if>
+	</select>
+	<!-- 根据表名查询字段 -->
+	<select id="searchFieldByTabName" parameterType="String"
+		resultType="cn.com.yusys.yusp.cm.ruleConfig.domain.CmFRcFieldEcName">
+		select #{tabId, jdbcType=VARCHAR} as table_id,t.column_name as field_e_name, t.comments as field_c_name,1 as field_type,1 as is_display
+		from user_col_comments t where t.table_name = #{tabName, jdbcType=VARCHAR}
+	</select>
+	<!-- 新增表字段 -->
+	<insert id="insertNewDataToField" parameterType="java.util.Map">
+		insert into CM_F_RC_FIELD_EC_NAME(field_id,table_id,field_e_name,field_c_name,field_type,is_display) 
+		(select '${id}','${tabId}',t.column_name, t.comments,1,1 from user_col_comments t where t.table_name = '${tabName}' )
+	</insert>
+	<!-- 删除表-->
+   <update id="updataTabState" parameterType="java.util.Map">  
+         UPDATE CM_F_RC_TABLE_EC_NAME  
+            SET 
+			DELETE_SIGN = '1',
+			UPDATE_USER	= #{userCode,javaType=java.lang.String},
+			UPDATE_DATE	= #{upDate,javaType=java.lang.String},
+			UPDATE_ORG	= #{orgCode,javaType=java.lang.String}
+            WHERE TABLE_ID = #{tableId,javaType=java.lang.String}
+   </update> 
+   <!-- 删除字段 -->
+   <update id="updateFieldState" parameterType="java.util.Map">  
+         UPDATE CM_F_RC_FIELD_EC_NAME  
+            SET 
+			DELETE_SIGN = '1',
+			UPDATE_USER	= #{userCode,javaType=java.lang.String},
+			UPDATE_DATE	= #{upDate,javaType=java.lang.String},
+			UPDATE_ORG	= #{orgCode,javaType=java.lang.String}
+            WHERE TABLE_ID = #{tableId,javaType=java.lang.String}
+   </update> 
+   <!-- 根据表类型id查询表Id -->
+   <select id="queryTableId" parameterType="String"
+		resultType="cn.com.yusys.yusp.cm.ruleConfig.domain.CmFRcTableEcName">
+		select T.TABLE_ID from CM_F_RC_TABLE_EC_NAME T
+		where T.TYPE_ID = #{typeId, jdbcType=VARCHAR}
+	</select>
+	
+	<!-- 查询交易码 -->
+	<select id="searchTransCode" parameterType="String"
+		resultType="java.util.HashMap">
+		select t.TRANSACTION_CODE as key,t.TRANSACTION_NAME as value,t.TABLE_E_NAME from cm_f_rc_transaction_category t
+		<if test="transType != null and transType !=''">
+			where t.TRANSACTION_TYPE = #{transType, jdbcType=VARCHAR}
+		</if>
+	</select>
+	<!-- 根据交易code删除交易类型 -->
+	<delete id="deleteTransCode" parameterType="String">
+		delete from cm_f_rc_transaction_category where TRANSACTION_CODE = #{transCode, jdbcType=VARCHAR}
+	</delete>
+	<!-- 根据表类型查询表是否 被实时事件所引用 -->
+	<select id="getEventByType" parameterType="String"
+		resultType="cn.com.yusys.yusp.cm.ruleConfig.domain.CmFRcEventInfo">
+		SELECT t.*
+      FROM cm_f_rc_event_info t
+      where (t.DELETE_SIGN is null or t.DELETE_SIGN != '1')
+	  	and T.TRANSACTION_CODE  in (SELECT TRANSACTION_CODE FROM CM_F_RC_TABLE_EC_NAME where TYPE_ID = #{typeId, jdbcType=VARCHAR}  )
+	</select>
+</mapper>

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.custmgr.repository.mapper.AcrmFcmCustMgrInfoMapper">
+    <select id="queryinfo" resultType="java.util.Map">
+		SELECT T.CUST_MANAGER_ID,
+		       T.CUST_MANAGER_NAME,
+		       T1.ORG_ID,
+		       T2.ORG_NAME,
+		       T3.BUSI_TYPE,
+		       T.EDUCATION,
+		       T.GRADUATE_SCHOOL,
+		       T.MAJOR,
+		       T.EXPERTISE,
+		       T.HOBBY,
+		       TO_CHAR(T.BEGIN_WORK_DATE,'yyyy-MM-dd') AS BEGIN_WORK_DATE,
+		       TO_CHAR(T.ENTRANTS_DATE,'yyyy-MM-dd') AS ENTRANTS_DATE,
+		       TO_CHAR(T.CUSTMGR_DATE,'yyyy-MM-dd') AS CUSTMGR_DATE,
+		       T.FINANCIAL_JOB_TIME,
+		       T.IS_INNER_TRAINER,
+		       T.TRAIN_NUM_YEAR,
+		       T.TRAIN_NUM_TOTAL,
+		       T.TRAIN_EXPERIENCE,
+		       T.TEACH_NUM_YEAR,
+		       T.TEACH_NUM_TOTAL,
+		       T.TEACH_EXPERIENCE,
+		       T.AWARD,
+		       T.CERTIFICATE,
+		       T.BIRTHDAY,
+		       T.SEX,
+		       T.IS_LOAN_QUA,
+		       TO_CHAR(T.POSITION_TIME,'yyyy-MM-dd') AS POSITION_TIME,
+		       T.MOBILE,
+		       T.PHONE,
+		       T.REMARK
+		  FROM ACRM_F_CM_CUST_MGR_INFO T
+		  LEFT JOIN ADMIN_SM_USER T1 ON T.CUST_MANAGER_ID = T1.LOGIN_CODE
+		  LEFT JOIN ADMIN_SM_ORG T2 ON T1.ORG_ID = T2.ORG_ID
+		  LEFT JOIN ADMIN_SM_USER_ATTR T3 ON T.CUST_MANAGER_ID = T3.LOGIN_CODE
+		<where>
+			<if  test="mgrId != null and mgrId != ''">
+	       		AND t.cust_manager_id = #{mgrId,jdbcType=VARCHAR}
+		    </if>
+		</where>
+	</select>
+</mapper>

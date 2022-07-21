@@ -1,0 +1,428 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.uimp.distribution.repository.mapper.CommonPerformanceImpMapper">
+    
+    <select id="queryList" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.Map">
+    	:{sqlStr}
+    </select>
+    
+    <select id="checkBatch" parameterType="java.lang.String" resultType="java.lang.Integer">
+    	:{sqlStr}
+    </select>
+    
+    <select id="getCurrentDstrTime" parameterType="java.lang.String" resultType="java.lang.String">
+    	:{sqlStr}
+    </select>
+    
+    <insert id="batchInsert" parameterType="java.util.Map">
+    	insert all 
+    	<foreach collection="dataList" item="item" separator=" ">
+    		into :{tableName}
+    		(
+	    	    ID, 
+		   		<foreach collection="columnMap.keys" item="key" separator="," >  
+					:{key}
+				</foreach>
+			)
+			values 
+			(
+			    sys_guid(),
+				<foreach collection="item.values" item="value" separator=",">
+					#{value}
+				</foreach>
+			)
+    	</foreach>
+    	select 1 from dual
+    </insert>
+    
+    <insert id="batchInsertMutex" parameterType="java.util.Map">
+    	insert all 
+    	<foreach collection="dataList" item="dataItem" separator=" ">
+    		into :{mutexTebleName}
+    		(
+    		    ID,
+    			TYPE_CODE,
+    			BATCH_ID,
+    			CREATE_TIME,
+    			CREATE_USER,
+		   		<foreach collection="pkList" item="pkStr" separator=",">
+					:{pkStr}
+				</foreach>
+			)
+			values 
+			(
+			    sys_guid(),
+			    #{typeCode},
+			    #{batchId},
+			    #{createTime, jdbcType=DATE},
+			    #{createUser},
+			    <foreach collection="pkList" item="pkStr" separator=",">
+			    	<foreach collection="dataItem" item="value" index="key" separator="">
+			    		<if test="key == pkStr">
+				    		#{value}
+			    		</if>
+			    	</foreach>
+			    </foreach>
+			)
+    	</foreach>
+    	select 1 from dual
+    </insert>
+    
+    <select id="callFImpCheckFunction" parameterType="cn.com.yusys.yusp.uimp.distribution.model.FImpCheckModel" statementType="CALLABLE" >
+    	{
+    	  #{result,mode=OUT,jdbcType=VARCHAR} = call 
+    	    F_IMP_CHECK(#{vBatchid,mode=IN,jdbcType=VARCHAR}, #{vKeycolumnname,mode=IN,jdbcType=VARCHAR}, #{vDtltablename,mode=IN,jdbcType=VARCHAR},
+    	              #{vChecktablename,mode=IN,jdbcType=VARCHAR}, #{vInfotablename,mode=IN,jdbcType=VARCHAR})
+    	}
+    </select>
+
+    <select id="queryResultList" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.Map">
+    	select b.BATCH_ID, b.FUN_CODE, f.FUN_NAME as FUN_CODE_NAME, 
+    		   case when tbi.STATUS is null then b.STATUS
+    		        when tbi.STATUS = '0' then '30'
+    		        when tbi.STATUS = '1' then '11'
+    		   end as STATUS,
+		       b.CHECK_RESULT, to_char(b.CREATE_TIME, 'yyyy-MM-dd HH24:mi:ss') as CREATE_TIME, b.CREATE_USER, u.USER_NAME as CREATE_USER_NAME,
+		       b.WF_TOTAL_COUNT, 
+		       case when b.WF_SUCC_COUNT > 0 then b.WF_SUCC_COUNT
+                	when sub_re.WF_SUCC_NUM > 0 then sub_re.WF_SUCC_NUM
+                	else 0 end as WF_SUCC_COUNT,
+			   case when b.WF_ERR_COUNT > 0 then b.WF_ERR_COUNT
+                	when sub_re.WF_ERR_NUM > 0 then sub_re.WF_ERR_NUM
+                	else 0 end as WF_ERR_COUNT
+		from PMA_F_PERFORMANCE_BATCH_INFO b 
+			left join (select resu.BATCH_ID,
+							case when sum(resu.WF_SUCC_NUM) is null then 0 else sum(resu.WF_SUCC_NUM) end as WF_SUCC_NUM,
+							case when sum(resu.WF_ERR_NUM) is null then 0 else sum(resu.WF_ERR_NUM) end as WF_ERR_NUM 
+					   from PMA_F_PERFORMANCE_BATCH_RESULT resu group by resu.BATCH_ID) sub_re on b.BATCH_ID = sub_re.BATCH_ID
+			left join ADMIN_BASE_META_FUN_REG f on b.FUN_CODE = f.FUN_CODE
+			left join ADMIN_SM_USER u on b.CREATE_USER = u.LOGIN_CODE
+			left join PMA_F_PERFORMANCE_TOBATCH_INF tbi on b.BATCH_ID = tbi.BATCH_ID
+		<where>
+			<if test="condition.funCode != null and condition.funCode != ''">
+				and b.FUN_CODE = #{condition.funCode}
+			</if>
+			<if test="condition.status != null and condition.status != ''">
+				and b.STATUS = #{condition.status}
+			</if>
+			<if test="condition.loginCode != null and condition.loginCode != ''">
+				and b.CREATE_USER = #{condition.loginCode}
+			</if>
+		</where>
+		order by b.CREATE_TIME desc
+    </select>
+    
+    <delete id="batchDelete" parameterType="java.util.Map">
+    	delete from :{tableName} 
+    	<where>
+    		BATCH_ID = #{batchId, jdbcType=VARCHAR} and (
+	    		<foreach collection="dataList" item="dataItem" separator="or" open="(" close=")">
+	    			<foreach collection="pkList" item="pkStr" separator="and">
+				    	<foreach collection="dataItem" item="value" index="key" separator="">
+				    		<if test="key == pkStr">
+					    		:{pkStr} = #{value}
+				    		</if>
+				    	</foreach>
+				    </foreach>
+	    		</foreach>
+    		)
+    	</where>
+    </delete>
+    
+    <select id="executeQuerySql" parameterType="java.lang.String" resultType="java.util.Map">
+    	:{sqlStr}
+    </select>
+    
+    <delete id="executeDeleteSql" parameterType="java.lang.String">
+    	:{sqlStr}
+    </delete>
+    
+    <update id="executeUpdateSql" parameterType="java.lang.String">
+    	:{sqlStr}
+    </update>
+    
+    <insert id="executeInsertSql" parameterType="java.lang.String">
+    	:{sqlStr}
+    </insert>
+    
+    <insert id="batchInsertDistributeHisTableData" parameterType="java.util.Map">
+    	insert all 
+    	<foreach collection="distributeDataList" item="dataItem" separator=" ">
+    		into :{distributeHisTableName}
+    		(
+		   		<foreach collection="distributeColumnList" item="columnName" separator=",">
+					:{columnName}
+				</foreach>
+			)
+			values 
+			(
+			    sys_guid(),
+			    #{dataItem.PERIOD_ID},
+			    <foreach collection="distributeColumnList" item="columnName" separator=",">
+			    	<choose>
+			    		<when test="columnName == 'ALLOT_TYPE' or columnName == 'HOST_CFG'">
+			    			''
+			    		</when>
+				    	<otherwise>
+					    	<foreach collection="dataItem" item="value" index="key" separator="">
+						    	<if test="(columnName != 'ID' and columnName != 'PERIOD_ID') and 
+						    			columnName == key and (columnName == 'DISTR_RATE' or columnName == 'END_AMT' or columnName == 'START_AMT')">
+					    			#{value, jdbcType=NUMERIC}
+						    	</if>
+						    	<if test="(columnName != 'ID' and columnName != 'PERIOD_ID') and
+						    			columnName == key and columnName != 'DISTR_RATE' and columnName != 'END_AMT' and columnName != 'START_AMT'">
+					    			#{value, jdbcType=VARCHAR}
+						    	</if>
+					    	</foreach>
+				    	</otherwise>
+			    	</choose>
+			    </foreach>
+			)
+    	</foreach>
+    	select 1 from dual
+    </insert>
+    
+    <!-- <insert id="batchInsertDistributeHisTableData" parameterType="java.util.Map">
+    	insert all 
+    	<foreach collection="distributeDataList" item="dataItem" separator=" ">
+    		into ${distributeHisTableName}
+    		(
+		   		<foreach collection="distributeColumnList" item="columnName" separator=",">
+					${columnName}
+				</foreach>
+			)
+			values 
+			(
+			    sys_guid(),
+			    #{periodId},
+			    <foreach collection="distributeColumnList" item="columnName" separator=",">
+			    	<choose>
+			    		<when test="columnName == 'ALLOT_TYPE' or columnName == 'HOST_CFG'">
+			    			''
+			    		</when>
+				    	<otherwise>
+					    	<foreach collection="dataItem" item="value" index="key" separator="">
+						    	<if test="(columnName != 'ID' and columnName != 'PERIOD_ID') and 
+						    			columnName == key and (columnName == 'DISTR_RATE' or columnName == 'END_AMT' or columnName == 'START_AMT')">
+					    			#{value, jdbcType=NUMERIC}
+						    	</if>
+						    	<if test="(columnName != 'ID' and columnName != 'PERIOD_ID') and
+						    			columnName == key and columnName != 'DISTR_RATE' and columnName != 'END_AMT' and columnName != 'START_AMT'">
+					    			#{value, jdbcType=VARCHAR}
+						    	</if>
+					    	</foreach>
+				    	</otherwise>
+			    	</choose>
+			    </foreach>
+			)
+    	</foreach>
+    	select 1 from dual
+    </insert> -->
+    
+    <insert id="batchInsertDistributeTableData" parameterType="java.util.Map">
+    	insert all 
+    	<foreach collection="distributeDataList" item="dataItem" separator=" ">
+    		into :{distributeTableName}
+    		(
+		   		<foreach collection="distributeColumnList" item="columnName" separator=",">
+					:{columnName}
+				</foreach>
+			)
+			values 
+			(
+			    sys_guid(),
+			    #{dataItem.PERIOD_ID},
+			    <foreach collection="distributeColumnList" item="columnName" separator=",">
+			    	<choose>
+			    		<when test="columnName == 'ALLOT_TYPE' or columnName == 'HOST_CFG'">
+			    			''
+			    		</when>
+				    	<otherwise>
+					    	<foreach collection="dataItem" item="value" index="key" separator="">
+						    	<if test="(columnName != 'ID' and columnName != 'PERIOD_ID') and 
+						    			columnName == key and (columnName == 'DISTR_RATE' or columnName == 'END_AMT' or columnName == 'START_AMT')">
+					    			#{value, jdbcType=NUMERIC}
+						    	</if>
+						    	<if test="(columnName != 'ID' and columnName != 'PERIOD_ID') and
+						    			columnName == key and columnName != 'DISTR_RATE' and columnName != 'END_AMT' and columnName != 'START_AMT'">
+					    			#{value, jdbcType=VARCHAR}
+						    	</if>
+					    	</foreach>
+				    	</otherwise>
+			    	</choose>
+			    </foreach>
+			)
+    	</foreach>
+    	select 1 from dual
+    </insert>
+    
+    <!-- <insert id="batchInsertDistributeTableData" parameterType="java.util.Map">
+    	insert all 
+    	<foreach collection="distributeDataList" item="dataItem" separator=" ">
+    		into ${distributeTableName}
+    		(
+		   		<foreach collection="distributeColumnList" item="columnName" separator=",">
+					${columnName}
+				</foreach>
+			)
+			values 
+			(
+			    sys_guid(),
+			    #{periodId},
+			    <foreach collection="distributeColumnList" item="columnName" separator=",">
+			    	<choose>
+			    		<when test="columnName == 'ALLOT_TYPE' or columnName == 'HOST_CFG'">
+			    			''
+			    		</when>
+				    	<otherwise>
+					    	<foreach collection="dataItem" item="value" index="key" separator="">
+						    	<if test="(columnName != 'ID' and columnName != 'PERIOD_ID') and 
+						    			columnName == key and (columnName == 'DISTR_RATE' or columnName == 'END_AMT' or columnName == 'START_AMT')">
+					    			#{value, jdbcType=NUMERIC}
+						    	</if>
+						    	<if test="(columnName != 'ID' and columnName != 'PERIOD_ID') and
+						    			columnName == key and columnName != 'DISTR_RATE' and columnName != 'END_AMT' and columnName != 'START_AMT'">
+					    			#{value, jdbcType=VARCHAR}
+						    	</if>
+					    	</foreach>
+				    	</otherwise>
+			    	</choose>
+			    </foreach>
+			)
+    	</foreach>
+    	select 1 from dual
+    </insert> -->
+    
+    <update id="updatePeriodHisApplySts" parameterType="java.lang.String">
+		update :{periodHisTableName} set APPLY_STS = #{applySts, jdbcType=VARCHAR} where APPLY_ID = #{applyId, jdbcType=VARCHAR}
+    </update>
+    
+    <update id="updatePeriodHisApplyStsByBatchId" parameterType="java.util.List">
+	    update :{periodHisTableName} ph
+			set ph.APPLY_STS = #{applySts, jdbcType=VARCHAR} 
+		<where>
+			<foreach collection="pkColumnNames" item="value" separator="and">
+				ph.:{value} in (select dtl.:{value} from :{dtlTableName} dtl where dtl.BATCH_ID = #{batchId, jdbcType=VARCHAR})
+			</foreach>
+		</where>
+    </update>
+    
+    <select id="queryTotalCountByKeyColumn" parameterType="java.util.List" resultType="java.lang.Integer">
+    	select count(*) from (
+    		select DISTINCT
+    			<foreach collection="pkColumnNames" item="value" separator=",">
+    				:{value}
+    			</foreach>
+    		from :{dtlTableName}
+    		where BATCH_ID = #{batchId, jdbcType=VARCHAR}
+    	)
+    </select>
+    
+    <select id="queryApplyIdAndOrgIdFromPeriodHisWorkFlowErr" parameterType="java.util.List" resultType="java.util.Map">
+    	select DISTINCT 
+    		ph.APPLY_ID, dtl.ORG_ID 
+    	from :{dtlTableName} dtl inner join :{periodHisTableName} ph on 
+    	<foreach collection="pkList" item="value" separator="and">
+    		dtl.:{value} = ph.:{value}
+    	</foreach>
+    	where dtl.BATCH_ID = #{batchId} and ph.APPLY_STS = '21'
+    </select>
+    
+	<delete id="deleteMutexTableData" parameterType="java.util.Map">
+    	delete from :{tableName} where BATCH_ID = #{batchId, jdbcType=VARCHAR} and TYPE_CODE = '1'
+    </delete>
+    
+    <delete id="deleteMutexTableDataByKeyColumn" parameterType="java.util.List">
+    	delete from :{tableName} where :{keyColumnName} in 
+			<foreach collection="dataList" item="item" separator="," open="(" close=")">
+    			#{item.pkValue}
+   			</foreach>
+    </delete>
+    
+    <delete id="batchDeleteDistributeTableData" parameterType="java.util.List">
+    	delete from :{distributeTableName} a 
+    	where exists (
+    		select 1 from :{periodTableName} b 
+    		<where>
+    			a.PERIOD_ID = b.ID and 
+    			<foreach collection="dataList" item="item" separator="or" open="(" close=")">
+    				(
+	    				b.:{pkColumnName} = #{item.pkValue}
+	    				<if test='funCode == "ComCustDstr" or funCode == "PerCustDstr"'>
+	    					and b.ACCT_ORG_ID = #{item.orgId}
+	    				</if>
+    				)
+    			</foreach>
+   			</where>
+    	)
+    </delete>
+    
+    <delete id="batchDeletePeriodTableData" parameterType="java.util.List">
+    	delete from :{periodTableName} a 
+		<where>
+			<foreach collection="dataList" item="item" separator="or" open="(" close=")">
+   				(
+    				:{pkColumnName} = #{item.pkValue}
+    				<if test='funCode == "ComCustDstr" or funCode == "PerCustDstr"'>
+    					and ACCT_ORG_ID = #{item.orgId}
+    				</if>
+   				)
+   			</foreach>
+		</where> 
+    </delete>
+    
+    <update id="batchUpdateInfoTableDstrSts" parameterType="java.util.List">
+    	update :{infoTableName} set DSTR_STS = #{dstrSts}
+    	where :{pkColumnName} in 
+	    	<foreach collection="dataList" item="item" separator="," open="(" close=")">
+	    		#{item.pkValue}
+	    	</foreach>
+	    	<!-- 分区表处理 -->
+	    	<if test='funCode != "ComCustDstr" and funCode != "PerCustDstr"'>
+	    		and etl_date = (SELECT TO_CHAR(TO_DATE(ETL_DATE,'YYYYMMDD')-1,'YYYYMMDD') FROM PMA_F_ETL_DATE WHERE ETL_TYPE = 'PMA')
+	    	</if>
+    </update>
+    
+    <insert id="batchInsertPeriodHisTableData" parameterType="java.util.List">
+    	insert all 
+    	<foreach collection="dataList" item="item" separator=" ">
+    		into :{periodHisTableName}
+    		(
+		   		:{insertPeriodColumnStr},APPLY_STS,APPLY_TIME,APPLY_ID,APPLY_VERSION
+			)
+			values 
+			(
+				:{item.insertPeriodValue},	<!-- 此处为字符串直接引用 -->
+				#{item.applySts},
+				#{item.operateTime},
+				#{item.applyId},
+				'0'
+			)
+    	</foreach>
+    	select 1 from dual
+    </insert>
+    
+    <update id="batchUpdatePeriodHisTableApplyVersion" parameterType="java.util.List">
+    	update :{periodHisTableName} set APPLY_VERSION = '1'
+    	where APPLY_VERSION = '0' and APPLY_STS = #{applySts}
+    	and APPLY_ID not in 
+    	<foreach collection="dataList" item="item" separator="," open="(" close=")">
+    		#{item.applyId}
+    	</foreach>
+    </update>
+    
+    <insert id="batchInsertPeriodTableData" parameterType="java.util.List">
+    	insert all 
+    	<foreach collection="dataList" item="item" separator=" ">
+    		into :{periodTableName}
+    		(
+    			:{insertPeriodColumnStr}
+			)
+			values 
+			(
+				:{item.insertPeriodValue}
+			)
+    	</foreach>
+    	select 1 from dual
+    </insert>
+</mapper>

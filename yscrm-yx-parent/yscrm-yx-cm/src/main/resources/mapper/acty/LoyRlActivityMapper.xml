@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.climp.acty.repository.mapper.LoyRlActivityMapper">
+    <resultMap id="BaseResultMap" type="cn.com.yusys.climp.acty.domain.LoyRlActivity">
+		<result column="ACTIVITY_ID" jdbcType="VARCHAR" property="activityId" />
+		<result column="PROJECT_ID" jdbcType="VARCHAR" property="projectId" />
+		<result column="ACTIVITY_NAME" jdbcType="VARCHAR" property="activityName" />
+		<result column="BEGIN_DATE" jdbcType="DATE" property="beginDate" />
+		<result column="END_DATE" jdbcType="DATE" property="endDate" />
+		<result column="ACTIVITY_PRIORITY" jdbcType="NUMERIC" property="activityPriority" />
+		<result column="TRANSACTION_CODE" jdbcType="VARCHAR" property="transactionCode" />
+		<result column="POOL_NO" jdbcType="VARCHAR" property="poolNo" />
+		<result column="WF_APPR_STS" jdbcType="VARCHAR" property="wfApprSts" />
+		<result column="USE_FLAG" jdbcType="VARCHAR" property="useFlag" />
+		<result column="DELETE_SIGN" jdbcType="VARCHAR" property="deleteSign" />
+		<result column="REMARK" jdbcType="VARCHAR" property="remark" />
+		<result column="INSTITUTION_ID" jdbcType="VARCHAR" property="institutionId" />
+		<result column="INSTITUTION_NAME" jdbcType="VARCHAR" property="institutionName" />
+		<result column="CREATE_USER" jdbcType="VARCHAR" property="createUser" />
+		<result column="CREATE_DATE" jdbcType="DATE" property="createDate" />
+		<result column="CREATE_ORG" jdbcType="VARCHAR" property="createOrg" />
+		<result column="UPDATE_USER" jdbcType="VARCHAR" property="updateUser" />
+		<result column="UPDATE_DATE" jdbcType="DATE" property="updateDate" />
+		<result column="UPDATE_ORG" jdbcType="VARCHAR" property="updateOrg" />
+    </resultMap>
+    <sql id="Base_Column_List">
+	    ACTIVITY_ID,PROJECT_ID,ACTIVITY_NAME,BEGIN_DATE,END_DATE,ACTIVITY_PRIORITY,TRANSACTION_CODE,POOL_NO,WF_APPR_STS,USE_FLAG,DELETE_SIGN,REMARK,INSTITUTION_ID,INSTITUTION_NAME,CREATE_USER,CREATE_DATE,CREATE_ORG,UPDATE_USER,UPDATE_DATE,UPDATE_ORG
+    </sql>
+    <!-- 查询积分活动信息 -->
+    <select id="getActivityInfo" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+		resultType="java.util.Map">
+		SELECT t.*, T1.PROJECT_NAME,p.pool_name
+      FROM LOY_RL_ACTIVITY t
+      LEFT JOIN LOY_RL_SCORE_PROJECT t1
+        ON t1.PROJECT_ID = t.PROJECT_ID
+        left join LOY_AC_SCORE_POOL p on p.pool_no = t.pool_no
+      where t.create_org in(select t4.org_id from admin_sm_org t4
+      start with t4.org_id in (select distinct case when
+      t2.org_id is not null then t2.org_id
+      else t3.org_id end org_id
+      from admin_sm_user t3
+      left join admin_sm_user_mgr_org t2
+      on t3.user_id = t2.user_id
+      <where>
+      	<if test="condition.loginCode != null and condition.loginCode != ''">
+      	    t3.login_code = #{condition.loginCode,jdbcType=VARCHAR}
+      	</if>
+      </where>
+      )CONNECT BY PRIOR T4.ORG_ID = T4.UP_ORG_ID) 
+      and (t.DELETE_SIGN is null or t.DELETE_SIGN != '1')
+      and t.PROJECT_ID is not null
+      <if test="condition.activityName != null and condition.activityName !=''">
+		and T.ACTIVITY_NAME  LIKE CONCAT(CONCAT('%', #{condition.activityName, jdbcType=VARCHAR}),'%') 
+	  </if>
+	  <if test="condition.activityId != null and condition.activityId !=''">
+	  	and T.ACTIVITY_ID  = #{condition.activityId, jdbcType=VARCHAR}
+	  </if>
+      <if test="condition.projectId != null and condition.projectId !='' and condition.projectId !='0000' ">
+	  	and T.PROJECT_ID  in (select project_id from LOY_RL_SCORE_PROJECT 
+      where PARENT_PRO_ID = #{condition.projectId, jdbcType=VARCHAR} or project_id = #{condition.projectId, jdbcType=VARCHAR}) 
+	  </if>
+	  <if test="condition.wfApprSts != null and condition.wfApprSts !=''">
+	  	and T.wf_appr_sts  = #{condition.wfApprSts, jdbcType=VARCHAR}
+	  </if>
+	  <if test="condition.useFlag != null and condition.useFlag !=''">
+	  	and T.use_flag  = #{condition.useFlag, jdbcType=VARCHAR}
+	  </if>
+	  <if test="condition.beginDate != null and condition.beginDate !=''">
+	  	and T.begin_Date  &gt;= to_date(#{condition.beginDate, jdbcType=VARCHAR},'YYYY-MM-DD')
+	  </if>
+	  <if test="condition.beginDateEnd != null and condition.beginDateEnd !=''">
+	  	and T.begin_Date  &lt;= to_date(#{condition.beginDateEnd, jdbcType=VARCHAR},'YYYY-MM-DD')
+	  </if>
+	  <if test="condition.endDate != null and condition.endDate !=''">
+	  	and T.end_Date  &gt;= to_date(#{condition.endDate, jdbcType=VARCHAR},'YYYY-MM-DD')
+	  </if>
+	  <if test="condition.endDateEnd != null and condition.endDateEnd !=''">
+	  	and T.end_Date  &lt;= to_date(#{condition.endDateEnd, jdbcType=VARCHAR},'YYYY-MM-DD')
+	  </if>
+	  <if test="sort != null">
+			order by ${sort}
+		</if>
+	</select>
+	
+	<!-- 根据营销活动id查询积分权益活动 -->
+	<select id="getActivityByTempId" parameterType="String" resultType="cn.com.yusys.climp.acty.domain.LoyRlActivity">
+		SELECT t.* FROM LOY_RL_ACTIVITY t where t.TEMP_ID = #{tempId,jdbcType=VARCHAR}
+	</select>
+	
+	<!-- 根据节点id查询活动 -->
+	<select id="getActiveForm" parameterType="String" resultType="cn.com.yusys.climp.acty.domain.LoyRlActivity">
+		SELECT t.* FROM LOY_RL_ACTIVITY t where t.NODE_ID = #{nodeId,jdbcType=VARCHAR}
+	</select>
+	
+	<!-- 查询优先级 -->
+    <select id="priorityList" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.Map">
+		SELECT t.* FROM LOY_RL_ACTIVITY t
+        where t.TRANSACTION_CODE = #{condition.transactionCode,jdbcType=VARCHAR}
+        and  t.END_DATE > to_date(#{condition.time, jdbcType=DATE},'YYYY/MM/DD HH24:MI:SS')
+	</select>
+	<!-- 根据活动分类修改所有分类下的活动 -->
+	<update id="updataActyState" parameterType="java.util.Map">  
+         UPDATE LOY_RL_ACTIVITY
+            SET 
+			DELETE_SIGN = '1',
+			UPDATE_USER	= #{userCode,javaType=java.lang.String},
+			UPDATE_DATE	= sysdate,
+			UPDATE_ORG	= #{orgCode,javaType=java.lang.String}
+            WHERE PROJECT_ID = #{projectId,javaType=java.lang.String}
+   </update> 
+   <!-- 根据活动id删除活动信息 -->
+	<update id="updataActyById" parameterType="java.util.Map">  
+         UPDATE LOY_RL_ACTIVITY  
+            SET 
+			DELETE_SIGN = '1',
+			UPDATE_USER	= #{userCode},
+			UPDATE_DATE	= sysdate,
+			UPDATE_ORG	= #{orgCode}
+            WHERE ACTIVITY_ID = #{activityId}
+   </update> 
+   <!-- 启用/停用活动 -->
+   <update id="updateSts" >
+		update LOY_RL_ACTIVITY 
+		set 
+			USE_FLAG=#{useflag,javaType=java.lang.String},
+			UPDATE_USER	= #{userCode,javaType=java.lang.String},
+			UPDATE_DATE	= sysdate,
+			UPDATE_ORG	= #{orgCode,javaType=java.lang.String}
+        WHERE ACTIVITY_ID = #{activityId,javaType=java.lang.String}
+	</update>
+</mapper>

@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.cm.market.repository.mapper.FrParamPoolMapper">
+	
+	<select id="getPropListBycodeOrName" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+		resultType="java.util.Map">
+		select 
+		t0.PARAM_ID,t0.PARAM_NAME,t0.PARAM_TYPE,t0.FIELD_TYPE,t0.PARAM_ENUM,t0.FILED_LENGTH,t0.BAK,t0.OP_ORG,t0.PARAM_DESC,t0.DEFAULT_VALUE,u.login_code as LOGIN_NO,substr(t0.OP_TIME, 1, 10) as OP_TIME
+		from  FR_RULE_PARAM_POOL t0
+		left join admin_sm_user u
+		    on t0.login_no = u.login_code
+		<where>
+				
+				<if test="condition.paramId != null and condition.paramId !=''">
+					and  t0.PARAM_ID like #{condition.paramId, jdbcType=VARCHAR}   
+				</if> 
+				<if test="condition.paramName != null and condition.paramName !=''">
+					and  t0.PARAM_NAME like #{condition.paramName, jdbcType=VARCHAR}   
+				</if> 
+				<if test="condition.paramType != null and condition.paramType !=''">
+					and  t0.PARAM_TYPE = #{condition.paramType, jdbcType=VARCHAR}   
+				</if>
+
+		</where>
+		 order by t0.op_time desc
+	</select>
+	<!-- 新增检查字段编号是否重复-->
+	<select id="createCheckparamid" parameterType="String" resultType="integer">
+		SELECT count(t.PARAM_ID) from FR_RULE_PARAM_POOL t where t.PARAM_ID = #{paramId}
+	</select>
+	
+	<!-- 查询字段池列表-->
+	<select id="list" parameterType="String" resultType="java.util.Map">
+		SELECT t.PARAM_ID,(t.PARAM_ID ||' '||t.PARAM_NAME ) as PARAM_NAME from FR_RULE_PARAM_POOL t 
+	</select>	
+	
+	<!-- 模糊匹配查询字段-->
+	<select id="selectList" parameterType="String" resultType="java.util.Map">
+		SELECT t.PARAM_ID,(t.PARAM_ID ||' '|| t.PARAM_NAME ) as PARAM_NAME from FR_RULE_PARAM_POOL t where t.PARAM_ID like #{tabName} or t.PARAM_NAME like #{tabName}
+	</select>
+	
+	<select id="selectByparamid" parameterType="String" resultType="java.util.Map">
+		SELECT t.PARAM_ID,t.FILED_LENGTH,t.FIELD_TYPE from FR_RULE_PARAM_POOL t where t.PARAM_ID in
+		 <foreach collection="paramId.split(',')" close=")" open="(" separator="," item="item">
+            #{item,jdbcType=VARCHAR}
+        </foreach>
+	</select>
+</mapper>

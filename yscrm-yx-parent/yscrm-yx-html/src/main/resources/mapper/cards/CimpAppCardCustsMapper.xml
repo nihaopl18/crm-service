@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscimc.cards.repository.mapper.CimpAppCardCustsMapper">
+	<!-- 集卡活动配置 -->
+	<select id="getActyConfig" parameterType="String" resultType="java.util.HashMap">
+		SELECT T.form_operation_filed,T.form_operation_val 
+		FROM CIMP_CM_NODES_PRESENTATION T
+		LEFT JOIN CIMP_CM_NODES_DISPLAY R ON T.FORM_ID = R.FORM_ID
+		WHERE R.NODE_ID = #{nodeId,jdbcType=VARCHAR}
+	</select>
+	<!-- 参与集卡活动用户统计接口 -->
+	<select id="getActyMembers" parameterType="String" resultType="java.util.Map">
+		SELECT COUNT(DISTINCT T.CUST_ID) as num 
+		FROM CIMP_APP_CARD_CUSTS T 
+		LEFT JOIN CIMP_CM_NODEINFO R ON R.TEMP_ID = T.ACTY_ID
+		LEFT JOIN CIMP_CM_NODES_DISPLAY Y ON Y.NODE_ID = R.NODE_ID
+		WHERE Y.NODE_ID = #{actyId,jdbcType=VARCHAR}
+	</select>
+	<!-- 参与集卡活动用户排序查询 -->
+	<select id="getMembersOrder" parameterType="String" resultType="java.util.HashMap">
+		SELECT T.CUST_ID,SUM(T.TURN_CARD_NUM) AS MAX_NUMBER,s.user_avatar
+		FROM CIMP_APP_CARD_CUSTS T 
+		LEFT JOIN CIMP_CM_NODEINFO R ON R.TEMP_ID = T.ACTY_ID
+		LEFT JOIN CIMP_CM_NODES_DISPLAY Y ON Y.NODE_ID = R.NODE_ID
+		left join admin_sm_user s on s.login_code = t.cust_id
+		WHERE Y.NODE_ID = #{actyId,jdbcType=VARCHAR}
+		GROUP BY T.CUST_ID,s.user_avatar ORDER BY MAX_NUMBER
+	</select> 
+	<!-- 用户集卡信息接口 -->
+	<select id="getCustCards" parameterType="java.util.Map" resultType="java.util.HashMap">
+		SELECT T.*,R.* FROM CIMP_APP_CARD_CUSTS T 
+		LEFT JOIN CIMP_APP_CARD_INFO R ON R.ID = T.CARD_ID
+		LEFT JOIN CIMP_CM_NODEINFO S ON S.TEMP_ID = T.ACTY_ID
+		LEFT JOIN CIMP_CM_NODES_DISPLAY Y ON Y.NODE_ID = S.NODE_ID
+		WHERE Y.NODE_ID = #{actyId,jdbcType=VARCHAR} AND T.CUST_ID = #{custId,jdbcType=VARCHAR}
+	</select>
+	<!-- 用户集卡翻卡次数接口 -->
+	<select id="getTurnCardTimes" parameterType="java.util.Map" resultType="int">
+		SELECT decode(MAX(T.TURN_CARD_NUM),null,#{limitNumDay,jdbcType=VARCHAR},MAX(T.TURN_CARD_NUM)) AS TURN_CARD_NUM 
+		FROM CIMP_APP_CARD_CUSTS T 
+		LEFT JOIN CIMP_CM_NODEINFO S ON S.TEMP_ID = T.ACTY_ID
+		LEFT JOIN CIMP_CM_NODES_DISPLAY Y ON Y.NODE_ID = S.NODE_ID
+		WHERE Y.NODE_ID = #{actyId,jdbcType=VARCHAR} AND T.CUST_ID = #{custId,jdbcType=VARCHAR}
+	</select>
+	<!-- 添加用户重复卡 -->
+	<update id="addCardNum" parameterType="java.util.Map">
+		UPDATE CIMP_APP_CARD_CUSTS SET CARD_NUM = CARD_NUM+1
+		WHERE ACTY_ID = #{activityId,jdbcType=VARCHAR} AND CUST_ID = #{custId,jdbcType=VARCHAR} AND CARD_ID = #{cardId,jdbcType=VARCHAR}
+	</update>
+	<!-- 减少用户重复卡 -->
+	<update id="reduceCardNum" parameterType="java.util.Map">
+		UPDATE CIMP_APP_CARD_CUSTS SET CARD_NUM = CARD_NUM-1
+		WHERE ACTY_ID = #{activityId,jdbcType=VARCHAR} AND CUST_ID = #{custId,jdbcType=VARCHAR} AND CARD_ID = #{cardId,jdbcType=VARCHAR}
+	</update>
+	<!-- 减少用户翻卡次数 -->
+	<update id="reduceTurnCardNum" parameterType="java.util.Map">
+		UPDATE CIMP_APP_CARD_CUSTS SET TURN_CARD_NUM = TURN_CARD_NUM - 1
+		WHERE ACTY_ID = #{activityId,jdbcType=VARCHAR} AND CUST_ID = #{custId,jdbcType=VARCHAR}
+	</update>
+	<!-- 判断用户抽卡是否重复 -->
+	<select id="getCustCardNum" parameterType="java.util.Map" resultType="int">
+		SELECT COUNT(1) FROM CIMP_APP_CARD_CUSTS 
+		WHERE ACTY_ID = #{activityId,jdbcType=VARCHAR} AND CUST_ID = #{custId,jdbcType=VARCHAR} AND CARD_ID = #{cardId,jdbcType=VARCHAR}
+	</select>
+	<!-- 获取活动id -->
+	<select id="getActyId" parameterType="String" resultType="java.util.Map">
+		SELECT ACTIVITY_ID,MKT_POSIT_CODE FROM CIMP_CM_MARKET_POSIT_CT 
+		WHERE CT_NODE_ID = #{nodeId,jdbcType=VARCHAR}
+	</select>
+	<!-- 集卡返回裂变奖励 -->
+	<update id="getShareBonus" parameterType="java.util.Map">
+		UPDATE CIMP_APP_CARD_CUSTS T
+		SET T.TURN_CARD_NUM = T.TURN_CARD_NUM + #{bonus,jdbcType=VARCHAR}
+		WHERE T.ACTY_ID = #{actyId,jdbcType=VARCHAR} AND CUST_ID = #{custId,jdbcType=VARCHAR}
+	</update>
+	<!-- nodeId转actyId -->
+	<select id="nodeIdToActyId" parameterType="String" resultType="String">
+		select t.temp_id from CIMP_CM_NODEINFO t where t.node_id = #{nodeId,jdbcType=VARCHAR}
+	</select>
+	<!-- 查找用户合成卡 -->
+	<select id="getCustParentCard" parameterType="java.util.Map" resultType="int">
+		SELECT DECODE(COUNT(T.CARD_ID),NULL,0,COUNT(T.CARD_ID)) FROM CIMP_APP_CARD_CUSTS T
+		LEFT JOIN CIMP_APP_CARD_INFO R ON R.ID = T.CARD_ID
+		WHERE R.PARENT_ID IS NULL AND T.CUST_ID = #{custId,jdbcType=VARCHAR} AND T.ACTY_ID = #{activityId,jdbcType=VARCHAR}
+	</select>
+</mapper>

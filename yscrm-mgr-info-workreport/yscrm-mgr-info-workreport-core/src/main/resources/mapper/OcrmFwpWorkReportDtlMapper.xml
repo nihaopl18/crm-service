@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.info.workreport.repository.mapper.OcrmFwpWorkReportDtlMapper">
+    <insert id="insertReportDtl" parameterType="java.util.Map">
+    	insert into OCRM_F_WP_WORK_REPORT_DTL(report_id,REPORT_CYCLE,CORP_ORG_CODE,ID) values (
+    	 #{reportId,jdbcType=VARCHAR},#{reportCycle,jdbcType=VARCHAR}，#{coreOrgCode,jdbcType=VARCHAR},
+    	 #{id,jdbcType=VARCHAR})
+    </insert>
+</mapper>

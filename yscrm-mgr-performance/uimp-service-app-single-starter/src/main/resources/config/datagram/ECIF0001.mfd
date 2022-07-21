@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<DataFormat Encoding="UTF-8" ImplClass="JsonExecutor">
+  <Head>
+    <Property Name="autoPack" Value="true"/>
+    <Property Name="autoPackVar" Value=""/>
+    <Property Name="filterEmpty" Value="false"/>
+    <Property Name="isAuto" Value="true"/>
+    <Property Name="autoSave" Value="false"/>
+    <Property Name="varName" Value=""/>
+  </Head>
+  <Body>
+    <Item BuildExpr="" DefaultValue="" Description="" Name="custName" Type="String">
+      <Head>
+        <Property Name="varName" Value=""/>
+        <Property Name="haveKey" Value="true"/>
+        <Property Name="type" Value="value"/>
+        <Property Name="escape" Value="false"/>
+      </Head>
+    </Item>
+    <Group name="identList">
+      <Head/>
+      <Body>
+        <Item BuildExpr="" DefaultValue="" Description=""
+          Name="identType" Type="String">
+          <Head>
+            <Property Name="varName" Value=""/>
+            <Property Name="haveKey" Value="true"/>
+            <Property Name="type" Value="value"/>
+            <Property Name="escape" Value="false"/>
+          </Head>
+        </Item>
+        <Item BuildExpr="" DefaultValue="" Description="" Name="identNo" Type="String">
+          <Head>
+            <Property Name="varName" Value=""/>
+            <Property Name="haveKey" Value="true"/>
+            <Property Name="type" Value="value"/>
+            <Property Name="escape" Value="false"/>
+          </Head>
+        </Item>
+      </Body>
+    </Group>
+  </Body>
+</DataFormat>

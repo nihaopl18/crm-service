@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.sysview.repository.mapper.OcrmFsysViewItemMapper">
+    <resultMap id="BaseResultMap" type="cn.com.yusys.yscrm.sysview.domain.OcrmFsysViewItem">
+		<id column="ID" jdbcType="VARCHAR" property="id" />
+		<result column="VIEW_ITEM_NAME" jdbcType="VARCHAR" property="viewItemName" />
+		<result column="VIEW_ITEM_DESC" jdbcType="VARCHAR" property="viewItemDesc" />
+		<result column="VIEW_ID" jdbcType="VARCHAR" property="viewId" />
+		<result column="VIEW_ADDR" jdbcType="VARCHAR" property="viewAddr" />
+		<result column="LAST_CHG_USR" jdbcType="VARCHAR" property="lastChgUsr" />
+		<result column="LAST_CHG_ORG" jdbcType="VARCHAR" property="lastChgOrg" />
+		<result column="LAST_CHG_DT" jdbcType="DATE" property="lastChgDt" />
+		<result column="ORDERS" jdbcType="NUMERIC" property="orders" />
+		<result column="NOTES" jdbcType="VARCHAR" property="notes" />
+    </resultMap>
+    <sql id="Base_Column_List">
+	    ID,VIEW_ITEM_NAME,VIEW_ITEM_DESC,VIEW_ID,VIEW_ADDR,LAST_CHG_USR,LAST_CHG_ORG,LAST_CHG_DT,ORDERS,NOTES
+    </sql>
+         <!--查询视图信息 -->
+	<select id="getViewItemlist" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+		resultType="java.util.HashMap">
+		select m.*
+		from OCRM_F_SYS_VIEW_ITEM m where m.view_Id = #{condition.viewId,jdbcType=VARCHAR}
+		<if test="condition.viewItemName != null and condition.viewItemName !=''">
+			and m.view_item_name like #{condition.viewItemName,jdbcType=VARCHAR}
+		</if>
+		<if test="condition.viewAddr != null and condition.viewAddr !=''">
+			and m.view_addr like #{condition.viewAddr,jdbcType=VARCHAR}
+		</if>
+	</select>
+	
+	<!--保存数据前查询视图名称是否已经存在-->
+	<select id="checkName" parameterType="java.util.Map" resultType="java.util.HashMap">
+		select m.id from OCRM_F_SYS_VIEW_ITEM m where m.view_item_name = #{viewItemName}
+		<if test=" id!=null and id!='' ">
+			and m.id &lt;&gt; #{id}
+		</if>
+	</select>
+	
+	<!--删除视图项前根据视图项编号查询控制点-->
+	<select id="getContrById" parameterType="String" resultType="java.lang.Integer">
+        select count(*) from OCRM_F_SYS_VIEW_CONTR  where view_item_id = #{ids}
+    </select>
+	
+	 <!--删除视图项前根据视图项编号查询是否被菜单引用 -->
+    <select id="getMenuById" parameterType="String" resultType="java.lang.Integer">
+        select count(*) as relationId from OCRM_F_SYS_VIEW_MANAGER  where view_item_id = #{ids}
+    </select>
+</mapper>

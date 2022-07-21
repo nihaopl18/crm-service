@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.custpub.repository.mapper.OcrmFciLatentListMapper">
+    <resultMap id="BaseResultMap" type="cn.com.yusys.yscrm.custpub.domain.OcrmFciLatentList">
+		<id column="LIST_ID" jdbcType="VARCHAR" property="listId" />
+		<result column="APPLY_ID" jdbcType="VARCHAR" property="applyId" />
+		<result column="CUST_ID" jdbcType="VARCHAR" property="custId" />
+		<result column="CUST_TYPE" jdbcType="VARCHAR" property="custType" />
+		<result column="MAN_TYPE" jdbcType="VARCHAR" property="manType" />
+		<result column="OLD_MGR_ID" jdbcType="VARCHAR" property="oldMgrId" />
+		<result column="OLD_MGR_NAME" jdbcType="VARCHAR" property="oldMgrName" />
+		<result column="OLD_ORG_ID" jdbcType="VARCHAR" property="oldOrgId" />
+		<result column="OLD_ORG_NAME" jdbcType="VARCHAR" property="oldOrgName" />
+    </resultMap>
+    <sql id="Base_Column_List">
+	    LIST_ID,APPLY_ID,CUST_ID,CUST_TYPE,MAN_TYPE,OLD_MGR_ID,OLD_MGR_NAME,OLD_ORG_ID,OLD_ORG_NAME
+    </sql>
+    
+</mapper>

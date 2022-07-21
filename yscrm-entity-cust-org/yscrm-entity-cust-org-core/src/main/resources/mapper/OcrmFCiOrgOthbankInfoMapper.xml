@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.cust.org.repository.mapper.OcrmFCiOrgOthbankInfoMapper">
+    <!-- 财务信息查询 -->
+	<select id="getOrgOtherBank" parameterType="java.util.Map"
+		resultType="java.util.HashMap">
+		select 
+		*
+		from OCRM_F_CI_ORG_OTHBANK_INFO t
+		<if test="custId != null and custId != ''">
+			where t.CUST_ID =#{custId,jdbcType=VARCHAR}
+		</if>
+	</select>
+</mapper>

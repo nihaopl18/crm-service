@@ -1,0 +1,268 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.salesoppor.repository.mapper.OcrmFMkMktSalesOpporMapper">
+	<!-- 查询商机信息表 -->
+	<select id="opporListQuery" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+		SELECT DISTINCT T.BUSINESS_NO,T.BUSINESS_NAME,T.BUSINESS_STATE,T.BUSINESS_STAGE,T.BUSINESS_SOURCE,
+        T.BUSINESS_FIT_CUST,T.BUSINESS_TYPE,
+        TO_CHAR(T.BUSINESS_START_DATE,'yyyy-mm-dd') AS BUSINESS_START_DATE,
+        TO_CHAR(T.BUSINESS_END_DATE,'yyyy-mm-dd') AS BUSINESS_END_DATE,
+        TO_CHAR(T.BUSINESS_VALID_DATE,'yyyy-mm-dd') AS BUSINESS_VALID_DATE,
+        T.MARKET_ACTIVITY_ID,T.MARKET_ACTIVITY_NAME,T.BUSINESS_CONTENT,T.CUST_ID,T.CUST_NAME,T.CUST_CONTACT,
+        T.CUST_CONCACT_INFO,T.CONTACT_PROD_ID,T.CONTACT_PROD_NAME,T.CUST_GROUP_ID,
+        T.CUST_GROUP_NAME,T.EXPECT_AMOUNT,T.REACH_AMOUNT,T.SUCCESS_CHANCE,T.BUSINESS_BUDGET,
+        T.CREATE_USER,T.CREATE_ORG,TO_CHAR(T.CREATE_DATE,'yyyy-mm-dd') AS CREATE_DATE,
+        T.UPDATA_USER,T.UPDATA_ORG,TO_CHAR(T.UPDATA_DATE,'yyyy-mm-dd') AS UPDATA_DATE,
+        T.EXECUTE_USER,T.EXECUTE_ORG,T.ASSIGN_USER,TO_CHAR(T.ASSIGN_DATE,'yyyy-mm-dd') AS ASSIGN_DATE,
+        T.ASSIGN_ORG,T.RECEIVE_USER,T.RECEIVE_ORG,T.RECEIVE_REASON,TO_CHAR(T.RECEIVE_DATE,'yyyy-mm-dd') AS RECEIVE_DATE,
+        T.BACK_REASON,T.OFF_STAT,T.OFF_FAIL_REASON,R.CUST_TYPE,R.CUST_STATUS,T1.USER_NAME AS CREATE_USER_NAME,
+        T2.USER_NAME AS UPDATA_USER_NAME,T3.USER_NAME AS RECEIVE_USER_NAME,T4.ORG_NAME AS CREATE_ORG_NAME,
+        T5.ORG_NAME AS UPDATA_ORG_NAME,T6.ORG_NAME AS RECEIVE_ORG_NAME
+        FROM OCRM_F_MK_MKT_SALESOPPOR T
+        LEFT JOIN ADMIN_SM_USER T1 ON T.CREATE_USER = T1.LOGIN_CODE
+        LEFT JOIN ADMIN_SM_USER T2 ON T.UPDATA_USER = T2.LOGIN_CODE
+        LEFT JOIN ADMIN_SM_USER T3 ON T.RECEIVE_USER = T3.LOGIN_CODE
+        LEFT JOIN ADMIN_SM_ORG T4 ON T.CREATE_ORG = T4.ORG_ID
+        LEFT JOIN ADMIN_SM_ORG T5 ON T.UPDATA_ORG = T5.ORG_ID
+        LEFT JOIN ADMIN_SM_ORG T6 ON T.RECEIVE_ORG = T6.ORG_ID
+        <!-- LEFT JOIN ACRM_F_CI_CUST_ADMIT_ALL R ON T.CUST_ID = R.CUST_ID -->
+        LEFT JOIN ACRM_F_CI_CUST_ALL R ON T.CUST_ID = R.CUST_ID
+        LEFT JOIN OCRM_F_CI_ADMIT_BELONG Y ON T.CUST_ID = Y.CUST_ID
+        LEFT JOIN OCRM_F_CM_TEAM_CUST_MANAGER U ON T1.USER_ID = U.USER_ID
+        <where>
+        	(
+        	T.CREATE_USER = #{condition.userId,jdbcType=VARCHAR}
+        	or T.UPDATA_USER = #{condition.userId,jdbcType=VARCHAR}
+        	<if test="condition.userType == 1"> <!-- 系统用户 -->
+        	or (T.ASSIGN_ORG = #{condition.orgId,jdbcType=VARCHAR} AND T.BUSINESS_STATE IN (1,5,6)) 
+        	</if>
+        	<if test="condition.userType == 2"> <!-- 机构主管 -->
+        	or (T.ASSIGN_ORG = #{condition.orgId,jdbcType=VARCHAR} AND T.BUSINESS_STATE = '3'
+        	or T.ASSIGN_ORG = #{condition.upOrgId,jdbcType=VARCHAR} AND T.BUSINESS_STATE IN(1,5,6)
+        	or U.CUST_MANAGER_ORG = #{condition.orgName,jdbcType=VARCHAR}
+        	or Y.ORG_ID = #{condition.orgId,jdbcType=VARCHAR})
+        	</if>
+        	<if test="condition.userType == 3"> <!-- 客户经理 -->
+        	or (T.RECEIVE_USER = #{condition.userId,jdbcType=VARCHAR} AND T.BUSINESS_STATE = '3'
+        	or Y.MGR_ID = #{condition.userId,jdbcType=VARCHAR})
+        	</if>
+        	)
+        	<if test="condition.businessType != null and condition.businessType != ''">
+        	and T.BUSINESS_TYPE = #{condition.businessType,jdbcType=VARCHAR}
+        	</if>
+        	<if test="condition.businessName != null and condition.businessName != ''">
+        	and T.BUSINESS_NAME LIKE CONCAT('%',CONCAT(#{condition.businessName,jdbcType=VARCHAR},'%'))
+        	</if>
+        	<if test="condition.businessState != null and condition.businessState != ''">
+        	and T.BUSINESS_STATE = #{condition.businessState,jdbcType=VARCHAR}
+        	</if>
+        	<if test="condition.businessStage != null and condition.businessStage != ''">
+        	and T.BUSINESS_STAGE = #{condition.businessStage,jdbcType=VARCHAR}
+        	</if>
+        	<if test="condition.businessSource != null and condition.businessSource != ''">
+        	and T.BUSINESS_SOURCE = #{condition.businessSource,jdbcType=VARCHAR}
+        	</if>
+        	<if test="condition.contactProdId != null and condition.contactProdId != ''">
+        	and T.CONTACT_PROD_ID = #{condition.contactProdId,jdbcType=VARCHAR}
+        	</if>
+        	<if test="condition.successChance != null and condition.successChance != ''">
+        	and T.SUCCESS_CHANCE = #{condition.successChance,jdbcType=VARCHAR}
+        	</if>
+        	<if test="condition.businessStartDate != null and condition.businessStartDate != ''">
+        	and TO_CHAR(T.BUSINESS_START_DATE,'yyyy-mm-dd') = #{condition.businessStartDate,jdbcType=VARCHAR}
+        	</if>
+        	<if test="condition.businessEndDate != null and condition.businessEndDate != ''">
+        	and TO_CHAR(T.BUSINESS_END_DATE,'yyyy-mm-dd') = #{condition.businessEndDate,jdbcType=VARCHAR}
+        	</if>
+        	<if test="condition.businessValidDate != null and condition.businessValidDate != ''">
+        	and TO_CHAR(T.BUSINESS_VALID_DATE,'yyyy-mm-dd') = #{condition.businessValidDate,jdbcType=VARCHAR}
+        	</if>
+        	and R.IS_ADMIT_ENTER='1'
+        </where>
+	</select>
+	<!-- 删除未使用的商机 -->
+	<delete id="opporDel" parameterType="String">
+		DELETE FROM OCRM_F_MK_MKT_SALESOPPOR WHERE BUSINESS_NO = #{businessNo,jdbcType=VARCHAR} AND BUSINESS_STATE <![CDATA[!= ]]> '4'
+	</delete>
+	<!-- 删除商机关联营销活动 -->
+	<delete id="opporActiDel" parameterType="String">
+		DELETE FROM OCRM_F_MK_MKT_ACTIVITY WHERE BUSINESS_NO = #{businessNo,jdbcType=VARCHAR}
+	</delete>
+	<!-- 查询客户经理管辖商机 -->
+	<select id="myOpporListQuery" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+		SELECT T.BUSINESS_NO,T.BUSINESS_NAME,T.BUSINESS_STATE,T.BUSINESS_STAGE,T.BUSINESS_SOURCE,
+		T.BUSINESS_FIT_CUST,T.BUSINESS_TYPE,
+        TO_CHAR(T.BUSINESS_START_DATE,'yyyy-mm-dd') AS BUSINESS_START_DATE,
+        TO_CHAR(T.BUSINESS_END_DATE,'yyyy-mm-dd') AS BUSINESS_END_DATE,
+        TO_CHAR(T.BUSINESS_VALID_DATE,'yyyy-mm-dd') AS BUSINESS_VALID_DATE,
+        T.MARKET_ACTIVITY_ID,T.MARKET_ACTIVITY_NAME,T.BUSINESS_CONTENT,T.CUST_ID,T.CUST_NAME,T.CUST_CONTACT,
+        T.CUST_CONCACT_INFO,T.CONTACT_PROD_ID,T.CONTACT_PROD_NAME,T.CUST_GROUP_ID,
+        T.CUST_GROUP_NAME,T.EXPECT_AMOUNT,T.REACH_AMOUNT,T.SUCCESS_CHANCE,T.BUSINESS_BUDGET,
+        T.CREATE_USER,T.CREATE_ORG,TO_CHAR(T.CREATE_DATE,'yyyy-mm-dd') AS CREATE_DATE,
+        T.UPDATA_USER,T.UPDATA_ORG,TO_CHAR(T.UPDATA_DATE,'yyyy-mm-dd') AS UPDATA_DATE,
+        T.EXECUTE_USER,T.EXECUTE_ORG,T.ASSIGN_USER,TO_CHAR(T.ASSIGN_DATE,'yyyy-mm-dd') AS ASSIGN_DATE,
+        T.ASSIGN_ORG,T.RECEIVE_USER,T.RECEIVE_ORG,T.RECEIVE_REASON,TO_CHAR(T.RECEIVE_DATE,'yyyy-mm-dd') AS RECEIVE_DATE,
+        T.BACK_REASON,T.OFF_STAT,T.OFF_FAIL_REASON,Y.CUST_TYPE,T1.USER_NAME AS CREATE_USER_NAME,
+        T2.USER_NAME AS UPDATA_USER_NAME,T3.USER_NAME AS RECEIVE_USER_NAME,T4.ORG_NAME AS CREATE_ORG_NAME,
+        T5.ORG_NAME AS UPDATA_ORG_NAME,T6.ORG_NAME AS RECEIVE_ORG_NAME
+        FROM OCRM_F_MK_MKT_SALESOPPOR T
+       <!--  LEFT JOIN ACRM_F_CI_CUST_ADMIT_ALL Y ON T.CUST_ID = Y.CUST_ID -->
+        LEFT JOIN ACRM_F_CI_CUST_ALL Y ON T.CUST_ID = Y.CUST_ID
+		LEFT JOIN ADMIN_SM_USER T1 ON T.CREATE_USER = T1.LOGIN_CODE
+        LEFT JOIN ADMIN_SM_USER T2 ON T.UPDATA_USER = T2.LOGIN_CODE
+        LEFT JOIN ADMIN_SM_USER T3 ON T.RECEIVE_USER = T3.LOGIN_CODE
+        LEFT JOIN ADMIN_SM_ORG T4 ON T.CREATE_ORG = T4.ORG_ID
+        LEFT JOIN ADMIN_SM_ORG T5 ON T.UPDATA_ORG = T5.ORG_ID
+        LEFT JOIN ADMIN_SM_ORG T6 ON T.RECEIVE_ORG = T6.ORG_ID
+		<where>
+			(
+			T.ASSIGN_USER = #{condition.userCode,jdbcType=VARCHAR}
+			OR T.EXECUTE_USER = #{condition.userId,jdbcType=VARCHAR}
+			OR T.RECEIVE_USER = #{condition.userCode,jdbcType=VARCHAR}
+			)
+			<if test="condition.businessType != null and condition.businessType != ''">
+        	and T.BUSINESS_TYPE = #{condition.businessType,jdbcType=VARCHAR}
+        	</if>
+        	<if test="condition.businessName != null and condition.businessName != ''">
+        	and T.BUSINESS_NAME LIKE CONCAT('%',CONCAT(#{condition.businessName,jdbcType=VARCHAR},'%'))
+        	</if>
+        	<if test="condition.businessState != null and condition.businessState != ''">
+        	and T.BUSINESS_STATE = #{condition.businessState,jdbcType=VARCHAR}
+        	</if>
+        	<if test="condition.businessStage != null and condition.businessStage != ''">
+        	and T.BUSINESS_STAGE = #{condition.businessStage,jdbcType=VARCHAR}
+        	</if>
+        	<if test="condition.businessSource != null and condition.businessSource != ''">
+        	and T.BUSINESS_SOURCE = #{condition.businessSource,jdbcType=VARCHAR}
+        	</if>
+        	<if test="condition.contactProdId != null and condition.contactProdId != ''">
+        	and T.CONTACT_PROD_ID = #{condition.contactProdId,jdbcType=VARCHAR}
+        	</if>
+        	<if test="condition.successChance != null and condition.successChance != ''">
+        	and T.SUCCESS_CHANCE = #{condition.successChance,jdbcType=VARCHAR}
+        	</if>
+        	<if test="condition.businessStartDate != null and condition.businessStartDate != ''">
+        	and TO_CHAR(T.BUSINESS_START_DATE,'yyyy-mm-dd') = #{condition.businessStartDate,jdbcType=VARCHAR}
+        	</if>
+        	<if test="condition.businessEndDate != null and condition.businessEndDate != ''">
+        	and TO_CHAR(T.BUSINESS_END_DATE,'yyyy-mm-dd') = #{condition.businessEndDate,jdbcType=VARCHAR}
+        	</if>
+        	<if test="condition.businessValidDate != null and condition.businessValidDate != ''">
+        	and TO_CHAR(T.BUSINESS_VALID_DATE,'yyyy-mm-dd') = #{condition.businessValidDate,jdbcType=VARCHAR}
+        	</if>
+        	and Y.IS_ADMIT_ENTER='1'
+		</where>
+		ORDER BY T.CREATE_DATE DESC
+	</select>
+	<!-- 商机编号验重 -->
+	<select id="sameBusinessNo" parameterType="cn.com.yusys.yscrm.salesoppor.domain.OcrmFMkMktSalesOpporInfo" resultType="int">
+		SELECT COUNT(1) FROM OCRM_F_MK_MKT_SALESOPPOR T WHERE BUSINESS_NO = #{businessNo,jdbcType=VARCHAR} AND BUSINESS_NAME <![CDATA[!= ]]> #{businessName,jdbcType=VARCHAR}
+	</select>
+	<!-- 商机名称验重 -->
+	<select id="sameBusinessName" parameterType="cn.com.yusys.yscrm.salesoppor.domain.OcrmFMkMktSalesOpporInfo" resultType="int">
+		SELECT COUNT(1) FROM OCRM_F_MK_MKT_SALESOPPOR WHERE BUSINESS_NAME = #{businessName,jdbcType=VARCHAR} AND BUSINESS_NO <![CDATA[!= ]]> #{businessNo,jdbcType=VARCHAR}
+	</select>
+	<!-- 查询商机状态 -->
+	<select id="getBusiStat" parameterType="String" resultType="String">
+	    SELECT T.BUSINESS_STATE FROM OCRM_F_MK_MKT_SALESOPPOR T WHERE T.BUSINESS_NO = #{businessNo,jdbcType=VARCHAR}
+	</select>
+	<!-- 商机分配 -->
+	<update id="opporAssign" parameterType="cn.com.yusys.yscrm.salesoppor.domain.OcrmFMkMktSalesOpporInfo">
+		UPDATE OCRM_F_MK_MKT_SALESOPPOR SET 
+		BUSINESS_STATE = #{businessState,jdbcType=VARCHAR},
+		EXECUTE_USER = #{executeUser,jdbcType=VARCHAR},
+		EXECUTE_ORG = #{executeOrg,jdbcType=VARCHAR},
+		ASSIGN_USER = #{assignUser,jdbcType=VARCHAR},
+		ASSIGN_DATE = #{assignDate,jdbcType=DATE},
+		ASSIGN_ORG = #{assignOrg,jdbcType=VARCHAR} 
+		WHERE BUSINESS_NO = #{businessNo,jdbcType=VARCHAR}
+	</update>
+	<!-- 商机认领 -->
+	<update id="opporReceive" parameterType="cn.com.yusys.yscrm.salesoppor.domain.OcrmFMkMktSalesOpporInfo">
+		UPDATE OCRM_F_MK_MKT_SALESOPPOR T SET 
+		T.BUSINESS_STATE = #{businessState,jdbcType=VARCHAR},
+		T.RECEIVE_USER = #{receiveUser,jdbcType=VARCHAR},
+		T.RECEIVE_ORG = #{receiveOrg,jdbcType=VARCHAR},
+		T.RECEIVE_REASON = #{receiveReason,jdbcType=VARCHAR},
+		T.RECEIVE_DATE = #{receiveDate,jdbcType=DATE}
+		WHERE BUSINESS_NO = #{businessNo,jdbcType=VARCHAR}
+	</update>
+	<!-- 商机退回 -->
+	<update id="opporBack" parameterType="cn.com.yusys.yscrm.salesoppor.domain.OcrmFMkMktSalesOpporInfo">
+		UPDATE OCRM_F_MK_MKT_SALESOPPOR T SET 
+		T.BACK_REASON = #{backReason,jdbcType=VARCHAR},
+		T.BUSINESS_STATE = '5'
+		WHERE BUSINESS_NO = #{businessNo,jdbcType=VARCHAR}
+	</update>
+	<!-- 商机关闭 -->
+	<update id="opporOff" parameterType="cn.com.yusys.yscrm.salesoppor.domain.OcrmFMkMktSalesOpporInfo">
+		UPDATE OCRM_F_MK_MKT_SALESOPPOR T SET 
+		T.BUSINESS_STATE = #{businessState,jdbcType=VARCHAR},
+		T.MARKET_ACTIVITY_ID = #{marketActivityId,jdbcType=VARCHAR},
+		T.REACH_AMOUNT = #{reachAmount,jdbcType=DECIMAL},
+		T.OFF_STAT = #{offStat,jdbcType=VARCHAR},
+		T.OFF_FAIL_REASON = #{offFailReason,jdbcType=VARCHAR}
+		WHERE BUSINESS_NO = #{businessNo,jdbcType=VARCHAR}
+	</update>
+	<!-- 判断客户类型 -->
+	<select id="custType" parameterType="String" resultType="String">
+		SELECT CUST_TYPE FROM ACRM_F_CI_CUST_ALL WHERE CUST_ID = #{custId,jdbcType=VARCHAR}
+	</select>
+	<!-- 判断客户类型 -->
+	<select id="custState" parameterType="String" resultType="String">
+		<!-- SELECT cust_status FROM ACRM_F_CI_CUST_ADMIT_ALL WHERE CUST_ID = #{custId,jdbcType=VARCHAR} -->
+		SELECT cust_status FROM ACRM_F_CI_CUST_ALL WHERE CUST_ID = #{custId,jdbcType=VARCHAR}
+	</select>
+	<!-- 返回登录人角色信息 -->
+	<select id="getUserType" parameterType="String" resultType="String">
+		SELECT DISTINCT Y.ROLE_NAME FROM ADMIN_SM_USER T
+        LEFT JOIN ADMIN_SM_USER_ROLE_REL R ON T.USER_ID = R.USER_ID
+        LEFT JOIN ADMIN_SM_ROLE Y ON Y.ROLE_ID = R.ROLE_ID
+        WHERE T.LOGIN_CODE = #{userId,jdbcType=VARCHAR}
+	</select>
+	<!-- 根据编号返回商机信息 -->
+	<select id="getOpporById" parameterType="String" resultType="cn.com.yusys.yscrm.salesoppor.domain.OcrmFMkMktSalesOpporInfo">
+		SELECT * FROM OCRM_F_MK_MKT_SALESOPPOR WHERE BUSINESS_NO = #{businessNo,jdbcType=VARCHAR}
+	</select>
+	<!-- 返回客户信息 -->
+	<select id="getCustData" parameterType="String" resultType="java.util.HashMap">
+		SELECT U.CONT_NAME,U.CONT_METH,T.ORG_ID,T.ORG_NAME,
+        DECODE(T.MGR_TYPE,NULL,'2',T.MGR_TYPE) AS MGR_TYPE,
+        DECODE(T.MGR_ID,NULL,'VM',T.MGR_ID) AS MGR_ID,
+        DECODE(T.MGR_NAME,NULL,'虚拟客户经理',T.MGR_NAME) AS MGR_NAME
+		FROM OCRM_F_CI_ADMIT_BELONG T 
+        LEFT JOIN ACRM_F_CI_CONTACT_INFO U ON U.CUST_ID = T.CUST_ID
+        WHERE T.CUST_ID = #{custId,jdbcType=VARCHAR}
+        ORDER BY T.MGR_TYPE
+	</select>
+	<!-- 返回执行人机构 -->
+	<select id="getOrgId" parameterType="String" resultType="String">
+		SELECT ORG_ID FROM ADMIN_SM_USER WHERE user_id = #{userId,jdbcType=VARCHAR}
+	</select>
+	<!-- 返回客户群客户信息 -->
+	<select id="getGroupCustList" parameterType="String" resultType="java.util.HashMap">
+		SELECT T.CUST_ID,R.CONT_NAME,R.CONT_METH
+      	FROM OCRM_F_CI_CG_MEMBER T
+      	LEFT JOIN ACRM_F_CI_CONTACT_INFO R ON R.CUST_ID = T.CUST_ID
+      	LEFT JOIN OCRM_F_CI_ADMIT_BELONG Y ON Y.CUST_ID = T.CUST_ID
+      	WHERE T.CUST_GROUP_ID = #{custGroupId,jdbcType=VARCHAR}
+      	GROUP BY T.CUST_ID,R.CONT_NAME,R.CONT_METH
+	</select>
+	<!-- 新增客户经理归属信息 -->
+	<insert id="addCustBelong" parameterType="java.util.Map">
+		INSERT INTO OCRM_F_CI_ADMIT_BELONG
+    	(BELONG_ID,LAST_UPDATE_USER,LAST_UPDATE_ORG,CORP_ORG_CODE,CUST_ID,ORG_TYPE,ORG_ID,ORG_NAME,MGR_TYPE,MGR_ID,MGR_NAME,IS_ADMIT_ENTER)
+    	SELECT #{belongId,jdbcType=VARCHAR},T.USER_ID,R.ORG_ID,'001',
+    	#{custId,jdbcType=VARCHAR},#{orgType,jdbcType=VARCHAR},R.ORG_ID,R.ORG_NAME,
+    	#{mgrType,jdbcType=VARCHAR},T.USER_ID,T.USER_NAME,'1'
+     	FROM ADMIN_SM_USER T LEFT JOIN ADMIN_SM_ORG R ON T.ORG_ID = R.ORG_ID WHERE T.USER_ID = #{userId,jdbcType=VARCHAR}
+	</insert>
+	<!-- 删除客户经理归属信息 -->
+	<delete id="delCustBelong" parameterType="java.util.Map">
+		DELETE FROM OCRM_F_CI_ADMIT_BELONG WHERE CUST_ID = #{custId,jdbcType=VARCHAR} AND MGR_ID = #{mgrId,jdbcType=VARCHAR}
+	</delete>
+	<!-- 返回userId -->
+	<select id="getUserId" parameterType="String" resultType="String">
+		select user_id from admin_sm_user where login_code = #{loginCode,jdbcType=VARCHAR}
+	</select>
+</mapper>

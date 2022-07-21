@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.cm.productmanager.repository.mapper.CmFRcProdCatlMapper">
+	<!-- 查询产品类别管理表 -->
+	<select id="getList" resultType="java.util.HashMap">
+		SELECT * FROM CM_F_RC_PROD_CATL
+    </select>
+    <!-- 获取自增序列 -->
+	<select id="getSeq" resultType="String">
+		SELECT ysc_sequence.nextval FROM dual
+	</select>
+	<!-- 返回父节点、父节点名称 -->
+    <!-- 产品类别检验重复名称 -->
+    <select id="getSameName" parameterType="cn.com.yusys.yusp.cm.productmanager.domain.CmFRcProdCatlInfo" resultType="String">
+    	SELECT COUNT(CATL_NAME) FROM CM_F_RC_PROD_CATL WHERE CATL_PARENT = #{catlParent} AND CATL_NAME = #{catlName} AND CATL_CODE <![CDATA[!= ]]> #{catlCode}
+    </select>
+    <!-- 返回子节点 -->
+    <select id="getSonNode" parameterType="long" resultType="String">
+    	SELECT COUNT(1) FROM CM_F_RC_PROD_CATL WHERE CATL_PARENT = #{catlCode}
+    </select>
+    <!-- 返回子产品 -->
+    <select id="getSonProd" parameterType="long" resultType="int">
+    	SELECT COUNT(R.PRODUCT_ID) FROM CM_F_RC_PROD_CATL T
+        LEFT JOIN  CM_F_RC_PROD_INFO R ON T.CATL_CODE = R.CATL_CODE
+        START WITH T.CATL_CODE = #{catlCode} CONNECT BY T.CATL_PARENT = PRIOR T.CATL_CODE
+    </select>
+    <!-- 删除产品类别 -->
+    <delete id="deleteList" parameterType="cn.com.yusys.yusp.cm.productmanager.domain.CmFRcProdCatlInfo">
+		DELETE FROM CM_F_RC_PROD_CATL WHERE CATL_CODE = #{catlCode}
+    </delete>
+    <!-- 更新节点数据 -->
+    <update id="updateList" parameterType="cn.com.yusys.yusp.cm.productmanager.domain.CmFRcProdCatlInfo">
+    	UPDATE CM_F_RC_PROD_CATL
+   		SET CATL_NAME = #{catlName},
+       	CATL_PARENT = #{catlParent},
+       	CATL_ORDER  = #{catlOrder},
+       	VIEW_DETAIL = #{viewDetail},
+       	PROD_VIEW   = #{prodView},
+       	UPDATA_USER = #{updataUser},
+       	UPDATA_DATE = #{updataDate}
+ 		WHERE CATL_CODE = #{catlCode}
+    </update>
+    <select id="getNodeLevel" parameterType="long" resultType="int">
+    	select count(1) from CM_F_RC_PROD_CATL m start with m.catl_code = #{catlCode} connect by prior m.catl_parent=m.catl_code
+    </select>
+</mapper>

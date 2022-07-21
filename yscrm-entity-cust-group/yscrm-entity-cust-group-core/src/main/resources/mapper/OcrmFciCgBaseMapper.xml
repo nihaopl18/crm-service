@@ -1,0 +1,1509 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.cust.group.repository.mapper.OcrmFciCgBaseMapper">
+
+	<!-- 通过条件刷选，查询客户群基本信息 -->
+    <!--<select id="getListByModel" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+		resultType="java.util.HashMap">
+		&lt;!&ndash; select DISTINCT (cg.cust_group_id),
+                (select count(*)
+                   from ocrm_f_ci_cg_member m
+                  where m.cust_group_id = cg.cust_group_id) as mem_num,
+                cg.cust_group_name,
+                cg.cust_origin,
+                cg.share_scope,
+                cg.group_member_type,
+                cg.cust_group_type,
+                cg.ssid,
+                to_char(cg.create_date, 'yyyy-MM-dd HH24:mi:ss') as create_date,
+                to_char(cg.update_date, 'yyyy-MM-dd HH24:mi:ss') as update_date,
+                u.user_name,
+                u.user_id,
+                o.org_name
+  from ocrm_f_ci_cg_base cg
+  left join ocrm_f_ci_cg_member mem
+    on mem.cust_group_id = cg.cust_group_id &ndash;&gt;
+    select DISTINCT (cg.cust_group_id),
+                case
+                  when cg.sql is null or cg.sql='' then
+                  nvl(to_char(m.mem_num),'0') 
+                  when cg.sql is not null then
+                   '每日更新'
+                end as mem_num,
+                cg.cust_group_name,
+                cg.cust_origin,
+                cg.share_scope,
+                cg.group_member_type,
+                cg.cust_group_type,
+                cg.ssid,
+                to_char(cg.create_date, 'yyyy-MM-dd HH24:mi:ss') as create_date,
+                to_char(cg.update_date, 'yyyy-MM-dd HH24:mi:ss') as update_date,
+                u.user_name,
+                u.user_id,
+                o.org_name
+  from ocrm_f_ci_cg_base cg
+  left join ocrm_f_ci_cg_member mem
+    on mem.cust_group_id = cg.cust_group_id
+  left join (select cust_group_id, count(1) as mem_num
+               from ocrm_f_ci_cg_member
+              group by cust_group_id) m
+    on m.cust_group_id = cg.cust_group_id
+  &lt;!&ndash; left join acrm_f_ci_cust_admit_all cu &ndash;&gt;
+  left join (select cust_id,CUST_NAME,CERT_TYPE,CERT_NO,BELONG_BRCH,BELONG_MGR from ACRM_F_CI_ORG_CUST_INFO where is_admit_enter='1'
+       union all select cust_id,CUST_NAME,CERT_TYPE,CERT_NO,BELONG_BRCH,BELONG_MGR from ACRM_F_CI_PER_ADMIT_INFO where is_admit_enter='1') cu
+    on cu.cust_id = mem.cust_id
+  left join admin_sm_user u
+    on u.user_id = cg.create_user
+  left join admin_sm_org o
+    on o.org_code = cg.create_org
+ where 1 = 1
+		<if test="condition.custName != null and condition.custName !=''">
+				  and cu.CUST_NAME  LIKE CONCAT(CONCAT('%', #{condition.custName, jdbcType=VARCHAR}),'%')
+		</if>
+		<if test="condition.custId != null and condition.custId !=''">
+				  and cu.CUST_ID LIKE CONCAT(CONCAT('%', #{condition.custId, jdbcType=VARCHAR}),'%')
+		</if>
+		<if test="condition.identType != null and condition.identType !=''">
+				  and cu.CERT_TYPE = #{condition.identType, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.identNo != null and condition.identNo !=''">
+				  and cu.CERT_NO LIKE CONCAT(CONCAT('%', #{condition.identNo, jdbcType=VARCHAR}),'%')
+		</if>
+		<if test="condition.belongOrg != null and condition.belongOrg !=''">
+				  and cu.BELONG_BRCH IN (select org_code from sys_org_view where sys_org_view.org_seq like '%'||#{condition.belongBrch, jdbcType=VARCHAR}||',%') 
+		</if>
+		<if test="condition.belongMgr != null and condition.belongMgr !=''">
+				  and cu.BELONG_MGR = #{condition.belongMgr, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.custGroupName != null and condition.custGroupName !=''">
+				  and cg.CUST_GROUP_NAME  LIKE CONCAT(CONCAT('%', #{condition.custGroupName, jdbcType=VARCHAR}),'%')
+		</if>
+		<if test="condition.custOrigin != null and condition.custOrigin !=''">
+				 and cg.CUST_ORIGIN = #{condition.custOrigin, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.groupMemberType != null and condition.groupMemberType !=''">
+				  and cg.GROUP_MEMBER_TYPE = #{condition.groupMemberType, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.custGroupType != null and condition.custGroupType !=''">
+				  and cg.CUST_GROUP_TYPE = #{condition.custGroupType, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.shareScope != null and condition.shareScope !=''">
+				  and cg.SHARE_SCOPE = #{condition.shareScope, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.createDate != null and condition.createDate !=''">
+				  and to_char(cg.create_date,'yyyy-MM-dd') &gt;= #{condition.createDate}
+		</if>
+		<if test="condition.endDate != null and condition.endDate !=''">
+				  and to_char(cg.create_date,'yyyy-MM-dd') &lt;= #{condition.endDate}
+		</if>
+		<if test="condition.custGroupId != null and condition.custGroupId !=''">
+				  and cg.CUST_GROUP_ID  LIKE CONCAT(CONCAT('%', #{condition.custGroupId, jdbcType=VARCHAR}),'%')
+		</if>
+		and (cg.share_scope = '1'
+    or (cg.share_scope = '2' and cg.create_user = #{condition.userId, jdbcType=VARCHAR})
+    or (cg.share_scope = '3'and (select count(*) from(select org_seq from sys_org_view where sys_org_view.org_seq like '%' ||#{condition.orgCode, jdbcType=VARCHAR}|| ',%') where instr(org_seq,cg.create_org)>0)>0) 
+       &lt;!&ndash; instr((select org_seq
+            from sys_org_view
+           where sys_org_view.org_seq like '%' ||#{condition.orgCode, jdbcType=VARCHAR}|| ',%'),','||cg.create_org||',')>0) &ndash;&gt;
+    or (cg.share_scope = '4' and cg.create_org = #{condition.orgCode, jdbcType=VARCHAR}))
+		order by update_date desc
+	</select>-->
+  <!--  <sql id="Base_Column_List">
+	    CUST_GROUP_ID,CUST_GROUP_NAME,CUST_ORIGIN,SHARE_SCOPE,GROUP_MEMBER_TYPE,CUST_GROUP_TYPE,REMARK,CORP_ORG_CODE,CREATE_USER,CREATE_DATE,CREATE_ORG,UPDATE_USER,UPDATE_DATE,UPDATE_ORG,UPDATE_SYS,EXPIRE_DATE
+    </sql>
+    -->
+    <!-- 获取客户群编号 -->
+    <select id="getSeq" resultType="String">
+		SELECT  custgroup_sequence.nextval FROM dual
+	</select>
+	
+	<!-- 新增时，检查名称重复 -->
+<!--	<select id="checkName" parameterType="String" resultType="int">
+		select  count(*) from OCRM_F_CI_CG_BASE b
+        where b.CUST_GROUP_NAME = #{name,jdbcType=VARCHAR}
+	</select>
+	-->
+	<!-- 修改时，检查名称重复 -->
+	<!--<select id="checkUpName" parameterType="String" resultType="int">
+		select  count(*) from OCRM_F_CI_CG_BASE b
+		where b.CUST_GROUP_ID != #{id,jdbcType=VARCHAR} and b.CUST_GROUP_NAME = #{name,jdbcType=VARCHAR}
+	</select>-->
+	<!-- 修改客户群基本信息 -->
+	<!--<update id="updateFun" parameterType="cn.com.yusys.yscrm.cust.group.domain.OcrmFciCgBase">
+	UPDATE OCRM_F_CI_CG_BASE b SET 
+	b.CUST_GROUP_NAME =#{custGroupName,jdbcType=VARCHAR},b.REMARK=#{remark,jdbcType=VARCHAR},
+	b.UPDATE_USER=#{updateUser,jdbcType=VARCHAR},b.UPDATE_DATE=#{updateDate,jdbcType=DATE}
+	 WHERE b.CUST_GROUP_ID = #{custGroupId,jdbcType=VARCHAR}
+	</update>-->
+
+	<update id="updateBase" parameterType="cn.com.yusys.yscrm.cust.group.domain.CrmFCissCgBase">
+		UPDATE OCRM_F_CISS_CG_BASE b SET
+		<if test="custGroupName !=null and custGroupName !=''">
+			b.CUST_GROUP_NAME =#{custGroupName,jdbcType=VARCHAR},
+		</if>
+		<if test="isFocus !=null and isFocus !=''">
+			b.IS_FOCUS =#{isFocus,jdbcType=VARCHAR},
+		</if>
+		<if test="custGroupDescribe !=null and custGroupDescribe !=''">
+			b.CUST_GROUP_DESCRIBE =#{custGroupDescribe,jdbcType=VARCHAR},
+		</if>
+		<if test="custGroupType !=null and custGroupType !=''">
+			b.CUST_GROUP_TYPE =#{custGroupType,jdbcType=VARCHAR},
+		</if>
+		<if test="isFlag !=null and isFlag !=''">
+			b.IS_FLAG =#{isFlag,jdbcType=VARCHAR},
+		</if>
+		<if test="updateDate !=null">
+			b.UPDATE_DATE =#{updateDate,jdbcType=DATE},
+		</if>
+		<if test="updateUser !=null and updateUser !=''">
+			b.UPDATE_USER =#{updateUser,jdbcType=VARCHAR}
+		</if>
+		WHERE b.CUST_GROUP_ID ${custGroupId}
+	</update>
+
+	<!-- 查询单个客户群信息 -->
+	<!--<select id="getGroupInfoByModel" parameterType="String" resultType="java.util.HashMap">
+		SELECT B.*,U.USER_NAME,O.ORG_NAME,(SELECT COUNT(*) FROM OCRM_F_CI_CG_MEMBER M WHERE M.CUST_GROUP_ID = B.CUST_GROUP_ID) AS CUST_NUM FROM OCRM_F_CI_CG_BASE B LEFT JOIN ADMIN_SM_USER U ON U.USER_ID = B.CREATE_USER LEFT JOIN ADMIN_SM_ORG O ON O.ORG_CODE = B.CREATE_ORG
+		WHERE B.CUST_GROUP_ID =  #{groupId,jdbcType=VARCHAR}
+	</select>-->
+	<!-- 查询自动刷选客户群成员-->
+	<select id="getAutoMemberList" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+		${conditon.sql}
+	</select>
+	<select id="getOrgLevel" parameterType="String"  resultType="java.util.HashMap">
+	SELECT * FROM ADMIN_SM_ORG WHERE ORG_CODE = #{getOrgLevel, jdbcType=VARCHAR}
+	</select>
+	
+	<select id="getOneOrg" parameterType="String"  resultType="java.util.HashMap">
+	${sql}
+	</select>
+	<insert id="updateAuto" parameterType="java.util.HashMap">
+	${sql}
+	</insert>
+	<insert id="updateAutoCust" parameterType="java.util.HashMap">
+	insert into ocrm_f_ci_cg_member (cust_id,id,cust_group_id,corp_org_code,create_user,update_user,create_date,update_date)
+select distinct(id) cust_id,id,cust_group_id,corp_org_code,create_user,update_user,create_date,update_date from cg_join_cust 
+	</insert>
+	<delete id = "cgdelete" parameterType="java.util.HashMap">
+	delete from cg_join_cust
+	</delete>
+	<delete id = "delecteMemberByGroupId" parameterType="String">
+	delete from OCRM_F_CI_CG_MEMBER where CUST_GROUP_ID = #{custGroupId,jdbcType=VARCHAR}
+	</delete>
+
+	<insert id="insertCountTage"  parameterType="cn.com.yusys.yscrm.cust.group.domain.CrmFCgTagcountTag">
+		insert into OCRM_F_CG_TAGCOUNT_TAG
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="seqno != null and seqno !=''">
+				SEQNO,
+			</if>
+			<if test="orgId != null and orgId !=''">
+				ORG_ID,
+			</if>
+			<if test="samId != null and samId !=''">
+				SAM_ID,
+			</if>
+			<if test="tagId != null and tagId !=''">
+				TAG_ID,
+			</if>
+			<if test="tagName != null and tagName !=''">
+				TAG_NAME,
+			</if>
+			<if test="createDate != null">
+				CREATE_DATE,
+			</if>
+			<if test="dataDate != null">
+				DATA_DATE,
+			</if>
+			<if test="createUser != null and createUser !=''">
+				CREATE_USER
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="seqno != null and seqno !=''">
+				#{seqno,jdbcType=VARCHAR},
+			</if>
+			<if test="orgId != null and orgId !=''">
+				#{orgId,jdbcType=VARCHAR},
+			</if>
+			<if test="samId != null and samId !=''">
+				#{samId,jdbcType=VARCHAR},
+			</if>
+			<if test="tagId != null and tagId !=''">
+				#{tagId,jdbcType=VARCHAR},
+			</if>
+			<if test="tagName != null and tagName !=''">
+				#{tagName,jdbcType=VARCHAR},
+			</if>
+			<if test="createDate != null">
+				#{createDate,jdbcType=DATE},
+			</if>
+			<if test="dataDate != null">
+				#{dataDate,jdbcType=DATE},
+			</if>
+			<if test="createUser != null and createUser !=''">
+				#{createUser,jdbcType=VARCHAR}
+			</if>
+		</trim>
+	</insert>
+
+	<select id="queryBaselist"  parameterType="cn.com.yusys.yscrm.cust.group.domain.CrmBaseDTO"  resultType="cn.com.yusys.yscrm.cust.group.domain.CrmFCissCgBase">
+		SELECT  cg.SAM_ID samId,
+		cg.ORG_ID orgId,
+		cg.IS_FOCUS isFocus,
+		cg.CUST_GROUP_ID custGroupId,
+		cg.CUST_GROUP_NAME custGroupName,
+		cg.CUST_GROUP_DESCRIBE custGroupDescribe,
+		cg.CUST_GROUP_RULE custGroupRule,
+		cg.INITIAL_COUT initialCout,
+		cg.CUST_GROUP_TYPE custGroupType,
+		cg.CUST_GROUP_LABEL custGroupLabel,
+		cg.IS_FLAG isFlag,
+		cg.CREATE_DATE createDate,
+		cg.CREATE_USER createUser,
+		cg.UPDATE_DATE updateDate,
+		cg.UPDATE_USER updateUser FROM OCRM_F_CISS_CG_BASE cg
+<!--
+		<if test="dataAuth != null and orgIdAuth =='500'">
+		WHERE 1=1
+		<if test="isFocus != null and isFocus !=''">
+		AND cg.IS_FOCUS=#{isFocus,jdbcType=VARCHAR}
+	    </if>
+		<if test="custGroupName != null and custGroupName !=''">
+		AND cg.CUST_GROUP_NAME  LIKE '%${custGroupName}%'
+		</if>
+		AND cg.IS_FLAG='01'
+		ORDER BY cg.IS_FOCUS,cg.INITIAL_COUT desc
+		</if>
+
+		<if test="dataAuth != null and orgIdAuth !='500'">
+			INNER JOIN ADMIN_SM_USER S ON cg.SAM_ID=S.USER_ID
+			INNER JOIN ADMIN_SM_USER_ROLE_REL T ON S.USER_ID=T.USER_ID
+			INNER JOIN ADMIN_SM_ROLE SS ON SS.ROLE_ID=T.ROLE_ID
+			WHERE 1=1
+			<if test="isFocus != null and isFocus !=''">
+				AND cg.IS_FOCUS=#{isFocus,jdbcType=VARCHAR}
+			</if>
+			<if test="custGroupName != null  and custGroupName !=''">
+				AND cg.CUST_GROUP_NAME=#{custGroupName,jdbcType=VARCHAR}
+			</if>
+			AND cg.IS_FLAG='01'
+			${dataAuth}
+			ORDER BY cg.INITIAL_COUT
+		</if>-->
+			WHERE 1=1
+			<if test="isFocus != null  and isFocus !=''">
+				AND cg.IS_FOCUS=#{isFocus,jdbcType=VARCHAR}
+			</if>
+			<if test="custGroupName != null  and custGroupName !=''">
+				AND cg.CUST_GROUP_NAME LIKE CONCAT(CONCAT('%', #{custGroupName, jdbcType=VARCHAR}),'%')
+			</if>
+			AND cg.CREATE_USER=#{createUser,jdbcType=VARCHAR}
+			AND cg.IS_FLAG='01'
+			ORDER BY cg.IS_FOCUS
+
+	</select>
+
+	<select id="countCustomer" parameterType="cn.com.yusys.yscrm.cust.group.domain.CrmBaseDTO" resultType="cn.com.yusys.yscrm.cust.group.domain.CrmBaseCountVo">
+		SELECT  COUNT(CUST_GROUP_ID) count,CUST_GROUP_ID custGroupId FROM
+        (select DISTINCT cg.custid,cg.custid_name,cg.CUST_GROUP_ID from
+        OCRM_F_CG_CUSTOMER cg
+		inner join OCRM_F_CISS_CG_BASE cc ON cc.cust_group_id=cg.cust_group_id
+		and cc.CREATE_USER=#{createUser,jdbcType=VARCHAR}
+	<!--	<if test="dataAuth != null and orgIdAuth =='500'">
+		</if>
+		<if test="dataAuth != null and orgIdAuth !='500'">
+			INNER join OCRM_F_CISS_CG_BASE T ON cg.CUST_GROUP_ID=T.CUST_GROUP_ID
+			INNER JOIN ADMIN_SM_USER S ON T.SAM_ID=S.USER_ID
+			INNER JOIN ADMIN_SM_USER_ROLE_REL T ON S.USER_ID=T.USER_ID
+			INNER JOIN ADMIN_SM_ROLE SS ON SS.ROLE_ID=T.ROLE_ID
+			WHERE 1=1
+			${dataAuth}
+		</if>
+		<if test="dataAuth == null">
+		</if>-->
+        )
+		GROUP BY CUST_GROUP_ID
+	</select>
+
+	<select id="Customercount"  resultType="cn.com.yusys.yscrm.cust.group.domain.CrmBaseCountVo">
+		SELECT  COUNT(CUST_GROUP_ID) count,CUST_GROUP_ID custGroupId FROM
+        (select DISTINCT cg.custid,cg.custid_name,cg.CUST_GROUP_ID from
+        OCRM_F_CG_CUSTOMER cg
+		WHERE 1=1
+		<if test="custGroupId != null and custGroupId!=''">
+			AND cg.CUST_GROUP_ID=#{custGroupId,jdbcType=VARCHAR}
+		</if>
+        )
+		GROUP BY CUST_GROUP_ID
+	</select>
+	<select id="queryGroupBaselist" resultType="cn.com.yusys.yscrm.cust.group.domain.CrmFCissCgBase">
+		SELECT cg.SAM_ID,
+		cg.ORG_ID,
+		cg.IS_FOCUS,
+		cg.CUST_GROUP_ID,
+		cg.CUST_GROUP_NAME,
+		cg.CUST_GROUP_DESCRIBE,
+		cg.CUST_GROUP_RULE,
+		cg.INITIAL_COUT,
+		cg.CUST_GROUP_TYPE,
+		cg.CUST_GROUP_LABEL,
+		cg.IS_FLAG,
+		cg.CREATE_DATE,
+		cg.CREATE_USER,
+		cg.UPDATE_DATE,
+		cg.UPDATE_USER  FROM OCRM_F_CISS_CG_BASE cg where 1=1
+			AND cg.IS_FLAG='01'
+		<if test="custGroupId != null and custGroupId!=''">
+			AND cg.CUST_GROUP_ID=#{custGroupId,jdbcType=VARCHAR}
+		</if>
+		  and  rownum = 1
+	</select>
+	<select id="countGroupCustomer"  resultType="cn.com.yusys.yscrm.cust.group.domain.CrmBaseCountVo">
+		SELECT  COUNT(cg.CUST_GROUP_ID) count,cg.CUST_GROUP_ID custGroupId FROM OCRM_F_CG_CUSTOMER cg WHERE 1=1
+		<if test="custGroupId != null and custGroupId!=''">
+			AND cg.CUST_GROUP_ID=#{custGroupId,jdbcType=VARCHAR}
+		</if>
+		 GROUP BY cg.CUST_GROUP_ID
+	</select>
+	<select id="selectPreparation" resultType="cn.com.yusys.yscrm.cust.group.domain.CrmFCgPreparationVO">
+       SELECT distinct T.CUST_NO custId,
+		case when T.CUST_NAME is null then T.CUST_ENG_NAME else T.CUST_NAME end custName,
+		T.CUST_ENG_NAME custEngName,
+		T.NDS_CUST_NO ndsCustNo,
+		CASE WHEN T.NATIONALITY='CN' THEN '中国内地'
+		WHEN T.NATIONALITY='HK' THEN '中国香港'
+		WHEN T.NATIONALITY='MO' THEN '中国澳门'
+		ELSE
+		'其他' END NATIONALITY,
+		T.AUM_BALANCE aumBalance,
+		T.AUM_BALANCE_AVG_RMB aumBalanceAvgRmb,
+		T.NON_EXCHANGE_FIN_BALANCE nonExchangeFinBalance,
+		T.EXCHANGE_FIN_BALANCE exchangeFinBalance,
+		T.TRUST_BALANCE_RMB trustBalanceRmb,
+		T.RMB_FUND_BALANCE rmbFundBalance,
+		T.QDII_BALANCE_RMB qdiiBalanceRmb,
+		T.ASSEST_MANAGE_BALANCE assestManageBalance,
+		T.INSURRANCE_BALANCE insurranceBalance,
+		T.DEPOSIT_BALANCE_RMB depositBalanceRmb,
+		D.CUST_GROUP_NAME custGroupName,
+        M.ORG_NAME belongBrch,
+		F.ORG_NAME belongBranch,
+		T.MANAGE_NAME mgrNameOne,
+		T.PERSONAL_LOAN_NAME mgrNameTwo
+		FROM OCRM_F_CG_PREPARATION T LEFT JOIN OCRM_F_CG_CUSTOMER  C ON T.CUST_NO=C.CUSTID
+		AND C.CUST_GROUP_ID=#{custGroupId,jdbcType=VARCHAR}
+		LEFT JOIN OCRM_F_CISS_CG_BASE D ON C.CUST_GROUP_ID=D.CUST_GROUP_ID
+		INNER JOIN OCRM_F_CI_ADMIT_BELONG S
+		ON T.CUST_NO=S.CUST_ID
+		LEFT JOIN ADMIN_SM_ORG M ON S.ORG_ID=M.ORG_CODE
+		LEFT JOIN ADMIN_SM_ORG F ON  F.ORG_ID=M.UP_ORG_ID
+		WHERE T.CUST_NO IN (SELECT CUSTID FROM OCRM_F_CG_CUSTOMER WHERE CUST_GROUP_ID=#{custGroupId,jdbcType=VARCHAR}
+		<if test="custId != null and custId !=''">
+			AND CUSTID ${custId}
+		</if>
+		)
+		<if test="mgrType != null and mgrType !=''">
+			AND S.MGR_TYPE=#{mgrType,jdbcType=VARCHAR}
+		</if>
+		<if test="queryCriteria != null and queryCriteria!=''">
+			AND (T.CUST_NO || T.CUST_NAME
+			|| T.CUST_ENG_NAME
+			|| T.NDS_CUST_NO
+			|| T.NATIONALITY
+			|| T.AUM_BALANCE
+			|| T.AUM_BALANCE_AVG_RMB
+			|| T.NON_EXCHANGE_FIN_BALANCE
+			|| T.EXCHANGE_FIN_BALANCE
+			|| T.TRUST_BALANCE_RMB
+			|| T.RMB_FUND_BALANCE
+			|| T.QDII_BALANCE_RMB
+			|| T.ASSEST_MANAGE_BALANCE
+			|| T.INSURRANCE_BALANCE
+			|| T.DEPOSIT_BALANCE_RMB
+			|| D.CUST_GROUP_NAME
+			|| M.ORG_NAME
+			|| F.ORG_NAME || T.MANAGE_NAME || T.PERSONAL_LOAN_NAME) LIKE '%${queryCriteria}%'
+		</if>
+				order by T.AUM_BALANCE desc
+	</select>
+
+	<delete id="deleteBaseCustomer" parameterType="cn.com.yusys.yscrm.cust.group.domain.CrmBaseCuDTO">
+		DELETE FROM OCRM_F_CG_CUSTOMER b
+		WHERE b.CUST_GROUP_ID = #{custGroupId,jdbcType=VARCHAR} and b.CUSTID ${custId}
+	</delete>
+
+	<insert id="insertchange"  parameterType="cn.com.yusys.yscrm.cust.group.domain.CrmFCgJournal">
+		insert into OCRM_F_CG_JOURNAL
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="seqno != null and seqno !=''">
+				SEQNO,
+			</if>
+			<if test="orgId != null and orgId !=''">
+				ORG_ID,
+			</if>
+			<if test="samId != null and samId !=''">
+				SAM_ID,
+			</if>
+			<if test="custGroupName != null and custGroupName !=''">
+				CUST_GROUP_NAME,
+			</if>
+			<if test="custGroupNo != null and custGroupNo !=''">
+				CUST_GROUP_NO,
+			</if>
+			<if test="custidCollect != null and custidCollect !=''">
+				CUSTID_COLLECT,
+			</if>
+			<if test="changeType != null and changeType !=''">
+				CHANGE_TYPE,
+			</if>
+			<if test="changeCount != null and changeCount !=''">
+				CHANGE_COUNT,
+			</if>
+			<if test="createUser != null and createUser !=''">
+				CREATE_USER,
+			</if>
+			<if test="createDate != null ">
+				CREATE_DATE
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="seqno != null and seqno !=''">
+				#{seqno,jdbcType=VARCHAR},
+			</if>
+			<if test="orgId != null and orgId !=''">
+				#{orgId,jdbcType=VARCHAR},
+			</if>
+			<if test="samId != null and samId !=''">
+				#{samId,jdbcType=VARCHAR},
+			</if>
+			<if test="custGroupName != null and custGroupName !=''">
+				#{custGroupName,jdbcType=VARCHAR},
+			</if>
+			<if test="custGroupNo != null and custGroupNo !=''">
+				#{custGroupNo,jdbcType=VARCHAR},
+			</if>
+			<if test="custidCollect != null and custidCollect !=''">
+				#{custidCollect,jdbcType=VARCHAR},
+			</if>
+			<if test="changeType != null and changeType !=''">
+			#{changeType,jdbcType=VARCHAR},
+		</if>
+			<if test="changeCount != null and changeCount !=''">
+				#{changeCount,jdbcType=VARCHAR},
+			</if>
+			<if test="createUser != null and createUser !=''">
+				#{createUser,jdbcType=VARCHAR},
+			</if>
+			<if test="createDate != null">
+				#{createDate,jdbcType=DATE}
+			</if>
+		</trim>
+	</insert>
+<select id="Selectjournal" resultType="cn.com.yusys.yscrm.cust.group.domain.CrmFCgJournalVO">
+	SELECT
+	ORG_ID orgId,
+	SAM_ID samId,
+	CUST_GROUP_NAME custGroupName,
+	CUST_GROUP_NO custGroupId,
+	CUSTID_COLLECT custidCollect,
+	CHANGE_TYPE changeType,
+	CHANGE_COUNT changeCount,
+	CREATE_USER createUser,
+	CREATE_DATE createDate
+	FROM OCRM_F_CG_JOURNAL WHERE CUST_GROUP_NO=#{custGroupId ,jdbcType=VARCHAR} ORDER BY CREATE_DATE desc
+</select>
+	<select id="queryIndexStatuslist" resultType="cn.com.yusys.yscrm.cust.group.domain.CrmFCissCgIndexStats">
+     select    DATA_DATE,
+		CUST_GROUP_NO,
+		CUST_NUMBER,
+		CUST_NUMBER_QOQ,
+		CUST_NUMBER_YOY,
+		CG_AUM_YEAR_AVG_BALANCE,
+		CG_AUM_YEAR_AVG_BALANCE_QOQ,
+		CG_AUM_YEAR_AVG_BALANCE_YOY,
+		CG_DEPOSIT_BALANCE,
+		CG_DEPOSIT_BALANCE_QOQ,
+		CG_DEPOSIT_BALANCE_YOY,
+		CG_LOAN_BALANCE,
+		CG_LOAN_BALANCE_QOQ,
+		CG_LOAN_BALANCE_YOY,
+		CUST_GRADE_1_NUMBER,
+		CUST_GRADE_2_NUMBER,
+		CUST_GRADE_3_NUMBER,
+		CUST_GRADE_4_NUMBER,
+		CUST_GRADE_5_NUMBER,
+		CUST_GRADE_6_NUMBER,
+		CG_TRUST_BALANCE_RMB,
+		CG_STRUST_FIN_BALANCE_RMB,
+		CG_QDII_BALANCE_RMB,
+		CG_COLLECT_PAY_BALANCE,
+		CG_RMB_FUND_BALANCE,
+		CG_DEMAND_DEPOSIT_BALANCE,
+		CG_TIME_DEPOSIT_BALANCE,
+		CG_INSURRANCE_BALANCE_RMB,
+		CG_AUM_BALANCE,
+		CG_MID_INCOME_AMT,
+		CG_BUY_FIN_AMT,
+		CG_AVG_AUM_YEAR_AVG_BALANCE,
+		CG_AVG_AUM_YEAR_AVG_BALANCE_QOQ,
+		CG_AVG_AUM_YEAR_AVG_BALANCE_YOY,
+		CG_AVG_DEPOSIT_BALANCE,
+		CG_AVG_DEPOSIT_BALANCE_QOQ,
+		CG_AVG_DEPOSIT_BALANCE_YOY,
+		CG_AVG_LOAN_BALANCE,
+		CG_AVG_LOAN_BALANCE_QOQ,
+		CG_AVG_LOAN_BALANCE_YOY,
+		CG_AVG_AUM_BALANCE,
+		CG_AVG_MID_INCOME_AMT,
+		CG_AVG_BUY_FIN_AMT,
+		CG_AVG_OVERALL_VALUE from OCRM_F_CISS_CG_INDEX_STATS WHERE
+		1=1
+		<if test="StartDate != null and StartDate !='' and endDate != null and endDate !=''">
+			AND DATA_DATE BETWEEN '${StartDate}' AND '${endDate}'
+		</if>
+		 AND CUST_GROUP_NO=#{custGroupId,jdbcType=VARCHAR}
+	</select>
+   <select id="selectMaxDate" parameterType="String" resultType="String">
+       SELECT MAX(DATA_DATE) as dataDate FROM OCRM_F_CISS_CG_INDEX_STATS WHERE CUST_GROUP_NO=#{custGroupId,jdbcType=VARCHAR} and rownum = 1
+   </select>
+	<select id="queryIndexStatuslistMap" resultType="cn.com.yusys.yscrm.cust.group.domain.CrmFCissCgIndexStats">
+		select    DATA_DATE,
+		CUST_GROUP_NO,
+		CUST_NUMBER,
+		CUST_NUMBER_QOQ,
+		CUST_NUMBER_YOY,
+		CG_AUM_YEAR_AVG_BALANCE,
+		CG_AUM_YEAR_AVG_BALANCE_QOQ,
+		CG_AUM_YEAR_AVG_BALANCE_YOY,
+		CG_DEPOSIT_BALANCE,
+		CG_DEPOSIT_BALANCE_QOQ,
+		CG_DEPOSIT_BALANCE_YOY,
+		CG_LOAN_BALANCE,
+		CG_LOAN_BALANCE_QOQ,
+		CG_LOAN_BALANCE_YOY,
+		CUST_GRADE_1_NUMBER,
+		CUST_GRADE_2_NUMBER,
+		CUST_GRADE_3_NUMBER,
+		CUST_GRADE_4_NUMBER,
+		CUST_GRADE_5_NUMBER,
+		CUST_GRADE_6_NUMBER,
+		CG_TRUST_BALANCE_RMB,
+		CG_STRUST_FIN_BALANCE_RMB,
+		CG_QDII_BALANCE_RMB,
+		CG_COLLECT_PAY_BALANCE,
+		CG_RMB_FUND_BALANCE,
+		CG_DEMAND_DEPOSIT_BALANCE,
+		CG_TIME_DEPOSIT_BALANCE,
+		CG_INSURRANCE_BALANCE_RMB,
+		CG_AUM_BALANCE,
+		CG_MID_INCOME_AMT,
+		CG_BUY_FIN_AMT,
+		CG_AVG_AUM_YEAR_AVG_BALANCE,
+		CG_AVG_AUM_YEAR_AVG_BALANCE_QOQ,
+		CG_AVG_AUM_YEAR_AVG_BALANCE_YOY,
+		CG_AVG_DEPOSIT_BALANCE,
+		CG_AVG_DEPOSIT_BALANCE_QOQ,
+		CG_AVG_DEPOSIT_BALANCE_YOY,
+		CG_AVG_LOAN_BALANCE,
+		CG_AVG_LOAN_BALANCE_QOQ,
+		CG_AVG_LOAN_BALANCE_YOY,
+		CG_AVG_AUM_BALANCE,
+		CG_AVG_MID_INCOME_AMT,
+		CG_AVG_BUY_FIN_AMT,
+		CG_AVG_OVERALL_VALUE
+		from OCRM_F_CISS_CG_INDEX_STATS WHERE
+		1=1
+		<if test=" endDate != null and endDate !=''">
+			AND DATA_DATE=#{endDate}
+		</if>
+		AND CUST_GROUP_NO=#{custGroupId,jdbcType=VARCHAR} and rownum = 1
+	</select>
+	<select id="getcustomerList"  parameterType="cn.com.yusys.yscrm.cust.group.domain.CrmCustomerDTO" resultType="cn.com.yusys.yscrm.cust.group.domain.CrmFCgPreparationVO">
+		SELECT DISTINCT  T.CUST_NO custId,
+		case when T.CUST_NAME is null then T.CUST_ENG_NAME else T.CUST_NAME end custName,
+		T.CUST_ENG_NAME custEngName,
+		T.NDS_CUST_NO ndsCustNo,
+		T.NATIONALITY nationality,
+		T.AUM_BALANCE aumBalance,
+		T.AUM_BALANCE_AVG_RMB aumBalanceAvgRmb,
+		T.NON_EXCHANGE_FIN_BALANCE nonExchangeFinBalance,
+		T.EXCHANGE_FIN_BALANCE exchangeFinBalance,
+		T.TRUST_BALANCE_RMB trustBalanceRmb,
+		T.RMB_FUND_BALANCE rmbFundBalance,
+		T.QDII_BALANCE_RMB qdiiBalanceRmb,
+		T.ASSEST_MANAGE_BALANCE assestManageBalance,
+		T.INSURRANCE_BALANCE insurranceBalance,
+		T.DEPOSIT_BALANCE_RMB depositBalanceRmb,
+		M.ORG_NAME belongBrch,
+		F.ORG_NAME belongBranch,
+		T.MANAGE_NAME mgrNameOne,
+		T.PERSONAL_LOAN_NAME mgrNameTwo,
+		CC.MAX_CONTACT_DATE contactDate
+		FROM
+		<if test="dataAuth != null and orgIdAuth =='500'">
+			(
+			SELECT  MS.CUST_ID,PER.ORG_ID
+			FROM ACRM_F_CI_PER_ADMIT_INFO MS
+		  <if test="custQueryType =='01'">
+			  INNER JOIN OCRM_F_CI_ADMIT_BELONG PER ON PER.CUST_ID=MS.CUST_ID
+			  <choose>
+				  <when test="_orgCode != null and _orgCode =='500'">
+					  AND (length(PER.MGR_ID)=4 or PER.MGR_ID='500')
+				  </when>
+				  <otherwise>
+					  AND length(PER.MGR_ID)=4 and PER.MGR_ID LIKE CONCAT(CONCAT('%', #{_orgCode, jdbcType=VARCHAR}),'%')
+				  </otherwise>
+			  </choose>
+			  <if test="mgrType != null and mgrType !=''">
+				  AND PER.MGR_TYPE=#{mgrType,jdbcType=VARCHAR}
+			  </if>
+		</if>
+		<if test="custQueryType =='02'">
+			INNER JOIN(
+			SELECT S.CUST_ID,S.ORG_ID FROM OCRM_F_CI_ADMIT_BELONG S
+			where 1=1
+			AND length(S.MGR_ID)=8
+            ${dataAuth}
+			UNION ALL
+			SELECT R.CUST_ID,BELONG.ORG_ID FROM OCRM_F_CI_TRUSTEESHIP_LIST R
+			INNER JOIN OCRM_F_CI_ADMIT_BELONG BELONG ON R.CUST_ID=BELONG.CUST_ID
+			<if test="mgrType != null and mgrType !=''">
+				AND BELONG.MGR_TYPE=#{mgrType,jdbcType=VARCHAR}
+			</if>
+			INNER JOIN OCRM_F_CI_TRUSTEESHIP_APPLY TT ON TT.APPLY_ID = R.APPLY_NO
+			AND TT.TRUST_STAT='04'
+			AND TT.TRUST_MGR_ID=#{_userCode,jdbcType = VARCHAR}
+			AND TT.DEAD_LINE &gt;= to_date('${dataDate}','yyyy-mm-dd')
+			)PER ON PER.CUST_ID=MS.CUST_ID
+		</if>
+			<if test="custType != null and custType !=''">
+				<if test="certNo != null and certNo !=''">
+					INNER JOIN ACRM_F_CI_CUST_IDENT_INFO CR
+					ON CR.CUST_ID=MS.CUST_ID
+					AND CR.CERT_TYPE=#{custType,jdbcType=VARCHAR}
+					AND CR.CERT_NO=#{certNo,jdbcType=VARCHAR}
+				</if>
+			</if>
+
+			<if test="cardNo != null and cardNo !=''">
+				INNER JOIN OCRM_F_CG_CARD_NUMBER K
+				ON K.CUSTID=MS.CUST_ID
+				AND K.CARD_NUMBER=#{cardNo,jdbcType=VARCHAR}
+			</if>
+			<if test="prodId != null and prodId !=''">
+				INNER JOIN OCRM_F_PD_CUST_FIT_PROD CH
+				ON CH.CUST_ID=MS.CUST_ID
+				AND CH.PROD_ID  LIKE CONCAT(CONCAT('%', #{prodId, jdbcType=VARCHAR}),'%')
+			</if>
+			<if test="prodName != null and prodName !=''">
+				INNER JOIN OCRM_F_PD_CUST_FIT_PROD CH
+				ON CH.CUST_ID=MS.CUST_ID
+				AND CH.PROD_NAME=#{prodName,jdbcType=VARCHAR}
+			</if>
+			<if test="custGrade != null and custGrade !=''">
+				INNER JOIN OCRM_F_CG_CUST_GRADE_INFO PJ
+				ON PJ.ECIF_CUST_NO=MS.CUST_ID
+				AND PJ.AUM_GRADE ${custGrade}
+			</if>
+
+            <if test="loanValueValue != null and loanValueValue =='01'">
+                INNER JOIN ACRM_F_PD_CUST_INDEXS PD
+                ON PD.CUST_NO=MS.CUST_ID
+                <if test="aumBalanceStart != null and aumBalanceStart !=''  and aumBalanceEnd !=null and aumBalanceEnd !=''">
+                    AND PD.AUM_BALANCE BETWEEN ${aumBalanceStart} AND ${aumBalanceEnd}
+                </if>
+				<if test="aumBalanceStart != null and aumBalanceStart !=''">
+					AND PD.AUM_BALANCE <![CDATA[ >= ]]> ${aumBalanceStart}
+				</if>
+				<if test="aumBalanceEnd != null and aumBalanceEnd !=''">
+					AND PD.AUM_BALANCE <![CDATA[ <= ]]> ${aumBalanceEnd}
+				</if>
+                <if test="isOnePaperCust != null and isOnePaperCust !=''">
+                    AND PD.IS_ONE_PAPER_CUST=#{loanValue,jdbcType=VARCHAR}
+                </if>
+                <if test="isAccreditedInvestor != null and isAccreditedInvestor !=''">
+                    AND PD.IS_ACCREDITED_INVESTOR=#{loanValue,jdbcType=VARCHAR}
+                </if>
+                <if test="isFinCust != null and isFinCust !=''">
+                    AND PD.IS_FIN_CUST=#{loanValue,jdbcType=VARCHAR}
+                </if>
+                <if test="isParkingInstallment != null and isParkingInstallment !=''">
+                    AND PD.IS_PARKING_INSTALLMENT=#{loanValue,jdbcType=VARCHAR}
+                </if>
+                <if test="isPerHouseLoan != null and isPerHouseLoan !=''">
+                    AND PD.IS_PER_HOUSE_LOAN=#{loanValue,jdbcType=VARCHAR}
+                </if>
+                <if test="isLegalHouseLoan != null and isLegalHouseLoan !=''">
+                    AND PD.IS_LEGAL_HOUSE_LOAN=#{loanValue,jdbcType=VARCHAR}
+                </if>
+                <if test="isCreditCardCust != null and isCreditCardCust !=''">
+                    AND PD.IS_CREDIT_CARD_CUST=#{loanValue,jdbcType=VARCHAR}
+                </if>
+                <if test="isfixedDepositMature != null and isfixedDepositMature !=''">
+                    AND PD.IS_FIXED_DEPOSIT_MATURE=#{loanValue,jdbcType=VARCHAR}
+                </if>
+                <if test="isLoanMature != null and isLoanMature !=''">
+                    AND PD.IS_LOAN_MATURE=#{loanValue,jdbcType=VARCHAR}
+                </if>
+                <if test="isFinMature != null and isFinMature !=''">
+                    AND PD.IS_FIN_MATURE=#{loanValue,jdbcType=VARCHAR}
+                </if>
+				<if test="isMktBlack != null and isMktBlack !=''">
+					AND PD.IS_MKT_BLACK=#{loanValue,jdbcType=VARCHAR}
+				</if>
+            </if>
+			WHERE 1=1
+			<if test="countAreaCd != null and countAreaCd !=''">
+				AND MS.COUNTRY_CD_OTHER=#{countAreaCd,jdbcType=VARCHAR}
+			</if>
+			<if test="ageGroup != null and ageGroup !=''">
+				AND MS.PEOPLE_OF_ALL_AGES=#{ageGroup,jdbcType=VARCHAR}
+			</if>
+			<if test="figureCode != null and figureCode !=''">
+				AND MS.APLIT_JOINT  LIKE CONCAT(CONCAT(CONCAT(CONCAT('%','|'), #{figureCode, jdbcType=VARCHAR}),'|'),'%')
+			</if>
+			<if test="characterCode != null and characterCode !=''">
+				AND MS.APLIT_JOINT  LIKE CONCAT(CONCAT('%', #{characterCode, jdbcType=VARCHAR}),'%')
+			</if>
+			GROUP BY MS.CUST_ID,PER.ORG_ID
+			)Q
+			INNER JOIN OCRM_F_CG_PREPARATION T
+			ON T.CUST_NO=Q.CUST_ID
+			LEFT JOIN ADMIN_SM_ORG M
+			ON Q.ORG_ID=M.ORG_CODE
+			LEFT JOIN ADMIN_SM_ORG F
+			ON  F.ORG_ID=M.UP_ORG_ID
+			LEFT JOIN  (SELECT CONTACT_CUST_ID, MAX(CONTACT_DATE) AS MAX_CONTACT_DATE
+			              FROM OCRM_F_WP_CUSTOMER_CONTACT
+			            GROUP BY CONTACT_CUST_ID
+			           ) CC
+			ON CC.CONTACT_CUST_ID=Q.CUST_ID
+			<choose>
+				<when test="sort != null and sort !=''">
+					order by ${sort}
+				</when>
+				<otherwise>
+					order by T.AUM_BALANCE desc
+				</otherwise>
+			</choose>
+		</if>
+		<if test="dataAuth != null and orgIdAuth !='500'">
+			(
+			SELECT  MS.CUST_ID,PER.ORG_ID
+			FROM ACRM_F_CI_PER_ADMIT_INFO MS
+			<if test="custQueryType =='01'">
+				INNER JOIN OCRM_F_CI_ADMIT_BELONG PER ON PER.CUST_ID=MS.CUST_ID
+				<choose>
+					<when test="_orgCode != null and _orgCode =='500'">
+						AND (length(PER.MGR_ID)=4 or PER.MGR_ID='500')
+					</when>
+					<otherwise>
+						AND length(PER.MGR_ID)=4 and PER.MGR_ID LIKE CONCAT(CONCAT('%', #{_orgCode, jdbcType=VARCHAR}),'%')
+					</otherwise>
+				</choose>
+				<if test="mgrType != null and mgrType !=''">
+					AND PER.MGR_TYPE=#{mgrType,jdbcType=VARCHAR}
+				</if>
+			</if>
+			<if test="custQueryType =='02'">
+				INNER JOIN(
+				SELECT S.CUST_ID,S.ORG_ID FROM OCRM_F_CI_ADMIT_BELONG S
+				where 1=1
+				AND length(S.MGR_ID)=8
+                ${dataAuth}
+				UNION ALL
+				SELECT R.CUST_ID,BELONG.ORG_ID FROM OCRM_F_CI_TRUSTEESHIP_LIST R
+				INNER JOIN OCRM_F_CI_ADMIT_BELONG BELONG ON R.CUST_ID=BELONG.CUST_ID
+				<if test="mgrType != null and mgrType !=''">
+					AND BELONG.MGR_TYPE=#{mgrType,jdbcType=VARCHAR}
+				</if>
+				INNER JOIN OCRM_F_CI_TRUSTEESHIP_APPLY TT ON TT.APPLY_ID = R.APPLY_NO
+				AND TT.TRUST_STAT='04'
+				AND TT.TRUST_MGR_ID=#{_userCode,jdbcType = VARCHAR}
+				AND TT.DEAD_LINE &gt;= to_date('${dataDate}','yyyy-mm-dd')
+				)PER ON PER.CUST_ID=MS.CUST_ID
+			</if>
+			<if test="custType != null and custType !=''">
+				<if test="certNo != null and certNo !=''">
+					INNER JOIN ACRM_F_CI_CUST_IDENT_INFO CR
+					ON CR.CUST_ID=MS.CUST_ID
+					AND CR.CERT_TYPE=#{custType,jdbcType=VARCHAR}
+					AND CR.CERT_NO=#{certNo,jdbcType=VARCHAR}
+				</if>
+			</if>
+
+			<if test="cardNo != null and cardNo !=''">
+				INNER JOIN OCRM_F_CG_CARD_NUMBER K
+				ON K.CUSTID=MS.CUST_ID
+				AND K.CARD_NUMBER=#{cardNo,jdbcType=VARCHAR}
+			</if>
+			<if test="prodId != null and prodId !=''">
+				INNER JOIN OCRM_F_PD_CUST_FIT_PROD CH
+				ON CH.CUST_ID=MS.CUST_ID
+				AND CH.PROD_ID  LIKE CONCAT(CONCAT('%', #{prodId, jdbcType=VARCHAR}),'%')
+			</if>
+			<if test="prodName != null and prodName !=''">
+				INNER JOIN OCRM_F_PD_CUST_FIT_PROD CH
+				ON CH.CUST_ID=MS.CUST_ID
+				AND CH.PROD_NAME=#{prodName,jdbcType=VARCHAR}
+			</if>
+			<if test="custGrade != null and custGrade !=''">
+				INNER JOIN OCRM_F_CG_CUST_GRADE_INFO PJ
+				ON PJ.ECIF_CUST_NO=MS.CUST_ID
+				AND PJ.AUM_GRADE ${custGrade}
+			</if>
+
+			<if test="loanValueValue != null and loanValueValue =='01'">
+				INNER JOIN ACRM_F_PD_CUST_INDEXS PD
+                ON PD.CUST_NO=MS.CUST_ID
+                <if test="aumBalanceStart != null and aumBalanceStart !=''  and aumBalanceEnd !=null and aumBalanceEnd !=''">
+                    AND PD.AUM_BALANCE BETWEEN ${aumBalanceStart} AND ${aumBalanceEnd}
+                </if>
+				<if test="aumBalanceStart != null and aumBalanceStart !=''">
+					AND PD.AUM_BALANCE <![CDATA[ >= ]]> ${aumBalanceStart}
+				</if>
+				<if test="aumBalanceEnd != null and aumBalanceEnd !=''">
+					AND PD.AUM_BALANCE <![CDATA[ <= ]]> ${aumBalanceEnd}
+				</if>
+                <if test="isOnePaperCust != null and isOnePaperCust !=''">
+                    AND PD.IS_ONE_PAPER_CUST=#{loanValue,jdbcType=VARCHAR}
+                </if>
+                <if test="isAccreditedInvestor != null and isAccreditedInvestor !=''">
+                    AND PD.IS_ACCREDITED_INVESTOR=#{loanValue,jdbcType=VARCHAR}
+                </if>
+                <if test="isFinCust != null and isFinCust !=''">
+                    AND PD.IS_FIN_CUST=#{loanValue,jdbcType=VARCHAR}
+                </if>
+                <if test="isParkingInstallment != null and isParkingInstallment !=''">
+                    AND PD.IS_PARKING_INSTALLMENT=#{loanValue,jdbcType=VARCHAR}
+                </if>
+                <if test="isPerHouseLoan != null and isPerHouseLoan !=''">
+                    AND PD.IS_PER_HOUSE_LOAN=#{loanValue,jdbcType=VARCHAR}
+                </if>
+                <if test="isLegalHouseLoan != null and isLegalHouseLoan !=''">
+                    AND PD.IS_LEGAL_HOUSE_LOAN=#{loanValue,jdbcType=VARCHAR}
+                </if>
+                <if test="isCreditCardCust != null and isCreditCardCust !=''">
+                    AND PD.IS_CREDIT_CARD_CUST=#{loanValue,jdbcType=VARCHAR}
+                </if>
+                <if test="isfixedDepositMature != null and isfixedDepositMature !=''">
+                    AND PD.IS_FIXED_DEPOSIT_MATURE=#{loanValue,jdbcType=VARCHAR}
+                </if>
+                <if test="isLoanMature != null and isLoanMature !=''">
+                    AND PD.IS_LOAN_MATURE=#{loanValue,jdbcType=VARCHAR}
+                </if>
+                <if test="isFinMature != null and isFinMature !=''">
+                    AND PD.IS_FIN_MATURE=#{loanValue,jdbcType=VARCHAR}
+                </if>
+				<if test="isMktBlack != null and isMktBlack !=''">
+					AND PD.IS_MKT_BLACK=#{loanValue,jdbcType=VARCHAR}
+				</if>
+            </if>
+			WHERE 1=1
+			<if test="countAreaCd != null and countAreaCd !=''">
+				AND MS.COUNTRY_CD_OTHER=#{countAreaCd,jdbcType=VARCHAR}
+			</if>
+			<if test="ageGroup != null and ageGroup !=''">
+				AND MS.PEOPLE_OF_ALL_AGES=#{ageGroup,jdbcType=VARCHAR}
+			</if>
+			<if test="figureCode != null and figureCode !=''">
+				AND MS.APLIT_JOINT  LIKE   CONCAT(CONCAT(CONCAT(CONCAT('%','|'), #{figureCode, jdbcType=VARCHAR}),'|'),'%')
+			</if>
+			<if test="characterCode != null and characterCode !=''">
+				AND MS.APLIT_JOINT  LIKE CONCAT(CONCAT('%', #{characterCode, jdbcType=VARCHAR}),'%')
+			</if>
+			GROUP BY MS.CUST_ID,PER.ORG_ID
+			)Q
+			INNER JOIN OCRM_F_CG_PREPARATION T
+			ON T.CUST_NO=Q.CUST_ID
+			LEFT JOIN ADMIN_SM_ORG M
+			ON Q.ORG_ID=M.ORG_CODE
+			LEFT JOIN ADMIN_SM_ORG F
+			ON  F.ORG_ID=M.UP_ORG_ID
+			LEFT JOIN  (SELECT CONTACT_CUST_ID, MAX(CONTACT_DATE) AS MAX_CONTACT_DATE
+			FROM OCRM_F_WP_CUSTOMER_CONTACT
+			GROUP BY CONTACT_CUST_ID
+			) CC
+			ON CC.CONTACT_CUST_ID=Q.CUST_ID
+			<choose>
+				<when test="sort != null and sort !=''">
+					order by ${sort}
+				</when>
+				<otherwise>
+					order by T.AUM_BALANCE desc
+				</otherwise>
+			</choose>
+		</if>
+		<if test="dataAuth == null ">
+			(
+			SELECT  MS.CUST_ID,PER.ORG_ID
+			FROM ACRM_F_CI_PER_ADMIT_INFO MS
+			<if test="custQueryType =='01'">
+				INNER JOIN OCRM_F_CI_ADMIT_BELONG PER ON PER.CUST_ID=MS.CUST_ID
+				<choose>
+					<when test="_orgCode != null and _orgCode =='500'">
+						AND (length(PER.MGR_ID)=4 or PER.MGR_ID='500')
+					</when>
+					<otherwise>
+						AND length(PER.MGR_ID)=4 and PER.MGR_ID LIKE CONCAT(CONCAT('%', #{_orgCode, jdbcType=VARCHAR}),'%')
+					</otherwise>
+				</choose>
+				<if test="mgrType != null and mgrType !=''">
+					AND PER.MGR_TYPE=#{mgrType,jdbcType=VARCHAR}
+				</if>
+			</if>
+			<if test="custQueryType =='02'">
+				INNER JOIN(
+				SELECT S.CUST_ID,S.ORG_ID FROM OCRM_F_CI_ADMIT_BELONG S
+				where 1=1
+				AND length(S.MGR_ID)=8
+                ${dataAuth}
+				UNION ALL
+				SELECT R.CUST_ID,BELONG.ORG_ID FROM OCRM_F_CI_TRUSTEESHIP_LIST R
+				INNER JOIN OCRM_F_CI_ADMIT_BELONG BELONG ON R.CUST_ID=BELONG.CUST_ID
+				<if test="mgrType != null and mgrType !=''">
+					AND BELONG.MGR_TYPE=#{mgrType,jdbcType=VARCHAR}
+				</if>
+				INNER JOIN OCRM_F_CI_TRUSTEESHIP_APPLY TT ON TT.APPLY_ID = R.APPLY_NO
+				AND TT.TRUST_STAT='04'
+				AND TT.TRUST_MGR_ID=#{_userCode,jdbcType = VARCHAR}
+				AND TT.DEAD_LINE &gt;= to_date('${dataDate}','yyyy-mm-dd')
+				)PER ON PER.CUST_ID=MS.CUST_ID
+			</if>
+			<if test="custType != null and custType !=''">
+				<if test="certNo != null and certNo !=''">
+					INNER JOIN ACRM_F_CI_CUST_IDENT_INFO CR
+					ON CR.CUST_ID=MS.CUST_ID
+					AND CR.CERT_TYPE=#{custType,jdbcType=VARCHAR}
+					AND CR.CERT_NO=#{certNo,jdbcType=VARCHAR}
+				</if>
+			</if>
+
+			<if test="cardNo != null and cardNo !=''">
+				INNER JOIN OCRM_F_CG_CARD_NUMBER K
+				ON K.CUSTID=MS.CUST_ID
+				AND K.CARD_NUMBER=#{cardNo,jdbcType=VARCHAR}
+			</if>
+			<if test="prodId != null and prodId !=''">
+				INNER JOIN OCRM_F_PD_CUST_FIT_PROD CH
+				ON CH.CUST_ID=MS.CUST_ID
+				AND CH.PROD_ID  LIKE CONCAT(CONCAT('%', #{prodId, jdbcType=VARCHAR}),'%')
+			</if>
+			<if test="prodName != null and prodName !=''">
+				INNER JOIN OCRM_F_PD_CUST_FIT_PROD CH
+				ON CH.CUST_ID=MS.CUST_ID
+				AND CH.PROD_NAME=#{prodName,jdbcType=VARCHAR}
+			</if>
+			<if test="custGrade != null and custGrade !=''">
+				INNER JOIN OCRM_F_CG_CUST_GRADE_INFO PJ
+				ON PJ.ECIF_CUST_NO=MS.CUST_ID
+				AND PJ.AUM_GRADE ${custGrade}
+			</if>
+
+			<if test="loanValueValue != null and loanValueValue =='01'">
+				INNER JOIN ACRM_F_PD_CUST_INDEXS PD
+                ON PD.CUST_NO=MS.CUST_ID
+                <if test="aumBalanceStart != null and aumBalanceStart !=''  and aumBalanceEnd !=null and aumBalanceEnd !=''">
+                    AND PD.AUM_BALANCE BETWEEN ${aumBalanceStart} AND ${aumBalanceEnd}
+                </if>
+				<if test="aumBalanceStart != null and aumBalanceStart !=''">
+					AND PD.AUM_BALANCE <![CDATA[ >= ]]> ${aumBalanceStart}
+				</if>
+				<if test="aumBalanceEnd != null and aumBalanceEnd !=''">
+					AND PD.AUM_BALANCE <![CDATA[ <= ]]> ${aumBalanceEnd}
+				</if>
+                <if test="isOnePaperCust != null and isOnePaperCust !=''">
+                    AND PD.IS_ONE_PAPER_CUST=#{loanValue,jdbcType=VARCHAR}
+                </if>
+                <if test="isAccreditedInvestor != null and isAccreditedInvestor !=''">
+                    AND PD.IS_ACCREDITED_INVESTOR=#{loanValue,jdbcType=VARCHAR}
+                </if>
+                <if test="isFinCust != null and isFinCust !=''">
+                    AND PD.IS_FIN_CUST=#{loanValue,jdbcType=VARCHAR}
+                </if>
+                <if test="isParkingInstallment != null and isParkingInstallment !=''">
+                    AND PD.IS_PARKING_INSTALLMENT=#{loanValue,jdbcType=VARCHAR}
+                </if>
+                <if test="isPerHouseLoan != null and isPerHouseLoan !=''">
+                    AND PD.IS_PER_HOUSE_LOAN=#{loanValue,jdbcType=VARCHAR}
+                </if>
+                <if test="isLegalHouseLoan != null and isLegalHouseLoan !=''">
+                    AND PD.IS_LEGAL_HOUSE_LOAN=#{loanValue,jdbcType=VARCHAR}
+                </if>
+                <if test="isCreditCardCust != null and isCreditCardCust !=''">
+                    AND PD.IS_CREDIT_CARD_CUST=#{loanValue,jdbcType=VARCHAR}
+                </if>
+                <if test="isfixedDepositMature != null and isfixedDepositMature !=''">
+                    AND PD.IS_FIXED_DEPOSIT_MATURE=#{loanValue,jdbcType=VARCHAR}
+                </if>
+                <if test="isLoanMature != null and isLoanMature !=''">
+                    AND PD.IS_LOAN_MATURE=#{loanValue,jdbcType=VARCHAR}
+                </if>
+                <if test="isFinMature != null and isFinMature !=''">
+                    AND PD.IS_FIN_MATURE=#{loanValue,jdbcType=VARCHAR}
+                </if>
+				<if test="isMktBlack != null and isMktBlack !=''">
+					AND PD.IS_MKT_BLACK=#{loanValue,jdbcType=VARCHAR}
+				</if>
+            </if>
+			WHERE 1=1
+			<if test="countAreaCd != null and countAreaCd !=''">
+				AND MS.COUNTRY_CD_OTHER=#{countAreaCd,jdbcType=VARCHAR}
+			</if>
+			<if test="ageGroup != null and ageGroup !=''">
+				AND MS.PEOPLE_OF_ALL_AGES=#{ageGroup,jdbcType=VARCHAR}
+			</if>
+			<if test="figureCode != null and figureCode !=''">
+				AND MS.APLIT_JOINT  LIKE   CONCAT(CONCAT(CONCAT(CONCAT('%','|'), #{figureCode, jdbcType=VARCHAR}),'|'),'%')
+
+			</if>
+			<if test="characterCode != null and characterCode !=''">
+				AND MS.APLIT_JOINT  LIKE CONCAT(CONCAT('%', #{characterCode, jdbcType=VARCHAR}),'%')
+			</if>
+			GROUP BY MS.CUST_ID,PER.ORG_ID
+			)Q
+			INNER JOIN OCRM_F_CG_PREPARATION T
+			ON T.CUST_NO=Q.CUST_ID
+			LEFT JOIN ADMIN_SM_ORG M
+			ON Q.ORG_ID=M.ORG_CODE
+			LEFT JOIN ADMIN_SM_ORG F
+			ON  F.ORG_ID=M.UP_ORG_ID
+			LEFT JOIN  (SELECT CONTACT_CUST_ID, MAX(CONTACT_DATE) AS MAX_CONTACT_DATE
+			FROM OCRM_F_WP_CUSTOMER_CONTACT
+			GROUP BY CONTACT_CUST_ID
+			) CC
+			ON CC.CONTACT_CUST_ID=Q.CUST_ID
+			<choose>
+				<when test="sort != null and sort !=''">
+					order by ${sort}
+				</when>
+				<otherwise>
+					order by T.AUM_BALANCE desc
+				</otherwise>
+			</choose>
+		</if>
+	</select>
+
+	<select id="checkUpNameId" parameterType="String" resultType="int">
+		select  count(*) from OCRM_F_CISS_CG_BASE b
+		where 1=1
+		<if test="custGroupId != null and custGroupId !=''">
+			and b.CUST_GROUP_ID = #{custGroupId,jdbcType=VARCHAR}
+		</if>
+		<if test="custGroupName != null and custGroupName !=''">
+			and b.CUST_GROUP_NAME = #{custGroupName,jdbcType=VARCHAR}
+		</if>
+	</select>
+	<select id="checkUpNameuserId" parameterType="String" resultType="int">
+		select  count(*) from OCRM_F_CISS_CG_BASE b
+		where 1=1
+		<if test="custGroupId != null and custGroupId !=''">
+			and b.CUST_GROUP_ID = #{custGroupId,jdbcType=VARCHAR}
+		</if>
+		<if test="custGroupName != null and custGroupName !=''">
+			and b.CUST_GROUP_NAME = #{custGroupName,jdbcType=VARCHAR}
+		</if>
+		AND b.CREATE_USER= #{userName,jdbcType=VARCHAR}
+	</select>
+
+	<insert id="insertBase"  parameterType="cn.com.yusys.yscrm.cust.group.domain.CrmFCissCgBase">
+		insert into OCRM_F_CISS_CG_BASE
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="seqno != null and seqno !=''">
+				SEQNO,
+			</if>
+			<if test="orgId != null and orgId !=''">
+				ORG_ID,
+			</if>
+			<if test="samId != null and samId !=''">
+				SAM_ID,
+			</if>
+			<if test="custGroupName != null and custGroupName !=''">
+				CUST_GROUP_NAME,
+			</if>
+			<if test="custGroupId != null and custGroupId !=''">
+				CUST_GROUP_ID,
+			</if>
+			<if test="isFocus != null and isFocus !=''">
+				IS_FOCUS,
+			</if>
+			<if test="custGroupDescribe != null and custGroupDescribe !=''">
+				CUST_GROUP_DESCRIBE,
+			</if>
+			<if test="custGroupRule != null and custGroupRule !=''">
+				CUST_GROUP_RULE,
+			</if>
+			<if test="initialCout != null and initialCout !=''">
+				INITIAL_COUT,
+			</if>
+			<if test="custGroupType != null and custGroupType !=''">
+				CUST_GROUP_TYPE,
+			</if>
+			<if test="custGroupLabel != null and custGroupLabel !=''">
+				CUST_GROUP_LABEL,
+			</if>
+			<if test="isFlag != null and isFlag !=''">
+				IS_FLAG,
+			</if>
+			<if test="createDate != null ">
+				CREATE_DATE,
+			</if>
+			<if test="createUser != null and createUser !=''">
+				CREATE_USER
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="seqno != null and seqno !=''">
+				#{seqno,jdbcType=VARCHAR},
+			</if>
+			<if test="orgId != null and orgId !='' ">
+				#{orgId,jdbcType=VARCHAR},
+			</if>
+			<if test="samId != null and samId !=''">
+				#{samId,jdbcType=VARCHAR},
+			</if>
+			<if test="custGroupName != null and custGroupName !='' ">
+				#{custGroupName,jdbcType=VARCHAR},
+			</if>
+			<if test="custGroupId != null and custGroupId !='' ">
+				#{custGroupId,jdbcType=VARCHAR},
+			</if>
+			<if test="isFocus != null and isFocus !=''">
+				#{isFocus,jdbcType=VARCHAR},
+			</if>
+			<if test="custGroupDescribe != null and custGroupDescribe !=''">
+				#{custGroupDescribe,jdbcType=VARCHAR},
+			</if>
+			<if test="custGroupRule != null and custGroupRule !=''">
+				#{custGroupRule,jdbcType=VARCHAR},
+			</if>
+			<if test="initialCout != null and initialCout !=''">
+				#{initialCout,jdbcType=VARCHAR},
+			</if>
+			<if test="custGroupType != null and custGroupType !=''">
+				#{custGroupType,jdbcType=VARCHAR},
+			</if>
+			<if test="custGroupLabel != null and custGroupLabel !=''">
+				#{custGroupLabel,jdbcType=VARCHAR},
+			</if>
+			<if test="isFlag != null and isFlag !=''">
+				#{isFlag,jdbcType=VARCHAR},
+			</if>
+			<if test="createDate != null">
+				#{createDate,jdbcType=DATE},
+			</if>
+			<if test="createUser != null and createUser !=''">
+				#{createUser,jdbcType=VARCHAR}
+			</if>
+		</trim>
+	</insert>
+	<insert id="insertcustomer" parameterType="cn.com.yusys.yscrm.cust.group.domain.CrmFCgCustomer">
+		insert into OCRM_F_CG_CUSTOMER
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="seqno != null and seqno !=''">
+				SEQNO,
+			</if>
+			<if test="custGroupId != null and custGroupId !=''">
+				CUST_GROUP_ID,
+			</if>
+			<if test="custid != null and custid !=''">
+				CUSTID,
+			</if>
+			<if test="custidName != null and custidName !=''">
+				CUSTID_NAME,
+			</if>
+			<if test="custidEngname != null and custidEngname !=''">
+				CUSTID_ENGNAME,
+			</if>
+			<if test="createDate != null">
+				CREATE_DATE
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="seqno != null and seqno !=''">
+				#{seqno,jdbcType=VARCHAR},
+			</if>
+			<if test="custGroupId != null and custGroupId !=''">
+				#{custGroupId,jdbcType=VARCHAR},
+			</if>
+			<if test="custid != null and custid !=''">
+				#{custid,jdbcType=VARCHAR},
+			</if>
+			<if test="custidName != null and custidName !=''">
+				#{custidName,jdbcType=VARCHAR},
+			</if>
+			<if test="custidEngname != null and custidEngname !=''">
+				#{custidEngname,jdbcType=VARCHAR},
+			</if>
+			<if test="createDate != null ">
+				#{createDate,jdbcType=DATE}
+			</if>
+		</trim>
+	</insert>
+
+	<insert id="insertcustomerList" parameterType="java.util.List">
+		insert ALL
+		<foreach collection="list" item="item" index="index" separator="">
+		into OCRM_F_CG_CUSTOMER (
+		    SEQNO,
+			CUST_GROUP_ID,
+			CUSTID,
+			CUSTID_NAME,
+			CUSTID_ENGNAME,
+			CREATE_DATE
+			) VALUES
+			(
+			    #{item.seqno,jdbcType=VARCHAR},
+				#{item.custGroupId,jdbcType=VARCHAR},
+				#{item.custid,jdbcType=VARCHAR},
+				#{item.custidName,jdbcType=VARCHAR},
+			   #{item.custidEngname,jdbcType=VARCHAR},
+				#{item.createDate,jdbcType=DATE}
+				)
+		</foreach>
+		SELECT 1 FROM DUAL
+	</insert>
+	<delete id="deleteCustomer" parameterType="cn.com.yusys.yscrm.cust.group.domain.CrmBaseCuDTO">
+		DELETE FROM OCRM_F_CG_CUSTOMER b
+		WHERE b.CUST_GROUP_ID ${custGroupId}
+	</delete>
+	<select id="querycrmFCgCustomerTagList" resultType="cn.com.yusys.yscrm.cust.group.domain.CrmFCgCustomerTag">
+		SELECT DATA_DATE as dataDate,
+		CUST_GROUP_NO,
+		TAG_NO,
+		TAG_NAME,
+		CUST_NUMBER FROM OCRM_F_CG_CUSTOMER_TAG WHERE CUST_GROUP_NO=#{custGroupId,jdbcType=VARCHAR}
+		<if test=" endDate != null and endDate !=''">
+			AND DATA_DATE=#{endDate}
+		</if>
+		 ORDER BY CUST_NUMBER
+	</select>
+	<select id="gettagName" resultType="String">
+		select TAG_NAME from CIM_F_MM_TAG_TAGS WHERE TAG_NO=#{tagNo}
+	</select>
+
+
+	<insert id="insertcrmFCgCustomerPreparation"  parameterType="cn.com.yusys.yscrm.cust.group.domain.CrmFCgCustomerPreparation">
+		insert into OCRM_F_CG_CUSTOMER_PREPARATION
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="seqno != null and seqno !=''">
+				SEQNO,
+			</if>
+			<if test="custGroupId != null and custGroupId !=''">
+				CUST_GROUP_ID,
+			</if>
+			<if test="aumBalance != null and aumBalance !=''">
+				AUM_BALANCE,
+			</if>
+			<if test="custgrade != null and custgrade !=''">
+				CUSTGRADE,
+			</if>
+			<if test="countareacd != null and countareacd !=''">
+				COUNTAREACD,
+			</if>
+			<if test="agegroup != null and agegroup !=''">
+				AGEGROUP,
+			</if>
+			<if test="expireno != null and expireno !=''">
+				EXPIRENO,
+			</if>
+			<if test="tagname != null and tagname !=''">
+				TAGNAME,
+			</if>
+			<if test="prodname != null and prodname !=''">
+				PRODNAME,
+			</if>
+			<if test="createDate != null">
+				CREATE_DATE,
+			</if>
+			<if test="createUser != null and createUser !=''">
+				CREATE_USER
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="seqno != null and seqno !=''" >
+				#{seqno,jdbcType=VARCHAR},
+			</if>
+			<if test="custGroupId != null and custGroupId !=''">
+				#{custGroupId,jdbcType=VARCHAR},
+			</if>
+			<if test="aumBalance != null and aumBalance !=''">
+				#{aumBalance,jdbcType=VARCHAR},
+			</if>
+			<if test="custgrade != null and custgrade !=''">
+				#{custgrade,jdbcType=VARCHAR},
+			</if>
+			<if test="countareacd != null and countareacd !=''">
+				#{countareacd,jdbcType=VARCHAR},
+			</if>
+			<if test="agegroup != null and agegroup !=''">
+				#{agegroup,jdbcType=VARCHAR},
+			</if>
+			<if test="expireno != null and expireno !=''">
+				#{expireno,jdbcType=VARCHAR},
+			</if>
+			<if test="tagname != null and tagname !=''">
+				#{tagname,jdbcType=VARCHAR},
+			</if>
+			<if test="prodname != null and prodname !=''">
+				#{prodname,jdbcType=VARCHAR},
+			</if>
+			<if test="createDate != null">
+				#{createDate,jdbcType=DATE},
+			</if>
+			<if test="createUser != null and createUser !=''">
+				#{createDate,jdbcType=VARCHAR}
+			</if>
+		</trim>
+	</insert>
+	<select id="selectocrmFciCgBaseMapper" resultType="cn.com.yusys.yscrm.cust.group.domain.CrmFCgCustomerPreparation">
+		SELECT CUST_GROUP_ID,
+		AUM_BALANCE,
+		CUSTGRADE ,
+		COUNTAREACD,
+		AGEGROUP  ,
+		EXPIRENO ,
+		TAGNAME  ,
+		PRODNAME FROM OCRM_F_CG_CUSTOMER_PREPARATION WHERE 1=1
+		<if test="custGroupId != null and custGroupId !=''">
+			AND CUST_GROUP_ID=#{custGroupId,jdbcType=VARCHAR}
+		</if>
+		AND rownum = 1
+	</select>
+
+
+	<select id="queryjournallist" resultType="cn.com.yusys.yscrm.cust.group.domain.CrmFCgPreparationVO">
+		SELECT distinct T.CUST_NO custId,
+		case when T.CUST_NAME is null then T.CUST_ENG_NAME else T.CUST_NAME end custName,
+		T.CUST_ENG_NAME custEngName,
+		T.NDS_CUST_NO ndsCustNo,
+		T.NATIONALITY nationality,
+		T.AUM_BALANCE aumBalance,
+		T.AUM_BALANCE_AVG_RMB aumBalanceAvgRmb,
+		T.NON_EXCHANGE_FIN_BALANCE nonExchangeFinBalance,
+		T.EXCHANGE_FIN_BALANCE exchangeFinBalance,
+		T.TRUST_BALANCE_RMB trustBalanceRmb,
+		T.RMB_FUND_BALANCE rmbFundBalance,
+		T.QDII_BALANCE_RMB qdiiBalanceRmb,
+		T.ASSEST_MANAGE_BALANCE assestManageBalance,
+		T.INSURRANCE_BALANCE insurranceBalance,
+		T.DEPOSIT_BALANCE_RMB depositBalanceRmb,
+		D.CUST_GROUP_NAME custGroupName,
+		M.ORG_NAME belongBrch,
+		F.ORG_NAME belongBranch,
+		T.MANAGE_NAME mgrNameOne,
+		T.PERSONAL_LOAN_NAME mgrNameTwo
+		FROM OCRM_F_CG_PREPARATION T LEFT JOIN OCRM_F_CG_CUSTOMER  C ON T.CUST_NO=C.CUSTID
+		AND C.CUST_GROUP_ID=#{custGroupId,jdbcType=VARCHAR}
+		LEFT JOIN OCRM_F_CISS_CG_BASE D ON C.CUST_GROUP_ID=D.CUST_GROUP_ID
+		INNER JOIN OCRM_F_CI_ADMIT_BELONG S
+		ON T.CUST_NO=S.CUST_ID
+        <if test="mgrType != null and mgrType !=''">
+            AND S.MGR_TYPE=#{mgrType,jdbcType=VARCHAR}
+        </if>
+		LEFT JOIN ADMIN_SM_ORG M ON S.ORG_ID=M.ORG_CODE
+		LEFT JOIN ADMIN_SM_ORG F ON  F.ORG_ID=M.UP_ORG_ID
+		WHERE 1=1
+		<if test="custId != null and custId !=''">
+			AND T.CUST_NO ${custId}
+		</if>
+		order by T.AUM_BALANCE desc
+	</select>
+    <select id="selectGroupName" parameterType="String" resultType="String">
+		SELECT CUST_GROUP_NAME FROM OCRM_F_CISS_CG_BASE WHERE 1=1
+		<if test="custGroupId != null and custGroupId !=''">
+			AND CUST_GROUP_ID=#{custGroupId,jdbcType=VARCHAR}
+		</if>
+		AND  rownum = 1
+	</select>
+	<select id="selectCheck" resultType="int">
+		SELECT COUNT(CUSTID) FROM OCRM_F_CG_CUSTOMER WHERE 1=1 AND  (${custIdsss})
+		AND CUST_GROUP_ID=#{custGroupId,jdbcType=VARCHAR}
+	</select>
+	<delete id="deleteCustomerCust" parameterType="String">
+		DELETE FROM OCRM_F_CG_CUSTOMER  WHERE CUST_GROUP_ID=#{custGroupId,jdbcType=VARCHAR}
+		AND  (${custIdsss})
+	</delete>
+	<select id="querycust" parameterType="String" resultType="cn.com.yusys.yscrm.cust.group.domain.CrmFCissCgBaseVO">
+		SELECT T.CUST_GROUP_NAME,T.CUST_GROUP_ID,
+        CASE WHEN T.CUST_GROUP_TYPE='01' THEN '静态客群'
+        WHEN T.CUST_GROUP_TYPE='02' THEN '静态客群' else ''
+        end custGroupType,T.CREATE_DATE,T.CREATE_USER  FROM OCRM_F_CISS_CG_BASE T INNER JOIN OCRM_F_CG_CUSTOMER S ON T.CUST_GROUP_ID=S.CUST_GROUP_ID
+		AND S.CUSTID=#{custId,jdbcType=VARCHAR}
+	</select>
+
+	<select id="selectcustName" parameterType="String" resultType="cn.com.yusys.yscrm.cust.group.domain.CrmFCissCgDTO">
+		SELECT CUST_NAME custidName,ENGLISH_NAME custidEngname,CUST_ID custId FROM ACRM_F_CI_PER_ADMIT_INFO
+		WHERE  CUST_ID ${str}
+	</select>
+	<select id="wholecustomerList" parameterType="cn.com.yusys.yscrm.cust.group.domain.CustomererDTO" resultType="cn.com.yusys.yscrm.cust.group.domain.CrmFCgUserVO">
+		SELECT   T.CUST_NO custId,
+		case when T.CUST_NAME is null then T.CUST_ENG_NAME else T.CUST_NAME end custName,
+		T.CUST_ENG_NAME custEngName,
+		T.NDS_CUST_NO ndsCustNo,
+		T.NATIONALITY nationality,
+		T.MANAGE_NAME mgrNameOne,
+		T.PERSONAL_LOAN_NAME mgrNameTwo,
+		S.USER_MOBILEPHONE managePhoneNo,
+		SS.USER_MOBILEPHONE personalLoanPhoneNo,
+		ORG.ORG_NAME orgName
+		FROM OCRM_F_CG_PREPARATION T
+		LEFT JOIN ADMIN_SM_USER S
+		ON S.USER_ID=T.MANAGE_NO
+		LEFT JOIN ADMIN_SM_USER SS
+		ON SS.USER_ID=T.PERSONAL_LOAN_NO
+		LEFT JOIN ADMIN_SM_ORG ORG ON T.OPEN_ORG=ORG.ORG_CODE
+			<if test="custType != null and custType !=''">
+				<if test="certNo != null and certNo !=''">
+					INNER JOIN ACRM_F_CI_CUST_IDENT_INFO CR
+					ON CR.CUST_ID=T.CUST_NO
+					AND CR.CERT_TYPE=#{custType,jdbcType=VARCHAR}
+					AND CR.CERT_NO=#{certNo,jdbcType=VARCHAR}
+				</if>
+			</if>
+			WHERE 1=1
+			<if test="custId != null and custId !=''">
+				AND T.CUST_NO=#{custId,jdbcType=VARCHAR}
+			</if>
+		   <if test="custName != null and custName !=''">
+			AND  T.CUST_NAME=#{custName,jdbcType=VARCHAR}
+		   </if>
+		<if test="ndsCustNo != null and ndsCustNo !=''">
+			AND  T.NDS_CUST_NO=#{ndsCustNo,jdbcType=VARCHAR}
+		</if>
+	</select>
+	<select id="queryprodlist" parameterType="cn.com.yusys.yscrm.cust.group.domain.ProdDTO" resultType="java.util.Map">
+		SELECT PROD_ID,PROD_NAME FROM OCRM_F_PD_CUST_PROD WHERE
+		1=1
+		<if test="prodName != null and prodName !=''">
+			AND PROD_NAME LIKE CONCAT(CONCAT('%', #{prodName, jdbcType=VARCHAR}),'%')
+		</if>
+		<if test="prodId != null and prodId !=''">
+			AND PROD_ID LIKE CONCAT(CONCAT('%', #{prodId, jdbcType=VARCHAR}),'%')
+		</if>
+		AND rownum &lt; 11
+	</select>
+	<select id="selectorg" parameterType="String" resultType="String">
+		SELECT DISTINCT ORG_ID FROM ADMIN_SM_ORG START WITH ORG_ID=#{code, jdbcType=VARCHAR}
+		CONNECT BY PRIOR ORG_ID=UP_ORG_ID
+	</select>
+	<select id="selectmgrId" parameterType="java.util.Map" resultType="String">
+		SELECT DISTINCT T.USER_ID FROM ADMIN_SM_USER T
+		INNER JOIN ADMIN_SM_USER_ROLE_REL TT ON T.USER_ID=TT.USER_ID
+		INNER JOIN ADMIN_SM_ROLE R ON TT.ROLE_ID=R.ROLE_ID
+		AND R.ROLE_TYPE=#{mgrType, jdbcType=VARCHAR}
+		WHERE T.ORG_ID IN (SELECT DISTINCT ORG_ID FROM ADMIN_SM_ORG START WITH ORG_ID=#{code, jdbcType=VARCHAR}
+		CONNECT BY PRIOR ORG_ID=UP_ORG_ID)
+	</select>
+	<select id="selectorgid" parameterType="java.util.Map" resultType="String">
+		SELECT DISTINCT T.MGR_ID FROM OCRM_F_CI_ADMIT_BELONG T WHERE length(T.ORG_ID)=4 AND T.ORG_ID LIKE
+		CONCAT(#{codecode, jdbcType=VARCHAR},'%')
+	</select>
+	<select id="selectmgrIduser" parameterType="java.util.Map" resultType="String">
+         SELECT DISTINCT USER_ID FROM OCRM_F_CM_TEAM_CUST_MANAGER WHERE MKT_TEAM_ID IN (
+		SELECT DISTINCT MKT_TEAM_ID FROM OCRM_F_CM_MKT_TEAM WHERE TEAM_LEADER_ID=#{userId, jdbcType=VARCHAR}
+		)
+	</select>
+</mapper>

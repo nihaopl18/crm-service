@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.uimp.distribution.repository.mapper.PmaFperformanceToinitwfInfMapper">
+    <resultMap id="BaseResultMap" type="cn.com.yusys.yusp.uimp.distribution.domain.PmaFperformanceToinitwfInf">
+		<id column="APPLY_ID" jdbcType="VARCHAR" property="applyId" />
+		<result column="FUN_CODE" jdbcType="VARCHAR" property="funCode" />
+		<result column="BATCH_ID" jdbcType="VARCHAR" property="batchId" />
+		<result column="PERIOD_HIS_TABLE_NAME" jdbcType="VARCHAR" property="periodHisTableName" />
+		<result column="DTL_TABLE_NAME" jdbcType="VARCHAR" property="dtlTableName" />
+		<result column="IS_RE_START_WF" jdbcType="VARCHAR" property="isReStartWf" />
+		<result column="WORK_FLOW" jdbcType="VARCHAR" property="workFlow" />
+		<result column="USER_ID" jdbcType="VARCHAR" property="userId" />
+		<result column="UNIT_LEVEL" jdbcType="VARCHAR" property="unitLevel" />
+		<result column="UNIT_ID" jdbcType="VARCHAR" property="unitId" />
+		<result column="INTER_BUSS" jdbcType="VARCHAR" property="interBuss" />
+		<result column="INTER_ORG" jdbcType="VARCHAR" property="interOrg" />
+		<result column="INTER_BRANCH" jdbcType="VARCHAR" property="interBranch" />
+		<result column="VIRTUAL_DSTR" jdbcType="VARCHAR" property="virtualDstr" />
+		<result column="ROLE" jdbcType="VARCHAR" property="role" />
+		<result column="BUSS" jdbcType="VARCHAR" property="buss" />
+		<result column="ORG_ID" jdbcType="VARCHAR" property="orgId" />
+		<result column="PK_COLUMN_NAMES" jdbcType="VARCHAR" property="pkColumnNames" />
+		<result column="PK_COLUMN_VALUES" jdbcType="VARCHAR" property="pkColumnValues" />
+		<result column="EXECUTE_STATUS" jdbcType="VARCHAR" property="executeStatus" />
+		<result column="CREATE_TIME" jdbcType="TIMESTAMP" property="createTime" />
+    </resultMap>
+    <sql id="Base_Column_List">
+	    APPLY_ID,FUN_CODE,BATCH_ID,PERIOD_HIS_TABLE_NAME,DTL_TABLE_NAME,IS_RE_START_WF,WORK_FLOW,USER_ID,UNIT_LEVEL,UNIT_ID,INTER_BUSS,INTER_ORG,INTER_BRANCH,VIRTUAL_DSTR,ROLE,BUSS,ORG_ID,PK_COLUMN_NAMES,PK_COLUMN_VALUES,EXECUTE_STATUS,CREATE_TIME
+    </sql>
+    
+    <insert id="batchInsertToinitwfInf" parameterType="java.util.Map">
+    	insert all 
+    	<foreach collection="dataList" item="dataItem" separator=" ">
+    		into PMA_F_PERFORMANCE_TOINITWF_INF
+    		(
+    		    APPLY_ID,FUN_CODE,BATCH_ID,PERIOD_HIS_TABLE_NAME,DTL_TABLE_NAME,IS_RE_START_WF,WORK_FLOW,USER_ID,
+    		    UNIT_LEVEL,UNIT_ID,INTER_BUSS,
+    		    INTER_ORG,INTER_BRANCH,VIRTUAL_DSTR,
+    		    ROLE,BUSS,ORG_ID,
+    		    PK_COLUMN_NAMES,PK_COLUMN_VALUES,
+    		    EXECUTE_STATUS,CREATE_TIME
+			)
+			values 
+			(
+			    #{dataItem.applyId},#{funCode},#{batchId},#{periodHisTableName},#{dtlTableName},#{isReStartWf},#{workFlow},#{userId},
+			    <choose>
+			    	<when test="dataItem.unitlevel != null">
+			    		':{dataItem.unitlevel}',
+			    	</when>
+			    	<otherwise>
+			    		'',
+			    	</otherwise>
+			    </choose>
+			    <choose>
+			    	<when test="dataItem.unitid != null">
+			    		':{dataItem.unitid}',
+			    	</when>
+			    	<otherwise>
+			    		'',
+			    	</otherwise>
+			    </choose>
+			    <choose>
+			    	<when test="dataItem.interBuss != null">
+			    		':{dataItem.interBuss}',
+			    	</when>
+			    	<otherwise>
+			    		'',
+			    	</otherwise>
+			    </choose>
+			    <choose>
+			    	<when test="dataItem.interOrg != null">
+			    		':{dataItem.interOrg}',
+			    	</when>
+			    	<otherwise>
+			    		'',
+			    	</otherwise>
+			    </choose>
+			    <choose>
+			    	<when test="dataItem.interBranch != null">
+			    		':{dataItem.interBranch}',
+			    	</when>
+			    	<otherwise>
+			    		'',
+			    	</otherwise>
+			    </choose>
+			    <choose>
+			    	<when test="dataItem.virtualDstr != null">
+			    		':{dataItem.virtualDstr}',
+			    	</when>
+			    	<otherwise>
+			    		'',
+			    	</otherwise>
+			    </choose>
+			    <choose>
+			    	<when test="dataItem.role != null">
+			    		':{dataItem.role}',
+			    	</when>
+			    	<otherwise>
+			    		'',
+			    	</otherwise>
+			    </choose>
+			    <choose>
+			    	<when test="dataItem.buss != null">
+			    		':{dataItem.buss}',
+			    	</when>
+			    	<otherwise>
+			    		'',
+			    	</otherwise>
+			    </choose>
+			    <choose>
+			    	<when test="dataItem.orgId != null">
+			    		':{dataItem.orgId}',
+			    	</when>
+			    	<otherwise>
+			    		'',
+			    	</otherwise>
+			    </choose>
+				<choose>
+			    	<when test="dataItem.pkColumnNames != null">
+			    		':{dataItem.pkColumnNames}',
+			    	</when>
+			    	<otherwise>
+			    		'',
+			    	</otherwise>
+			    </choose>
+			    <choose>
+			    	<when test="dataItem.pkColumnValues != null">
+			    		':{dataItem.pkColumnValues}',
+			    	</when>
+			    	<otherwise>
+			    		'',
+			    	</otherwise>
+			    </choose>
+			    #{executeStatus},
+			    sysdate
+			)
+    	</foreach>
+    	select 1 from dual
+    </insert>
+    
+    <select id="getEarlyApplyIdsByCount" parameterType="java.lang.Integer" resultType="java.lang.String">
+    	select * from (
+			select APPLY_ID from PMA_F_PERFORMANCE_TOINITWF_INF where EXECUTE_STATUS = '0' order by CREATE_TIME
+		) where rownum &lt;= :{count}
+    </select>
+    
+    <delete id="deleteByApplyId" parameterType="java.lang.String">
+    	delete from PMA_F_PERFORMANCE_TOINITWF_INF where APPLY_ID = #{applyId}
+    </delete>
+    
+    <select id="getToinitwfInfByApplyIds" parameterType="java.lang.String" resultType="cn.com.yusys.yusp.uimp.distribution.domain.PmaFperformanceToinitwfInf">
+    	select * from PMA_F_PERFORMANCE_TOINITWF_INF where APPLY_ID in 
+    	<foreach collection="applyIdsList" item="applyId" separator="," open="(" close=")" index="">
+    		#{applyId}
+    	</foreach>
+    </select>
+    
+    <update id="updateExecuteStatusByApplyIds" parameterType="java.lang.String">
+    	update PMA_F_PERFORMANCE_TOINITWF_INF set EXECUTE_STATUS = #{executeStatus} where APPLY_ID in 
+    	<foreach collection="applyIdsList" item="applyId" separator="," open="(" close=")" index="">
+    		#{applyId}
+    	</foreach>
+    </update>
+</mapper>

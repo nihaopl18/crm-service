@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.climp.acty.repository.mapper.LoyRLFieldCostListMapper">
+	<select id="costList" parameterType="String" resultType="java.util.HashMap">
+		SELECT T.ID,T.COST_TYPE,R.FIELD_C_NAME,R.FIELD_E_NAME 
+		FROM LOY_RL_FIELD_COST_LIST T 
+		LEFT JOIN LOY_RL_FIELD_EC_NAME R ON T.COST_FIELD = R.FIELD_ID 
+		WHERE T.TABLE_ID = #{tableId,jdbcType=VARCHAR}
+	</select>
+	<select id="costField" parameterType="String" resultType="java.util.HashMap">
+		select field_id as key,field_c_name as value from LOY_RL_FIELD_EC_NAME where table_id = #{table_id,jdbcType=VARCHAR}
+	</select>
+	<delete id="delByTableId" parameterType="String">
+		DELETE FROM LOY_RL_FIELD_COST_LIST WHERE TABLE_ID = #{tableId,jdbcType=VARCHAR}
+	</delete>
+	<!-- 查询已经分摊的成本信息 -->
+	<select id="getCostList" parameterType="String" resultType="java.util.HashMap">
+		SELECT * FROM LOY_RL_FIELD_COST_LIST WHERE TABLE_ID = #{tableId,jdbcType=VARCHAR}
+	</select>
+</mapper>

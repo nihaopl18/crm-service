@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper
+	namespace="cn.com.yusys.yusp.uimp.base.repository.mapper.AdminBaseAutoSearchConfMapper">
+	<resultMap id="BaseResultMap"
+		type="cn.com.yusys.yusp.uimp.base.domain.AdminBaseAutoSearchConf">
+		<id column="ID" jdbcType="VARCHAR" property="id" />
+		<result column="FIELD_EN_NAME" jdbcType="VARCHAR" property="fieldEnName" />
+		<result column="FIELD_CN_NAME" jdbcType="VARCHAR" property="fieldCnName" />
+		<result column="IF_COL_SHOW" jdbcType="VARCHAR" property="ifColShow" />
+		<result column="IF_MONEY" jdbcType="VARCHAR" property="ifMoney" />
+		<result column="IF_SEACHER" jdbcType="VARCHAR" property="ifSeacher" />
+		<result column="IF_LOOKUP" jdbcType="VARCHAR" property="ifLookup" />
+		<result column="IF_BIG" jdbcType="VARCHAR" property="ifBig" />
+		<result column="BIG_GRANT" jdbcType="VARCHAR" property="bigGrant" />
+		<result column="IF_ID" jdbcType="VARCHAR" property="ifId" />
+		<result column="SEACHER_ID" jdbcType="VARCHAR" property="seacherId" />
+		<result column="IF_DATE_SEACHER" jdbcType="VARCHAR" property="ifDateSeacher" />
+	</resultMap>
+	<sql id="Base_Column_List">
+		ID,FIELD_EN_NAME,FIELD_CN_NAME,IF_COL_SHOW,IF_MONEY,IF_SEACHER,IF_LOOKUP,IF_BIG,BIG_GRANT,IF_ID,SEACHER_ID,IF_DATE_SEACHER,IF_COL_SORT,COL_SHOW_SORT,COL_GOING_DOWN,LOOKUP_MULTIPLE,COL_WIDTH,COL_GL_PROP
+	</sql>
+
+	<select id="querylist" resultType="java.util.Map">
+		select
+		<include refid="Base_Column_List" />
+		from ADMIN_BASE_AUTO_SEARCH_CONF
+		<where>
+			<if test="seacherId != null and seacherId  != ''">
+				AND SEACHER_ID = #{seacherId,jdbcType=VARCHAR}
+			</if>
+		</where>
+		order by COL_SHOW_SORT nulls last
+	</select>
+
+	<select id="queryPubliclist" resultType="java.util.Map"
+		parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel">
+		${condition.sql}
+		${dataAuth}	
+		${condition.sort}
+	</select>
+
+	<select id="queryTable" resultType="String">
+		select TABLE_EN_NAME
+		from ADMIN_BASE_AUTO_SEARCH
+		<where>
+			<if test="seacherId != null and seacherId  != ''">
+				AND ID = #{seacherId,jdbcType=VARCHAR}
+			</if>
+		</where>
+	</select>
+	
+	<select id="queryDataAuth" resultType="String">
+		select ORG_DATA_AUTH
+		from ADMIN_BASE_AUTO_SEARCH
+		<where>
+			<if test="seacherId != null and seacherId  != ''">
+				AND ID = #{seacherId,jdbcType=VARCHAR}
+			</if>
+		</where>
+	</select>
+	
+	<select id="queryTableType" resultType="String">
+		select TABLE_TYPE
+		from ADMIN_BASE_AUTO_SEARCH
+		<where>
+			<if test="seacherId != null and seacherId  != ''">
+				AND ID = #{seacherId,jdbcType=VARCHAR}
+			</if>
+		</where>
+	</select>
+
+	<!-- 生成功能菜单 -->
+	<update id="delConf">
+		delete from ADMIN_BASE_AUTO_SEARCH_CONF where SEACHER_ID=#{seacherId}
+	</update>
+
+	<select id="queryDataCodeValue" resultType="String">
+		select Lookup_item_name from ADMIN_SM_LOOKUP_ITEM where lookup_item_code
+		=#{key} and lookup_code =#{dataCode}
+	</select>
+	
+	<!-- 查询当前机构是否是最后一个机构 -->
+	<select id="queryLastOrg" resultType="int">
+		select count(org_code) from admin_sm_org where up_org_id
+		=#{orgCode,jdbcType=VARCHAR}
+	</select>
+	
+	<select id="queryFieldInsert" resultType="java.util.HashMap">
+        SELECT 
+        ''as ID,
+        a.COLUMN_NAME as FIELD_EN_NAME,
+        c.COMMENTS as FIELD_CN_NAME,
+        '1' as IF_COL_SHOW,
+        case when a.DATA_TYPE ='NUMBER' then '0' else '' end as
+        IF_MONEY,
+        '0' as IF_SEACHER,
+        '' as IF_LOOKUP,
+        '' as IF_BIG,
+        '' as BIG_GRANT,
+        case when a.COLUMN_NAME ='ID' then '1' else '0' end
+        as IF_ID,
+        #{seacherId,jdbcType=VARCHAR} as SEACHER_ID,
+         '' as IF_DATE_SEACHER,
+         '0' as IF_COL_SORT,
+        (select max(t.COL_SHOW_SORT)+1
+          from ADMIN_BASE_AUTO_SEARCH_CONF t
+         where t.seacher_id =  #{seacherId,jdbcType=VARCHAR} ) as COL_SHOW_SORT
+		FROM user_tab_columns a
+		left join user_col_comments c on c.TABLE_NAME=a.TABLE_NAME and c.COLUMN_NAME=a.COLUMN_NAME
+		where a.COLUMN_NAME not in
+		       (select t.field_en_name
+		          from ADMIN_BASE_AUTO_SEARCH_CONF t
+		         where t.seacher_id = #{seacherId,jdbcType=VARCHAR})
+		   and a.TABLE_NAME = #{tableName,jdbcType=VARCHAR}
+    </select>
+    
+    <select id="queryFieldDel" resultType="java.util.HashMap">
+    	SELECT A.id,A.field_en_name
+		  FROM ADMIN_BASE_AUTO_SEARCH_CONF A
+		where a.field_en_name not in
+		       (select t.COLUMN_NAME
+		          from user_tab_columns t
+		         where t.TABLE_NAME = #{tableName,jdbcType=VARCHAR})
+		   and a.seacher_id = #{seacherId,jdbcType=VARCHAR}
+    </select>
+</mapper>

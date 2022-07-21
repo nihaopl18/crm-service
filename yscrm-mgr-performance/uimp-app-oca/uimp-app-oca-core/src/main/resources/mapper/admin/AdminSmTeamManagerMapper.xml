@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.admin.repository.mapper.AdminSmTeamManagerMapper">
+	<select id="queryList" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+		resultType="java.util.Map">
+		select id,team_id,user_id,user_name,join_date,team_leader_flag,creator_id,creator_name,create_time,
+		updater_id,updater_name,update_time,leave_date
+		from admin_sm_team_manager 
+		<where>
+			<if test="condition.teamId != null and condition.teamId != ''">
+				and team_id =#{condition.teamId}
+			</if>
+		</where> 
+	</select>
+	
+	<delete id="delTeam" parameterType="java.lang.String">
+		delete from admin_sm_team_manager where team_id =#{teamId}
+	</delete>
+	<select id="countOther"  resultType="string" databaseId="oracle">
+		SELECT count(*) FROM admin_sm_team_manager T
+		<where>
+			T.USER_ID = #{loginCode}
+		</where>
+	</select>
+</mapper>

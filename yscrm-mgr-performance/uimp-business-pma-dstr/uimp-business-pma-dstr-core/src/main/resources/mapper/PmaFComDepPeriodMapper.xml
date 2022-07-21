@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.uimp.distribution.repository.mapper.PmaFComDepPeriodMapper">
+
+	<select id="queryList" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+		select t.id,
+		t.acct_info_no,
+		t.acct_no,
+		t.sub_acct_no,
+		t.oper_time,
+		t.effect_date,
+		t.expirate_date,
+		t.data_src,
+		t.oper_user_id,
+		t.oper_org_id,
+		a.org_name as operOrgName,
+		t.oper_user_name,
+		t.creator    ,
+		t.create_date,
+		t.create_org ,
+		t.updater_id ,
+		t.update_date,
+		t.update_org,
+		t.apply_sts
+		from PMA_F_COM_DEP_PERIOD t left join PMA_F_COM_DEP_ACCT_INFO b
+		on t.ACCT_INFO_NO = b.id
+		left join ADMIN_SM_ORG a
+		on t.oper_org_id = a.ORG_CODE
+		<where>
+			<if test="condition.id != null and condition.id != ''">
+				AND t.id = #{condition.id,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.acctInfoNo != null and condition.acctInfoNo != ''">
+				AND t.acct_info_no = #{condition.acctInfoNo,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.acctNo != null and condition.acctNo != ''">
+				AND t.acct_no = #{condition.acctNo,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.operTime != null and condition.operTime != ''">
+				AND t.oper_time = #{condition.operTime,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.effectDate != null and condition.effectDate != ''">
+				<![CDATA[
+	                AND TO_DATE(t.effect_date, 'yyyy-MM-dd hh24:mi:ss') >= TO_DATE(#{condition.effectDate,jdbcType=VARCHAR}, 'yyyy-MM-dd')
+	            ]]>
+			</if>
+			<if test="condition.expirateDate != null and condition.expirateDate != ''">
+				<![CDATA[
+	                AND TO_DATE(t.expirate_date, 'yyyy-MM-dd hh24:mi:ss') <= TO_DATE(#{condition.expirateDate,jdbcType=VARCHAR}, 'yyyy-MM-dd')
+	            ]]>
+			</if>
+			<if test="condition.dataSrc != null and condition.dataSrc != ''">
+				AND t.data_src = #{condition.dataSrc,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.operUserId != null and condition.operUserId != ''">
+				AND t.oper_user_id = #{condition.operUserId,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.operOrgId != null and condition.operOrgId != ''">
+				AND t.oper_org_id = #{condition.operOrgId,jdbcType=VARCHAR}
+			</if>
+
+		</where>
+		order by t.CREATE_DATE desc
+	</select>
+
+
+	<delete id="delPmaFComDepPeriod" parameterType="String" >
+		delete from PMA_F_COM_DEP_PERIOD t where  t.acct_info_no = #{id,jdbcType=VARCHAR} and (t.apply_sts is null or t.apply_sts = '3')
+	</delete>
+
+	<insert id="batchInsertPeriod" parameterType="List">
+		INSERT INTO PMA_F_COM_DEP_PERIOD (id,
+		acct_info_no,
+		acct_no,
+		sub_acct_no,
+		oper_time,
+		effect_date,
+		expirate_date,
+		data_src,
+		oper_user_id,
+		oper_user_name,
+		oper_org_id,
+		creator       ,
+		create_date   ,
+		create_org    ,
+		updater_id    ,
+		update_date   ,
+		update_org,
+		apply_sts)
+		<foreach collection="list" item="param" index="index" separator="union all" >
+			select #{param.id,jdbcType=VARCHAR},
+			#{param.acctInfoNo,jdbcType=VARCHAR},
+			#{param.acctNo,jdbcType=VARCHAR},
+			#{param.subAcctNo,jdbcType=VARCHAR},
+			#{param.operTime,jdbcType=VARCHAR},
+			#{param.effectDate,jdbcType=VARCHAR},
+			#{param.expirateDate,jdbcType=VARCHAR},
+			#{param.dataSrc,jdbcType=VARCHAR},
+			#{param.operUserId,jdbcType=VARCHAR},
+			#{param.operUserName,jdbcType=VARCHAR},
+			#{param.operOrgId,jdbcType=VARCHAR},
+			#{param.creator,jdbcType=VARCHAR},
+			#{param.createDate,jdbcType=VARCHAR},
+			#{param.createOrg,jdbcType=VARCHAR},
+			#{param.updaterId,jdbcType=VARCHAR},
+			#{param.updateDate,jdbcType=VARCHAR},
+			#{param.updateOrg,jdbcType=VARCHAR},
+			#{param.applySts,jdbcType=VARCHAR}
+			from dual
+		</foreach>
+	</insert>
+
+	<update id="updatePeriodByAcctInfoNo" parameterType="java.util.Map">
+		update PMA_F_COM_DEP_PERIOD set apply_Sts = #{applySts,jdbcType=VARCHAR}
+		 where acct_info_no = #{acctInfoNo,jdbcType=VARCHAR}
+		 and (APPLY_STS is null or APPLY_STS = '3' or APPLY_STS = '1')
+	</update>
+
+	<update id="batchUpdatePeriod" parameterType="List">
+		<foreach collection="list" item="param" index="index" open="begin" close=";end;"  separator=";">
+			update PMA_F_COM_DEP_PERIOD
+			<set>
+				<if test="param.acctNo != null and param.acctNo != ''">
+					acct_no = #{param.acctNo},
+				</if>
+				<if test="param.subAcctNo != null and param.subAcctNo != ''">
+					sub_acct_no = #{param.subAcctNo},
+				</if>
+				<if test="param.operTime != null and param.operTime != ''">
+					oper_time = #{param.operTime},
+				</if>
+				<if test="param.effectDate != null and param.effectDate != ''">
+					effect_date = #{param.effectDate},
+				</if>
+				<if test="param.expirateDate != null and param.expirateDate != ''">
+					expirate_date = #{param.expirateDate},
+				</if>
+				<if test="param.dataSrc != null and param.dataSrc != ''">
+					data_src = #{param.dataSrc},
+				</if>
+				<if test="param.operUserId != null and param.operUserId != ''">
+					oper_user_id = #{param.operUserId},
+				</if>
+				<if test="param.operUserName != null and param.operUserName != ''">
+					oper_user_name = #{param.operUserName},
+				</if>
+				<if test="param.operOrgId != null and param.operOrgId != ''">
+					oper_org_id = #{param.operOrgId},
+				</if>
+
+				<if test="param.updaterId != null and param.updaterId != ''">
+					updater_id = #{param.updaterId},
+				</if>
+				<if test="param.updateDate != null and param.updateDate != ''">
+					update_date = #{param.updateDate},
+				</if>
+				<if test="param.updateOrg != null and param.updateOrg != ''">
+					update_org = #{param.updateOrg},
+				</if>
+				<if test="param.applySts != null and param.applySts != ''">
+					apply_sts = #{param.applySts},
+				</if>
+			</set>
+			where id = #{param.id}
+		</foreach>
+	</update>
+</mapper>

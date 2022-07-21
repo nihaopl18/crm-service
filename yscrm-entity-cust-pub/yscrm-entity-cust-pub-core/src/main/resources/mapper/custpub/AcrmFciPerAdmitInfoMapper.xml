@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.custpub.repository.mapper.AcrmFciPerAdmitInfoMapper">
+  <update id ="updateBelong" parameterType="java.util.HashMap">
+   	UPDATE ACRM_F_CI_PER_ADMIT_INFO SET BELONG_MGR = #{belongMgr, jdbcType=VARCHAR},BELONG_BRCH = #{belongBrch, jdbcType=VARCHAR},CUST_STATUS = #{custStatus, jdbcType=VARCHAR}
+   	WHERE CUST_ID = #{custId, jdbcType=VARCHAR}
+   </update>
+    
+</mapper>

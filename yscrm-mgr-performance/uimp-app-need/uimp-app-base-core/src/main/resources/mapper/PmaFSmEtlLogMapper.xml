@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper
+	namespace="cn.com.yusys.yusp.uimp.base.repository.mapper.PmaFSmEtlLogMapper">
+
+	<select id="queryList" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+		resultType="java.util.Map">
+		select
+		ETL_DATE,SP_NAME,STEP,STEP_MSG,SQL_CODE,SQL_MSG,START_TIME,END_TIME,LIST_NUM,COST_TIME
+		from PMA_F_SM_ETL_LOG
+		<where>
+			<if test="condition.etlDate != null and condition.etlDate  != ''">
+				AND ETL_DATE = #{condition.etlDate}
+			</if>
+			<if test="condition.sqlCode != null and condition.sqlCode  != ''">
+				AND SQL_CODE != #{condition.sqlCode}
+			</if>
+			<if test="condition.sqlMsg != null and condition.sqlMsg  != ''">
+				AND SQL_MSG like concat(concat('%',#{condition.sqlMsg}),'%')
+			</if>
+		</where>
+	</select>
+</mapper>

@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.custflexEs.repository.mapper.CrmFCiFqSsolutionMapper">
+    <resultMap id="BaseResultMap" type="cn.com.yusys.yscrm.custflexEs.domain.CrmFCiFqSsolution">
+		<id column="ID" jdbcType="VARCHAR" property="id" />
+		<result column="SS_DATE" jdbcType="TIMESTAMP" property="ssDate" />
+		<result column="SS_NAME" jdbcType="VARCHAR" property="ssName" />
+		<result column="SS_SQL" jdbcType="VARCHAR" property="ssSql" />
+		<result column="SS_RESULT" jdbcType="VARCHAR" property="ssResult" />
+		<result column="SS_SORT" jdbcType="VARCHAR" property="ssSort" />
+		<result column="SS_TYPE" jdbcType="VARCHAR" property="ssType" />
+		<result column="SS_USER" jdbcType="VARCHAR" property="ssUser" />
+		<result column="TOP_NUM" jdbcType="NUMERIC" property="topNum" />
+		<result column="CREATE_ORG" jdbcType="VARCHAR" property="createOrg" />
+		<result column="SS_REL_REPORT" jdbcType="CHAR" property="ssRelReport" />
+		<result column="SS_VALID_DATE" jdbcType="TIMESTAMP" property="ssValidDate" />
+		<result column="CORP_ORG_CODE" jdbcType="VARCHAR" property="corpOrgCode" />
+    </resultMap>
+    <sql id="Base_Column_List">
+	    ID,SS_DATE,SS_NAME,SS_SQL,SS_RESULT,SS_SORT,SS_TYPE,SS_USER,TOP_NUM,CREATE_ORG,SS_REL_REPORT,SS_VALID_DATE,CORP_ORG_CODE
+    </sql>
+    
+    <select id="querySolutionList" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.Map">
+    	select a.ID, a.SS_NAME, a.SS_RESULT, a.SS_SORT, o.ORG_NAME, u.USER_NAME,to_char(a.SS_DATE,'yyyy-MM-dd') SS_DATE
+    	from CRM_F_CI_FQ_SSOLUTION a 
+    		left join ADMIN_SM_ORG o on a.CREATE_ORG = o.ORG_CODE
+    		left join ADMIN_SM_USER u on a.SS_USER = u.LOGIN_CODE
+    	<where>
+    		<if test="condition.ssUser != null and condition.ssUser != ''">
+    			AND a.SS_USER = #{condition.ssUser}
+    		</if>
+    		<if test="condition.ssType != null and condition.ssType != ''">
+    			AND a.SS_TYPE = #{condition.ssType}
+    		</if>
+    	</where>
+    	order by a.SS_DATE 
+    </select>
+    <!-- 通过创建人 加方案名称判断 当前方案是否存在 -->
+    <select id="queryBySsName" parameterType="java.lang.String" resultType="cn.com.yusys.yscrm.custflexEs.domain.CrmFCiFqSsolution">
+    	select <include refid="Base_Column_List"/>
+    	from CRM_F_CI_FQ_SSOLUTION
+    	where SS_NAME = #{ssName, jdbcType=VARCHAR} and SS_USER=#{loginCode, jdbcType=VARCHAR}
+    </select>
+    
+    <delete id="deleteBySsIds" parameterType="java.lang.String">
+    	delete from CRM_F_CI_FQ_SSOLUTION
+    	where ID in
+    	<foreach collection="ids" index="index" item="id" open="(" separator="," close=")">
+    		#{id, jdbcType=VARCHAR}
+    	</foreach>
+    </delete>
+</mapper>

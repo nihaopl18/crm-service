@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<forms>
+    <!-- 不可删除 -->
+    <form id="wf_yusp_form" name="缺省表单" url="" bz="">
+    </form>
+    <app id="wf_yusp_app" name="缺省流程类型" supid="">
+        <form id="wf_yusp_form" />
+    </app>
+</forms>

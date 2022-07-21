@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<DataFormat Encoding="GBK" ImplClass="SuperXmlExecutor">
+  <Head>
+    <Property Name="packXml" Value="true"/>
+    <Property Name="packSimple" Value="true"/>
+    <Property Name="filterEmpty" Value="false"/>
+    <Property Name="isAuto" Value="true"/>
+    <Property Name="autoSave" Value="false"/>
+    <Property Name="varName" Value=""/>
+    <Property Name="useValue" Value="true"/>
+    <Property Name="valueVariable" Value="value"/>
+    <Property Name="cdataVariable" Value="cdata"/>
+    <Property Name="loopNodes" Value=""/>
+    <Property Name="sign" Value=""/>
+  </Head>
+  <Body/>
+</DataFormat>

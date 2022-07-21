@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.uimp.distribution.repository.mapper.CommonDistributionMapper">
+    <select id="listByModel" parameterType="string" resultType="java.util.HashMap">
+		:{value} 
+    </select>
+    <select id="queryUserIdByRoleCode" resultType="java.util.HashMap">
+		select A.LOGIN_CODE,a.USER_NAME from ADMIN_SM_USER A INNER JOIN ADMIN_SM_USER_ROLE_REL B ON A.USER_ID = B.USER_ID  
+			INNER JOIN ADMIN_SM_ROLE D ON D.ROLE_ID = B.ROLE_ID 
+			INNER JOIN  ADMIN_SM_USER_MGR_ORG  C ON A.USER_ID = C.USER_ID
+			<where>
+			AND D.ROLE_CODE = #{roleCode}
+			AND C.ORG_ID = #{orgId}
+			</where>
+    </select>
+    <select id="queryEtlState" resultType="java.util.HashMap">
+			SELECT ETL_STATE FROM PMA_F_ETL_DATE WHERE ETL_TYPE = 'PMA'
+    </select>
+    <select id="queryTimeState" resultType="java.util.HashMap">
+			select a.data as stat_date from (select t.data,rownum as rown
+                          from PMA_F_TIME_STATE t
+                          where t.state ='02'
+                          order by t.data desc) a
+      where a.rown=1
+    </select>
+    <select id="queryPeriodTable" parameterType="string" resultType="java.util.HashMap">
+		:{value} 
+    </select>
+    
+    <select id="queryDistributeTable" parameterType="string" resultType="java.util.HashMap">
+		:{value} 
+    </select>
+    
+    <select id="queryPeriodHisTable" parameterType="string" resultType="java.util.HashMap">
+		:{value} 
+    </select>
+    
+    <select id="queryDistributeHisTable" parameterType="string" resultType="java.util.HashMap">
+		:{value} 
+    </select>
+    
+    <select id="queryPeriodHisTableForVet" parameterType="string" resultType="java.util.HashMap">
+	    :{value} 
+    </select>
+    
+    <select id="getQueryId" parameterType="string" resultType="String">
+	    :{value} 
+    </select>
+    <select id="selectPeriod" parameterType="string" resultType="java.util.HashMap">
+		:{value}
+    </select>
+    <select id="selectApproveUser" parameterType="String" resultType="java.util.HashMap">
+		select role.role_name,a.login_code,a.user_name from admin_sm_user_role_rel t 
+			inner join admin_sm_user a on t.user_id = a.user_id
+			inner join admin_sm_role role on t.role_id = role.role_id and role.role_code = 'RC008'
+			inner join ADMIN_SM_USER_MGR_ORG org on a.user_id = org.user_id 
+			<if test="orgId != null and orgId != '' and orgId != '01147'.toString()">
+			where org.org_id = (SELECT O.UP_ORG_ID FROM ADMIN_SM_ORG O WHERE O.ORG_ID = #{orgId})
+			</if>
+			<if test="orgId != null and orgId != '' and orgId == '01147'.toString()">
+			where org.org_id = #{orgId}
+			</if>
+    </select>
+    <insert id="insertConFun" parameterType="java.util.List">
+		<foreach collection="list" item="item" index="index" separator=";" >
+			:{item};
+    	</foreach>
+	</insert>
+	<insert id="save" parameterType="java.util.List">
+<foreach collection="list" item="item" index="index" separator="" >
+<![CDATA[:{item};]]>
+ </foreach>
+	</insert>
+	<insert id="pass" parameterType="java.util.List">
+		<foreach collection="list" item="item" index="index" separator=";" >
+			:{item};
+    	</foreach>
+	</insert>
+	<insert id="reject" parameterType="java.util.List">
+		<foreach collection="list" item="item" index="index" separator=";" >
+			:{item};
+    	</foreach>
+	</insert>
+    <insert id="executeInsertSql" parameterType="java.lang.String">
+    	:{sqlStr}
+    </insert>
+</mapper>

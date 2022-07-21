@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.admin.repository.mapper.AdminSmUserMgrOrgMapper">
+
+	<update id="updateSts" parameterType="java.util.Map">
+		update ADMIN_SM_USER_MGR_ORG set REL_STS=#{sts, jdbcType=VARCHAR},LAST_CHG_USR=#{user, jdbcType=VARCHAR},
+		 LAST_CHG_DT=#{date, jdbcType=VARCHAR} where USER_MGR_ORG_ID=#{id, jdbcType=VARCHAR}
+	</update>
+		<select id="findQueryByParam" parameterType="java.util.Map"
+		resultType="java.util.Map">
+		select o.org_name,u.user_name,s.org_id from ADMIN_SM_USER_MGR_ORG s 
+		left join sys_org_view o on o.org_id=s.org_id
+		left join admin_sm_user u on u.user_id=s.user_id 
+		<where>
+			and s.org_id in 
+			<foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+            	#{item}  
+         	</foreach>
+			<if test="userId != null and userId != ''">
+				and s.USER_ID = #{userId , jdbcType=VARCHAR}
+			</if>
+		</where>
+	</select>
+</mapper>

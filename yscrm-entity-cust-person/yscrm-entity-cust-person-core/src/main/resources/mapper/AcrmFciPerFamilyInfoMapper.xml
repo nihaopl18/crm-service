@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.cust.person.repository.mapper.AcrmFciPerFamilyInfoMapper">
+   <select id="getFamilyList" parameterType="java.util.Map"  resultType="java.util.HashMap">
+	  select t.DATA_DATE,t.LAST_CHG_SYS,t.LAST_CHG_USR, to_char(t.LAST_CHG_DT,'yyyy-mm-dd') as LAST_CHG_DT    ,t.CORP_ORG_CODE,t.CUST_ID,t.SUR_YEAR
+	  ,t.FAM_ADDR,t.HOME_TEL_NO,t.POPU_NUM,t.LABOR_NUM,t.HOUSEHOLDER_NAME,t.HOUSE_STAT,t.CAR_FLG,t.FAM_CREDIT_FLG
+	  ,t.HARMONY_DESC,t.CREDIT_AMT,t.CREDIT_REC,t.ITEM_AND_SCAL,t.FAM_DEBT_REC,t.FAM_BAD_REC,t.COUNT_AREA_CD,t.OTHERS
+	  ,t.FAM_ECON_STAT,t.VILLAGE_EVAL,t.PLATE_NO1,t.PLATE_NO2,t.PLATE_NO3
+	 , to_char(to_date(t.CAR_INSUR_DT1,'yyyymmdd'),'yyyy-mm-dd') as CAR_INSUR_DT1 
+	 ,to_char(to_date(t.CAR_INSUR_DT2,'yyyymmdd'),'yyyy-mm-dd') as CAR_INSUR_DT2  
+	 ,to_char(to_date(t.CAR_INSUR_DT3,'yyyymmdd'),'yyyy-mm-dd') as CAR_INSUR_DT3      
+	 
+	  ,t.FAM_INC_AVG,t.PER_INC_AVG,t.PER_INC_Y,t.FAM_INC_Y,t.REMARK
+	  from  ACRM_F_CI_PER_FAMILY_INFO t
+	   <if  test="custId != null and custId != ''">
+		       		where t.CUST_ID =#{custId,jdbcType=VARCHAR} 
+	   </if>
+	</select>
+	
+    
+</mapper>

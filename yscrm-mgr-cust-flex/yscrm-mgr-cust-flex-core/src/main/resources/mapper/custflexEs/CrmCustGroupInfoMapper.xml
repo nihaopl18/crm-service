@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.custflexEs.repository.mapper.CrmCustGroupInfoMapper">
+    <resultMap id="BaseResultMap" type="cn.com.yusys.yscrm.custflexEs.domain.CrmCustGroupInfo">
+		<id column="GROUP_ID" jdbcType="VARCHAR" property="groupId" />
+		<result column="GROUP_NAME" jdbcType="VARCHAR" property="groupName" />
+		<result column="GROUP_CLASS" jdbcType="VARCHAR" property="groupClass" />
+		<result column="GROUP_SHARE_TYPE" jdbcType="VARCHAR" property="groupShareType" />
+		<result column="IF_APPRROVE" jdbcType="VARCHAR" property="ifApprrove" />
+		<result column="REMARK" jdbcType="VARCHAR" property="remark" />
+		<result column="CREATE_DT" jdbcType="TIMESTAMP" property="createDt" />
+		<result column="CREATE_USER" jdbcType="VARCHAR" property="createUser" />
+		<result column="CREATE_ORG" jdbcType="VARCHAR" property="createOrg" />
+		<result column="ACTIVITY_EXPIRY_DATE" jdbcType="TIMESTAMP" property="activityExpiryDate" />
+		<result column="SQL" jdbcType="VARCHAR" property="sql" />
+		<result column="SSID" jdbcType="VARCHAR" property="ssid" />
+    </resultMap>
+    <sql id="Base_Column_List">
+	    GROUP_ID,GROUP_NAME,GROUP_CLASS,GROUP_SHARE_TYPE,IF_APPRROVE,REMARK,CREATE_DT,CREATE_USER,CREATE_ORG,ACTIVITY_EXPIRY_DATE,SQL,SSID
+    </sql>
+    
+    <select id="queryList" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.Map">
+    	select 
+    		a.GROUP_ID, a.GROUP_NAME, a.GROUP_CLASS, a.GROUP_SHARE_TYPE, a.IF_APPRROVE, a.REMARK,
+    		case when a.GROUP_CLASS = '00' then (select count(*) from CRM_CUST_GROUP_REL_INFO r WHERE  a.GROUP_ID = r.GROUP_ID ) || ''
+    			 else '动态' end as GROUP_NUM,
+    		case when a.CREATE_DT is not null then to_char(a.CREATE_DT, 'yyyy-MM-dd')
+    			 else '' end as CREATE_DT, 
+    		a.CREATE_USER, a.CREATE_ORG, 
+    		case when a.ACTIVITY_EXPIRY_DATE is not null then to_char(a.ACTIVITY_EXPIRY_DATE, 'yyyy-MM-dd')
+    			 else '' end as ACTIVITY_EXPIRY_DATE,
+    		u.USER_NAME as CREATE_USER_NAME, o.ORG_NAME as CREATE_ORG_NAME,a.SQL,a.SSID
+    	from CRM_CUST_GROUP_INFO a
+    		left join ADMIN_SM_USER u on a.CREATE_USER = u.LOGIN_CODE
+    		left join ADMIN_SM_ORG o on a.CREATE_ORG = o.ORG_CODE
+<!--     		left join CRM_CUST_GROUP_REL_INFO r on a.GROUP_ID = r.GROUP_ID -->   
+     	<where>
+    		and a.CREATE_USER = #{condition.curUserId, jdbcType=VARCHAR}	<!-- 创建人是本人过滤 -->
+    		<if test="condition.groupClass != null and condition.groupClass != ''">
+				AND a.GROUP_CLASS = #{condition.groupClass, jdbcType=VARCHAR}
+			</if>
+			<if test="condition.createDtStart != null and condition.createDtStart != ''">
+				AND to_date(to_char(a.CREATE_DT, 'yyyy-MM-dd'), 'yyyy-MM-dd') &gt;= to_date(#{condition.createDtStart}, 'yyyy-MM-dd')
+			</if>
+			<if test="condition.createDtEnd != null and condition.createDtEnd != ''">
+				AND to_date(to_char(a.CREATE_DT, 'yyyy-MM-dd'), 'yyyy-MM-dd') &lt;= to_date(#{condition.createDtEnd}, 'yyyy-MM-dd')
+			</if>
+			<if test="condition.groupShareType != null and condition.groupShareType != ''">
+				AND a.GROUP_SHARE_TYPE = #{condition.groupShareType, jdbcType=VARCHAR}
+			</if>
+			<if test="condition.groupName != null and condition.groupName != ''">
+				AND a.GROUP_NAME LIKE CONCAT('%',CONCAT(#{condition.groupName},'%'))
+			</if>
+    	</where>
+    	<!-- group by a.GROUP_ID, a.GROUP_NAME, a.GROUP_CLASS, a.GROUP_SHARE_TYPE, a.IF_APPRROVE, a.REMARK, a.GROUP_CLASS,
+    		a.CREATE_DT, a.CREATE_USER, a.CREATE_ORG, a.ACTIVITY_EXPIRY_DATE, u.USER_NAME, o.ORG_NAME -->
+    	order by a.GROUP_CLASS asc, CREATE_DT desc
+    </select>
+    
+    <update id="updateActivityExpiryDate">
+    	update CRM_CUST_GROUP_INFO set ACTIVITY_EXPIRY_DATE = #{newActivityExpiryDate, jdbcType=TIMESTAMP}
+    	where GROUP_ID = #{groupId, jdbcType=VARCHAR}
+    </update>
+    
+    <select id="queryToJoinCustGroupList" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.Map">
+    	select a.GROUP_ID, a.GROUP_NAME, a.GROUP_CLASS, a.GROUP_SHARE_TYPE, a.IF_APPRROVE, a.REMARK, 
+    		case when a.CREATE_DT is not null then to_char(a.CREATE_DT, 'yyyy-MM-dd')
+    			 else '' end as CREATE_DT, 
+    		u.USER_NAME as CREATE_USER_NAME, o.ORG_NAME as CREATE_ORG_NAME
+    	from CRM_CUST_GROUP_INFO a
+    		left join ADMIN_SM_USER u on a.CREATE_USER = u.LOGIN_CODE
+    		left join ADMIN_SM_ORG o on a.CREATE_ORG = o.ORG_CODE
+    	<where>
+    		and a.GROUP_CLASS = '00'	<!-- 查询自定义客户群 -->
+    		and ( a.CREATE_USER = #{condition.curUserId} or (
+    			a.GROUP_SHARE_TYPE = '00' and a.CREATE_ORG in (
+      				select o.ORG_ID from ADMIN_SM_ORG o start with o.ORG_CODE = #{condition.curOrgCode} connect by prior o.UP_ORG_ID = o.ORG_ID
+      			)
+    		) )	<!-- 查询共享类型或本人创建的客户群 -->
+    		<if test="condition.groupName != null and condition.groupName != ''">
+				AND a.GROUP_NAME LIKE CONCAT('%',CONCAT(#{condition.groupName},'%'))
+			</if>
+    	</where>
+    	order by a.CREATE_DT desc
+    </select>
+</mapper>

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.product.repository.mapper.AcrmFpdProdCatlMapper">
+	<!-- 产品类别树查询-->
+	<select id="treeListQuery" parameterType="java.util.Map" resultType="java.util.Map">
+		SELECT DISTINCT A.CATL_CODE, A.CATL_NAME, A.CATL_PARENT, A.CATL_ORDER, A.DISPLAY_SCHEME,A.CATL_LEVEL FROM ACRM_F_PD_PROD_CATL A
+		WHERE A.CATL_LEVEL &lt; 5 ORDER BY A.CATL_ORDER,A.CATL_CODE
+ 	</select>
+	
+	<!-- 产品类别树点击事件-->
+	<select id="productTreeQuery" parameterType="java.util.Map" resultType="java.util.Map">
+		SELECT DISTINCT A.CATL_CODE, A.CATL_NAME, A.CATL_PARENT, A.CATL_PARENT_NM , A.CATL_ORDER, A.ORG_ID, A.DISPLAY_SCHEME
+		FROM ACRM_F_PD_PROD_CATL A WHERE 1=1
+		<if  test="condition.catlCode != null and condition.catlCode != ''">
+       		AND A.CATL_CODE = #{condition.catlCode,jdbcType=NUMERIC}
+	    </if>
+	</select>
+	
+	<!-- 根据产品编号删除产品类别树 -->
+	<delete id="deleteProductTree" parameterType="String">
+		DELETE FROM ACRM_F_PD_PROD_CATL A WHERE A.CATL_CODE = #{condition.catlCode,jdbcType=VARCHAR} OR A.CATL_PARENT = #{condition.catlCode,jdbcType=VARCHAR}
+	</delete>
+	
+	<!-- 产品展示方案树查询-->
+	<select id="displaySchemeQuery" parameterType="java.util.Map" resultType="java.util.Map">
+		SELECT A.PLAN_ID, A.PLAN_NAME FROM OCRM_F_PD_PROD_SHOW_PLAN A WHERE 1=1
+ 	</select>
+ 	
+ 	<!-- 部门选择器查询-->
+	<select id="yufpDptSelectorQuery" parameterType="java.util.Map" resultType="java.util.Map">
+		SELECT A.DPT_ID, A.DPT_CDE, A.DPT_NAME, A.BELONG_ORG_ID, B.ORG_NAME, A.UP_DPT_ID,
+       		A.DPT_STS, A.LAST_CHG_USR, A.LAST_CHG_DT from ADMIN_SM_DPT A 
+       		LEFT JOIN ADMIN_SM_ORG B ON A.BELONG_ORG_ID = B.ORG_CODE
+      	WHERE 1=1
+      	<if  test="condition.orgCde != null and condition.orgCde != ''">
+       		AND B.ORG_CODE = #{condition.orgCde, jdbcType=VARCHAR} 
+	    </if>
+	    <if  test="condition.dptName != null and condition.dptName != ''">
+			AND A.DPT_NAME LIKE CONCAT(CONCAT('%', #{condition.dptName, jdbcType=VARCHAR}),'%')	    </if>
+ 	</select>
+ 		
+	
+</mapper>

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.cm.ruleConfig.repository.mapper.CmFRcRuleActionMapper">
+	<delete id="delActionByEventId" parameterType="String">
+		delete from CM_F_RC_RULE_ACTION where event_id = #{eventId, jdbcType=VARCHAR}
+	</delete>
+	<select id="getActionByEventId" parameterType="String"
+		resultType="cn.com.yusys.yusp.cm.ruleConfig.domain.CmFRcRuleAction">
+		select a.* from cm_f_rc_rule_action a where a.event_id = #{eventId, jdbcType=VARCHAR}
+	</select>
+	<select id="getmodelList" parameterType="String"
+		resultType="java.util.HashMap">
+		<if test="actionType=='CARE'">
+		select b.action_classify,a.* from cm_f_rc_sys_type a 
+		left join cm_f_rc_care_action b on b.action_id = #{actionId, jdbcType=VARCHAR} and 
+					a.id = b.care_id
+			where a.id 
+			in (select care_id from 
+				cm_f_rc_care_action where action_id = #{actionId, jdbcType=VARCHAR})
+		</if>
+		<if test="actionType=='PRODUCT'">
+		select b.action_classify,a.* from cm_f_rc_sys_type a 
+		left join CM_F_RC_PRO_ACTION b on b.action_id = #{actionId, jdbcType=VARCHAR} and 
+					a.id = b.pro_id
+			where a.id 
+			in (select pro_id from 
+				CM_F_RC_PRO_ACTION where action_id = #{actionId, jdbcType=VARCHAR})
+		</if>
+		<if test="actionType=='RISK'">
+		select b.action_classify,a.* from cm_f_rc_sys_type a 
+		left join CM_F_RC_RISK_ACTION b on b.action_id = #{actionId, jdbcType=VARCHAR} and 
+					a.id = b.risk_id
+			where a.id 
+			in (select risk_id from 
+				CM_F_RC_RISK_ACTION where action_id = #{actionId, jdbcType=VARCHAR})
+		</if>
+	</select>
+	<select id="getCareAction" resultType="cn.com.yusys.yusp.cm.ruleConfig.domain.CmFRcCareAction">
+		select * from cm_f_rc_care_action where action_id=#{actionId, jdbcType=VARCHAR}
+	</select>
+	<select id="getProAction" resultType="cn.com.yusys.yusp.cm.ruleConfig.domain.CmFRcProAction">
+		select * from CM_F_RC_PRO_ACTION where action_id=#{actionId, jdbcType=VARCHAR}
+	</select>
+	<select id="getRiskAction" resultType="cn.com.yusys.yusp.cm.ruleConfig.domain.CmFRcRiskAction">
+		select * from CM_F_RC_RISK_ACTION where action_id=#{actionId, jdbcType=VARCHAR}
+	</select>
+</mapper>

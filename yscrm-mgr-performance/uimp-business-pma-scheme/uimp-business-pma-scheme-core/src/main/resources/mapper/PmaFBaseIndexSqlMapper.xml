@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.uimp.business.pma.scheme.baseIndex.repository.mapper.PmaFBaseIndexSqlMapper">
+    <resultMap id="BaseResultMap" type="cn.com.yusys.yusp.uimp.business.pma.scheme.baseIndex.domain.PmaFBaseIndexSql">
+		<id column="ID" jdbcType="VARCHAR" property="id" />
+		<result column="INDEX_ID" jdbcType="VARCHAR" property="indexId" />
+		<result column="SQL_CONTENT" jdbcType="VARCHAR" property="sqlContent" />
+    </resultMap>
+    <sql id="Base_Column_List">
+	    ID,INDEX_ID,SQL_CONTENT
+    </sql>
+    <delete id="deleteSql" parameterType="String" >
+       delete  from PMA_F_BASE_INDEX_SQL  where index_id=#{index_id}
+    </delete>
+</mapper>

@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.climp.acct.repository.mapper.AccountManagerMapper">
+    <select id="getList" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.Map">
+	     select t.account_id,t.account_no,t.account_name,t.acct_type_id, t.acct_priority,t.time_valid_type,
+		       t.score_type,t.pool_no,t.remark,t5.user_name as create_user, to_char(t.create_date,'yyyy-mm-dd') as create_date,
+		       t3.org_name as create_org,t5.user_name as update_user,to_char(t.update_date,'yyyy-mm-dd') as update_date, t4.org_name as update_org,
+		       t.delete_sign,t.auto_change,t.wf_appr_sts,t.acct_b_type,t.acct_s_type, t2.acct_type_name
+		  from LOY_AC_SCORE_ACCOUNT t
+		  left join LOY_AC_SCORE_ACCT_TYPE t2
+		    on t.acct_type_id = t2.acct_type_id
+		  left join admin_sm_org t3 on t.create_org = t3.org_id
+		  left join admin_sm_org t4 on t.update_org = t4.org_id
+		  left join admin_sm_user t5 on t.create_user = t5.login_code
+		  left join admin_sm_user t6 on t.update_user = t6.login_code
+		  where t.delete_sign = '0'
+    		<if test="condition.accountNo != null and condition.accountNo !=''">
+				and t.account_No like '%'||#{condition.accountNo}||'%'
+			</if>		
+			<if test="condition.accountName != null and condition.accountName !=''">
+				and t.account_Name like '%'||#{condition.accountName}||'%'
+			</if>
+			<if test="condition.wfApprSts != null and condition.wfApprSts !=''">
+				and t.wf_Appr_Sts = #{condition.wfApprSts}
+			</if>
+			  order by t.account_no desc
+    </select>
+    
+    <!-- 逻辑删除 -->
+    <select id="delAcct" parameterType="string" resultType="java.util.Map">
+    	update LOY_AC_SCORE_ACCOUNT t set t.delete_sign = '1' where account_id in  (#{id}) 
+    </select>
+    
+    <!-- 新增获取id -->
+	<select id="getSeq" resultType="String">
+		 select SEQ_ACCOUNT_NO.nextval from dual
+	</select>
+	
+	<!-- 查询审批列表 -->
+    <select id="getApprovalList" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.Map">
+	   select t.ACCOUNT_NO,t.ACCOUNT_NAME,t.CREATE_USER,
+	    to_char(t.CREATE_DATE,'YYYY-mm-dd') as create_date
+		from LOY_AC_SCORE_ACCOUNT t 
+		where t.ACCOUNT_ID = #{condition.bizSeqNo, jdbcType=VARCHAR}
+    </select>
+    
+    <!-- 查询积分账户是否被引用   -->
+    <select id="checkAcct" parameterType="string" resultType="java.util.Map">
+	   select count(*) as num from LOY_ENG_RULE_ACTION t where t.account_no = #{acctNo}
+    </select>
+    
+    <!-- 校验账户名字是否重复 -->
+    <select id="checkAcctName" parameterType="java.util.Map" resultType="java.util.Map">
+    	select count(*) as num from LOY_AC_SCORE_ACCOUNT t where t.ACCOUNT_NAME =  #{accountName} and t.delete_sign != '1' 
+		<if test="accountId != null and accountId !=''">
+			and t.ACCOUNT_ID != #{accountId,jdbcType=VARCHAR}
+		</if>
+    </select>
+    <!-- 账户类型查询 -->
+    <select id="acctStsQuery" parameterType="String" resultType="java.util.HashMap">
+    	SELECT ACCOUNT_NO AS KEY,ACCOUNT_NAME AS VALUE FROM LOY_AC_SCORE_ACCOUNT WHERE ACCT_TYPE_ID = #{acctTypeId,jdbcType=VARCHAR}
+    </select>
+</mapper>

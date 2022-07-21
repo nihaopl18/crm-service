@@ -1,0 +1,339 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper
+	namespace="cn.com.yusys.yscrm.cust.person.repository.mapper.PCustBaseViewMapper">
+
+	<sql id="Base_Column_List">
+		DATA_DATE,LAST_UPDATE_SYS,LAST_UPDATE_USER,LAST_UPDATE_TM,LAST_UPDATE_ORG,CORP_ORG_CODE,CUST_ID,ECIF_CUST_ID,CUST_NAME,CERT_TYPE,CERT_NO,PINYIN_NAME,OTHER_NAME,TITLE_CD,ENGLISH_NAME,SEX,NATION,BIRTH_DT,AGE,BRN_PLACE,INDIV_OCC,POL_STAT,REG_PLACE,HLT_STAT,MARRI_STAT,FAITH_STAT,COUNTRY_CD,LANG_CD,HIG_EDU_REC,HIG_EDU_DGR,RESIDENT_STAT,PASSPORT_FLG,AGRI_FLG,STAFF_FLG,HOLDER_FLG,INSP_IND,CUST_BANK_REL,COM_INIT_LOAN_DATE,LOAN_CUST_TYPE,PER_INCOME_Y,FAM_INCOME_Y,WORK_UNIT,SOC_SECUR_STAT,BE_CUST_DATE,BANK_DUTY,HOLD_STOCK_AMT,HOLD_STOCK_TOT,FIN_RISK_LEV,RISK_LEV,RISK_LEV_VALID_DT,PHONE_NO,CONT_ADDR,SERV_LEV,VALUE_LEV,BELONG_MGR,BELONG_BRCH,CUST_PHOTO,CUST_ASSIGN_STAT,CUST_STATUS,SRC_CUST_STATUS,IS_LOAN_CUST,IS_STOCK_CUST,IS_CARD_VIP,REMARK
+	</sql>
+	<select id="getList" parameterType="java.util.Map" resultType="java.util.HashMap">
+		select
+		t.DATA_DATE,t.LAST_UPDATE_SYS,t.LAST_UPDATE_USER,to_char(t.LAST_UPDATE_TM,'yyyy-mm-dd')
+		as LAST_UPDATE_TM,t.LAST_UPDATE_ORG,t.CORP_ORG_CODE,t.CUST_ID,
+		t.ECIF_CUST_ID,t.CUST_NAME,t.CERT_TYPE,t.CERT_NO,t.PINYIN_NAME,t.OTHER_NAME,t.TITLE_CD,t.ENGLISH_NAME,t.SEX,t.NATION,
+		t.BIRTH_DT ,
+		t.AGE,t.BRN_PLACE,t.INDIV_OCC,t.POL_STAT,t.REG_PLACE,t.HLT_STAT,t.MARRI_STAT,t.FAITH_STAT,t.COUNTRY_CD,t.LANG_CD,t.HIG_EDU_REC,
+		t.HIG_EDU_DGR,t.RESIDENT_STAT,t.PASSPORT_FLG,t.AGRI_FLG,t.STAFF_FLG,t.HOLDER_FLG,t.INSP_IND,t.CUST_BANK_REL,t.COM_INIT_LOAN_DATE,
+		t.LOAN_CUST_TYPE,t.PER_INCOME_Y,t.FAM_INCOME_Y,t.WORK_UNIT,t.SOC_SECUR_STAT,t.BE_CUST_DATE,t.BANK_DUTY,t.HOLD_STOCK_AMT,t.HOLD_STOCK_TOT
+		,perSum.REPORT_SUM as REPORT_SUM_NUMBER
+		,t.FIN_RISK_LEV,t.RISK_LEV,t.RISK_LEV_VALID_DT,t.PHONE_NO,t.CONT_ADDR,t.SERV_LEV,t.VALUE_LEV,t.BELONG_MGR,t.BELONG_BRCH,t.CUST_PHOTO
+		,t.CUST_ASSIGN_STAT,t.CUST_STATUS,t.SRC_CUST_STATUS,t.IS_LOAN_CUST,t.IS_STOCK_CUST,t.IS_CARD_VIP,t.REMARK,t.CREDIT_GRADE
+		,cust.USER_NAME as MGR_USER_NAME
+		,org.ORG_NAME,d.MOBILE as MGR_TEL,lt.LOOKUP_ITEM_NAME as SEX_NAME,it.LOOKUP_ITEM_NAME as
+		CERT_TYPE_NAME,li.LOOKUP_ITEM_NAME as VALUE_LEV_NAME
+		,lu.LOOKUP_ITEM_NAME as SERV_LEV_NAME
+		from ACRM_F_CI_PER_ADMIT_INFO t
+		left join ADMIN_SM_USER cust on cust.LOGIN_CODE=t.BELONG_MGR
+		left join admin_sm_org org on org.ORG_ID=t.BELONG_BRCH
+		left join ACRM_F_CM_CUST_MGR_INFO d on d.CUST_MANAGER_ID=t.BELONG_MGR 
+		left join ACRM_A_CI_PER_BUSI_SUM_D perSum on t.CUST_ID=perSum.CUST_ID 
+	    left join admin_sm_lookup_item lt on lt.LOOKUP_ITEM_CODE=t.SEX and
+	    lt.LOOKUP_CODE='SEX_TYPE'
+	    left join admin_sm_lookup_item it on it.LOOKUP_ITEM_CODE=t.CERT_TYPE and
+	    it.LOOKUP_CODE='CD0011'
+	    left join admin_sm_lookup_item li on li.LOOKUP_ITEM_CODE=t.VALUE_LEV and
+	    li.LOOKUP_CODE='CD0243'
+	    left join admin_sm_lookup_item lu on lu.LOOKUP_ITEM_CODE=t.SERV_LEV and
+	    lu.LOOKUP_CODE='CD0032'
+
+		<if test="custId != null and custId != ''">
+			where t.CUST_ID =#{custId,jdbcType=VARCHAR}
+		</if>
+	</select>
+	<select id="getworkList" parameterType="java.util.Map" resultType="java.util.HashMap">
+		select t.CUST_ID as
+		WORK_ID,t.CUST_ID,t.LAST_ORG_ID,t.LAST_CHG_USR,t.LAST_CHG_DT,t.CUR_WORK_UNIT,t.UNIT_CON_PER
+		,t.ENG_IN_PRO,t.UNIT_NAT,t.IND_OWN_UNIT,t.DEPARTMENT,t.DUTIES,t.POSITION,t.COR_EXE,t.BOARD_MEM
+		,t.REL_WITH_ACTUAL_CON,t.TITLE,to_char(t.ENTRY_DATE,'yyyy-mm-dd') as
+		ENTRY_DATE,t.TOTAL_LEN_SER,t.CORP_ORG_CODE
+		from OCRM_F_CI_PER_WORK_INFO t
+		<if test="custId != null and custId != ''">
+			where t.CUST_ID =#{custId,jdbcType=VARCHAR}
+		</if>
+	</select>
+	<select id="getrelatList" parameterType="java.util.Map"	resultType="java.util.HashMap">
+		select t.CUST_ID as
+		RELAT_ID,T.CUST_ID,t.LAST_ORG_ID,t.LAST_CHG_USR,t.LAST_CHG_DT,t.WHE_AGR_REL_CUS,t.WHE_THR_FAR_LEA_FIG
+		,t.WHE_PRO_LAR_HOU,t.RURAL_CRE_YOUTH,t.WHE_FAM_FARM,t.SCI_AND_TEC_DEM_HOU,t.DEM_HOU_DET_TIME,t.WHE_DUAL_BASE_WIN_CUS
+		,t.WHE_IMM,t.WHE_DIS,t.DIS_LEVEL,t.WHE_AGR_SCI_TEC_INN,t.WHE_NEW_AGR_MAN_SUB,t.PRI_TYPE,t.WHE_COO_MEM,t.AMO_OF_INS
+		,t.INSURANCE,t.INS_TYPE,t.WHE_POV_ALL_LOAN_CUS,t.POV_ALL_CUS_TYPE,t.POV_ALL_PRO,t.PRO_LOC,t.WHE_REF_OF_AGR_LOA
+		,t.PRO_COO_LOGO,t.WHE_TO_NEW_COU,t.WHE_TO_CON_OF_URB,t.CORP_ORG_CODE
+		from OCRM_F_CI_PER_RELAT_INFO t
+		<if test="custId != null and custId != ''">
+			where t.CUST_ID =#{custId,jdbcType=VARCHAR}
+		</if>
+	</select>
+	<select id="getimportFlagList" parameterType="java.util.Map" resultType="java.util.HashMap">
+		select t.CUST_ID as
+		FLAG_ID,t.DATA_DATE,t.LAST_UPDATE_SYS,t.LAST_UPDATE_USER,to_char(t.LAST_UPDATE_TM,'yyyy-mm-dd')
+		as LAST_UPDATE_TM,t.CORP_ORG_CODE,t.CUST_ID,t.PEASANT_FLG
+		,t.FINACE_FLAG,t.DEPOSIT_FLAG,t.STAFF_FLG,t.THIRD_DEP_FLAG,t.STAFF_LOAN_FLAG,t.MOBILE_BANK_FLAG,t.BADLOAN_FLAG
+		,t.CREDITCARD_FLAG,t.INTERNET_BANK_FLAG,t.POS_FLAG,t.QUEST_LOAN_FLAG,t.INTER_BUSI_FLG,t.ERRORNAME_FLAG,t.PAYROLL_FLG
+		,t.KEEP_PHO_FLG,t.REC_SMS_FLG,t.VIP_FLG,t.XWD_FLG,t.HOUSEFUND_LN_FLG,t.MORTGAGE_FLG,t.HOUSEFUND_FLG,t.GOVER_FLG
+		,t.STOCKHOLDER_FLG,t.NEIGHB_FLG,t.CNTR_FLG,t.ENT_STOCKHOLDER_FLG,t.GUAR_FLG,t.COR_CUST_FLG,t.OTHERB_VIP_FLG
+		,t.STAFF_REL_FLG,t.CIVILSVER_FLG,t.TEACHER_FLG,t.DOCTOR_FLG,t.SELF_TAB
+		from ACRM_F_CI_PER_KEY_FLAG t
+		<if test="custId != null and custId != ''">
+			where t.CUST_ID =#{custId,jdbcType=VARCHAR}
+		</if>
+	</select>
+	<select id="getresumeList" parameterType="java.util.Map" resultType="java.util.HashMap">
+		select
+		t.DATA_DATE,t.CRAT_DT,t.CRAT_ORG_ID,t.CRAT_USR,t.LAST_CHG_SYS,t.LAST_CHG_USR,to_char(t.LAST_CHG_DT,'yyyy-mm-dd')
+		as LAST_CHG_DT
+		,t.CORP_ORG_CODE,t.CUST_ID,to_char(to_date(t.START_DATE,'yyyymmdd'),'yyyy-mm-dd')
+		as START_DATE,to_char(to_date(t.END_DATE,'yyyymmdd'),'yyyy-mm-dd') as
+		END_DATE,t.DUTY,t.FULL_PART_FLG,t.DEPT,t.COM_SCH,t.SCH_DEPT
+		,t.SCH_MAJOR,t.SCH_LENGTH,t.CITY,t.COUNTRY,t.REMARKS,t.ID
+		from ACRM_F_CI_PER_RESUME_INFO t
+		<if test="custId != null and custId != ''">
+			where t.CUST_ID =#{custId,jdbcType=VARCHAR}
+		</if>
+	</select>
+
+	<!-- 基本信息修改 -->
+	<update id="updatebaseInfo" parameterType="java.util.Map">
+		UPDATE ACRM_F_CI_PER_ADMIT_INFO t SET
+
+		t.ENGLISH_NAME=#{englishName,jdbcType=VARCHAR}
+		<if test="custPhoto != null and custPhoto != ''">
+			,t.CUST_PHOTO =#{custPhoto,jdbcType=VARCHAR}
+		</if>
+		,t.TITLE_CD=#{titleCd,jdbcType=VARCHAR}
+		,t.POL_STAT=#{polStat,jdbcType=VARCHAR}
+		,t.BRN_PLACE=#{brnPlace,jdbcType=VARCHAR}
+		,t.REG_PLACE=#{regPlace,jdbcType=VARCHAR}
+		<if test="langCd != null and langCd != ''">
+			,t.LANG_CD=#{langCd,jdbcType=VARCHAR}
+		</if>
+		,t.FAITH_STAT=#{faithStat,jdbcType=VARCHAR}
+		,t.INDIV_OCC=#{indivOcc,jdbcType=VARCHAR}
+		,t.BIRTH_DT=#{birthDt,jdbcType=VARCHAR}
+		,t.MARRI_STAT=#{marriStat,jdbcType=VARCHAR}
+		,t.HIG_EDU_DGR=#{higEduDgr,jdbcType=VARCHAR}
+		,t.HIG_EDU_REC=#{higEduRec,jdbcType=VARCHAR}
+		,t.AGRI_FLG=#{agriFlg,jdbcType=CHAR}
+		,t.HLT_STAT=#{hltStat,jdbcType=VARCHAR}
+		<if test="inspInd != null and langCd != ''">
+			,t.INSP_IND=#{inspInd,jdbcType=VARCHAR}
+		</if>
+		,t.PASSPORT_FLG=#{passportFlg,jdbcType=CHAR}
+		,t.SOC_SECUR_STAT=#{socSecurStat,jdbcType=VARCHAR}
+		,t.LAST_UPDATE_SYS=#{lastUpdateSys,jdbcType=VARCHAR}
+		,t.LAST_UPDATE_USER=#{lastUpdateUser,jdbcType=VARCHAR}
+		,t.LAST_UPDATE_TM=TO_DATE(#{lastUpdateTm,jdbcType=DATE}, 'yyyy-MM-dd')
+
+		,t.LAST_UPDATE_ORG=#{lastUpdateOrg,jdbcType=VARCHAR}
+
+
+		WHERE t.CUST_ID = #{custId,jdbcType=VARCHAR}
+	</update>
+	<!--工作信息修改 -->
+	<update id="updateworkInfo" parameterType="java.util.Map">
+		UPDATE OCRM_F_CI_PER_WORK_INFO t SET
+
+		t.CUR_WORK_UNIT=#{curWorkUnit,jdbcType=VARCHAR}
+		,t.UNIT_CON_PER=#{unitConPer,jdbcType=VARCHAR}
+		,t.ENG_IN_PRO=#{engInPro,jdbcType=VARCHAR}
+		,t.UNIT_NAT=#{unitNat,jdbcType=VARCHAR}
+		,t.IND_OWN_UNIT=#{indOwnUnit,jdbcType=VARCHAR}
+		,t.DEPARTMENT=#{department,jdbcType=VARCHAR}
+		,t.DUTIES=#{duties,jdbcType=VARCHAR}
+		,t.POSITION=#{position,jdbcType=VARCHAR}
+		,t.COR_EXE=#{corExe,jdbcType=VARCHAR}
+		,t.BOARD_MEM=#{boardMem,jdbcType=VARCHAR}
+		,t.REL_WITH_ACTUAL_CON=#{relWithActualCon,jdbcType=VARCHAR}
+		,t.TITLE=#{title,jdbcType=VARCHAR}
+		<!-- ,t.ENTRY_DATE=#{entryDate,jdbcType=VARCHAR} -->
+		,t.ENTRY_DATE=to_date(#{entryDate,jdbcType=VARCHAR},'yyyy-MM-dd')
+		,t.TOTAL_LEN_SER=#{totalLenSer,jdbcType=VARCHAR}
+		,t.LAST_ORG_ID=#{lastOrgId,jdbcType=VARCHAR}
+		,t.LAST_CHG_USR=#{lastChgUsr,jdbcType=VARCHAR}
+		,t.LAST_CHG_DT=TO_DATE(#{lastChgDt,jdbcType=DATE}, 'yyyy-MM-dd')
+		WHERE t.CUST_ID = #{custId,jdbcType=VARCHAR}
+	</update>
+
+	<!-- 与我行关系信息修改 -->
+	<update id="updaterelationInfo" parameterType="java.util.Map">
+		UPDATE ACRM_F_CI_PER_ADMIT_INFO t SET
+
+		t.BE_CUST_DATE=#{beCustDate,jdbcType=VARCHAR}
+		,t.HOLD_STOCK_AMT=#{holdStockAmt,jdbcType=VARCHAR}
+		,t.HOLD_STOCK_TOT=#{holdStockTot,jdbcType=VARCHAR}
+		,t.STAFF_FLG=#{staffFlg,jdbcType=VARCHAR}
+		,t.BANK_DUTY=#{bankDuty,jdbcType=VARCHAR}
+		,t.CUST_BANK_REL=#{custBankRel,jdbcType=VARCHAR}
+		,t.COM_INIT_LOAN_DATE=#{comInitLoanDate,jdbcType=VARCHAR}
+		,t.LAST_UPDATE_SYS=#{lastUpdateSys,jdbcType=VARCHAR}
+		,t.LAST_UPDATE_USER=#{lastUpdateUser,jdbcType=VARCHAR}
+		,t.LAST_UPDATE_TM=TO_DATE(#{lastUpdateTm,jdbcType=DATE}, 'yyyy-MM-dd')
+
+		,t.LAST_UPDATE_ORG=#{lastUpdateOrg,jdbcType=VARCHAR}
+		WHERE t.CUST_ID = #{custId,jdbcType=VARCHAR}
+	</update>
+	<!-- 涉农个性标识修改 -->
+	<update id="updaterelatInfo" parameterType="java.util.Map">
+		UPDATE OCRM_F_CI_PER_RELAT_INFO t SET
+		t.WHE_AGR_REL_CUS=#{wheAgrRelCus,jdbcType=VARCHAR}
+		,t.WHE_THR_FAR_LEA_FIG=#{wheThrFarLeaFig,jdbcType=VARCHAR}
+		,t.WHE_PRO_LAR_HOU=#{wheProLarHou,jdbcType=VARCHAR}
+		,t.RURAL_CRE_YOUTH=#{ruralCreYouth,jdbcType=VARCHAR}
+		,t.WHE_FAM_FARM=#{wheFamFarm,jdbcType=VARCHAR}
+
+		,t.SCI_AND_TEC_DEM_HOU=#{sciAndTecDemHou,jdbcType=VARCHAR}
+		,t.DEM_HOU_DET_TIME=#{demHouDetTime,jdbcType=VARCHAR}
+		,t.WHE_DUAL_BASE_WIN_CUS=#{wheDualBaseWinCus,jdbcType=VARCHAR}
+		,t.WHE_IMM=#{wheImm,jdbcType=VARCHAR}
+		,t.WHE_DIS=#{wheDis,jdbcType=VARCHAR}
+
+		,t.DIS_LEVEL=#{disLevel,jdbcType=VARCHAR}
+		,t.WHE_AGR_SCI_TEC_INN=#{wheAgrSciTecInn,jdbcType=VARCHAR}
+		,t.WHE_NEW_AGR_MAN_SUB=#{wheNewAgrManSub,jdbcType=VARCHAR}
+		,t.PRI_TYPE=#{priType,jdbcType=VARCHAR}
+		,t.WHE_COO_MEM=#{wheCooMem,jdbcType=VARCHAR}
+		,t.AMO_OF_INS=#{amoOfIns,jdbcType=VARCHAR}
+		,t.INSURANCE=#{insurance,jdbcType=VARCHAR}
+		,t.INS_TYPE=#{insType,jdbcType=VARCHAR}
+		,t.WHE_POV_ALL_LOAN_CUS=#{whePovAllLoanCus,jdbcType=VARCHAR}
+		,t.POV_ALL_CUS_TYPE=#{povAllCusType,jdbcType=VARCHAR}
+		,t.POV_ALL_PRO=#{povAllPro,jdbcType=VARCHAR}
+		,t.PRO_LOC=#{proLoc,jdbcType=VARCHAR}
+		,t.WHE_REF_OF_AGR_LOA=#{wheRefOfAgrLoa,jdbcType=VARCHAR}
+		,t.PRO_COO_LOGO=#{proCooLogo,jdbcType=VARCHAR}
+		,t.WHE_TO_NEW_COU=#{wheToNewCou,jdbcType=VARCHAR}
+		,t.WHE_TO_CON_OF_URB=#{wheToConOfUrb,jdbcType=VARCHAR}
+
+		,t.LAST_ORG_ID=#{lastOrgId,jdbcType=VARCHAR}
+		,t.LAST_CHG_USR=#{lastChgUsr,jdbcType=VARCHAR}
+		,t.LAST_CHG_DT=TO_DATE(#{lastChgDt,jdbcType=DATE}, 'yyyy-MM-dd')
+
+
+		WHERE t.CUST_ID = #{custId,jdbcType=VARCHAR}
+	</update>
+	<!-- 重要修改 -->
+	<update id="updateimportInfo" parameterType="java.util.Map">
+		UPDATE ACRM_F_CI_PER_KEY_FLAG t SET
+		t.PEASANT_FLG=#{peasantFlg,jdbcType=VARCHAR}
+		,t.FINACE_FLAG=#{finaceFlag,jdbcType=VARCHAR}
+		,t.DEPOSIT_FLAG=#{depositFlag,jdbcType=VARCHAR}
+		,t.STAFF_FLG=#{staffFlg,jdbcType=VARCHAR}
+		,t.THIRD_DEP_FLAG=#{thirdDepFlag,jdbcType=VARCHAR}
+		,t.STAFF_LOAN_FLAG=#{staffLoanFlag,jdbcType=VARCHAR}
+		,t.MOBILE_BANK_FLAG=#{mobileBankFlag,jdbcType=VARCHAR}
+		,t.BADLOAN_FLAG=#{badloanFlag,jdbcType=VARCHAR}
+		,t.CREDITCARD_FLAG=#{creditcardFlag,jdbcType=VARCHAR}
+		,t.INTERNET_BANK_FLAG=#{internetBankFlag,jdbcType=VARCHAR}
+		,t.POS_FLAG=#{posFlag,jdbcType=VARCHAR}
+		,t.QUEST_LOAN_FLAG=#{questLoanFlag,jdbcType=VARCHAR}
+		,t.INTER_BUSI_FLG=#{interBusiFlg,jdbcType=VARCHAR}
+		,t.ERRORNAME_FLAG=#{errornameFlag,jdbcType=VARCHAR}
+
+		,t.PAYROLL_FLG=#{payrollFlg,jdbcType=VARCHAR}
+		,t.KEEP_PHO_FLG=#{keepPhoFlg,jdbcType=VARCHAR}
+		,t.REC_SMS_FLG=#{recSmsFlg,jdbcType=VARCHAR}
+		,t.VIP_FLG=#{vipFlg,jdbcType=VARCHAR}
+		,t.XWD_FLG=#{xwdFlg,jdbcType=VARCHAR}
+		,t.HOUSEFUND_LN_FLG=#{housefundLnFlg,jdbcType=VARCHAR}
+		,t.MORTGAGE_FLG=#{mortgageFlg,jdbcType=VARCHAR}
+		,t.HOUSEFUND_FLG=#{housefundFlg,jdbcType=VARCHAR}
+		,t.GOVER_FLG=#{goverFlg,jdbcType=VARCHAR}
+		,t.STOCKHOLDER_FLG=#{stockholderFlg,jdbcType=VARCHAR}
+		,t.NEIGHB_FLG=#{neighbFlg,jdbcType=VARCHAR}
+		,t.CNTR_FLG=#{cntrFlg,jdbcType=VARCHAR}
+		,t.ENT_STOCKHOLDER_FLG=#{entStockholderFlg,jdbcType=VARCHAR}
+
+		,t.GUAR_FLG=#{guarFlg,jdbcType=VARCHAR}
+		,t.COR_CUST_FLG=#{corCustFlg,jdbcType=VARCHAR}
+		,t.OTHERB_VIP_FLG=#{otherbVipFlg,jdbcType=VARCHAR}
+		,t.STAFF_REL_FLG=#{staffRelFlg,jdbcType=VARCHAR}
+		,t.CIVILSVER_FLG=#{civilsverFlg,jdbcType=VARCHAR}
+		,t.TEACHER_FLG=#{teacherFlg,jdbcType=VARCHAR}
+		,t.DOCTOR_FLG=#{doctorFlg,jdbcType=VARCHAR}
+
+
+		,t.LAST_UPDATE_SYS=#{lastUpdateSys,jdbcType=VARCHAR}
+		,t.LAST_UPDATE_USER=#{lastUpdateUser,jdbcType=VARCHAR}
+		,t.LAST_UPDATE_TM=TO_DATE(#{lastUpdateTm,jdbcType=TIMESTAMP},
+		'yyyy-MM-dd')
+		WHERE t.CUST_ID = #{custId,jdbcType=VARCHAR}
+	</update>
+	<!--履历修改 -->
+	<update id="updateresumeInfo" parameterType="java.util.Map">
+		UPDATE ACRM_F_CI_PER_RESUME_INFO t SET
+
+		t.COUNTRY=#{country,jdbcType=VARCHAR}
+		,t.CITY=#{city,jdbcType=VARCHAR}
+		,t.COM_SCH=#{comSch,jdbcType=VARCHAR}
+		,t.DEPT=#{dept,jdbcType=VARCHAR}
+		,t.SCH_DEPT=#{schDept,jdbcType=VARCHAR}
+		,t.SCH_MAJOR=#{schMajor,jdbcType=VARCHAR}
+		,t.SCH_LENGTH=#{schLength,jdbcType=VARCHAR}
+		,t.DUTY=#{duty,jdbcType=VARCHAR}
+		,t.REMARKS=#{remarks,jdbcType=VARCHAR}
+		,t.FULL_PART_FLG=#{fullPartFlg,jdbcType=VARCHAR}
+		,t.START_DATE=#{startDate,jdbcType=VARCHAR}
+		,t.END_DATE=#{endDate,jdbcType=VARCHAR}
+
+
+
+
+		WHERE t.ID = #{id,jdbcType=VARCHAR}
+	</update>
+	<insert id="insertresumeInfo" parameterType="java.util.Map">
+		INSERT INTO
+		ACRM_F_CI_PER_RESUME_INFO (
+		ID,CUST_ID,COUNTRY,CITY,COM_SCH,DEPT,SCH_DEPT,SCH_MAJOR,SCH_LENGTH,DUTY,REMARKS,FULL_PART_FLG,START_DATE,END_DATE
+		)
+		VALUES
+		(
+		#{id,jdbcType=VARCHAR},
+		#{custId,jdbcType=VARCHAR},
+		#{country,jdbcType=VARCHAR},
+		#{city,jdbcType=VARCHAR},
+		#{comSch,jdbcType=VARCHAR},
+		#{dept,jdbcType=VARCHAR},
+		#{schDept,jdbcType=VARCHAR},
+		#{schMajor,jdbcType=VARCHAR},
+		#{schLength,jdbcType=VARCHAR},
+		#{duty,jdbcType=VARCHAR},
+		#{remarks,jdbcType=VARCHAR},
+		#{fullPartFlg,jdbcType=VARCHAR},
+		#{startDate,jdbcType=VARCHAR},
+		#{endDate,jdbcType=VARCHAR}
+		)
+	</insert>
+	<select id="getNextId" resultType="String">
+		select acrm.id_info.NEXTVAL from dual
+	</select>
+
+	<select id="queryCustUpdateHis" parameterType="String"	resultType="java.util.HashMap">
+		select t.id,t.cust_id,t.chg_org_id,t.chg_usr,to_char(t.chg_dt,'YYYY-MM-dd HH24:MM:SS') as chg_dt,
+       t.chg_mod,t.chg_type, t.chg_eng_name,t.chg_chi_name,t.chg_bef_key_value,
+       t.chg_bef_value_value,t.chg_aft_key_value,t.chg_aft_value_value,t.table_name,t.if_use,
+       t2.org_name,t3.user_name
+		  from OCRM_F_CI_CUST_UPDATE_HIS t
+		  left join admin_sm_org t2
+		    on t.chg_org_id = t2.org_code
+		  left join admin_sm_user t3
+		    on t.chg_usr = t3.login_code
+		 where t.CUST_ID = #{custId}
+		   and t.CHG_MOD = 'custBaseView'
+		order by t.chg_dt desc
+	</select>
+	
+	<update id="updateIsUse" parameterType="String">
+		update OCRM_F_CI_CUST_UPDATE_HIS set IF_USE = '0' 
+		where cust_id = #{custId} and chg_eng_name in (${updateName})
+	</update>
+	<update id="saveImage" parameterType="String">
+		update ACRM_F_CI_PER_ADMIT_INFO set CUST_PHOTO = #{imagePath}
+		where cust_id = #{custId}
+	</update>
+	<update id="saveImage1" parameterType="String">
+		update ACRM_F_CI_PER_ADMIT_INFO set CUST_PHOTO = #{imagePath}
+		where cust_id = #{custId}
+	</update>
+	<select id="getItemName" parameterType="java.util.HashMap"	resultType="String">
+	select lookup_item_name from admin_sm_lookup_item where lookup_code=#{dataCode,jdbcType=VARCHAR} and lookup_item_code=#{itemCode,jdbcType=VARCHAR}
+	</select>
+</mapper>

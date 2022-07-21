@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.admin.repository.mapper.AdminSmUserMgrOrgMapper">
+
+	<select id="findAllByParam" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+		resultType="java.util.Map" databaseId="DB2">
+		select s.USER_MGR_ORG_ID,s.USER_ID,s.ORG_ID,s.REL_STS,substr(s.LAST_CHG_DT,1,10) as LAST_CHG_DT,
+		o.org_name,u.user_name, u1.user_name as last_chg_name from ADMIN_SM_USER_MGR_ORG s 
+		left join sys_org_view o on o.org_code=s.org_id
+		left join admin_sm_user u on u.LOGIN_CODE=s.user_id 
+		left join admin_sm_user u1 on u1.LOGIN_CODE=s.LAST_CHG_USR
+		<where>
+			<if test="condition.relSts != null and condition.relSts != ''">
+				and s.REL_STS = #{condition.relSts , jdbcType=VARCHAR}
+			</if>
+			<if test="condition.userId != null and condition.userId != ''">
+				and s.USER_ID = #{condition.userId , jdbcType=VARCHAR}
+			</if>
+			<if test="condition.orgId != null and condition.orgId != ''">
+				and o.ORG_SEQ  LIKE CONCAT(CONCAT('%', #{condition.orgId, jdbcType=VARCHAR}),'%') 
+			</if>
+		</where>
+	</select>
+
+</mapper>

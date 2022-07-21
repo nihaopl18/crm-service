@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.mgr.sys.pdplan.repository.mapper.OcrmFpdProdShowPlanMapper">
+	<!-- 查询产品展示方案列表信息 -->
+    <select id="getListByModel" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"  resultType="java.util.HashMap">
+	 select a.plan_id,a.plan_name,a.plan_type,TO_CHAR(a.create_date,'YYYY-MM-DD') as create_date,u.user_name,a.remark FROM OCRM_F_PD_PROD_SHOW_PLAN a left join admin_sm_user u on u.user_id = a.create_user 
+	 <where>
+	 1 = 1
+		<if test="condition.planName != null and condition.planName !=''">
+				  and a.PLAN_NAME   LIKE CONCAT(CONCAT('%', #{condition.planName, jdbcType=VARCHAR}),'%')
+		</if>
+		</where>
+	</select>
+	<!-- 检查方案名称 -->
+	 <select id="checkPlanName" parameterType="String"  resultType="int">
+	 select count(*) FROM OCRM_F_PD_PROD_SHOW_PLAN WHERE PLAN_NAME = #{planName, jdbcType=VARCHAR}
+	</select>
+	
+	<select id="checkUpdPlanName" parameterType="String"  resultType="int">
+	 select count(*) FROM OCRM_F_PD_PROD_SHOW_PLAN WHERE PLAN_ID = #{planId, jdbcType=VARCHAR} AND PLAN_NAME = #{planName, jdbcType=VARCHAR}
+	</select>
+	<delete id="delById" parameterType="String">
+	delete OCRM_F_PD_PROD_SHOW_PLAN where PLAN_ID = #{planId,jdbcType=VARCHAR}
+	</delete>
+	
+	<select id="getPlanType" parameterType="String"  resultType="String">
+	 select PLAN_TYPE FROM OCRM_F_PD_PROD_SHOW_PLAN WHERE PLAN_ID = #{planId, jdbcType=VARCHAR}
+	</select>
+</mapper>

@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.cust.org.repository.mapper.OCustHomePageMapper">
+    <select id="queryOProductTagList" parameterType="java.util.Map" resultType="java.util.HashMap">
+	    SELECT    
+					  t.CUST_ID        ,    
+					  t.DATA_DATE       ,    
+					  t.BASIC_HOU      ,    
+					  t.REG_DEP        ,    
+					  t.ALT_PAYROLL    ,    
+					  t.GEN_LOANS      ,    
+					  t.BANK_ACC       ,    
+					  t.DISCOUNT       ,    
+					  t.FACTORING      ,    
+					  t.LET_OF_GUA     ,    
+					  t.CRE_CER        ,    
+					  t.NAT_KNOT       ,    
+					  t.FINANCIAL      ,    
+					  t.INSURANCE      ,    
+					  t.FUND           ,    
+					  t.PRE_MET        ,    
+					  t.ONL_BANK_SER   ,    
+					  t.TELE_BANK      ,    
+					  t.SMS            ,    
+					  t.POS_MAC        ,    
+					  t.CAIZHI_BAO     ,    
+					  t.LARGE_CER      ,    
+					  t.CORP_ORG_CODE       
+  
+	      
+	    FROM ACRM_F_CI_ORG_HOLD_PRO t
+	  
+
+		where 1=1
+			<if  test="custId != null and custId != ''">
+	       		AND t.CUST_ID = #{custId,jdbcType=VARCHAR}
+	       		
+		    </if>
+	
+		
+	</select> 
+	 <select id="getBussXaxisArray" resultType="java.lang.String">
+    	SELECT T.DATA_DATE AS DATA_DT FROM ACRM_A_CI_ORG_BUSI_SUM_D T
+		where 1=1
+			
+			<if  test="custId != null and custId != ''">
+	       		AND T.CUST_ID = #{custId,jdbcType=VARCHAR}
+		    </if>
+		
+		ORDER BY T. DATA_DATE ASC
+	</select>
+	<select id="getOrgBussSumList" resultType="java.util.Map">
+    	SELECT  t.CORP_ORG_CODE          ,      
+				t.DATA_DATE                ,      
+				t.CUST_ID                ,      
+				round(t.DPS_BAL/10000,2) as  DPS_BAL             ,      
+		        round(t.DPS_Y_AVG_BAL/10000,2) as DPS_Y_AVG_BAL       ,      
+		        round(t.DPS_BAL_LY/10000,2) as DPS_BAL_LY             ,      
+		        round(t.DPS_Y_AVG_BAL_LY/10000,2) as DPS_Y_AVG_BAL_LY       ,      
+		        round(t.LOAN_BAL/10000,2) as LOAN_BAL               ,      
+		        round(t.LOAN_Y_AVG_BAL/10000,2) as LOAN_Y_AVG_BAL         ,      
+		        round(t.LOAN_BAL_LY/10000,2) as LOAN_BAL_LY            ,      
+		        round(t.LOAN_Y_AVG_BAL_LY/10000,2) as LOAN_Y_AVG_BAL_LY      ,      
+		        round(t.FIN_Y_AVG_BAL_LY/10000,2) as FIN_Y_AVG_BAL_LY       ,      
+		        round(t.FIN_Y_AVG_BAL/10000,2) as FIN_Y_AVG_BAL          , 
+		        round(t.FIN_BAL/10000,2) as FIN_BAL,        
+				t.SILVER_DISCOUNT        ,      
+				t.DIS_GUARAN_TICK        ,      
+				t.FIN_FACT_INVOICE       ,      
+				t.FIN_UNDER_IMP_EXP      ,      
+				t.TOTAL_LIA_STATE        ,      
+				t.UNPAID_BANK_ACC_BILL   ,      
+				t.UNPAID_LC              ,      
+				t.UNPAID_SBLC            ,      
+				t.UNPAID_GUAR            ,      
+				t.UNPAID_FOR_EXCG        ,      
+				t.OFF_BAL_SHEET          ,      
+				t.CREDIT_LINE            ,      
+				t.CREDIT_DATE            ,      
+				t.AVAIL_CREDIT           ,      
+				t.RISK_LEVEL                    
+    	
+  		FROM ACRM_A_CI_ORG_BUSI_SUM_D T
+  		
+		<where>
+		1=1
+			<if  test="custId != null and custId != ''">
+	       		AND T.CUST_ID = #{custId,jdbcType=VARCHAR}
+		    </if>
+		    
+		</where>
+		ORDER BY T.DATA_DATE ASC
+	</select>  
+     <select id="getBussMonXaxisArray" resultType="java.lang.String">
+    	SELECT T.DATA_DATE FROM ACRM_A_CI_ORG_BUSI_SUM_M T
+		where 1=1
+			
+			<if  test="custId != null and custId != ''">
+	       		AND T.CUST_ID = #{custId,jdbcType=VARCHAR}
+		    </if>
+		
+		ORDER BY T. DATA_DATE ASC
+	</select>
+	<select id="getOrgBussMonSumList" resultType="java.util.Map">
+    	SELECT   t.CORP_ORG_CODE          ,   
+				 t.DATA_DATE                ,   
+				 t.CUST_ID                ,   
+				  round(t.DPS_BAL/10000,2) as  DPS_BAL             ,      
+		        round(t.DPS_FIX_BAL/10000,2) as DPS_FIX_BAL       ,      
+		        round(t.DPS_CUR_BAL/10000,2) as DPS_CUR_BAL             ,      
+		        round(t.DPS_M_AVG_BAL/10000,2) as DPS_M_AVG       ,      
+		        round(t.DPS_BAL_WB/10000,2) as DPS_BAL_WB               ,      
+		        round(t.REPORT_LOAN/10000,2) as REPORT_LOAN         ,      
+		        round(t.REPORT_MID/10000,2) as REPORT_MID            ,      
+		        round(t.REPORT_SUM/10000,2) as REPORT_SUM      ,      
+		        round(t.LOAN_BAL/10000,2) as LOAN_BAL       ,      
+		        round(t.BAD_LOAN_BAL/10000,2) as BAD_LOAN_BAL          ,  
+		        round(t.DEBT_M_AVG_BAL/10000,2) as DEBT_M_AVG_BAL          ,
+		        round(t.REPORT_DPS/10000,2) as REPORT_DPS          ,
+				 round(t.AUM_M_AVG_BAL/10000,2) as AUM_M_AVG_BAL   ,   
+				 round(t.FIN_BAL/10000,2) as FIN_BAL,
+				 t.AUM_Q_AVG_BAL_GD       ,   
+				 t.AUM_Y_AVG_BAL          ,   
+				 t.DEBT_Y_AVG_BAL             
+                              
+    	 
+    	
+  		FROM ACRM_A_CI_ORG_BUSI_SUM_M T
+		<where>
+		1=1
+			<if  test="custId != null and custId != ''">
+	       		AND T.CUST_ID = #{custId,jdbcType=VARCHAR}
+		    </if>
+		    
+		</where>
+		ORDER BY T.DATA_DATE ASC
+	</select>  
+	<select id="queryOrgReportList" resultType="java.util.Map">
+		select '存款'  as name,REPORT_DPS  as value from (
+		       select  REPORT_DPS,REPORT_LOAN,REPORT_MID
+		       from ACRM_A_CI_ORG_BUSI_SUM_M
+		       where rownum=1
+		       <if  test="custId != null and custId != ''">
+	       		AND CUST_ID = #{custId,jdbcType=VARCHAR}
+		       </if>
+		       order by DATA_DATE desc)
+		union all 
+		select '贷款'  as name,REPORT_LOAN  as value from(
+		     select  REPORT_DPS,REPORT_LOAN,REPORT_MID
+		     from ACRM_A_CI_ORG_BUSI_SUM_M
+		     where rownum=1
+		      <if  test="custId != null and custId != ''">
+	       		AND CUST_ID = #{custId,jdbcType=VARCHAR}
+		       </if>
+		     order by DATA_DATE desc)
+		union all
+		select  '中间业务'  as name,REPORT_MID  as value from(
+		         select  REPORT_DPS,REPORT_LOAN,REPORT_MID
+		         from ACRM_A_CI_ORG_BUSI_SUM_M
+	     	     where rownum=1
+	     	      <if  test="custId != null and custId != ''">
+	       		AND CUST_ID = #{custId,jdbcType=VARCHAR}
+		       </if>
+                 order by DATA_DATE desc)
+	
+	</select>   
+	 
+</mapper>

@@ -1,0 +1,230 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper
+        namespace="cn.com.yusys.yscrm.fiexdstatement.repository.mapper.OcrmFCLStatementMapper">
+    <!-- 条件列表查询 -->
+
+    <select id="queryBranchList" parameterType="java.util.Map" resultType="java.util.Map">
+        select RM,JOB,EMPLOYEE_YEARS,OCCUPATION_RANK,st.USER_ID,SUPERINTEND,BRANCH,EFF_CUSTNUMBER,YOUHUI_CUSTNUMBER,YOUHUI_UPGRATE,YOUHUI_WINBACK,XIANZHUO_CUSTNUMBER,XIANZHUO_UPGRATE,XIANZHUO_WINBACK,AUM_BALANCEAVG_T_HT,AUM_BALANCEAVG_HT_FHT,AUM_BALANCEAVG_FHT_TM,AUM_BALANCEAVG_TM_SM,AUM_BALANCEAVG_SM_ENDLESS,
+        round(AUM_BALANCE/10000,4) as AUM_BALANCE,
+        round(AUM_DEPOSIT/10000,4) as AUM_DEPOSIT,AUM_DEPOSIT_SORT,
+        round(AUM_RATE/10000,4) as AUM_RATE,AUM_RATE_SORT,
+        round(AUM_NONRATE/10000,4) as AUM_NONRATE,AUM_NONRATE_SORT,
+        round(CONSIGNMENT/10000,4) as CONSIGNMENT,CONSIGNMENT_SORT,
+        round(DANAHARTA/10000,4) as DANAHARTA,DANAHARTA_SORT,
+        round(QDII/10000,4) as QDII,QDII_SORT,
+        round(RMBFUND/10000,4) as RMBFUND,RMBFUND_SORT,
+        round(INSURRANCE/10000,4) as INSURRANCE,INSURRANCE_SORT
+        from OCRM_F_CL_STATEMENT st
+
+
+        <where>
+            <if test="sqlDataAuth != null and sqlDataAuth != ''">
+                ${sqlDataAuth}
+            </if>
+            <if test="dataDate != null and dataDate != ''">
+                and st.DATA_DATE=to_date(#{dataDate},'yyyy-MM-dd')
+            </if>
+            <if test="aumBalanceStart != null and aumBalanceStart != ''">
+                and st.AUM_BALANCE >= to_number(#{aumBalanceStart,jdbcType=VARCHAR}) * 10000
+            </if>
+            <if test="aumBalanceEnd != null and aumBalanceEnd != ''">
+                and st.AUM_BALANCE &lt;= to_number(#{aumBalanceEnd,jdbcType=VARCHAR}) * 10000
+            </if>
+            <if test="targetId != null and targetId !=''">
+                AND st.SUPERINTEND_NO=#{targetId}
+            </if>
+            <if test="mktRespPerson != null and mktRespPerson !=''">
+                AND (st.BRANCH_NO=#{mktRespPerson} or st.USER_ID = #{mktRespPerson})
+            </if>
+            <if test="userIds != null">
+                and st.USER_ID in
+                <foreach collection="userIds" item="userId" index="index" open="(" close=")" separator=",">
+                    #{userId}
+                </foreach>
+            </if>
+            <if test="exportIds != null and exportIds !='' ">
+                and st.USER_ID ${exportIds}
+            </if>
+
+        </where>
+    </select>
+    <select id="queryBranchListUnPeople" parameterType="java.util.Map" resultType="java.util.Map">
+        select RM,JOB,EMPLOYEE_YEARS,OCCUPATION_RANK,st.USER_ID,SUPERINTEND,BRANCH,
+        EFF_CUSTNUMBER_PEOPLE as EFF_CUSTNUMBER,
+        YOUHUI_PEOPLE as YOUHUI_CUSTNUMBER,
+        YOUHUI_UPGRATE_PEOPLE as YOUHUI_UPGRATE,
+        YOUHUI_WINBACK_PEOPLE as YOUHUI_WINBACK,
+        XIANZHUO_PEOPLE as XIANZHUO_CUSTNUMBER ,
+        XIANZHUO_UPGRATE_PEOPLE as XIANZHUO_UPGRATE ,
+        XIANZHUO_WINBACK_PEOPLE as XIANZHUO_WINBACK ,
+        AUM_BALANCEAVG_T_HT_PEOPLE as AUM_BALANCEAVG_T_HT,
+        AUM_BALANCEAVG_HT_FHT_PEOPLE as AUM_BALANCEAVG_HT_FHT,
+        AUM_BALANCEAVG_FHT_TM_PEOPLE as AUM_BALANCEAVG_FHT_TM,
+        AUM_BALANCEAVG_TM_SM_PEOPLE as AUM_BALANCEAVG_TM_SM,
+        AUM_BALANCEAVG_SM_ENDLESS_PEOPLE as AUM_BALANCEAVG_SM_ENDLESS ,
+        round(AUM_BALANCE_DEL/10000,4) as AUM_BALANCE,
+        round(AUM_DEPOSIT_DEL/10000,4) as AUM_DEPOSIT,
+        AUM_DEPOSIT_DEL_SORT as AUM_DEPOSIT_SORT,
+        round(AUM_RATE_DEL/10000,4) as AUM_RATE,
+        AUM_RATE_DEL_SORT as AUM_RATE_SORT,
+        round(AUM_NONRATE_DEL/10000,4) as AUM_NONRATE,
+        AUM_NONRATE_DEL_SORT as AUM_NONRATE_SORT,
+        round(CONSIGNMENT_DEL/10000,4) as CONSIGNMENT,
+        CONSIGNMENT_DEL_SORT as CONSIGNMENT_SORT,
+        round(DANAHARTA_DEL/10000,4) as DANAHARTA,
+        DANAHARTA_DEL_SORT as DANAHARTA_SORT,
+        round(QDII_DEL/10000,4) as QDII,
+        QDII_DEL_SORT as QDII_SORT,
+        round(RMBFUND_DEL/10000,4) as RMBFUND,
+        RMBFUND_DEL_SORT as RMBFUND_SORT,
+        round(INSURRANCE_DEL/10000,4) as INSURRANCE,
+        INSURRANCE_DEL_SORT as INSURRANCE_SORT
+        from OCRM_F_CL_STATEMENT st
+
+
+        <where>
+            <if test="sqlDataAuth != null and sqlDataAuth != ''">
+                ${sqlDataAuth}
+            </if>
+            <if test="dataDate != null and dataDate != ''">
+                and st.DATA_DATE=to_date(#{dataDate},'yyyy-MM-dd')
+            </if>
+            <if test="aumBalanceStart != null and aumBalanceStart != ''">
+                and st.AUM_BALANCE >= to_number(#{aumBalanceStart,jdbcType=VARCHAR}) * 10000
+            </if>
+            <if test="aumBalanceEnd != null and aumBalanceEnd != ''">
+                and st.AUM_BALANCE &lt;= to_number(#{aumBalanceEnd,jdbcType=VARCHAR}) * 10000
+            </if>
+            <if test="targetId != null and targetId !=''">
+                AND st.SUPERINTEND_NO=#{targetId}
+            </if>
+            <if test="mktRespPerson != null and mktRespPerson !=''">
+                AND (st.BRANCH_NO=#{mktRespPerson} or st.USER_ID = #{mktRespPerson})
+            </if>
+            <if test="userIds != null">
+                and st.USER_ID in
+                <foreach collection="userIds" item="userId" index="index" open="(" close=")" separator=",">
+                    #{userId}
+                </foreach>
+            </if>
+            <if test="exportIds != null and exportIds !='' ">
+                and st.USER_ID ${exportIds}
+            </if>
+        </where>
+    </select>
+    <select id="getCount" parameterType="java.util.Map" resultType="java.util.Map">
+        select
+               sum(EFF_CUSTNUMBER) as EFF_CUSTNUMBER,sum (YOUHUI_CUSTNUMBER) as YOUHUI_CUSTNUMBER,sum(YOUHUI_UPGRATE) as YOUHUI_UPGRATE,sum(YOUHUI_WINBACK) as YOUHUI_WINBACK,
+               sum(XIANZHUO_CUSTNUMBER) as XIANZHUO_CUSTNUMBER,sum(XIANZHUO_UPGRATE) as XIANZHUO_UPGRATE,sum(XIANZHUO_WINBACK) as XIANZHUO_WINBACK,
+               sum(AUM_BALANCEAVG_T_HT) as AUM_BALANCEAVG_T_HT,sum(AUM_BALANCEAVG_HT_FHT) as AUM_BALANCEAVG_HT_FHT,sum(AUM_BALANCEAVG_FHT_TM) as AUM_BALANCEAVG_FHT_TM,sum(AUM_BALANCEAVG_TM_SM) as AUM_BALANCEAVG_TM_SM,sum(AUM_BALANCEAVG_SM_ENDLESS) as AUM_BALANCEAVG_SM_ENDLESS,
+               sum(round(AUM_BALANCE/10000,4)) as AUM_BALANCE,
+               sum(round(AUM_DEPOSIT/10000,4)) as AUM_DEPOSIT,sum(AUM_DEPOSIT_SORT) as AUM_DEPOSIT_SORT,
+               sum(round(AUM_RATE/10000,4)) as AUM_RATE,sum(AUM_RATE_SORT) as AUM_RATE_SORT,
+               sum(round(AUM_NONRATE/10000,4)) as AUM_NONRATE,
+               sum(AUM_NONRATE_SORT) as AUM_NONRATE_SORT,
+               sum(round(CONSIGNMENT/10000,4)) as CONSIGNMENT,sum(CONSIGNMENT_SORT) as CONSIGNMENT_SORT,
+               sum(round(DANAHARTA/10000,4)) as DANAHARTA,sum(DANAHARTA_SORT) as DANAHARTA_SORT,
+               sum(round(QDII/10000,4)) as QDII,sum(QDII_SORT) as QDII_SORT,
+               sum(round(RMBFUND/10000,4)) as RMBFUND,sum(RMBFUND_SORT) as RMBFUND_SORT,
+        sum(round(INSURRANCE/10000,4)) as INSURRANCE,sum(INSURRANCE_SORT) as INSURRANCE_SORT
+        from OCRM_F_CL_STATEMENT st
+
+
+        <where>
+            <if test="sqlDataAuth != null and sqlDataAuth != ''">
+                ${sqlDataAuth}
+            </if>
+            <if test="dataDate != null and dataDate != ''">
+                and st.DATA_DATE=to_date(#{dataDate},'yyyy-MM-dd')
+            </if>
+            <if test="aumBalanceStart != null and aumBalanceStart != ''">
+                and st.AUM_BALANCE >= to_number(#{aumBalanceStart,jdbcType=VARCHAR}) * 10000
+            </if>
+            <if test="aumBalanceEnd != null and aumBalanceEnd != ''">
+                and st.AUM_BALANCE &lt;= to_number(#{aumBalanceEnd,jdbcType=VARCHAR}) * 10000
+            </if>
+            <if test="targetId != null and targetId !=''">
+                AND st.SUPERINTEND_NO=#{targetId}
+            </if>
+            <if test="mktRespPerson != null and mktRespPerson !=''">
+                AND (st.BRANCH_NO=#{mktRespPerson} or st.USER_ID = #{mktRespPerson})
+            </if>
+            <if test="userIds != null">
+                and st.USER_ID in
+                <foreach collection="userIds" item="userId" index="index" open="(" close=")" separator=",">
+                    #{userId}
+                </foreach>
+            </if>
+            <if test="exportIds != null and exportIds !='' ">
+                and st.USER_ID ${exportIds}
+            </if>
+
+        </where>
+    </select>
+    <select id="getCountUnpeople" resultType="java.util.Map">
+        select
+        sum(EFF_CUSTNUMBER_PEOPLE) as EFF_CUSTNUMBER,
+        sum(YOUHUI_PEOPLE) as YOUHUI_CUSTNUMBER,
+        sum(YOUHUI_UPGRATE_PEOPLE) as YOUHUI_UPGRATE,
+        sum(YOUHUI_WINBACK_PEOPLE) as YOUHUI_WINBACK,
+        sum(XIANZHUO_PEOPLE) as XIANZHUO_CUSTNUMBER ,
+        sum(XIANZHUO_UPGRATE_PEOPLE) as XIANZHUO_UPGRATE ,
+        sum(XIANZHUO_WINBACK_PEOPLE) as XIANZHUO_WINBACK ,
+        sum(AUM_BALANCEAVG_T_HT_PEOPLE) as AUM_BALANCEAVG_T_HT,
+        sum(AUM_BALANCEAVG_HT_FHT_PEOPLE) as AUM_BALANCEAVG_HT_FHT,
+        sum(AUM_BALANCEAVG_FHT_TM_PEOPLE) as AUM_BALANCEAVG_FHT_TM,
+        sum(AUM_BALANCEAVG_TM_SM_PEOPLE) as AUM_BALANCEAVG_TM_SM,
+        sum(AUM_BALANCEAVG_SM_ENDLESS_PEOPLE) as AUM_BALANCEAVG_SM_ENDLESS ,
+        sum(round(AUM_BALANCE_DEL/10000,4)) as AUM_BALANCE,
+        sum(round(AUM_DEPOSIT_DEL/10000,4)) as AUM_DEPOSIT,
+        sum(AUM_DEPOSIT_DEL_SORT) as AUM_DEPOSIT_SORT,
+        sum(round(AUM_RATE_DEL/10000,4)) as AUM_RATE,
+        sum(AUM_RATE_DEL_SORT) as AUM_RATE_SORT,
+        sum(round(AUM_NONRATE_DEL/10000,4)) as AUM_NONRATE,
+        sum(AUM_NONRATE_DEL_SORT) as AUM_NONRATE_SORT,
+        sum(round(CONSIGNMENT_DEL/10000,4)) as CONSIGNMENT,
+        sum(CONSIGNMENT_DEL_SORT) as CONSIGNMENT_SORT,
+        sum(round(DANAHARTA_DEL/10000,4)) as DANAHARTA,
+        sum(DANAHARTA_DEL_SORT) as DANAHARTA_SORT,
+        sum(round(QDII_DEL/10000,4)) as QDII,
+        sum(QDII_DEL_SORT) as QDII_SORT,
+        sum(round(RMBFUND_DEL/10000,4)) as RMBFUND,
+        sum(RMBFUND_DEL_SORT) as RMBFUND_SORT,
+        sum(round(INSURRANCE_DEL/10000,4)) as INSURRANCE,
+        sum(INSURRANCE_DEL_SORT) as INSURRANCE_SORT
+        from OCRM_F_CL_STATEMENT st
+        <where>
+            <if test="sqlDataAuth != null and sqlDataAuth != ''">
+                ${sqlDataAuth}
+            </if>
+            <if test="dataDate != null and dataDate != ''">
+                and st.DATA_DATE=to_date(#{dataDate},'yyyy-MM-dd')
+            </if>
+            <if test="aumBalanceStart != null and aumBalanceStart != ''">
+                and st.AUM_BALANCE >= to_number(#{aumBalanceStart,jdbcType=VARCHAR}) * 10000
+            </if>
+            <if test="aumBalanceEnd != null and aumBalanceEnd != ''">
+                and st.AUM_BALANCE &lt;= to_number(#{aumBalanceEnd,jdbcType=VARCHAR}) * 10000
+            </if>
+            <if test="targetId != null and targetId !=''">
+                AND st.SUPERINTEND_NO=#{targetId}
+            </if>
+            <if test="mktRespPerson != null and mktRespPerson !=''">
+                AND (st.BRANCH_NO=#{mktRespPerson} or st.USER_ID = #{mktRespPerson})
+            </if>
+            <if test="userIds != null">
+                and st.USER_ID in
+                <foreach collection="userIds" item="userId" index="index" open="(" close=")" separator=",">
+                    #{userId}
+                </foreach>
+            </if>
+            <if test="exportIds != null and exportIds !='' ">
+                and st.USER_ID ${exportIds}
+            </if>
+            
+        </where>
+    </select>
+
+
+</mapper>

@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.admin.repository.mapper.WfiDemoMapper">
+  <resultMap id="BaseResultMap" type="cn.com.yusys.yusp.admin.domain.WfiDemo">
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <id column="LOGIC_SEQ" jdbcType="VARCHAR" property="logicSeq" />
+    <result column="CURRENT_ACTION" jdbcType="VARCHAR" property="currentAction" />
+    <result column="CUST_ID" jdbcType="VARCHAR" property="custId" />
+    <result column="CUST_NAME" jdbcType="VARCHAR" property="custName" />
+    <result column="INSTANCE_ID" jdbcType="VARCHAR" property="instanceId" />
+    <result column="NODE_ID" jdbcType="VARCHAR" property="nodeId" />
+    <result column="NODE_USER" jdbcType="VARCHAR" property="nodeUser" />
+    <result column="SEX" jdbcType="VARCHAR" property="sex" />
+    <result column="HIGHEST_EDU" jdbcType="VARCHAR" property="highestEdu" />
+    <result column="MONEY" jdbcType="VARCHAR" property="money" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    <!--
+      WARNING - @mbg.generated
+    -->
+    LOGIC_SEQ, CURRENT_ACTION, CUST_ID, CUST_NAME, INSTANCE_ID, NODE_ID, NODE_USER, SEX, 
+    HIGHEST_EDU, MONEY
+  </sql>
+  
+    <select id="selectAllWfiDemo"  resultMap="BaseResultMap">  
+    select 
+    <include refid="Base_Column_List" />
+    from WFI_DEMO order by LOGIC_SEQ  desc 
+  </select>
+  <select id="getUserByOrg" parameterType="java.util.HashMap" resultType="java.util.HashMap">  
+     select #{instr,jdbcType=VARCHAR} as org_Id from dual where #{userOrg,jdbcType=VARCHAR} in (
+    SELECT ORG_ID 
+	  FROM ADMIN_SM_ORG
+	 START WITH ORG_ID in (select org_id from admin_sm_user where login_code=#{instr,jdbcType=VARCHAR})
+	CONNECT BY PRIOR ORG_ID = UP_ORG_ID)
+  </select>
+   <insert id="insertSelective" parameterType="cn.com.yusys.yusp.admin.domain.WfiDemo">
+    insert into WFI_DEMO
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="logicSeq != null">
+        LOGIC_SEQ,
+      </if>
+      <if test="currentAction != null">
+        CURRENT_ACTION,
+      </if>
+       <if test="custId != null">
+        CUST_ID,
+      </if>
+       <if test="custName != null">
+        CUST_NAME,
+      </if>
+         <if test="sex != null">
+        SEX,
+      </if>
+       <if test="highestEdu != null">
+        HIGHEST_EDU,
+      </if>
+       <if test="money != null">
+        MONEY,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="logicSeq != null">
+        #{logicSeq,jdbcType=VARCHAR},
+      </if>
+      <if test="currentAction != null">
+        #{currentAction,jdbcType=VARCHAR},
+      </if>
+      <if test="custId != null">
+          #{custId,jdbcType=VARCHAR},
+      </if>
+      <if test="custName != null">
+        #{custName,jdbcType=VARCHAR},
+      </if>
+        <if test="sex != null">
+        #{sex,jdbcType=VARCHAR},
+      </if>
+      <if test="highestEdu != null">
+        #{highestEdu,jdbcType=VARCHAR},
+      </if>
+       <if test="money != null">
+        #{money,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  
+    <update id="updateByPrimaryKeySelective" parameterType="cn.com.yusys.yusp.admin.domain.WfiDemo">
+    update WFI_DEMO
+    <set>
+      <if test="currentAction != null">
+        CURRENT_ACTION = #{currentAction,jdbcType=VARCHAR},
+      </if>
+      <if test="custId != null">
+        CUST_ID = #{custId,jdbcType=VARCHAR},
+      </if>
+      <if test="custName != null">
+        CUST_NAME = #{custName,jdbcType=VARCHAR},
+      </if>
+      <if test="instanceId != null">
+        INSTANCE_ID = #{instanceId,jdbcType=VARCHAR},
+      </if>
+       <if test="nodeId != null">
+        NODE_ID = #{nodeId,jdbcType=VARCHAR},
+      </if>
+       <if test="nodeUser != null">
+        NODE_USER = #{nodeUser,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where LOGIC_SEQ = #{logicSeq,jdbcType=VARCHAR}
+  </update>
+  
+</mapper>

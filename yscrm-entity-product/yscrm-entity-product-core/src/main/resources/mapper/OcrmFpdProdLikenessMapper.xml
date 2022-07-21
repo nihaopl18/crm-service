@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.product.repository.mapper.OcrmFpdProdLikenessMapper">
+   <!-- 类似产品查询 -->
+	<select id="similarProductsQuery" parameterType="java.util.Map" resultType="java.util.Map">
+		SELECT A.LIKENESS_ID, A.CORP_ORG_CODE, A.PROD_ID, A.LIKE_PROD_ID, 
+		A.LIKE_PROD_NAME, A.REMARK, A.LAST_CHG_USR, A.LAST_CHG_DT,
+		B.DATA_DATE, B.LAST_CHG_SYS, B.LAST_CHG_TM, 
+		B.SOURCE_PRD_NO, B.PRODUCT_ID, B.PROD_NAME, B.CATL_CODE, 
+		TO_CHAR(B.PROD_START_DATE,'yyyy-MM-dd') as PROD_START_DATE,
+		TO_CHAR(B.PROD_END_DATE, 'yyyy-MM-dd') as PROD_END_DATE,
+		B.PROD_STATE, B.RISK_LEVEL, B.PROD_DESC, B.RATE, B.FREE_RATE, B.PROD_TERM, 
+		B.CUYYEN_TYPE, B.SUBSCRIBE_START_AMT, B.PROD_CHARACT, B.OBJ_CUST_DESC, 
+		B.DISCNT_INFO, B.MKT_MSG, B.APP_OBJ, B.HAND_CHANNLE, B.HAND_PROCESS, 
+		B.PD_SOURCE, B.PD_MAGAGER, B.MANAGER_DEPT, B.BUY_CONDITION, B.IS_BANLACE, 
+		B.INCOME_RATE, B.IS_MULTI_RECORD, B.EXT_TABLE_ID, B.VIEW_SHOW_ID,
+        C.CATL_NAME, D.PROD_NAME AS LIKE_PRODUCT_NAME
+		FROM OCRM_F_PD_PROD_LIKENESS A
+		LEFT JOIN ACRM_F_PD_PROD_INFO B						
+		ON A.LIKE_PROD_ID = B.PRODUCT_ID
+		LEFT JOIN ACRM_F_PD_PROD_CATL C 
+		ON B.CATL_CODE = C.CATL_CODE
+		LEFT JOIN ACRM_F_PD_PROD_INFO D				
+		ON A.LIKE_PROD_ID = D.PRODUCT_ID
+		WHERE 1=1
+		<!-- 产品编号 -->
+		<if test="condition.prodId != null and condition.prodId != ''">
+       		AND A.PROD_ID = #{condition.prodId,jdbcType=VARCHAR}
+	    </if>
+	</select>
+    
+    <!-- 根据产品编号删除产品信息 -->
+	<delete id="deleteSimilarProducts" parameterType="String">
+		DELETE FROM OCRM_F_PD_PROD_LIKENESS A WHERE A.LIKENESS_ID = #{condition.likenessId,jdbcType=VARCHAR}
+	</delete>
+    
+</mapper>

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.custpub.repository.mapper.OcrmFciNetworkRelaMapper">
+    
+    <select id="getListByModel" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"  resultType="java.util.HashMap">
+	 SELECT t.*,u.user_name as CREATE_NAME,u1.user_name as update_name,o.org_name as create_org_name,
+	 (select count(s.RELA_MEMBER_ID) from ocrm_f_ci_network_rela_member s where s.NETWORK_RELA_ID=t.NETWORK_RELA_ID) as member_num
+	  FROM OCRM_F_CI_NETWORK_RELA t
+	 left join admin_sm_user u on u.LOGIN_CODE=t.CREATE_USER
+	 left join admin_sm_user u1 on u1.LOGIN_CODE=t.UPDATE_USER
+	 left join admin_sm_org o on o.org_id=t.CREATE_ORG
+	  <where>
+		<if test="condition.networkRelaName != null and condition.networkRelaName !=''">
+				  and NETWORK_RELA_NAME LIKE CONCAT(CONCAT('%', #{condition.networkRelaName, jdbcType=VARCHAR}),'%')
+		</if>
+		<if test="condition.userId != null and condition.userId !=''">
+				  and create_user=#{condition.userId, jdbcType=VARCHAR}
+		</if>
+    </where>
+	</select>
+    	  <!--查询本人管理的客户  -->
+    <select id="getCustInfoByInfo" parameterType="java.util.HashMap"  resultType="java.util.HashMap">
+	 	<!-- SELECT T.CUST_ID,T.CUST_NAME,T.CUST_TYPE FROM ACRM_F_CI_CUST_ADMIT_ALL T  -->
+	 	SELECT T.CUST_ID,T.CUST_NAME,T.CUST_TYPE FROM ACRM_F_CI_CUST_ALL T
+	 	LEFT JOIN OCRM_F_CI_ADMIT_BELONG B ON B.CUST_ID = T.CUST_ID
+	 	<where>
+	 	T.IS_ADMIT_ENTER='1' and B.IS_ADMIT_ENTER='1'
+	 		<if test="userId != null and userId !=''">
+				  and B.MGR_ID = #{userId, jdbcType=VARCHAR}
+			</if>	 		
+	 		<if test="custName != null and custName !=''">
+				  and T.CUST_NAME LIKE CONCAT(CONCAT('%', #{custName, jdbcType=VARCHAR}),'%')
+			</if>
+	 	</where>
+	</select>
+</mapper>

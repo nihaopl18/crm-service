@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.cm.sysKeyWord.repository.mapper.CmFRcMarketCapMapper">
+	<!-- 查询 -->
+	<select id="getList" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.Map">
+		SELECT T.*,R.CATL_NAME FROM CM_F_RC_PROD_CAP T
+		LEFT JOIN CM_F_RC_PROD_CATL R ON T.CATL_CODE = R.CATL_CODE
+		<where>
+			<if test="condition.catlCode != null and condition.catlCode != ''">
+				CATL_CODE = #{catlCode}
+			</if>
+		</where>
+	</select>
+	<!-- 删除 -->
+	<delete id="deleteList" parameterType="cn.com.yusys.yusp.cm.sysKeyWord.domain.CmFRcMarketCapInfo">
+		DELETE FROM CM_F_RC_PROD_CAP WHERE CATL_CODE = #{catlCode}
+	</delete>
+</mapper>

@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.cust.org.repository.mapper.OcrmFciOrgKeyManMapper">
+    <sql id="Base_Column_List">
+	    DATA_DATE,CRAT_DT,CRAT_ORG_ID,CRAT_USR,LAST_CHG_SYS,LAST_CHG_USR,LAST_CHG_DT,CORP_ORG_CODE,CUST_ID,CUST_NAME,RELA_TYPE,KEY_CUST_ID,CUST_TITLE,CUST_NAME_REL,JOB_POSI,OFFI_TEL_NO,HOME_TEL_NO,MOBILE_NO,EMAIL,CONT_PRIO,SEX,CERT_TYPE,CERT_NO,WECHAT,QQ,WEIBO,EDU_REC,MARRI_STAT,SPOUSE_NAME,SPOUSE_CERT_TYPE,SPOUSE_CERT_NO,SPOUSE_TEL_NO,SPOUSE_IND_OCC,VALID_FLG,REMARK
+    </sql>
+    
+    <!-- 关键人信息查询 -->
+	<select id="querylist" parameterType="java.util.Map" resultType="java.util.Map">
+		select t.DATA_DATE,
+			   to_char(t.CRAT_DT,'yyyy-mm-dd') as CRAT_DT,
+		       t.CRAT_ORG_ID,
+		       t.CRAT_USR,
+		       t.LAST_CHG_SYS,
+		       t.LAST_CHG_USR,
+		       t.ID,
+		       to_char(t.LAST_CHG_DT,'yyyy-mm-dd') as LAST_CHG_DT,
+		       t.CORP_ORG_CODE,
+		       t.CUST_ID,
+		       t.CUST_NAME,
+		       t.RELA_TYPE,
+		       t.KEY_CUST_ID,
+		       t.CUST_TITLE,
+		       t.CUST_NAME_REL,
+		       t.JOB_POSI,
+		       t.OFFI_TEL_NO,
+		       t.HOME_TEL_NO,
+		       t.MOBILE_NO,
+		       t.EMAIL,
+		       t.CONT_PRIO,
+		       t.SEX,
+		       t.CERT_TYPE,
+		       t.CERT_NO,
+		       t.WECHAT,
+		       t.QQ,
+		       t.WEIBO,
+		       t.EDU_REC,
+		       t.MARRI_STAT,
+		       t.SPOUSE_NAME,
+		       t.SPOUSE_CERT_TYPE,
+		       t.SPOUSE_CERT_NO,
+		       t.SPOUSE_TEL_NO,
+		       t.SPOUSE_IND_OCC,
+		       t.VALID_FLG,
+		       t.REMARK,
+		       org.org_name,
+		       cust.user_name
+		  from ACRM_F_CI_ORG_KEY_MAN t
+		  left join admin_sm_org org
+	      on org.org_id = t.CRAT_ORG_ID
+	      left join admin_sm_user cust
+	      on cust.login_code = t.LAST_CHG_USR
+		  where 1=1
+		  
+		  <if  test="condition.custId != null and condition.custId != ''">
+       			and  t.CUST_ID =#{condition.custId,jdbcType=VARCHAR} 
+	  	  </if>
+	  	    <if  test="condition.topfive=='yes'">
+       			and  ROWNUM &lt;=5
+	  	  </if>
+	  	  order by t.LAST_CHG_DT  desc
+	</select>
+	
+	<!-- 根据关键人编号删除反馈信息 -->
+	<delete id="deleteById" parameterType="String">
+		DELETE FROM ACRM_F_CI_ORG_KEY_MAN A WHERE A.ID = #{condition.id,jdbcType=VARCHAR}
+	</delete> 
+</mapper>

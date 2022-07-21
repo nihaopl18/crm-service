@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.admin.repository.mapper.AdminSmDutyMapper">
+
+	<!-- 查询岗位信息 -->
+	<select id="getDutyByModel" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+		resultType="java.util.Map" databaseId="mysql">
+		SELECT d.duty_id,d.duty_cde,d.duty_name,d.belong_org_id,d.duty_remark,
+		d.duty_sts,d.last_chg_usr,d.last_chg_dt,o.org_name,u.user_name
+		from ADMIN_SM_DUTY d 
+		LEFT JOIN  sys_org_view O ON D.BELONG_ORG_ID = O.ORG_ID
+		LEFT JOIN  ADMIN_SM_USER U ON u.user_id = d.last_chg_usr
+		<where>
+			<if test="condition.dutyCde != null and condition.dutyCde !=''">
+				and d.DUTY_CDE  LIKE CONCAT(CONCAT('%', #{condition.dutyCde, jdbcType=VARCHAR}),'%') 
+			</if>
+			<if test="condition.dutyName != null and condition.dutyName !=''">
+				and d.DUTY_NAME  LIKE CONCAT(CONCAT('%', #{condition.dutyName, jdbcType=VARCHAR}),'%') 
+			</if>
+			<if test="condition.dutySts != null and condition.dutySts !=''">
+				and d.DUTY_STS=#{condition.dutySts}
+			</if>
+            <if test="condition.belongOrgId != null and condition.belongOrgId != ''">
+                and o.ORG_SEQ  LIKE (CONCAT(CONCAT('%', CONCAT(CONCAT(',',#{condition.belongOrgId, jdbcType=VARCHAR}),',')),'%'))
+            </if>
+		</where>
+		order by d.last_chg_dt desc
+	</select>
+	<!-- 查询岗位用户信息 -->
+	<select id="getUserListByModel" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+		resultType="java.util.Map" databaseId="mysql">
+		select T.LOGIN_CODE,T.USER_NAME,O.ORG_NAME from
+		       admin_sm_user t
+		       	LEFT JOIN ADMIN_SM_ORG O ON O.ORG_ID = T.ORG_ID
+		        where t.user_id in 
+		       ( select user_id from admin_sm_user_duty_rel where duty_id =#{condition.dutyId, jdbcType=VARCHAR} and REL_STS = 'A' )
+			<if test="condition.loginCode != null and condition.loginCode !=''">
+				and t.LOGIN_CODE  LIKE CONCAT(CONCAT('%', #{condition.loginCode, jdbcType=VARCHAR}),'%')
+			</if>
+			<if test="condition.userName != null and condition.userName !=''">
+				and t.USER_NAME  LIKE CONCAT(CONCAT('%', #{condition.userName, jdbcType=VARCHAR}),'%') 
+			</if>
+			<if test="condition.userCode != null and condition.userCode !=''">
+				and t.USER_CODE  LIKE CONCAT(CONCAT('%', #{condition.userCode, jdbcType=VARCHAR}),'%') 
+			</if>
+	</select>
+
+</mapper>

@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.user.schedule.repository.mapper.OcrmFwpScheduleOtherMapper">
+    <resultMap id="BaseResultMap" type="cn.com.yusys.yscrm.user.schedule.domain.OcrmFwpScheduleOther">
+		<id column="O_ID" jdbcType="VARCHAR" property="oid" />
+		<result column="SCHEDULE_ID" jdbcType="VARCHAR" property="scheduleId" />
+		<result column="CUST_ID" jdbcType="VARCHAR" property="custId" />
+		<result column="CUST_NAME" jdbcType="VARCHAR" property="custName" />
+		<result column="OTH_SIT_REMARK" jdbcType="VARCHAR" property="othSitRemark" />
+		<result column="OTH_COMP_REMARK" jdbcType="VARCHAR" property="othCompRemark" />
+		<result column="SCH_DESC" jdbcType="VARCHAR" property="schDesc" />
+		<result column="STAT" jdbcType="VARCHAR" property="stat" />
+		<result column="ARANGE_ID" jdbcType="VARCHAR" property="arangeId" />
+		<result column="ARANGE_NAME" jdbcType="VARCHAR" property="arangeName" />
+		<result column="MGR_ID" jdbcType="VARCHAR" property="mgrId" />
+		<result column="MGR_NAME" jdbcType="VARCHAR" property="mgrName" />
+		<result column="IS_REMIND" jdbcType="VARCHAR" property="isRemind" />
+		<result column="REMIND_DATE" jdbcType="VARCHAR" property="remindDate" />
+		<result column="REMARK" jdbcType="VARCHAR" property="remark" />
+		<result column="CORP_ORG_CODE" jdbcType="VARCHAR" property="corpOrgCode" />
+		<result column="IS_DELETE" jdbcType="VARCHAR" property="isDelete" />
+		<result column="LAST_CHG_USR" jdbcType="VARCHAR" property="lastChgUsr" />
+		<result column="LAST_CHG_DT" jdbcType="VARCHAR" property="lastChgDt" />
+    </resultMap>
+    <sql id="Base_Column_List">
+	    a.O_ID,a.SCHEDULE_ID,a.CUST_ID,a.CUST_NAME,a.OTH_SIT_REMARK,a.OTH_COMP_REMARK,a.SCH_DESC,a.STAT,a.ARANGE_ID,a.ARANGE_NAME,a.MGR_ID,a.MGR_NAME,a.IS_REMIND,a.REMIND_DATE,a.REMARK,a.CORP_ORG_CODE,a.IS_DELETE,a.LAST_CHG_USR,a.LAST_CHG_DT
+    </sql>
+    
+    <!-- 列表查询 -->
+    <select id="queryList" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultMap="BaseResultMap">
+        <!-- select <include refid="Base_Column_List" /> from OCRM_F_WP_SCHEDULE_OTHER
+          where IS_DELETE = 'N' and SCHEDULE_ID in (
+		    select SCHEDULE_ID from OCRM_F_WP_SCHEDULE 
+			  <where>
+	            <if test="condition.reporterId != null and condition.reporterId != ''">
+	               AND MGR_ID = #{condition.reporterId,jdbcType=VARCHAR} 
+	            </if>
+	            <if test="condition.reporterDate != null and condition.reporterDate != ''">
+	               AND SCH_DATE = #{condition.reporterDate,jdbcType=VARCHAR} 
+	            </if>
+              </where>
+	      )
+	    <if test="sort != null"> order by ${sort} </if> -->
+	    select <include refid="Base_Column_List" /> from  OCRM_F_WP_SCHEDULE_OTHER a  
+	    left join OCRM_F_WP_SCHEDULE b on a.schedule_id=b.schedule_id 
+	    
+	    <where>
+			    <if test="condition.reporterDate != null and condition.reporterDate != ''">
+			               AND b.SCH_DATE = #{condition.reporterDate,jdbcType=VARCHAR} 
+			     </if>
+	            <if test="condition.reporterId != null and condition.reporterId != ''">
+	               AND a.mgr_id = #{condition.reporterId,jdbcType=VARCHAR} 
+	            </if>
+	            <if test="condition.reporterId != null and condition.reporterId != ''">
+	               AND a.arange_id != #{condition.reporterId,jdbcType=VARCHAR} 
+	            </if>
+	            and a.stat!='1' and IS_DELETE='N'
+              </where>
+        union 
+        select <include refid="Base_Column_List" /> from OCRM_F_WP_SCHEDULE_OTHER  a  
+        left join OCRM_F_WP_SCHEDULE b on a.schedule_id=b.schedule_id 
+        <where>
+	            <if test="condition.reporterId != null and condition.reporterId != ''">
+	               AND a.arange_id = #{condition.reporterId,jdbcType=VARCHAR} 
+	            </if>
+	            <if test="condition.reporterDate != null and condition.reporterDate != ''">
+	               AND b.SCH_DATE = #{condition.reporterDate,jdbcType=VARCHAR} 
+	            </if>
+	             and IS_DELETE='N'
+          </where>
+    </select>
+    
+    <!-- 根据主键删除 逻辑删除 -->
+    <update id="deleteByOids" parameterType="String">
+        update OCRM_F_WP_SCHEDULE_OTHER set IS_DELETE = 'Y'
+        where O_ID in 
+        <foreach collection="array" item="ids" index="index" open="(" close=")" separator=",">
+        	#{ids}
+        </foreach>
+    </update>
+    
+    <!-- 根据 其他日程 主键 修改完成状态 -->
+    <update id="scheduleRelease" parameterType="String">
+        update OCRM_F_WP_SCHEDULE_OTHER set STAT = '2'
+        where O_ID in 
+        <foreach collection="array" item="ids" index="index" open="(" close=")" separator=",">
+        	#{ids}
+        </foreach>
+    </update>
+</mapper>

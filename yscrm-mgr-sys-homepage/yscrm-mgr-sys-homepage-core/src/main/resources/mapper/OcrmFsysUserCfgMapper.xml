@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.homepage.repository.mapper.OcrmFsysUserCfgMapper">
+    <!-- 查询用户系统主题 --> 
+     <select id="getThemeInfo" parameterType="string"  resultType="cn.com.yusys.yscrm.homepage.domain.OcrmFsysUserCfg">
+	 SELECT * FROM OCRM_F_SYS_USER_CFG WHERE USER_ID = #{loginCode, jdbcType=VARCHAR}
+	</select>   
+	
+	<!-- 删除用户系统主题 -->
+    <delete id="delByuserId" parameterType="string">
+	 DELETE OCRM_F_SYS_USER_CFG WHERE USER_ID = #{loginCode, jdbcType=VARCHAR}
+	</delete>  
+</mapper>

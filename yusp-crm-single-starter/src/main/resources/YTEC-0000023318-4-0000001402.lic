@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<license build-time="Thu Nov 18 14:16:18 CST 2021" validate-code="595AAF996049A13BAF1D527BE2274655">
+  <element name="customer_name">东亚银行（中国）有限公司</element>
+  <element name="contract_code">HT2021-0883</element>
+  <element name="license_code">0000024030</element>
+  <element name="product_code">0000001402</element>
+  <element name="product_name_zh-cn">宇信科技客户关系管理系统[简称：YSCRM客户关系管理系统]V6.0</element>
+  <element name="product_name_en-us">YSCRM</element>
+  <element name="version_major">6</element>
+  <element name="version_sub">0</element>
+  <element name="version_publish">1</element>
+  <element name="complie_date">2019-04-16</element>
+  <element name="license_type">客户销售许可证</element>
+  <element name="license_start_time">2021-10-04</element>
+  <element name="license_end_time">2050-10-03</element>
+</license>

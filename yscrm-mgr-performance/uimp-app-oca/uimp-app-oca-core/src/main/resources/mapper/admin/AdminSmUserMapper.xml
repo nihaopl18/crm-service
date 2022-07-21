@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.admin.repository.mapper.AdminSmUserMapper">
+	
+	<!-- 根据用户code,用户名称，用户登录号查询用户信息 -->
+	<select id="findQueryUserByParam"  resultType="java.util.Map" >
+		select t.* from ADMIN_SM_USER t 
+		
+		<where>
+			<if test=" userCode !=null and userCode !=''">
+				 and t.user_code =#{userCode, jdbcType=VARCHAR}
+			</if>
+			<if test=" userName !=null and userName !=''">
+				 and t.user_name =#{userName, jdbcType=VARCHAR}
+			</if>
+			<if test=" loginCode !=null and loginCode !=''">
+				 and t.login_code =#{loginCode, jdbcType=VARCHAR}
+			</if>
+		</where>
+		
+	</select>
+	<!-- 根据用户id修改用户数据状态 -->
+	<update id="updateUserSts" parameterType="java.util.Map">
+		update ADMIN_SM_USER set USER_STS=#{sts, jdbcType=VARCHAR},LAST_CHG_USR=#{user, jdbcType=VARCHAR},
+		 LAST_CHG_DT=#{date, jdbcType=VARCHAR} where USER_ID=#{id, jdbcType=VARCHAR}
+	</update>
+	<!-- 根据用户id移除角色用户关系数据 -->
+	<update id="removeUserRole" parameterType="java.util.Map">
+		DELETE FROM ADMIN_SM_USER_ROLE_REL WHERE  USER_ID =#{userId,jdbcType=VARCHAR} 
+	</update>
+	<!-- 根据用户id移除岗位用户关系数据 -->
+	<update id="removeUserDuty" parameterType="java.util.Map">
+		DELETE FROM ADMIN_SM_USER_DUTY_REL WHERE  USER_ID =#{userId,jdbcType=VARCHAR} 
+	</update>
+	<!-- 根据用户id移除授权机构用户关系数据 -->
+	<update id="removeUserOrg" parameterType="java.util.Map">
+		DELETE FROM ADMIN_SM_USER_MGR_ORG WHERE  USER_ID =#{userId,jdbcType=VARCHAR} 
+	</update>
+		
+	<!-- 根据用户id查询用户岗位关系数据 -->
+	<select id="getUserDuty" parameterType="java.util.Map"
+		resultType="java.util.Map">
+		select * from  ADMIN_SM_USER_DUTY_REL 
+		    <if  test="userId != null and userId != ''">
+		       		where USER_ID =#{userId,jdbcType=VARCHAR} 
+		    </if>
+	</select>
+	<!-- 根据用户id查询用户授权机构关系数据 -->
+	<select id="getUserOrg" parameterType="java.util.Map"
+		resultType="java.util.Map">
+		select * from  ADMIN_SM_USER_MGR_ORG 
+		    <if  test="userId != null and userId != ''">
+		       		where USER_ID =#{userId,jdbcType=VARCHAR} 
+		    </if>
+	</select>
+	<!-- 用户密码重置 -->
+	<update id="resetUserPassword" parameterType="java.util.Map">
+        update admin_sm_user
+        <set>
+            <if test="password != null and password != ''">
+                USER_PASSWORD = #{password,jdbcType=VARCHAR},
+            </if>
+            <if test="loginTime != null and loginTime != ''">
+                LAST_LOGIN_TIME = #{loginTime,jdbcType=VARCHAR},
+            </if>
+            <if test="lastEditPassTime != null and lastEditPassTime != ''">
+                LAST_EDIT_PASS_TIME = #{lastEditPassTime,jdbcType=VARCHAR},
+            </if>
+            <if test="lastChgUsr != null and lastChgUsr != ''">
+                LAST_CHG_USR = #{lastChgUsr,jdbcType=VARCHAR},
+            </if>
+            <if test="lastChgDt != null and lastChgDt != ''">
+                LAST_CHG_DT = #{lastChgDt,jdbcType=VARCHAR},
+            </if>
+        </set>
+        where USER_ID = #{userId,jdbcType=VARCHAR}
+	</update>
+	<!-- 设置手势密码 -->
+	<update id="resetGesturePassword" parameterType="java.util.Map">
+        update admin_sm_user
+        <set>
+            <if test="password != null and password != ''">
+                GESTURE_PASSWORD = #{password,jdbcType=VARCHAR},
+            </if>
+            <if test="lastChgUsr != null and lastChgUsr != ''">
+                LAST_CHG_USR = #{lastChgUsr,jdbcType=VARCHAR},
+            </if>
+            <if test="lastChgDt != null and lastChgDt != ''">
+                LAST_CHG_DT = #{lastChgDt,jdbcType=VARCHAR},
+            </if>
+        </set>
+        where USER_ID = #{userId,jdbcType=VARCHAR}
+	</update>
+	<!-- 查询是否已设置手势密码 -->
+	<select id="checkGesturePassword" parameterType="java.util.Map" resultType="java.lang.String">
+		select GESTURE_PASSWORD from admin_sm_user where LOGIN_CODE = #{loginCode, jdbcType=VARCHAR}
+	</select>
+	<!--查询用户所在机构及上级机构-->
+	<select id="getOrgIds" parameterType="String" resultType="String">
+		select ORG_SEQ from SYS_ORG_VIEW where ORG_ID = #{orgId}
+	</select>
+	<!-- 根据用户登录代码查询用户Id -->
+	<select id="getUserIdByLoginCode" parameterType="String" resultType="String">
+		select USER_ID from ADMIN_SM_USER where LOGIN_CODE = #{loginCode}
+	</select>
+
+	<!-- 查询角色数据，只可关联用户所在机构及上级机构的生效角色-->
+	<select id="getListByRolests" parameterType="String" resultType="java.util.Map">
+		select r.role_id,r.role_code,r.role_name from ADMIN_SM_ROLE r
+		where r.org_id in
+		<foreach item="orgIds" index="index" collection="array" open="(" separator="," close=")">
+			#{orgIds}
+		</foreach>
+		and r.role_sts = 'A'
+	</select>
+
+	<!-- 查询岗位数据，只可关联用户所在机构及上级机构的生效岗位-->
+	<select id="getListByDuty" parameterType="String" resultType="java.util.Map">
+		select t.duty_id,t.duty_cde,t.duty_name from ADMIN_SM_DUTY t
+		where t.BELONG_ORG_ID in
+		<foreach item="orgIds" index="index" collection="array" open="(" separator="," close=")">
+			#{orgIds}
+		</foreach>
+		and t.duty_sts = 'A'
+	</select>
+	<!-- 根据用户id修改用户数据 -->
+	<update id="updateUserInfo" parameterType="java.util.Map">
+		update ADMIN_SM_USER set ORG_ID=#{orgId, jdbcType=VARCHAR},POST_NO=#{postNo, jdbcType=VARCHAR}
+		  where USER_ID=#{loginCode, jdbcType=VARCHAR}
+	</update>
+	<!-- 根据用户id修改用户授权机构 -->
+	<update id="updateUserMgrOrg" parameterType="java.util.Map">
+		update ADMIN_SM_USER_MGR_ORG set ORG_ID=#{orgId, jdbcType=VARCHAR}
+		  where USER_ID=#{loginCode, jdbcType=VARCHAR}
+	</update>
+	<!-- 根据用户id修改用户授权机构 -->
+	<update id="updateUserDutyRel" parameterType="java.util.Map">
+		update ADMIN_SM_USER_DUTY_REL set DUTY_ID=#{dutyId, jdbcType=VARCHAR}
+		  where USER_ID=#{loginCode, jdbcType=VARCHAR}
+	</update>
+	
+</mapper>

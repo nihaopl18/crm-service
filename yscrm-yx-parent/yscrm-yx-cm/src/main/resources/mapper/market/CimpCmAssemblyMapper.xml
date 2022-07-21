@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.cm.market.repository.mapper.CimpCmAssemblyMapper">
+<!-- 营销组件相关操作 hujun3 2018-11-15 -->
+
+	<!-- 查询分类信息 -->
+	<select id="getAllClassifyinfo" 
+		resultType="java.util.HashMap">
+		select T.* from cimp_cm_assem_classifyinfo T order by T.CLASS_ID asc
+	</select>
+	<!-- 查询组件输入输出信息 -->
+	<select id="getItemInOutinfo" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+		resultType="java.util.HashMap">
+		select T.* from CIMP_CM_ASSEM_INOUT T where T.ASSEMBLY_ID =#{condition.id,jdbcType=VARCHAR} 
+	</select>
+	<!-- 根据分类查询组件信息-->
+	<select id="getIteminfoByClassify" parameterType="java.util.Map"
+		resultType="java.util.HashMap">
+		select T.* from cimp_cm_asseminfo T 
+		WHERE T.CLASS_ID = #{id,jdbcType=VARCHAR} 
+	</select>
+	<!-- 根据更具渠道类组件的ID查询渠道对应的栏位信息-->
+	<select id="getfieldsChannelById" parameterType="java.util.Map"
+		resultType="java.util.HashMap">
+		select * FROM CM_F_RC_MARKET_POSITION where CHANNEL_ID 
+		IN (SELECT CHANNEL_ID FROM CM_F_RC_CHANNEL_MGR WHERE CHANNEL_ITEM_ID=#{id,jdbcType=VARCHAR})
+	</select>
+	<select id="getInOutinfo" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+		resultType="cn.com.yusys.yusp.cm.market.domain.CimpCmAssemInout">
+		select T.* from CIMP_CM_ASSEM_INOUT T where T.ASSEMBLY_ID =#{condition.id,jdbcType=VARCHAR} 
+	</select>
+	<!-- 根据所有的组件信息-->
+	<select id="getAllIteminfo"  resultType="java.util.HashMap">
+		select t.* from cimp_cm_asseminfo t inner join cimp_cm_assem_classifyinfo t1 on t1.class_id=t.class_id
+	</select>
+	<!-- 根据活动类型查询对应适用的组件信息-->
+	<select id="getAllIteminfoByScene" parameterType="java.util.Map" resultType="java.util.HashMap">
+		select t.* from cimp_cm_asseminfo t inner join cimp_cm_assem_classifyinfo t1 on t1.class_id=t.class_id
+		<where>
+			<if test="flowId != null and flowId !=''">
+			
+				and ( t.SUIT_SCENE LIKE CONCAT(CONCAT('%', (select ACTIVITY_TYPE from CIMP_CM_MARKETPLAN where TEMP_ID=#{flowId,jdbcType=VARCHAR})),'%') )
+			</if>
+		</where> 
+	</select>
+	<!-- 查询数据表的信息-->
+	<select id="getTablesInfo" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+		resultType="java.util.HashMap">
+		select table_name,comments from user_tab_comments
+		 <where>
+			<if test="condition.tableName != null and condition.tableName !=''">
+				and table_name like '%'||#{condition.tableName}||'%'
+			</if>
+			
+			<if test="condition.comments!= null and condition.comments!=''">
+				and comments like '%'||#{condition.comments}||'%'
+			</if>
+		</where> 
+		ORDER BY table_name ASC 
+	</select>
+	<!-- 根据表名查询表的字段信息-->
+	<select id="getcolumnByTable" parameterType="java.util.Map"
+		resultType="java.util.HashMap">
+		select TABLE_NAME,COLUMN_NAME 
+			from USER_COL_COMMENTS  
+			where 
+			TABLE_NAME in 
+			<foreach item="item" index="index" collection="list" open="(" separator="," close=")">  
+			    #{item}  
+			</foreach> 
+			<if test="tableName != null and tableName !=''">
+				and table_name like '%'||#{tableName}||'%'
+			</if>
+			
+			<if test="columnName !=null and columnName!=''">
+				and COLUMN_NAME like '%'||#{columnName}||'%'
+			</if>
+			order by TABLE_NAME ASC
+	</select>
+	<!-- 根据分类id移除组件数据 -->
+	<update id="removeItemsByClassify" parameterType="java.util.Map">
+		DELETE FROM CIMP_CM_ASSEMINFO WHERE  CLASS_ID =#{classId,jdbcType=VARCHAR} 
+	</update>
+		<!-- 根据分类id移除组件的输入输出数据 -->
+	<update id="removeInOutByClassify" parameterType="java.util.Map">
+		DELETE FROM CIMP_CM_ASSEM_INOUT WHERE 
+		 ASSEMBLY_ID in(select ASSEMBLY_ID from FROM CIMP_CM_ASSEMINFO WHERE  
+		 CLASS_ID =#{classId,jdbcType=VARCHAR} )
+	</update>
+			<!-- 根据组件id移除组件的输入输出数据 -->
+	<update id="removeInOutByItem" parameterType="java.util.Map">
+		DELETE FROM CIMP_CM_ASSEM_INOUT WHERE 
+		 ASSEMBLY_ID =#{conditionid,jdbcType=VARCHAR} 
+	</update>
+	<update id="updateCmFRcChannelMgr" parameterType="cn.com.yusys.yusp.cm.market.domain.CimpCmAsseminfo">
+		update CM_F_RC_CHANNEL_MGR set CHANNEL_NAME=#{data.assemblyName} where CHANNEL_ITEM_ID=#{data.assemblyId}
+	</update>
+</mapper>

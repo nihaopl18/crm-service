@@ -1,0 +1,118 @@
+# ===================================================================
+# Eureka properties.
+# ===================================================================
+eureka:
+    client:
+        enabled: true
+        healthcheck:
+            enabled: true
+        fetch-registry: true
+        register-with-eureka: true
+        instance-info-replication-interval-seconds: 10
+        registry-fetch-interval-seconds: 10
+    instance:
+        instanceId: ${spring.application.name}:${spring.application.instance-id:${random.value}}
+        lease-renewal-interval-in-seconds: 5
+        lease-expiration-duration-in-seconds: 10
+        status-page-url-path: ${management.context-path}/info
+        health-check-url-path: ${management.context-path}/health
+        metadata-map:
+            profile: ${spring.profiles.active}
+            version: ${info.project.version}
+            managementPath: ${management.context-path}
+#ribbon
+ribbon:
+    eureka:
+        enabled: true
+# ===================================================================
+# Spring properties
+# ===================================================================
+spring:
+    jackson:
+        serialization.write_dates_as_timestamps: false
+    jpa:
+        open-in-view: false
+        hibernate:
+            ddl-auto: none
+            naming:
+                physical-strategy: org.springframework.boot.orm.jpa.hibernate.SpringPhysicalNamingStrategy
+                implicit-strategy: org.springframework.boot.orm.jpa.hibernate.SpringImplicitNamingStrategy
+    messages:
+        basename: i18n/messages
+    mvc:
+        favicon:
+            enabled: false
+    thymeleaf:
+        mode: XHTML
+server:
+    session:
+        cookie:
+            http-only: true
+management:
+    security:
+        roles: ADMIN
+        enabled: false
+    context-path: /management
+    health:
+        mail:
+            enabled: false # When using the MailService, configure an SMTP server and set this to true
+# ===================================================================
+# SpringSecurity properties
+# ===================================================================
+security:
+    basic:
+        enabled: false
+    oauth2:
+        resource:
+            filter-order: 3
+
+# ===================================================================
+# JHipster properties
+# ===================================================================
+jhipster:
+    async:
+        core-pool-size: 2
+        max-pool-size: 50
+        queue-capacity: 10000
+    # By default CORS is disabled. Uncomment to enable.
+    #cors:
+        #allowed-origins: "*"
+        #allowed-methods: GET, PUT, POST, DELETE, OPTIONS
+        #allowed-headers: "*"
+        #exposed-headers:
+        #allow-credentials: true
+        #max-age: 1800
+    mail:
+        from: yscrm-mgr-sys-view-core@localhost
+    swagger:
+        default-include-pattern: /api/.*
+        title: yscrm-mgr-sys-view-core API
+        description: yscrm-mgr-sys-view-core API documentation
+        version: 0.0.1
+        terms-of-service-url:
+        contact-name:
+        contact-url:
+        contact-email:
+        license:
+        license-url:
+    ribbon:
+        display-on-active-profiles: dev
+
+# ===================================================================
+# Mybatis properties
+# ===================================================================
+mybatis:
+    mapperLocations: classpath:mapper/**/*.xml
+    type-aliases-package: cn.com.yusys.admin.repository
+    configuration:
+        map-underscore-to-camel-case: false
+mapper:
+    mappers:
+    - cn.com.yusys.yusp.commons.mapper.CommonMapper
+pagehelper:
+    helperDialect: oracle
+    reasonable: true
+# ===================================================================
+# Application properties
+# ===================================================================
+application:

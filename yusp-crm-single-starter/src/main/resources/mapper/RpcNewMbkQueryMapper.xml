@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.dycrm.realtimerpc.repository.mapper.RpcNewMbkQueryMapper">
+
+    <select id="queryCustDesAndAssetAll" resultType="java.util.HashMap">
+        select t.AUM_BALANCE as TOTAL_ASSETS,t.LIAB_BAL as TOTAL_INDEBTEDNESS,t.DEPOSIT_BALANCE_RMB as CUST_DEPOSIT,t.FIN_BALANCE_RMB as CUST_TREASURE,t.WAIT_REPAY_AMT as WAIT_REPAYMENT,t.CR_CARD_ARRE_AMT as CARD_DEBIT_TOTAL_MONEY,t.LOAN_ARRE_AMT as LOAN_DEBIT_TOTAL_MONEY
+        from ACRM_F_PD_CUST_INDEXS t
+        where t.cust_no = #{ecifCustNo}
+    </select>
+    <select id="queryCustDesDetil" resultType="java.util.HashMap">
+        SELECT T.MAIN_ACCT   AS ACCOUNT_NUM,
+        SUM(T.ACCT_BALANCE_RMB)   AS MONEY_SUM
+        FROM ACRM_F_CUST_ACCT_INFO T
+        <where>
+            <if test="ecifCustNo != null and ecifCustNo != ''">
+                and T.CUST_NO = #{ecifCustNo}
+            </if>
+            <if test="depCode != null">
+                and SUBSTR(T.PROD_CODE, 1, 3)  = #{depCode}
+            </if>
+        </where>
+        group by t.MAIN_ACCT,T.CUST_NO
+    </select>
+    <select id="queryListForTreaDetails" resultType="java.util.HashMap">
+        select t.PROD_TYPE AS PRODUCT_TYPE,t.TOT_Z_INCOME AS HOLD_MONEY,t.DAY_INCOME AS YESTERDAY_EARNINGS,t.TOTAL_INCOME AS HOLD_EARNINGS,t.DAY_PROFIT AS YESTERDAY_PROFIT_LOSS,t.TOTAL_PROFIT AS FLOAT_PROFIT_LOSS
+        from ACRM_F_PD_PROD_CUST_FIT_INFO t
+        where t.data_date = (SELECT max(data_date) from ACRM_F_PD_PROD_CUST_FIT_INFO x where x.CUST_NO = #{ecifCustNo})
+        and t.CUST_NO = #{ecifCustNo}
+    </select>
+    <select id="queryCreditTotalNum" resultType="java.lang.Integer">
+        select count(*) as total from ACRM_F_PD_PROD_CUST_FIT_INFO t
+        where t.data_date = (SELECT max(data_date) from ACRM_F_PD_PROD_CUST_FIT_INFO x where x.CUST_NO = #{ecifCustNo})
+        and t.CUST_NO = #{ecifCustNo}
+    </select>
+    <select id="queryCustFinMgrContact" resultType="java.util.HashMap">
+        select f.MGR_NAME as CUST_FINANC_MGR_NM,a.USER_MOBILEPHONE as MOBILEPHONE,a.USER_OFFICETEL as OFFICETEL
+        from OCRM_F_CI_ADMIT_BELONG f inner join  ADMIN_SM_USER  a on a.USER_ID  = f.MGR_ID
+        where f.CUST_ID = #{ecifCustNo}
+    </select>
+    <select id="queryListForTotal" resultType="java.util.HashMap">
+        select t.FIN_BALANCE_RMB as TOTAL_ASSETS,t.FINC_TOTL_PRFT as HIS_TOTAL_EARNINGS
+        from ACRM_F_PD_CUST_INDEXS t
+        where t.CUST_NO = #{ecifCustNo}
+    </select>
+    <select id="queryCustHisTotalNum" resultType="java.lang.Integer">
+        select count(*) as total
+        from ACRM_F_PD_PROD_CUST_FIT_INFO t
+        <where>
+            <if test="ecifCustNo != null and ecifCustNo != ''">
+                and t.CUST_NO = #{ecifCustNo}
+            </if>
+            <if test="startTime != null and startTime != ''">
+                and t.data_date >= #{startTime}
+            </if>
+            <if test="stopTime != null and stopTime!='' ">
+                and t.data_date &lt;= #{stopTime}
+            </if>
+            <if test="startTime == null and stopTime == null">
+                and t.data_date = (SELECT max(data_date) from ACRM_F_PD_PROD_CUST_FIT_INFO x where x.CUST_NO = #{ecifCustNo})
+            </if>
+        </where>
+
+    </select>
+    <select id="queryCustHisTbprofit" resultType="java.util.HashMap">
+        select t.DATA_DATE as PRODUCT_TIME,t.PROD_TYPE as PRODUCT_TYPE,t.SRC_PROD_CODE as PRODUCT_CODE,t.PROD_SHORT_NAME as PRODUCT_NAME,PRINCIPAL as TRAN_TOTAL_MONEY,DAY_PROFIT as PRODUCT_EARNINGS
+        from ACRM_F_PD_PROD_CUST_FIT_INFO t
+        <where>
+            <if test="ecifCustNo != null and ecifCustNo != ''">
+                and t.CUST_NO = #{ecifCustNo}
+            </if>
+            <if test="startTime != null and startTime != ''">
+                and t.data_date >= #{startTime}
+            </if>
+            <if test="stopTime != null and stopTime!='' ">
+                and t.data_date &lt;= #{stopTime}
+            </if>
+            <if test="startTime == null and stopTime == null">
+                and t.data_date = (SELECT max(data_date) from ACRM_F_PD_PROD_CUST_FIT_INFO x where x.CUST_NO = #{ecifCustNo})
+            </if>
+        </where>
+    </select>
+</mapper>

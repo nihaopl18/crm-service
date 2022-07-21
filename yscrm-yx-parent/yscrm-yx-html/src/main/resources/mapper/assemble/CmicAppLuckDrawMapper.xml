@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscimc.luckdraw.repository.mapper.CmicAppLuckDrawMapper">
+    <!-- 根据活动id查询参抽奖formId -->
+    <select id="getNodeIdByActyid" parameterType="String" resultType="java.util.Map">
+    	select t.form_id
+		  from cimp_cm_nodes_display t
+		 where t.node_id = #{actyId}
+    </select>
+    
+    <!-- 根据formId查询参抽奖信息 -->
+    <select id="getLuckDraw" parameterType="String" resultType="java.util.Map">
+    	select *
+			  from cimp_cm_nodes_presentation t
+			 where t.form_id = #{formId}
+    </select>
+    <!-- 查询客户抽奖信息 -->
+    <select id="custInfo" parameterType="String" resultType="java.util.Map">
+    	select *
+		  from CMIC_APP_LUCK_CUSTS t
+		 where t.cust_id = #{custId}
+		   and t.form_id = #{formId}
+    </select>
+    <!-- 查询客户抽奖信息 -->
+    <select id="updateCustInfo" parameterType="String" resultType="java.util.Map">
+    	update CMIC_APP_LUCK_CUSTS set LUCK_DRAW_NUM  = #{luckDrawNum} , LAST_CHG_DT = sysdate where id = #{id}
+    </select>
+    <!-- 查询客户抽奖信息 -->
+    <select id="winInfo" parameterType="String" resultType="java.util.Map">
+    	select t.cust_id, t2.prize_id, t3.user_name, t2.crat_dt,t2.prize_name
+		  from CMIC_APP_LUCK_CUSTS t
+		  left join CMIC_APP_LUCK_CUST_HIS t2
+		    on t.id = t2.draw_cust_id
+		  left join admin_sm_user t3
+		    on t.cust_id = t3.login_code
+		 where t.form_id = #{formId} and t2.prize_id is not null 
+		 order by t2.crat_dt desc
+    </select>
+    
+    <!-- 查询可用素材 -->
+    <select id="displayList" parameterType="String" resultType="java.util.Map">
+		select t.id as
+		key,t.material_name as value from LOY_QY_MATERIAL_LIST t    
+	</select>
+</mapper>

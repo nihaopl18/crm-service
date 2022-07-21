@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.uimp.business.pma.app.repository.mapper.AppGuessMapper">
+	<select id="queryBusTypeSub" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+		select id,buss_type,buss_no,buss_name,hgr_buss_no,is_prior,buss_no_state,buss_level,buss_flag,buss_seq
+		  from buss_units
+		<where>  buss_level='3'
+		<if test="condition.bussType != null and condition.bussType != ''">
+			AND buss_type =#{condition.bussType}
+		</if>
+		</where>
+	</select>
+	
+	
+	<select id="queryParamByList" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+		select param_value
+		  from PMA_F_PARAM_LIST_INFO
+		<where>
+		<if test="condition.paramId != null and condition.paramId != ''">
+			AND PARAM_ID =#{condition.paramId}
+		</if>
+		<if test="condition.orgId != null and condition.orgId != ''">
+			AND ORG_ID =#{condition.orgId}
+		</if>
+		</where> 
+	</select>
+	
+	<select id="queryParamByInfo" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+		select param_value
+		  from PMA_F_PARAM_INFO
+		<where>
+		<if test="condition.paramId != null and condition.paramId != ''">
+			AND PARAM_ID =#{condition.paramId}
+		</if>
+		</where> 
+	</select>
+	
+	<select id="queryFun" resultType="java.util.HashMap">
+		select b.fun_code, b.fun_name ,c.config_value
+		  from admin_base_meta_fun_page_cfg a
+		  left join admin_base_meta_fun_reg b
+		    on a.fun_code = b.fun_code
+		  left join admin_base_meta_fun_page_cfg c
+		    on a.fun_code = c.fun_code and c.config_name='DATA_AUTH'
+		 where a.config_name = 'APP_APPLY'
+		   and a.config_value = '1'
+	</select>
+</mapper>

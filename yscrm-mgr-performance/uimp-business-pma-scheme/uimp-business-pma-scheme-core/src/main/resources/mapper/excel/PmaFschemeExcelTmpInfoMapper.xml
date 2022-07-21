@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.uimp.excel.repository.mapper.PmaFschemeExcelTmpInfoMapper">
+    <resultMap id="BaseResultMap" type="cn.com.yusys.yusp.uimp.excel.domain.PmaFschemeExcelTmpInfo">
+		<id column="TEMPLATE_ID" jdbcType="VARCHAR" property="templateId" />
+		<result column="SCHEME_ID" jdbcType="VARCHAR" property="schemeId" />
+		<result column="TEMPLATE_CONTENTJSON" jdbcType="CLOB" property="templateContentjson" />
+		<result column="TEMPLATE_TYPE" jdbcType="VARCHAR" property="templateType" />
+		<result column="EVL_OBJ_TYPE" jdbcType="VARCHAR" property="evlObjType" />
+    </resultMap>
+    <sql id="Base_Column_List">
+	    TEMPLATE_ID,SCHEME_ID,TEMPLATE_CONTENTJSON,TEMPLATE_TYPE,EVL_OBJ_TYPE
+    </sql>
+    
+    <select id="indexSelectorQuerylist" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+    	<if test='condition.type == "0" or condition.type == "1"'>
+    		select 
+    			b.INDEX_ID, b.INDEX_NAME, e.evl_obj_type, a.apply_type, bal.bal_type, '1' as TYPE
+    		from PMA_F_BASE_INDEX_INFO b
+	    		left join PMA_F_INDEX_EVL_OBJ_INFO e on b.INDEX_ID = e.INDEX_ID
+				left join PMA_F_INDEX_APPLY_INFO a on b.INDEX_ID = a.INDEX_ID
+				left join PMA_F_INDEX_BAL_INFO bal on b.INDEX_ID = bal.INDEX_ID
+			<where>
+				<if test="condition.indexId != null and condition.indexId  != ''">
+	      			AND b.INDEX_ID LIKE concat(concat('%',#{condition.indexId,jdbcType=VARCHAR}),'%')
+			    </if>
+				<if test="condition.indexName != null and condition.indexName  != ''">
+		      		AND b.INDEX_NAME LIKE concat(concat('%',#{condition.indexName,jdbcType=VARCHAR}),'%')
+			    </if>
+			    <if test="condition.sql != null and condition.sql  != ''">
+			        :{condition.sql}
+			    </if>
+			</where> 
+    	</if>
+    	<if test='condition.type == "0"'> union </if>
+    	<if test='condition.type == "0" or condition.type == "2"'>
+    		select 
+    			ei.INDEX_ID, ei.INDEX_NAME, ee.evl_obj_type, ae.apply_type, bale.bal_type, '2' as TYPE
+    		from PMA_F_EVL_INDEX_INFO ei
+	    		left join PMA_F_INDEX_EVL_OBJ_INFO ee on ei.INDEX_ID = ee.INDEX_ID
+				left join PMA_F_INDEX_APPLY_INFO ae on ei.INDEX_ID = ae.INDEX_ID
+				left join PMA_F_INDEX_BAL_INFO bale on ei.INDEX_ID = bale.INDEX_ID
+			<where>
+				<if test="condition.indexId != null and condition.indexId  != ''">
+	      			AND ei.INDEX_ID LIKE concat(concat('%',#{condition.indexId,jdbcType=VARCHAR}),'%')
+			    </if>
+				<if test="condition.indexName != null and condition.indexName  != ''">
+		      		AND ei.INDEX_NAME LIKE concat(concat('%',#{condition.indexName,jdbcType=VARCHAR}),'%')
+			    </if>
+			</where> 
+    	</if>
+    </select>
+    
+    <select id="queryIndexNameByIndexId" parameterType="String" resultType="String">
+    	select b.INDEX_NAME from PMA_F_BASE_INDEX_INFO b where b.INDEX_ID in 
+        <foreach collection="indexIds" item="indexId" index="index" open="(" close=")" separator=",">
+        	#{indexId}
+        </foreach>
+        union all 
+        select e.INDEX_NAME from PMA_F_EVL_INDEX_INFO e where e.INDEX_ID in 
+        <foreach collection="indexIds" item="indexId" index="index" open="(" close=")" separator=",">
+        	#{indexId}
+        </foreach>
+    </select>
+    
+    <select id="getTmpInfoBySchemeId" parameterType="java.lang.String" resultType="cn.com.yusys.yusp.uimp.excel.domain.PmaFschemeExcelTmpInfo">
+    	select * from PMA_F_SCHEME_EXCELTMP_INF where SCHEME_ID = #{schemeId, jdbcType=VARCHAR}
+    </select>
+    
+    <delete id="deleteBackupTableDataBySchemeIdAndEtlDate" parameterType="java.lang.String">
+    	delete from PMA_F_SCHEME_EXCELTMP_BAK where SCHEME_ID = #{schemeId, jdbcType=VARCHAR} and ETL_DATE = #{etlDate, jdbcType=VARCHAR}
+    </delete>
+    
+    <insert id="insertBackupTableData" parameterType="cn.com.yusys.yusp.uimp.excel.domain.PmaFschemeExcelTmpInfo">
+    	insert into PMA_F_SCHEME_EXCELTMP_BAK
+    	(
+    		TEMPLATE_ID,
+    		SCHEME_ID,
+    		TEMPLATE_CONTENTJSON,
+    		TEMPLATE_TYPE,
+    		EVL_OBJ_TYPE,
+    		ETL_DATE
+    	)
+    	values
+    	(
+    		#{tmpInfo.templateId, jdbcType=VARCHAR},
+    		#{tmpInfo.schemeId, jdbcType=VARCHAR},
+    		#{tmpInfo.templateContentjson, jdbcType=CLOB},
+    		#{tmpInfo.templateType, jdbcType=VARCHAR},
+    		#{tmpInfo.evlObjType, jdbcType=VARCHAR},
+    		#{etlDate, jdbcType=VARCHAR}
+    	)
+    </insert>
+    
+	<select id="getTmpInfoFromBackupTableBySchemeIdAndEtlDate" parameterType="java.lang.String" resultType="cn.com.yusys.yusp.uimp.excel.domain.PmaFschemeExcelTmpInfo">
+    	select * from PMA_F_SCHEME_EXCELTMP_BAK where SCHEME_ID = #{schemeId, jdbcType=VARCHAR} and ETL_DATE = #{etlDate, jdbcType=VARCHAR}
+    </select>
+    
+    <insert id="copySchemeInf" parameterType="java.lang.String">
+    	insert into PMA_F_SCHEME_EXCELTMP_INF(TEMPLATE_ID, SCHEME_ID, TEMPLATE_CONTENTJSON, TEMPLATE_TYPE, EVL_OBJ_TYPE)
+    	select #{templateId}, #{newSchemeId}, TEMPLATE_CONTENTJSON, TEMPLATE_TYPE, EVL_OBJ_TYPE 
+		from PMA_F_SCHEME_EXCELTMP_INF where SCHEME_ID = #{schemeId}
+    </insert>
+    
+    <select id="getAppOrgSchemeEvlObjInfo" parameterType="java.lang.String" resultType="java.util.Map">
+    	select DISTINCT
+    		 objrel.EVL_OBJ_ID, org.ORG_NAME as EVL_OBJ_NAME
+    	from PMA_F_SCHEME_EVLOBJ_REL_BAK objrel 
+    		left join ADMIN_SM_ORG org on org.ORG_CODE = objrel.EVL_OBJ_ID
+    	where objrel.SCHEME_ID = #{schemeId, jdbcType=VARCHAR} and objrel.ETL_DATE = #{etlDate, jdbcType=VARCHAR}
+    	   AND EXISTS
+ 			(SELECT 1 FROM SYS_UNITS C 
+ 			   WHERE org.ORG_ID = C.UNITID
+           			AND REGEXP_LIKE(C.UNITSEQ, '(^|,)(:{evlObjId})($|,)'))
+    </select>
+</mapper>

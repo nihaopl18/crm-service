@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.admin.repository.mapper.AdminSmOrgMapper">
+
+	<!-- 根据条件查询机构信息 -->
+	<select id="findOrgByParam" parameterType="java.util.Map"
+		resultType="java.util.Map">
+		select a.* from admin_sm_org a
+		<where>
+			<if test="orgCode != null and orgCode !=''">
+				and a.org_code  =#{orgCode, jdbcType=VARCHAR}
+			</if>
+			<if test="orgId != null and orgId !=''">
+				and a.UP_ORG_ID  =#{orgId, jdbcType=VARCHAR}
+			</if>
+		</where>
+	</select>
+	
+	<!-- 跟新机构状态 -->
+	<update id="updateOrgSts" parameterType="String">
+		update admin_sm_org set ORG_STS=#{sts, jdbcType=VARCHAR} ,LAST_CHG_USR=#{user, jdbcType=VARCHAR},
+		 LAST_CHG_DT=#{date, jdbcType=VARCHAR} where ORG_ID=#{id, jdbcType=VARCHAR}
+	</update>
+	<!-- 自定义码值（金融机构） -->
+	<select id="getInstuOrg" parameterType="java.util.Map" resultType="java.util.Map">
+		select t.instu_id,t.instu_name  
+		from admin_sm_instu t 
+		where t.INSTU_STS ='A'
+	</select>
+	
+	<!-- 查询机构父级机构 -->
+	<select id="getParentOrgIds" parameterType="java.util.List" resultType="java.util.Map">
+		select t.ORG_SEQ 
+		from sys_org_view t 
+		where t.org_id in 
+		<if test="list != null ">
+			<foreach item="item" index="index" collection="list" open="(" separator="," close=")">  
+				  #{item}  
+			</foreach>
+		</if>
+	</select>
+
+    <!-- 根据机构ID查询是否有用户、角色、岗位、部门数据-->
+    <select id="queryRelByOrgId" parameterType="java.util.Map" resultType="java.lang.Integer">
+      select sum(rel.count) as num from
+      ( select count(*) count from ADMIN_SM_USER U where U.ORG_ID = #{orgId, jdbcType=VARCHAR}
+        UNION ALL
+        select count(*) count from ADMIN_SM_ROLE R where R.ORG_ID = #{orgId, jdbcType=VARCHAR}
+        UNION ALL
+        select count(*) count from ADMIN_SM_DUTY D where D.BELONG_ORG_ID = #{orgId, jdbcType=VARCHAR}
+        UNION ALL
+        select count(*) count from ADMIN_SM_DPT T where T.BELONG_ORG_ID = #{orgId, jdbcType=VARCHAR}) rel
+    </select>
+
+    <!-- 查询机构树信息（懒加载） -->
+    <select id="queryOrgTreeInfoLazy"  resultType="java.util.Map">
+        select
+        o.ORG_ID,
+        o.ORG_NAME,
+        o.UP_ORG_ID,
+        o.ORG_CODE,
+        o.INSTU_ID,
+        o.ORG_LEVEL,
+        'G' as ORG_TYPE
+        from
+        admin_sm_org o
+        left join
+        admin_sm_instu i
+        on i.INSTU_ID = o.INSTU_ID
+        <where>
+            <if test="orgSts !=null and orgSts !=''">
+                and o.ORG_STS= #{orgSts, jdbcType=VARCHAR}
+            </if>
+            <!-- 传upOrgId，查询下一级机构 -->
+            <if test="orgId !=null and orgId !=''">
+                and o.UP_ORG_ID= #{orgId, jdbcType=VARCHAR}
+            </if>
+        </where>
+        order by o.ORG_ID
+    </select>
+	
+	<select id="getAllOrgs" resultType="java.util.Map">
+		SELECT UNIT.ID,
+		       UNIT.UNITID,
+		       UNIT.UNITNAME,
+		       UNIT.SUPERUNITID,
+		       UNIT.LEVELUNIT,
+		       UNIT.UNITSEQ
+		  FROM SYS_UNITS UNIT
+		 ORDER BY UNIT.LEVELUNIT, UNIT.ID
+	</select>
+</mapper>

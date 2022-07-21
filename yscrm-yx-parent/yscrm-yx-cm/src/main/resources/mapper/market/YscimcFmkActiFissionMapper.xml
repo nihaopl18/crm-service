@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.cm.market.repository.mapper.YscimcFmkActiFissionMapper">
+    <select id="getListByModel" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.Map">  
+       SELECT * FROM YSCIMC_F_MK_ACTI_FISSION WHERE NODE_ID = #{condition.nodeId, jdbcType=VARCHAR}
+	</select>
+    <!-- 通过节点ID删除已有数据 -->
+	<delete id="delByNodeId" parameterType="String">
+		DELETE FROM YSCIMC_F_MK_ACTI_FISSION WHERE NODE_ID = #{nodeId, jdbcType=VARCHAR}
+	</delete>
+	<select id="getListById" parameterType="String" resultType="cn.com.yusys.yusp.cm.market.domain.YscimcFMkActiFission">
+       SELECT * FROM YSCIMC_F_MK_ACTI_FISSION WHERE NODE_ID = #{id, jdbcType=VARCHAR}
+	</select>
+
+	<select id="getInfoByIds" parameterType="java.util.List" resultType="cn.com.yusys.yusp.cm.market.domain.YscimcFMkActiFission">
+		SELECT * FROM YSCIMC_F_MK_ACTI_FISSION WHERE NODE_ID in
+		<foreach collection="list" open="(" close=")" separator="," item="item">
+			#{item}
+		</foreach>
+	</select>
+</mapper>

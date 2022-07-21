@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper
+	namespace="cn.com.yusys.yusp.admin.repository.mapper.AdminSmDataAuthMapper">
+
+	 <!-- 查询数据权限信息,关联数据权限模板表查询数据权限模板、数据权限sql条件 -->
+    <select id="getDataAuthInfo" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.Map" databaseId="DB2">
+        select t.auth_tmpl_name,char(t.sql_string)as
+        sql_string,a.auth_id,a.contr_id,a.auth_tmpl_id,
+        substr(a.last_chg_dt,1,10) as last_chg_dt,u.user_name as last_chg_name
+        from admin_sm_data_auth a
+        left join admin_sm_user u on u.user_id = a.last_chg_usr
+        left join admin_sm_res_contr c on a.contr_id = c.contr_id
+        left join admin_sm_data_auth_tmpl t on a.auth_tmpl_id = t.auth_tmpl_id
+        <where>
+            <if test="condition.contrId!= null and condition.contrId != ''">
+                and a.contr_id = #{condition.contrId, jdbcType=VARCHAR}
+            </if>
+            <if test="condition.authTmplName!= null and condition.authTmplName != ''">
+                and t.auth_tmpl_name like #{condition.authTmplName, jdbcType=VARCHAR}
+            </if>
+            <if test="condition.sqlString!= null and condition.sqlString != ''">
+                and  char(t.sql_string) like #{condition.sqlString, jdbcType=VARCHAR}
+            </if>
+        </where>
+        order by a.last_chg_dt desc
+    </select>
+    
+        <!-- 查询控制点可用数据权限模板 -->
+    <select id="getAuthTmpl" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.Map" databaseId="DB2">
+        select t.auth_tmpl_name,t.auth_tmpl_id
+        from admin_sm_data_auth_tmpl t
+        where (  char(t.contr_include)='*' or  char(t.contr_include)=#{condition.contrId, jdbcType=VARCHAR} )
+        and t.auth_tmpl_id not in
+        (select a.auth_tmpl_id from admin_sm_data_auth a where a.contr_Id = #{condition.contrId, jdbcType=VARCHAR})
+        <if test="condition.authTmplName!= null and condition.authTmplName != ''">
+            and t.auth_tmpl_name like #{condition.authTmplName, jdbcType=VARCHAR}
+        </if>
+    </select>
+    
+</mapper>

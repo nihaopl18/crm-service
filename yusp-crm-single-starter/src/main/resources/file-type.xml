@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<fileTypeMeta>
+    <fileType>
+        <suffix>.xlsx</suffix>
+        <mimeType>application/vnd.openxmlformats-officedocument.spreadsheetml.sheet</mimeType>
+    </fileType>
+    <fileType>
+        <suffix>.xls</suffix>
+        <mimeType>application/vnd.ms-excel</mimeType>
+    </fileType>
+    <fileType>
+        <suffix>.csv</suffix>
+        <mimeType>application/vnd.ms-excel</mimeType>
+    </fileType>
+    <fileType>
+        <suffix>.jpg</suffix>
+        <mimeType>image/jpeg</mimeType>
+    </fileType>
+    <fileType>
+        <suffix>.txt</suffix>
+        <mimeType>text/plain</mimeType>
+    </fileType>
+    <fileType>
+        <suffix>.doc</suffix>
+        <mimeType>text/plain</mimeType>
+    </fileType>
+     <fileType>
+        <suffix>.docx</suffix>
+        <mimeType>text/plain</mimeType>
+    </fileType>
+    <fileType>
+        <suffix>.zip</suffix>
+        <mimeType>application/x-zip-compressed</mimeType>
+    </fileType>
+    <fileType>
+        <suffix>.jar</suffix>
+        <mimeType>application/java-archive</mimeType>
+    </fileType>
+    <fileType>
+        <suffix>.png</suffix>
+        <mimeType>image/png</mimeType>
+    </fileType>
+    <fileType>
+        <suffix>.PNG</suffix>
+        <mimeType>image/png</mimeType>
+    </fileType>
+    <fileType>
+        <suffix>.gif</suffix>
+        <mimeType>image/gif</mimeType>
+    </fileType>
+    <fileType>
+        <suffix>.bmp</suffix>
+        <mimeType>image/bmp</mimeType>
+    </fileType>
+    <!-- <fileType>
+        <suffix>.java</suffix>
+        <mimeType>text/plain</mimeType>
+    </fileType> -->
+    <fileType>
+        <suffix>.jpeg</suffix>
+        <mimeType>image/jpeg</mimeType>
+    </fileType>
+    <fileType>
+        <suffix>.ppt</suffix>
+        <mimeType>application/vnd.ms-powerpoint</mimeType>
+    </fileType>
+    <fileType>
+        <suffix>.pptx</suffix>
+        <mimeType>application/vnd.openxmlformats-officedocument.presentationml.presentation</mimeType>
+    </fileType>
+    <fileType>
+        <suffix>.tar</suffix>
+        <mimeType>application/x-tar</mimeType>
+    </fileType>
+   <!--  <fileType>
+        <suffix>.exe</suffix>
+        <mimeType>application/x-msdownload</mimeType>
+    </fileType> -->
+    <fileType>
+        <suffix>.rar</suffix>
+        <mimeType>application/x-rar-compressed</mimeType>
+    </fileType>
+    <fileType>
+        <suffix>.pdf</suffix>
+        <mimeType>application/pdf</mimeType>
+    </fileType>
+</fileTypeMeta>

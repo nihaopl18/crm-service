@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.admin.repository.mapper.SystemUtilMapper">
+
+	<!--获取部门信息 -->
+	<select id="getDptByParam" parameterType="java.util.Map"
+		resultType="java.util.HashMap">
+		select t.dpt_cde as ORG_CODE ,t.dpt_name as ORG_NAME,t.up_dpt_id as
+		UP_ORG_ID from ADMIN_SM_DPT t  where t.dpt_sts = 'A'
+			<if test="orgCode!=null and orgCode!=''">
+				and t.BELONG_ORG_ID = #{orgCode}
+			</if>
+	</select>
+
+	<select id="getRoleByUser" parameterType="java.util.Map"
+		resultType="java.util.HashMap">
+		select t.ROLE_ID as key,t1.ROLE_NAME as value FROM
+		ADMIN_SM_USER_ROLE_REL t
+		LEFT JOIN ADMIN_SM_ROLE t1 on
+		t.ROLE_ID=t1.ROLE_ID
+		WHERE t.USER_ID=#{userId} and t.REL_STS='A'
+	</select>
+
+	<select id="getDutyByUser" parameterType="java.util.Map"
+		resultType="java.util.HashMap">
+		select t.DUTY_ID as key,t1.DUTY_NAME as value FROM
+		ADMIN_SM_USER_DUTY_REL t
+		LEFT JOIN ADMIN_SM_DUTY t1 on
+		t.DUTY_ID=t1.DUTY_ID
+		WHERE t.USER_ID=#{userId} and t.REL_STS='A'
+	</select>
+
+    <!--根据id获取机构信息  -->
+    <select id="getorgById" parameterType="string"
+            resultType="java.util.HashMap">
+		SELECT T.* FROM ADMIN_SM_ORG
+		T
+		WHERE
+		T.ORG_ID = #{orgId}
+	</select>
+	
+    <select id="getorgByIds" parameterType="string" resultType="java.util.HashMap">
+		SELECT T.* FROM ADMIN_SM_ORG T
+		WHERE T.ORG_ID in 
+		<foreach collection="array" index="index" item="item" open="(" separator="," close=")">
+	   		#{item}
+	   	</foreach>
+	</select>
+
+    <!--获取机构信息 只能查询当前用户机构以下(懒加载) -->
+    <select id="getOrgByParamLazy" parameterType="java.util.Map"
+            resultType="java.util.HashMap">
+		SELECT T.* FROM ADMIN_SM_ORG
+		T
+		WHERE
+		T.UP_ORG_ID = #{orgId}
+	</select>
+
+    <!--获取机构树 只能查询当前用户机构以下 -->
+    <select id="getOrgtreeByParamLazy" parameterType="java.util.Map" resultType="java.util.HashMap">
+        SELECT T_ORG.ORG_ID,T_ORG.ORG_NAME, T_ORG.UP_ORG_ID ,T_ORG.ORG_LEVEL FROM SYS_ORG_VIEW T_ORG
+        where
+        T_ORG.ORG_STS = 'A'
+		AND T_ORG.UP_ORG_ID = #{orgCode}
+        <if test="needDpt">
+            UNION ALL
+            SELECT T_DPT.DPT_ID AS ORG_ID,T_DPT.DPT_NAME AS ORG_NAME ,T_DPT.UP_DPT_ID AS UP_ORG_ID FROM ADMIN_SM_DPT T_DPT
+            WHERE T_DPT.BELONG_ORG_ID =#{orgCode}
+        </if>
+
+    </select>
+        <!--获取机构树 只能查询当前用户机构以下 -->
+    <select id="getOrgtreeByParamLazyApp" parameterType="java.util.Map" resultType="java.util.HashMap">
+        SELECT T_ORG.ORG_CODE AS ORG_ID,T_ORG.ORG_NAME, T_ORG.UP_ORG_ID ,T_ORG.ORG_LEVEL FROM SYS_ORG_VIEW T_ORG
+        where
+        T_ORG.ORG_STS = 'A'
+        and T_ORG.ORG_LEVEL in ('2','3')
+        <if test="orgCode!=null and orgCode!='' and orgCode!='80101000'">
+		 AND T_ORG.UP_ORG_ID = #{orgCode}
+		 </if>
+        <if test="needDpt">
+            UNION ALL
+            SELECT T_DPT.DPT_ID AS ORG_ID,T_DPT.DPT_NAME AS ORG_NAME ,T_DPT.UP_DPT_ID AS UP_ORG_ID FROM ADMIN_SM_DPT T_DPT
+            WHERE T_DPT.BELONG_ORG_ID =#{orgCode}
+        </if>
+        <if test="needTeam">
+            UNION ALL
+            SELECT T_TEAM.TEAM_CODE AS ORG_ID,T_TEAM.TEAM_NAME AS ORG_NAME ,T_TEAM.TEAM_BELONG_ORG AS UP_ORG_ID FROM admin_sm_team T_TEAM
+            WHERE T_TEAM.BELONG_ORG_ID =#{orgCode}
+        </if>
+    </select>
+</mapper>

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.cm.market.repository.mapper.TransTestMapper">
+	<!--查询方法  -->
+	<select id="queryTrans" parameterType="java.lang.String" resultType="java.util.Map">  
+       select * from (
+       select  FTM.PARAM_CODE field ,FTM.PARAM_DESC  label,FTT.PARAM_VALUE  from FR_RULE_TRANS_MAPPING FTM  left JOIN FR_RULE_TRANS_TEST FTT on(FTM.PARAM_CODE=FTT.PARAM_CODE and FTM.TRANS_CODE =FTT.TRANS_CODE )  where  FTM.TRANS_CODE = #{transCode}
+          order by param_pos asc) B
+ union  all
+   select *from (
+   select   PARAM_CODE field , PARAM_DESC  label,
+   case when PARAM_CODE='PU_BRNO' then '0500'
+        when PARAM_CODE='PU_RSCD' then '000000'
+        when PARAM_CODE='PU_TRBR' then '050001'
+        when PARAM_CODE ='PU_TRCD' then #{transCode}
+        when PARAM_CODE='PU_TRDT' then TO_CHAR (sysdate, 'yyyy-mm-dd')
+        when PARAM_CODE='PU_TRNO' then  TO_CHAR (sysdate, 'yyyymmddhh24miss')
+        when PARAM_CODE='PU_TRST' then '0100'
+        when PARAM_CODE='PU_TRTM' then TO_CHAR (sysdate, 'hh24:mi:ss')
+         when PARAM_CODE='PU_TRUS' then 'admins'
+         when PARAM_CODE='PU_DTTM' then  TO_CHAR (sysdate, 'yyyy-mm-dd hh24:mi:ss')
+        end as  PARAM_VALUE                             
+   from FR_RULE_TRANS_MAPPING FTM    where  FTM.TRANS_CODE = 'AAAAAA'   
+    order by param_pos asc) A 
+	</select>
+	
+	<!-- 删除原有的测试数据 -->
+	<delete id="delTrans" parameterType="String">
+		delete from FR_RULE_TRANS_TEST where TRANS_CODE = #{trcd}
+	</delete>
+	<!-- 插入新数据 -->
+	<insert id="insertTrans" parameterType="java.util.List">
+		insert into FR_RULE_TRANS_TEST (TRANS_CODE,PARAM_CODE,PARAM_VALUE) VALUES
+		<foreach collection="list" item="item" index="index" separator="," >  
+         	(#{item.transCode},#{item.paramCode},#{item.paramValue})
+    	</foreach> 
+	</insert>
+</mapper>

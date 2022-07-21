@@ -1,0 +1,48 @@
+spring:
+  kafka: # 指定kafka 代理地址，可以多个
+    bootstrap-servers: 192.168.8.108:9091,192.168.8.108:9092,192.168.8.108:9093
+    template: # 指定默认topic id
+      default-topic: receipts
+    listener: # 指定listener 容器中的线程数，用于提高并发量
+      concurrency: 5
+      ack-mode: manual
+    consumer:
+      group-id: myGroup # 指定默认消费者group id
+      client-id: 200
+      max-poll-records: 200
+      auto-offset-reset: earliest # 最早未被消费的offset
+      enable-auto-commit: false
+      auto-commit-interval: 5000
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+    producer: # 生产者配置
+      retries: 3 # 设置大于0的值，则客户端会将发送失败的记录重新发送
+      batch-size: 16384 #16K
+      buffer-memory: 33554432 #32M
+      acks: 1
+      # 指定消息key和消息体的编解码方式
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+
+  #数据源
+#  datasource:
+#    url: jdbc:mysql://localhost:3306/dybank?characterEncoding=UTF-8
+#    username: cj
+#    password: cj123456
+#    driver-class-name: com.mysql.cj.jdbc.Driver
+  # redis配置，以下有默认配置的也可以使用默认配置
+  redis:
+    #host: 192.168.35.51
+    host: localhost
+    port: 6379
+    #    cluster:
+    #      nodes: 192.168.211.134:7000,192.168.211.134:7001,192.168.211.134:7002
+    #      maxRedirects: 6
+    pool:
+      max-active: 8 # 在给定的时间，连接池中分配的最大连接数
+      max-wait: 20000 # 连接阻塞最大等待时间(以毫秒为单位)，连接池耗尽时抛出异常。使用负值无限期地阻塞
+      max-idle: 8
+      min-idle: 1 # 连接池最小的空闲连接数
+    timeout: 60000 # 连接超时时间(以毫秒为单位)
+    password: 123456
+    database: 1

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.uimp.displan.repository.mapper.PmaFDisPlanDetailMapper">
+    <resultMap id="BaseResultMap" type="cn.com.yusys.yusp.uimp.displan.domain.PmaFDisPlanDetail">
+		<id column="ID" jdbcType="VARCHAR" property="id" />
+		<result column="ORG_NO" jdbcType="VARCHAR" property="orgNo" />
+		<result column="ORG_NAME" jdbcType="VARCHAR" property="orgName" />
+		<result column="DISTR_RATE" jdbcType="NUMERIC" property="distrRate" />
+		<result column="MANAGER_TYPE" jdbcType="VARCHAR" property="managerType" />
+		<result column="BUSS_TYPE" jdbcType="VARCHAR" property="bussType" />
+    </resultMap>
+    <sql id="Base_Column_List">
+	    ID,ORG_NO,ORG_NAME,DISTR_RATE,MANAGER_TYPE,BUSS_TYPE
+    </sql>
+        <!-- 查询接口 -->
+    <select id="listByModel" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+    	SELECT ID,ORG_NO,ORG_NAME,DISTR_RATE,MANAGER_TYPE,BUSS_TYPE   FROM PMA_F_DIS_PLAN_DETAIL T
+    	<where>
+			<if test="condition.orgNo != null and condition.orgNo != ''">
+			AND T.ORG_NO = #{condition.orgNo}
+			</if>
+			<if test="condition.bussType != null and condition.bussType != ''">
+			AND T.BUSS_TYPE = #{condition.bussType}
+			</if>
+		</where>
+    </select>
+     <!-- 根据方案编号删除方案机构关联表 -->
+    <delete id="deleteSql" >
+	   delete from   PMA_F_DIS_PLAN_DETAIL  where BUSS_TYPE=#{bussType} and ORG_NO = #{orgNo}
+	</delete>
+</mapper>

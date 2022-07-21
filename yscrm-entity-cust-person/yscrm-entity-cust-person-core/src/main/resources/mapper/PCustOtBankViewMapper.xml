@@ -1,0 +1,291 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.cust.person.repository.mapper.PCustOtBankViewMapper">
+    <!--存款信息查询 -->
+     <select id="getDepList" parameterType="java.util.Map"  resultType="java.util.HashMap">
+	    select       t.DATA_DATE         ,            
+					 t.CRAT_DT           ,            
+					 t.CRAT_ORG_ID       ,            
+					 t.CRAT_USR          ,            
+					 t.LAST_CHG_SYS      ,            
+					 t.LAST_CHG_USR      ,            
+					 t.LAST_CHG_DT       ,            
+					 t.CORP_ORG_CODE     ,            
+					 t.CUST_ID           ,            
+					 t.OPEN_BRCH_NAME    ,            
+					 t.DEPT_TYPE         , 
+					 t.TDEP_DUE_DT 		 ,               
+					 t.ACCT_ID           ,            
+					 t.CURR_CD           ,            
+					 t.DEPT_BAL          ,            
+					 t.ID                             
+
+	    from    OCRM_F_CI_PER_OTHBANK_DEP t
+	   <if  test="custId != null and custId != ''">
+		       		where t.CUST_ID =#{custId,jdbcType=VARCHAR} 
+		    </if>
+	</select>
+	 <!-- 贷款信息查询 -->
+     <select id="getLoanList" parameterType="java.util.Map"  resultType="java.util.HashMap">
+	    select       t.DATA_DATE         ,      
+					 t.CRAT_DT           ,      
+					 t.CRAT_ORG_ID       ,      
+					 t.CRAT_USR          ,      
+					 t.LAST_CHG_SYS      ,      
+					 t.LAST_CHG_USR      ,      
+					 t.LAST_CHG_DT       ,      
+					 t.CORP_ORG_CODE     ,      
+					 t.CUST_ID           ,      
+					 t.BUSS_CD           ,      
+					 t.OPEN_BRCH_NAME    ,      
+					 t.CURR_CD           ,      
+					 t.CONT_NO           ,      
+					 t.LOAN_NO           ,      
+					 t.CONT_AMT          ,      
+					 t.EXEC_RATE         ,      
+					 t.LOAN_BAL          ,      
+					 t.MARGIN_RATIO      ,      
+					 t.MAIN_GUAR_CD      ,      
+					 t.MORTGAGE_NO       ,      
+					 t.PLEDGE_NO         ,      
+					 t.REPAY_WAY         , 
+					 t.START_DATE		 ,     
+					 t.END_DATE   		 ,       
+					 
+					 t.EXTEND_FLG        ,      
+					 t.REFINANCE_FLG     ,      
+					 t.LAWSUIT_FLG       ,      
+					 t.VALID_FLG         ,      
+					 t.REMARK            ,      
+					 t.ID                       
+
+	    from    OCRM_F_CI_PER_OTHBANK_LOAN t
+	   <if  test="custId != null and custId != ''">
+		       		where t.CUST_ID =#{custId,jdbcType=VARCHAR} 
+		    </if>
+	</select>
+	 <!-- 理财信息查询 -->
+     <select id="getFinList" parameterType="java.util.Map"  resultType="java.util.HashMap">
+	    select      t.ID                ,     
+					 t.CUST_ID           ,     
+					 t.LAST_ORG_ID       ,     
+					 t.LAST_CHG_USR      ,     
+					 t.LAST_CHG_DT       ,     
+					 t.ACCOUNT           ,     
+					 t.FIN_PRO_TYPE      ,     
+					 t.PUR_AMO           ,     
+					 t.EXP_RATE_OF_RET   ,     
+					 t.TERM              ,  
+					 t.PUR_DATE,
+       				 t.EXP_DATE,
+					 
+					 t.BUY_BANK          ,     
+					 t.CORP_ORG_CODE           
+ 
+	    from    OCRM_F_CI_PRE_OTHER_FIN t
+	   <if  test="custId != null and custId != ''">
+		       		where t.CUST_ID =#{custId,jdbcType=VARCHAR} 
+		    </if>
+	</select>
+	 <!-- 担保信息查询 -->
+     <select id="getGuarList" parameterType="java.util.Map"  resultType="java.util.HashMap">
+	    select      t.ID             ,   
+					 t.CUST_ID        ,   
+					 t.LAST_ORG_ID    ,   
+					 t.LAST_CHG_USR   ,   
+					 t.LAST_CHG_DT    ,   
+					 t.BY_GUA_NAME    ,   
+					 t.GUA_MET        ,   
+					 t.GUA_BUS_DES    ,   
+					 t.GUA_AMO        ,   
+					 t.GUA_BAL        , 
+					 t.START_DATE,     
+					 t.EXP_DATE,     
+					 
+					 t.BANK_DET_NAME  ,   
+					 t.VALID_LOGO     ,   
+					 t.NOTE           ,   
+					 t.CORP_ORG_CODE      
+	    from    OCRM_F_CI_PRE_OTHER_GUAR t
+	   <if  test="custId != null and custId != ''">
+		       		where t.CUST_ID =#{custId,jdbcType=VARCHAR} 
+		    </if>
+	</select>
+    <!-- 存款信息修改 -->
+  	<update id="updateDepInfo" parameterType="java.util.Map">
+			UPDATE OCRM_F_CI_PER_OTHBANK_DEP t SET 
+			t.LAST_CHG_SYS =#{lastChgSys,jdbcType=VARCHAR},
+			t.LAST_CHG_USR =#{lastChgUsr,jdbcType=VARCHAR},
+			t.LAST_CHG_DT=TO_DATE(#{lastChgDt,jdbcType=DATE}, 'yyyy-MM-dd') 
+			
+		
+		    <if  test="openBrchName != null and openBrchName != ''">
+			,t.OPEN_BRCH_NAME =#{openBrchName,jdbcType=VARCHAR}
+			</if>
+			 <if  test="deptType != null and deptType != ''">
+			,t.DEPT_TYPE =#{deptType,jdbcType=VARCHAR}
+			</if>
+			 <if  test="tdepDueDt != null and tdepDueDt != ''">
+			,t.TDEP_DUE_DT =#{tdepDueDt,jdbcType=VARCHAR}
+			</if>
+			  <if  test="acctId != null and acctId != ''">
+			,t.ACCT_ID =#{acctId,jdbcType=VARCHAR}
+			</if>
+			  <if  test="currCd != null and currCd != ''">
+			,t.CURR_CD =#{currCd,jdbcType=VARCHAR}
+			</if>
+			<if  test="deptBal != null and deptBal != ''">
+			,t.DEPT_BAL =#{deptBal,jdbcType=VARCHAR}
+			</if>
+			
+
+	  		WHERE t.CUST_ID = #{custId,jdbcType=VARCHAR}
+	</update>
+	<!-- 贷款信息修改 -->
+  	<update id="updateLoanInfo" parameterType="java.util.Map">
+			UPDATE OCRM_F_CI_PER_OTHBANK_LOAN t SET 
+			t.LAST_CHG_SYS =#{lastChgSys,jdbcType=VARCHAR},
+			t.LAST_CHG_USR =#{lastChgUsr,jdbcType=VARCHAR},
+			t.LAST_CHG_DT=TO_DATE(#{lastChgDt,jdbcType=DATE}, 'yyyy-MM-dd') 
+			
+		
+		    <if  test="bussCd != null and bussCd != ''">
+			,t.BUSS_CD =#{bussCd,jdbcType=VARCHAR}
+			</if>
+			 <if  test="openBrchName != null and openBrchName != ''">
+			,t.OPEN_BRCH_NAME =#{openBrchName,jdbcType=VARCHAR}
+			</if>
+			 <if  test="currCd != null and currCd != ''">
+			,t.CURR_CD =#{currCd,jdbcType=VARCHAR}
+			</if>
+			  <if  test="contAmt != null and contAmt != ''">
+			,t.CONT_AMT =#{contAmt,jdbcType=VARCHAR}
+			</if>
+			  <if  test="execRate != null and execRate != ''">
+			,t.EXEC_RATE =#{execRate,jdbcType=VARCHAR}
+			</if>
+			  <if  test="loanBal != null and loanBal != ''">
+			,t.LOAN_BAL =#{loanBal,jdbcType=VARCHAR}
+			</if>
+			  <if  test="marginRatio != null and marginRatio != ''">
+			,t.MARGIN_RATIO =#{marginRatio,jdbcType=VARCHAR}
+			</if>
+			  <if  test="mainGuarCd != null and mainGuarCd != ''">
+			,t.MAIN_GUAR_CD =#{mainGuarCd,jdbcType=VARCHAR}
+			</if>
+
+            <if  test="mortgageNo != null and mortgageNo != ''">
+			,t.MORTGAGE_NO =#{mortgageNo,jdbcType=VARCHAR}
+			</if>
+			 <if  test="pledgeNo != null and pledgeNo != ''">
+			,t.PLEDGE_NO =#{pledgeNo,jdbcType=VARCHAR}
+			</if>
+			 <if  test="repayWay != null and repayWay != ''">
+			,t.REPAY_WAY =#{repayWay,jdbcType=VARCHAR}
+			</if>
+			 <if  test="startDate != null and startDate != ''">
+			,t.START_DATE =#{startDate,jdbcType=VARCHAR}
+			</if>
+			 <if  test="endDate != null and endDate != ''">
+			,t.END_DATE =#{endDate,jdbcType=VARCHAR}
+			</if>
+			 <if  test="extendFlg != null and extendFlg != ''">
+			,t.EXTEND_FLG =#{extendFlg,jdbcType=VARCHAR}
+			</if>
+			 <if  test="refinanceFlg != null and refinanceFlg != ''">
+			,t.REFINANCE_FLG =#{refinanceFlg,jdbcType=VARCHAR}
+			</if>
+			 <if  test="lawsuitFlg != null and lawsuitFlg != ''">
+			,t.LAWSUIT_FLG =#{lawsuitFlg,jdbcType=VARCHAR}
+			</if>
+			 <if  test="validFlg != null and validFlg != ''">
+			,t.VALID_FLG =#{validFlg,jdbcType=VARCHAR}
+			</if>
+			 <if  test="remark != null and remark != ''">
+			,t.REMARK =#{remark,jdbcType=VARCHAR}
+			</if>
+	  		WHERE t.CUST_ID = #{custId,jdbcType=VARCHAR}
+	</update>
+	<!-- 理财信息修改 -->
+  	<update id="updateFinInfo" parameterType="java.util.Map">
+			UPDATE OCRM_F_CI_PRE_OTHER_FIN t SET 
+			t.LAST_ORG_ID =#{lastOrgId,jdbcType=VARCHAR},
+			t.LAST_CHG_USR =#{lastChgUsr,jdbcType=VARCHAR},
+			t.LAST_CHG_DT=TO_DATE(#{lastChgDt,jdbcType=DATE}, 'yyyy-MM-dd') 
+			
+		
+		    <if  test="account != null and account != ''">
+			,t.ACCOUNT =#{account,jdbcType=VARCHAR}
+			</if>
+			 <if  test="finProType != null and finProType != ''">
+			,t.FIN_PRO_TYPE =#{finProType,jdbcType=VARCHAR}
+			</if>
+			 <if  test="purAmo != null and purAmo != ''">
+			,t.PUR_AMO =#{purAmo,jdbcType=VARCHAR}
+			</if>
+			  <if  test="expRateOfRet != null and expRateOfRet != ''">
+			,t.EXP_RATE_OF_RET =#{expRateOfRet,jdbcType=VARCHAR}
+			</if>
+			  <if  test="term != null and term != ''">
+			,t.TERM =#{term,jdbcType=VARCHAR}
+			</if>
+			  <if  test="purDate != null and purDate != ''">
+			  
+			,t.PUR_DATE =TO_DATE(#{purDate,jdbcType=DATE}, 'yyyy-MM-dd') 
+			
+			</if>
+			  <if  test="expDate != null and expDate != ''">
+			,t.EXP_DATE =TO_DATE(#{expDate,jdbcType=DATE}, 'yyyy-MM-dd') 
+			
+			</if>
+			  <if  test="buyBank != null and buyBank != ''">
+			,t.BUY_BANK =#{buyBank,jdbcType=VARCHAR}
+			</if>
+
+	  		WHERE t.CUST_ID = #{custId,jdbcType=VARCHAR}
+	</update>
+	<!-- 担保信息修改 -->
+  	<update id="updateGuarInfo" parameterType="java.util.Map">
+			UPDATE OCRM_F_CI_PRE_OTHER_GUAR t SET 
+			t.LAST_ORG_ID =#{lastOrgId,jdbcType=VARCHAR},
+			t.LAST_CHG_USR =#{lastChgUsr,jdbcType=VARCHAR},
+			t.LAST_CHG_DT=TO_DATE(#{lastChgDt,jdbcType=DATE}, 'yyyy-MM-dd') 
+			
+		
+		    <if  test="byGuaName != null and byGuaName != ''">
+			,t.BY_GUA_NAME =#{byGuaName,jdbcType=VARCHAR}
+			</if>
+			 <if  test="guaMet != null and guaMet != ''">
+			,t.GUA_MET =#{guaMet,jdbcType=VARCHAR}
+			</if>
+			 <if  test="guaBusDes != null and guaBusDes != ''">
+			,t.GUA_BUS_DES =#{guaBusDes,jdbcType=VARCHAR}
+			</if>
+			  <if  test="guaAmo != null and guaAmo != ''">
+			,t.GUA_AMO =#{guaAmo,jdbcType=VARCHAR}
+			</if>
+			  <if  test="guaBal != null and guaBal != ''">
+			,t.GUA_BAL =#{guaBal,jdbcType=VARCHAR}
+			</if>
+			  <if  test="startDate != null and startDate != ''">
+			,t.START_DATE =TO_DATE(#{startDate,jdbcType=DATE}, 'yyyy-MM-dd') 
+		
+			</if>
+			  <if  test="expDate != null and expDate != ''">
+			,t.EXP_DATE =TO_DATE(#{expDate,jdbcType=DATE}, 'yyyy-MM-dd') 
+		
+			</if>
+			  <if  test="bankDetName != null and bankDetName != ''">
+			,t.BANK_DET_NAME =#{bankDetName,jdbcType=VARCHAR}
+			</if>
+			  <if  test="validLogo != null and validLogo != ''">
+			,t.VALID_LOGO =#{validLogo,jdbcType=VARCHAR}
+			</if>
+			  <if  test="note != null and note != ''">
+			,t.NOTE =#{note,jdbcType=VARCHAR}
+			</if>
+			
+
+	  		WHERE t.CUST_ID = #{custId,jdbcType=VARCHAR}
+	</update>
+</mapper>

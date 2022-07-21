@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.custpub.repository.mapper.AcrmAbrBusiSumMapper">
+    <select id= "getListByModel" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"  resultType="java.util.HashMap">
+    select * from (select t.* from ACRM_A_BR_BUSI_SUM t where t.belong_brch_no = #{condition.orgCode, jdbcType=VARCHAR}  order by t.data_date desc ) where rownum &lt; 3
+    </select>
+    <select id= "getRank" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"  resultType="java.util.HashMap">
+	    <if test="condition.orgCode != null and condition.orgCode =='500'">
+					  select *
+			  from (select t.*, o.org_name
+			          from ACRM_A_BR_BUSI_SUM t
+			          left join admin_sm_org o
+			            on o.org_code = t.belong_brch_no
+			         where (t.belong_brch_no IN
+			               (select org_id from admin_sm_org where ORG_LEVEL='3')
+			           AND t.cust_type = #{condition.custType, jdbcType=VARCHAR})
+			         order by t.data_date desc, t.aum_bal desc)
+			 where rownum &lt;6
+		</if>
+		<if test="condition.orgCode != null and condition.orgCode !='500'">
+			select * from (select t.*,o.org_name from ACRM_A_BR_BUSI_SUM t left join admin_sm_org o on o.org_code = t.belong_brch_no where (t.belong_brch_no IN (select org_code from sys_org_view where sys_org_view.org_seq like '%'||#{condition.orgCode, jdbcType=VARCHAR}||',%') AND  t.belong_brch_no != #{condition.orgCode, jdbcType=VARCHAR}) AND t.cust_type = #{condition.custType, jdbcType=VARCHAR} order by t.data_date desc,t.aum_bal desc ) where  rownum &lt; 6
+		</if>
+    </select>
+
+	<select id= "getProp" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"  resultType="java.util.HashMap">
+			select * from (select * from ACRM_F_PD_ORG_INDEXS  where ORG_NO = #{condition.orgCode, jdbcType=VARCHAR} and BUSINESS_LINE = #{condition.line, jdbcType=VARCHAR}
+		  order by data_date desc)
+		  where rownum=1
+    </select>
+
+	<select id= "getProp1" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"  resultType="java.util.HashMap">
+		select * from (select * from ACRM_F_PD_MGR_INDEXS where CUST_MANAGER_NO =#{condition.userId, jdbcType=VARCHAR}
+		 order by data_date desc)
+		 where rownum=1
+    </select>
+
+
+	<select id= "getProp2" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"  resultType="java.util.HashMap">
+		select * from (select * from ACRM_F_PD_TEAM_INDEXS where TEAM_NO in (
+		    select MKT_TEAM_ID from OCRM_F_CM_MKT_TEAM where TEAM_LEADER_ID = #{condition.userId, jdbcType=VARCHAR}
+			))
+	</select>
+</mapper>

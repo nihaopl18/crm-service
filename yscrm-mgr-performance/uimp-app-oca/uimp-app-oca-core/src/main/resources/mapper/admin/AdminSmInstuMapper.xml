@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.admin.repository.mapper.AdminSmInstuMapper">
+
+	<!-- 根据参数查询金融机构数据 -->
+	<select id="findInstuByParam" parameterType="java.util.Map"
+		resultType="java.util.Map">
+		select a.* from admin_sm_instu a
+		<where>
+			<if test="instuCde != null and instuCde !=''">
+				and a.INSTU_CDE  =#{instuCde, jdbcType=VARCHAR}
+			</if>
+			<if test="instuName != null and instuName !=''">
+				and a.INSTU_NAME  = #{instuName, jdbcType=VARCHAR}
+			</if>
+			<if test="sysId != null and sysId !=''">
+				and a.SYS_ID  = #{sysId, jdbcType=VARCHAR}
+			</if>
+		</where>
+	</select>
+	<!-- 根据金融机构查询机构数据 -->
+	<select id="findOrgByInstu" parameterType="java.util.Map"
+		resultType="java.util.Map">
+		select a.org_id from admin_sm_org a
+		<where>
+			<if test="instuId != null and instuId !=''">
+				and a.INSTU_Id  =#{instuId, jdbcType=VARCHAR}
+			</if>
+		</where>
+	</select>
+	
+	<!-- 跟新金融机构状态 -->
+	<update id="updateInstuSts" >
+		update admin_sm_instu set INSTU_STS=#{sts,jdbcType=VARCHAR} ,LAST_CHG_USR=#{user, jdbcType=VARCHAR},
+		 LAST_CHG_DT=#{date, jdbcType=VARCHAR} where INSTU_ID=#{id,jdbcType=VARCHAR}
+	</update>
+</mapper>

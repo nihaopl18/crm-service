@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.uimp.distribution.repository.mapper.PmaFDistributionModeDetailMapper">
+    <resultMap id="BaseResultMap" type="cn.com.yusys.yusp.uimp.distribution.domain.PmaFDistributionModeDetail">
+		<id column="ID" jdbcType="VARCHAR" property="id" />
+		<result column="BRCH_NO" jdbcType="VARCHAR" property="brchNo" />
+		<result column="BRCH_NA" jdbcType="VARCHAR" property="brchNa" />
+		<result column="ALLOT_TYPE" jdbcType="VARCHAR" property="allotType" />
+		<result column="PRIORITY" jdbcType="VARCHAR" property="priority" />
+		<result column="EFFECT_DATE" jdbcType="VARCHAR" property="effectDate" />
+		<result column="EXPIRATE_DATE" jdbcType="VARCHAR" property="expirateDate" />
+		<result column="BUSS_TYPE" jdbcType="VARCHAR" property="bussType" />
+		<result column="TYPE" jdbcType="VARCHAR" property="type" />
+    </resultMap>
+    <sql id="Base_Column_List">
+	    ID,BRCH_NO,BRCH_NA,ALLOT_TYPE,PRIORITY,EFFECT_DATE,EXPIRATE_DATE,BUSS_TYPE,TYPE
+    </sql>
+    
+     <select id="queryList" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+		resultType="java.util.Map">
+		select ID,BRCH_NO,BRCH_NA,ALLOT_TYPE,PRIORITY,to_char(to_date(EFFECT_DATE,'yyyyMMdd'),'yyyy-MM-dd') as EFFECT_DATE,
+		 to_char(to_date(EXPIRATE_DATE,'yyyyMMdd'),'yyyy-MM-dd') as EXPIRATE_DATE,BUSS_TYPE,TYPE
+		from PMA_F_Distribution_mode_DETAIL 
+		<where>
+			<if test="condition.brchNo != null and condition.brchNo != ''">
+				and BRCH_NO =#{condition.brchNo}
+			</if>
+		</where> 
+	</select>
+	
+	<delete id="delDetail" parameterType="java.lang.String">
+		delete from PMA_F_Distribution_mode_DETAIL where BRCH_NO =#{brchNo}
+	</delete>
+</mapper>

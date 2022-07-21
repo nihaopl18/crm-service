@@ -1,0 +1,234 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.com.yusys.yusp.uimp.base.repository.mapper.PmaFPerformanceResultMapper">
+    <!--- 根据指标编号与考核对象查询方案与指标关系信息 -->
+    <select id="getRelationListByType" resultType="java.util.Map">
+        select * from (
+                          select distinct a.index_id, b.index_name, a.create_date
+                          from PMA_F_SCHEME_INDEX_REL a
+                                   inner join PMA_F_BASE_INDEX_INFO b on a.index_id = b.index_id
+                          where a.scheme_id = #{schemeId}
+                            and a.EVL_OBJ_TYPE = #{evlObjType}
+                          union all
+                          select distinct a.index_id, b.index_name, a.create_date
+                          from PMA_F_SCHEME_INDEX_REL a
+                                   inner join PMA_F_EVL_INDEX_INFO b on a.index_id = b.index_id
+                          where a.scheme_id = #{schemeId}
+                            and a.EVL_OBJ_TYPE = #{evlObjType}
+                      )
+        order by create_date desc
+    </select>
+
+    <select id="getRelationListByTypeInIds" resultType="java.util.Map">
+        select * from (
+        select distinct a.index_id, b.index_name, a.create_date
+        from PMA_F_SCHEME_INDEX_REL a
+        inner join PMA_F_BASE_INDEX_INFO b on a.index_id = b.index_id
+        where a.scheme_id = #{schemeId}
+        and a.EVL_OBJ_TYPE = #{evlObjType}
+        union all
+        select distinct a.index_id, b.index_name, a.create_date
+        from PMA_F_SCHEME_INDEX_REL a
+        inner join PMA_F_EVL_INDEX_INFO b on a.index_id = b.index_id
+        where a.scheme_id = #{schemeId}
+        and a.EVL_OBJ_TYPE = #{evlObjType}
+        )
+        <where>
+            1 = 1
+            <if test="ids != null">
+                and index_id in
+                <foreach collection="ids" item="item" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+        </where>
+        order by create_date desc
+    </select>
+
+    <select id="getMgrIdInfoByMgr" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+            resultType="String">
+        select manager_id from PMA_F_PERFORMANCE_RESULT_MGR
+        <where>
+            scheme_id = #{condition.schemeId}
+            <if test="condition.schemeCycle != null and condition.schemeCycle != ''">
+                and substr(scheme_cycle,1,7) = substr(#{condition.schemeCycle,jdbcType=VARCHAR},1,7)
+            </if>
+            <if test="condition.managerId != null and condition.managerId != ''">
+                and manager_id = #{condition.managerId,jdbcType=VARCHAR}
+            </if>
+            <if test="condition.teamId != null and condition.teamId != ''">
+                and team_id = #{condition.teamId,jdbcType=VARCHAR}
+            </if>
+            <if test="dataAuth != null">
+                ${dataAuth}
+            </if>
+        </where>
+        group by scheme_cycle,manager_id order by scheme_cycle,manager_id
+    </select>
+
+    <!--- 查询考核指标事实表-客户经理 -->
+    <select id="getRusultByMgr" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+            resultType="java.util.Map">
+        with lookuptemp as (select * from admin_sm_lookup_item where lookup_code in
+        ('OBJ','YE_TYPE','INDEX_APPLY_TYPE','CURRENCY_TYPE'))
+        select b.*
+        from (select a.id,
+        a.scheme_id,
+        a.scheme_name,
+        a.scheme_cycle,
+        a.manager_id,
+        a.manager_name,
+        a.branch_id,
+        a.branch_name,
+        a.org_id,
+        a.org_name,
+        a.team_id,
+        a.team_name,
+        a.index_id,
+        a.index_name || '['||
+        (SELECT LOOKUP_ITEM_NAME FROM lookuptemp WHERE LOOKUP_CODE = 'INDEX_APPLY_TYPE' AND LOOKUP_ITEM_CODE =
+        A.apply_type) || ','||
+        (SELECT LOOKUP_ITEM_NAME FROM lookuptemp WHERE LOOKUP_CODE = 'YE_TYPE' AND LOOKUP_ITEM_CODE = A.Bal_Type) ||
+        ','||
+        (SELECT LOOKUP_ITEM_NAME FROM lookuptemp WHERE LOOKUP_CODE = 'CURRENCY_TYPE' AND LOOKUP_ITEM_CODE = A.Currency)
+        || ']'
+        AS index_name,
+        a.index_target_value,
+        a.index_res,
+        a.comp_rate,
+        dense_rank() over(partition by index_id order by comp_rate desc) as rank
+        from PMA_F_PERFORMANCE_RESULT_MGR a
+        WHERE a.scheme_id = #{schemeId}
+        order by a.scheme_cycle,a.manager_id,rank) b
+        <where>
+            <if test="list != null and list.size > 0">
+                b.manager_id in
+                <foreach collection="list" item="item" open="(" separator="," close=")">
+                    #{item,jdbcType=VARCHAR}
+                </foreach>
+            </if>
+        </where>
+    </select>
+
+
+    <select id="getTeamIdInfoByTeam" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+            resultType="String">
+        select team_id from PMA_F_PERFORMANCE_RESULT_TEAM
+        <where>
+            scheme_id = #{condition.schemeId}
+            <if test="condition.schemeCycle != null and condition.schemeCycle != ''">
+                and substr(scheme_cycle,1,7) = substr(#{condition.schemeCycle,jdbcType=VARCHAR},1,7)
+            </if>
+            <if test="condition.teamleaderName != null and condition.teamleaderName != ''">
+                and teamleader_name like concat(concat('%', #{condition.teamleaderName,jdbcType=VARCHAR}),'%')
+            </if>
+            <if test="condition.teamId != null and condition.teamId != ''">
+                and team_id = #{condition.teamId,jdbcType=VARCHAR}
+            </if>
+            <if test="dataAuth != null">
+                ${dataAuth}
+            </if>
+        </where>
+        group by scheme_cycle,team_id order by scheme_cycle,team_id
+    </select>
+
+    <select id="getRusultByTeam" parameterType="java.util.List" resultType="java.util.Map">
+        with lookuptemp as (select * from admin_sm_lookup_item where lookup_code in
+        ('OBJ','YE_TYPE','INDEX_APPLY_TYPE','CURRENCY_TYPE'))
+        select b.* from (select a.id,
+        a.scheme_id,
+        a.scheme_name,
+        a.scheme_cycle,
+        a.team_id,
+        a.team_name,
+        a.teamleader_id,
+        a.teamleader_name,
+        a.branch_id,
+        a.branch_name,
+        a.org_id,
+        a.org_name,
+        a.index_id,
+        a.index_name || '['||
+        (SELECT LOOKUP_ITEM_NAME FROM lookuptemp WHERE LOOKUP_CODE = 'INDEX_APPLY_TYPE' AND LOOKUP_ITEM_CODE =
+        A.apply_type) || ','||
+        (SELECT LOOKUP_ITEM_NAME FROM lookuptemp WHERE LOOKUP_CODE = 'YE_TYPE' AND LOOKUP_ITEM_CODE = A.Bal_Type) ||
+        ','||
+        (SELECT LOOKUP_ITEM_NAME FROM lookuptemp WHERE LOOKUP_CODE = 'CURRENCY_TYPE' AND LOOKUP_ITEM_CODE = A.Currency)
+        || ']'
+        AS index_name,
+        a.index_target_value,
+        a.index_res,
+        a.comp_rate,dense_rank() over(partition by index_id order by comp_rate desc) as rank
+        from PMA_F_PERFORMANCE_RESULT_TEAM a WHERE a.scheme_id = #{schemeId})b
+
+        <where>
+            <if test="list != null and list.size>0 ">
+                b.team_id in
+                <foreach collection="list" item="item" open="(" separator="," close=")">
+                    #{item,jdbcType=VARCHAR}
+                </foreach>
+            </if>
+        </where>
+
+    </select>
+
+
+    <select id="getOrgIdInfoByOrg" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="String">
+        select org_id from PMA_F_PERFORMANCE_RESULT_ORG
+        <where>
+            scheme_id = #{condition.schemeId}
+            <if test="condition.schemeCycle != null and condition.schemeCycle != ''">
+                and substr(scheme_cycle,1,7) = substr(#{condition.schemeCycle,jdbcType=VARCHAR},1,7)
+            </if>
+            <if test="condition.teamleaderName != null and condition.teamleaderName != ''">
+                and teamleader_name like concat(concat('%', #{condition.teamleaderName,jdbcType=VARCHAR}),'%')
+            </if>
+            <if test="condition.teamId != null and condition.teamId != ''">
+                and team_id = #{condition.teamId,jdbcType=VARCHAR}
+            </if>
+        </where>
+        group by scheme_cycle,org_id order by scheme_cycle,org_id
+    </select>
+
+    <!--- 查询考核指标事实表-机构 -->
+    <select id="getRusultByOrg" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+            resultType="java.util.Map">
+        with lookuptemp as (select * from admin_sm_lookup_item where lookup_code in
+        ('OBJ','YE_TYPE','INDEX_APPLY_TYPE','CURRENCY_TYPE'))
+        select b.*
+        from (select a.id,
+        a.scheme_id,
+        a.scheme_name,
+        a.scheme_cycle,
+        a.org_id,
+        a.org_name,
+        a.index_id,
+        a.index_name || '['||
+        (SELECT LOOKUP_ITEM_NAME FROM lookuptemp WHERE LOOKUP_CODE = 'INDEX_APPLY_TYPE' AND LOOKUP_ITEM_CODE =
+        A.apply_type) || ','||
+        (SELECT LOOKUP_ITEM_NAME FROM lookuptemp WHERE LOOKUP_CODE = 'YE_TYPE' AND LOOKUP_ITEM_CODE = A.Bal_Type) ||
+        ','||
+        (SELECT LOOKUP_ITEM_NAME FROM lookuptemp WHERE LOOKUP_CODE = 'CURRENCY_TYPE' AND LOOKUP_ITEM_CODE = A.Currency)
+        || ']'
+        AS index_name,
+        a.index_target_value,
+        a.index_res,
+        a.comp_rate,
+        dense_rank() over(partition by index_id order by comp_rate desc) as rank
+        from PMA_F_PERFORMANCE_RESULT_ORG a
+        WHERE a.scheme_id = #{schemeId}) b
+
+        <where>
+            <if test="list != null and list.size>0 ">
+                b.org_id in
+                <foreach collection="list" item="item" open="(" separator="," close=")">
+                    #{item,jdbcType=VARCHAR}
+                </foreach>
+            </if>
+        </where>
+
+    </select>
+
+
+</mapper>

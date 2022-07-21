@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.cm.productmanager.repository.mapper.CmFRcProductManagerMapper">
+	<!-- 查询产品管理表 -->
+	<select id="getList" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+		SELECT T.PRODUCT_ID,T.PROD_NAME,T.PROD_STATE,T.PROD_TYPE_ID,T.TYPE_FIT_CUST,
+		TO_CHAR(T.PROD_START_DATE,'yyyy-MM-dd') AS PROD_START_DATE,
+		TO_CHAR(T.PROD_END_DATE,'yyyy-MM-dd') AS PROD_END_DATE,
+		T.RATE,T.COST_RATE,T.LIMIT_TIME,T.IS_COMBINATION,T.OBJ_CUST_DISC,T.PROD_CHARACT,
+		T.RISK_LEVEL,T.DANGER_DISC,T.ASSURE_DISC,T.PROD_DESC,T.OTHER_INFO,T.MONEY,
+		A.CATL_NAME,A.CATL_CODE,A.CATL_PARENT 
+		FROM CM_F_RC_PROD_INFO T          
+		LEFT JOIN CM_F_RC_PROD_CATL A ON A.CATL_CODE = T.CATL_CODE
+        <where>
+        	1=1
+        	<if test="condition.productId != null and condition.productId !=''">
+        	AND T.PRODUCT_ID LIKE CONCAT(CONCAT('%',#{condition.productId}),'%')
+        	</if>
+        	<if test="condition.prodName != null and condition.prodName !=''">
+        	AND T.PROD_NAME LIKE CONCAT(CONCAT('%',#{condition.prodName}),'%')
+        	</if>
+        	<if test="condition.prodStartDate != null and condition.prodStartDate !=''">
+        	AND TO_CHAR(T.PROD_START_DATE,'yyyy-MM-dd') = #{condition.prodStartDate} 
+        	</if>
+        	<if test="condition.prodEndDate != null and condition.prodEndDate !=''">
+        	AND TO_CHAR(T.PROD_END_DATE,'yyyy-MM-dd') = #{condition.prodEndDate}
+        	</if>
+        	<if test="condition.prodState != null and condition.prodState !=''">
+        	AND T.PROD_STATE LIKE CONCAT(CONCAT('%',#{condition.prodState}),'%')
+        	</if>
+        	<if test="condition.isCombination != null and condition.isCombination !=''">
+        	AND T.IS_COMBINATION = #{condition.isCombination}
+        	</if>
+        	<if test="condition.money != null and condition.money !=''">
+        	AND T.MONEY = #{condition.money}
+        	</if>
+        	<if test="condition.riskLevel != null and condition.riskLevel !=''">
+        	AND T.RISK_LEVEL = #{condition.riskLevel}
+        	</if>
+        	<if test="condition.prodDept != null and condition.prodDept !=''">
+        	AND T.PROD_DEPT LIKE CONCAT(CONCAT('%',#{condition.prodDept}),'%')
+        	</if>
+        	<if test="condition.prodMag != null and condition.prodMag !=''">
+        	AND T.PROD_MAG LIKE CONCAT(CONCAT('%',#{condition.prodMag}),'%')
+        	</if>
+        	<if test="condition.catlCode != 0 and condition.catlCode !=null">
+        	AND T.CATL_CODE IN (SELECT A.CATL_CODE FROM CM_F_RC_PROD_CATL A
+    		START WITH A.CATL_CODE  = #{condition.catlCode} CONNECT BY A.CATL_PARENT = PRIOR A.CATL_CODE)
+        	</if>
+        </where>
+        ORDER BY T.PRODUCT_ID DESC
+    </select>
+    <!-- 新增产品检验重复id -->
+    <select id="getSameId" parameterType="String" resultType="String">
+    	SELECT COUNT(I.PRODUCT_ID) AS PRODUCT_ID FROM CM_F_RC_PROD_INFO I WHERE I.PRODUCT_ID = #{productId}
+    </select>
+    <!-- 新增产品检验重复名称 -->
+    <select id="getSameName" parameterType="String" resultType="String">
+    	SELECT COUNT(I.PROD_NAME) AS PROD_NAME FROM CM_F_RC_PROD_INFO I WHERE I.PROD_NAME = #{prodName}
+    </select>
+    <!-- 更新产品检验重复名称 -->
+    <select id="getSameUpdateName" parameterType="cn.com.yusys.yusp.cm.productmanager.domain.CmFRcProductManagerInfo" resultType="String">
+    	SELECT COUNT(I.PROD_NAME) AS PROD_NAME FROM CM_F_RC_PROD_INFO I WHERE I.PROD_NAME = #{prodName} AND I.PRODUCT_ID <![CDATA[!= ]]> #{productId}
+    </select>
+    <!-- 组件返回产品输入 -->
+    <select id="getProdById" parameterType="cn.com.yusys.yusp.cm.productmanager.domain.CmFRcProductManagerInfo" resultType="java.util.HashMap">
+    	SELECT T.PRODUCT_ID,T.PROD_NAME,R.CATL_NAME,T.CATL_CODE
+        FROM CM_F_RC_PROD_INFO T
+        LEFT JOIN CM_F_RC_PROD_CATL R ON T.CATL_CODE = R.CATL_CODE
+        WHERE T.PRODUCT_ID = #{productId}
+    </select>
+    <!-- 组件返回产品信息输出 -->
+    <select id="getOutputProd" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+		SELECT T.PRODUCT_ID,T.PROD_NAME,T.PROD_TYPE_ID,T.PROD_STATE,T.RISK_LEVEL,A.CATL_NAME,T.PROD_MAG,T.RATE,T.PROD_DEPT,
+       	COUNT(DISTINCT(Y.MODEL_NAME)) AS MODEL_NUM,COUNT(DISTINCT(R.CHANNEL_NAME)) AS CHANNEL_NUM,COUNT(DISTINCT(G.TARGET_ID)) AS TARGET_NUM
+  		FROM CM_F_RC_PROD_INFO T LEFT JOIN CM_F_RC_PROD_CATL A ON A.CATL_CODE = T.CATL_CODE
+  		LEFT JOIN CM_F_RC_SYS_TYPE Y ON T.PRODUCT_ID = Y.APPLY_OBJECT
+  		LEFT JOIN CM_F_RC_CHANNEL_MGR R ON instr(Y.APPLY_CHANNEL_NAME, R.CHANNEL_NAME) > 0
+  		LEFT JOIN CM_F_RC_PROD_TARGET G ON G.PRODUCT_ID = T.PRODUCT_ID
+        <if test="condition.flag == false">
+        	WHERE T.PRODUCT_ID IS NULL
+        </if>
+        <if test="condition.flag == true">
+        	WHERE T.PRODUCT_ID IN 
+        	<foreach collection="condition.ids" item="condition.ids" open="(" separator="," close=")">
+           		#{condition.ids, jdbcType=NUMERIC}
+        	</foreach>
+        </if>
+        GROUP BY T.PRODUCT_ID,T.PROD_NAME,T.PROD_TYPE_ID,T.PROD_STATE,T.RISK_LEVEL,
+        T.PROD_MAG,T.RATE,T.PROD_DEPT,A.CATL_NAME 
+    </select>
+    <!-- 产品目标客户 -->
+    <select id="getProdCust" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+		SELECT T.PRODUCT_ID,T.PROD_NAME,U.CUST_ID,U.CUST_NAME,R.CUST_GROUP_ID,G.CUST_GROUP_NAME 
+        FROM CM_F_RC_PROD_INFO T
+   	    LEFT JOIN CM_F_RC_CUST_FIT_PROD Y ON T.PRODUCT_ID = Y.PROD_ID
+        LEFT JOIN CIMP_C_CUSTGROUP_CUST R ON R.CUST_ID = Y.CUST_ID
+        LEFT JOIN ACIM_F_CI_CUSTOMER U ON U.CUST_ID = Y.CUST_ID
+        LEFT JOIN CIMP_C_CG_BASEINFO G ON G.CUST_GROUP_ID = R.CUST_GROUP_ID
+        <if test="condition.flag == false">
+        	WHERE T.PRODUCT_ID IS NULL
+        </if>
+        <if test="condition.flag == true">
+        	WHERE 
+        	<foreach collection="condition.ids" item="condition.ids" open="(" separator="OR" close=")">
+           		T.PRODUCT_ID = #{condition.ids.prod, jdbcType=NUMERIC} AND G.CUST_GROUP_ID = #{condition.ids.cust,jdbcType=VARCHAR}
+        	</foreach>
+        </if>
+    </select>
+    <select id="getProByIds" parameterType="java.util.List" resultType="java.util.HashMap">
+		select t.PROD_NAME from CM_F_RC_PROD_INFO t 
+<if test="list != null and list.size > 0">
+    where
+		PRODUCT_ID in
+    <foreach item="item" index="index" collection="list" open="(" separator="," close=")">  
+			    #{item}  
+			</foreach> 
+</if>
+		
+	</select>
+	<select id="getPro"  resultType="java.util.HashMap">
+		select t.PRODUCT_ID,t.PROD_NAME from CM_F_RC_PROD_INFO t 
+	</select>
+	<select id="checkPro" parameterType="String" resultType="int">
+		select count(*) from CM_F_RC_PROD_INFO t where PRODUCT_ID = #{productid,jdbcType=VARCHAR}
+	</select>
+	<select id="getProInfo" parameterType="String" resultType="cn.com.yusys.yusp.cm.productmanager.domain.CmFRcProductManagerInfo">
+		select * from CM_F_RC_PROD_INFO where PRODUCT_ID = #{productId,jdbcType=VARCHAR}
+	</select>
+</mapper>

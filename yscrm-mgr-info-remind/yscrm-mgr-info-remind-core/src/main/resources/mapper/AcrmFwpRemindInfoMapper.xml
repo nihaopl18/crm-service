@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper
+	namespace="cn.com.yusys.yscrm.info.remind.repository.mapper.AcrmFwpRemindInfoMapper">
+	<!-- 列表查询 -->
+	<select id="queryList" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+		resultType="java.util.HashMap">
+		SELECT
+		INFO_ID,
+		BUSI_ID,
+		REMIND_CLASS,
+		REMIND_TYPE,
+		INFO_TEXT,
+		INFO_STATE,
+		ISSUE_DATE
+		FROM
+		ACRM_F_WP_REMIND_INFO
+		WHERE
+		RECE_USER_ID = #{condition.userId,jdbcType=VARCHAR}
+		AND (
+		(INFO_STATE = '1' AND TO_CHAR(ISSUE_DATE, 'yyyy-MM-dd hh24:mi:ss') &lt;= #{condition.currentDate})
+		OR
+		(INFO_STATE = '2' AND TO_CHAR(LAST_CHG_DATE, 'yyyy-MM-dd') = TO_CHAR(sysdate, 'yyyy-MM-dd'))
+		)
+		ORDER BY INFO_STATE,ISSUE_DATE DESC
+	</select>
+
+	<select id="getIsReadNum" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+			resultType="java.lang.Integer">
+		SELECT
+			count(*)
+		FROM
+			ACRM_F_WP_REMIND_INFO
+		WHERE
+			RECE_USER_ID = #{condition.userId,jdbcType=VARCHAR}
+		  AND INFO_STATE = '1' AND TO_CHAR(ISSUE_DATE, 'yyyy-MM-dd hh24:mi:ss') &lt;= #{condition.currentDate}
+	</select>
+	<!-- 更新 异动提醒状态 -->
+	<update id="updateStateByIssuDate" parameterType="java.util.HashMap">
+		UPDATE
+		ACRM_F_WP_REMIND_INFO
+		SET
+		INFO_STATE = '1',
+		LAST_CHG_DATE = to_date(#{currentDate,jdbcType=VARCHAR},'yyyy-MM-dd HH24:mi:ss')
+		WHERE
+		TO_CHAR(ISSUE_DATE,'yyyy-MM-dd
+		hh24:mi:ss') &lt;=
+		#{currentDate}
+		and
+		INFO_STATE = '0'
+		and
+		RECE_USER_ID = #{userId,jdbcType=VARCHAR}
+	</update>
+
+	<update id="updateStateByInfoId" parameterType="java.util.HashMap">
+		UPDATE
+		ACRM_F_WP_REMIND_INFO
+		SET INFO_STATE = '2',
+		LAST_CHG_DATE = to_date(#{currentDate,jdbcType=VARCHAR},'yyyy-MM-dd HH24:mi:ss')
+		WHERE
+		INFO_ID = #{infoId,jdbcType=VARCHAR}
+	</update>
+
+	<update id="updateStateByUserId" parameterType="java.util.HashMap">
+		UPDATE
+			ACRM_F_WP_REMIND_INFO
+		SET INFO_STATE = '2',
+			LAST_CHG_DATE = to_date(#{currentDate,jdbcType=VARCHAR},'yyyy-MM-dd HH24:mi:ss')
+		WHERE
+			RECE_USER_ID = #{userId,jdbcType=VARCHAR}
+		  and INFO_STATE = '1'
+		  and  TO_CHAR(ISSUE_DATE, 'yyyy-MM-dd hh24:mi:ss') &lt;= #{currentDate,jdbcType=VARCHAR}
+	</update>
+</mapper>

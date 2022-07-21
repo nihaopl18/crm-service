@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper
+        namespace="cn.com.yusys.yusp.dycrm.userAcct.repository.mapper.UserAccountInfoMapper">
+    <select id="getBaseInfo" parameterType="java.lang.String" resultType="cn.com.yusys.yusp.dycrm.userAcct.domain.BaseInfo">
+        SELECT
+            U.USER_ID ,
+            U.USER_NAME,
+            CASE WHEN U.USER_OFFICETEL is null OR U.USER_OFFICETEL = '' THEN '-' ELSE U.USER_OFFICETEL END USER_OFFICETEL,
+            CASE WHEN U.USER_MOBILEPHONE is null OR U.USER_MOBILEPHONE = '' THEN '-' ELSE U.USER_MOBILEPHONE END USER_MOBILEPHONE,
+            U.USER_AVATAR,
+            O.ORG_ID,
+            CASE WHEN O.ORG_NAME is null OR O.ORG_NAME = '' THEN '-' ELSE O.ORG_NAME END ORG_NAME,
+            CASE WHEN T.MKT_TEAM_ID is null OR T.MKT_TEAM_ID = '' THEN '-' ELSE T.MKT_TEAM_ID END MKT_TEAM_ID,
+            CASE WHEN T.MKT_TEAM_NAME is null OR T.MKT_TEAM_NAME = '' THEN '-' ELSE T.MKT_TEAM_NAME END MKT_TEAM_NAME
+        FROM ADMIN_SM_USER U
+                 LEFT JOIN ADMIN_SM_ORG O ON U.ORG_ID = O.ORG_ID
+                 LEFT JOIN OCRM_F_CM_TEAM_CUST_MANAGER M ON U.USER_ID = M.USER_ID
+                 LEFT JOIN OCRM_F_CM_MKT_TEAM T ON M.MKT_TEAM_ID = T.MKT_TEAM_ID
+        WHERE U.USER_ID = #{userId,jdbcType=VARCHAR}
+    </select>
+
+    <select id="getRoles" parameterType="java.lang.String" resultType="java.util.HashMap">
+        SELECT R.ROLE_ID,R.ROLE_CODE,R.ROLE_NAME
+        FROM ADMIN_SM_USER_ROLE_REL U
+                 LEFT JOIN ADMIN_SM_ROLE R ON R.ROLE_ID = U.ROLE_ID
+        WHERE U.USER_ID = #{userId,jdbcType=VARCHAR}
+    </select>
+
+    <select id="getTeamLeader" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="cn.com.yusys.yusp.dycrm.userAcct.domain.TeamUserInfo">
+        SELECT
+               U.USER_ID,
+               U.USER_NAME,
+               U.USER_OFFICETEL,
+               U.USER_MOBILEPHONE,
+               U.USER_AVATAR,
+               O.ORG_ID,
+               O.ORG_NAME
+        FROM OCRM_F_CM_TEAM_CUST_MANAGER M
+                 LEFT JOIN OCRM_F_CM_MKT_TEAM T ON M.MKT_TEAM_ID = T.MKT_TEAM_ID
+                 LEFT JOIN ADMIN_SM_USER U ON T.TEAM_LEADER_ID = U.USER_ID
+                 LEFT JOIN ADMIN_SM_ORG O ON U.ORG_ID = O.ORG_ID
+        WHERE M.USER_ID = #{condition.userId,jdbcType=VARCHAR}
+    </select>
+
+    <select id="getTeamUser" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="cn.com.yusys.yusp.dycrm.userAcct.domain.TeamUserInfo">
+        SELECT
+            U.USER_ID,
+            U.USER_NAME,
+            U.USER_OFFICETEL,
+            U.USER_MOBILEPHONE,
+            U.USER_AVATAR,
+            O.ORG_ID,
+            O.ORG_NAME
+        FROM
+            OCRM_F_CM_TEAM_CUST_MANAGER M
+                LEFT JOIN ADMIN_SM_USER U ON M.USER_ID = U.USER_ID
+                LEFT JOIN ADMIN_SM_ORG O ON U.ORG_ID = O.ORG_ID
+        <where>
+              M.MKT_TEAM_ID = (
+                SELECT T.MKT_TEAM_ID
+                FROM OCRM_F_CM_TEAM_CUST_MANAGER M
+                         LEFT JOIN OCRM_F_CM_MKT_TEAM T ON M.MKT_TEAM_ID = T.MKT_TEAM_ID
+                WHERE M.USER_ID = #{condition.userId,jdbcType=VARCHAR})
+          AND U.USER_ID != #{condition.userId,jdbcType=VARCHAR}
+          <if test="condition.teamLeader != null and condition.teamLeader != ''">
+              AND U.USER_ID != #{condition.teamLeader,jdbcType=VARCHAR}
+          </if>
+        </where>
+    </select>
+
+    <select id="contactDetails" parameterType="java.lang.String" resultType="java.util.HashMap">
+        select USER_MOBILEPHONE,USER_EMAIL from ADMIN_SM_USER where LOGIN_CODE = #{loginCode,jdbcType=VARCHAR}
+    </select>
+
+    <update id="saveDetails" parameterType="cn.com.yusys.yusp.dycrm.userAcct.domain.BaseInfo">
+        update ADMIN_SM_USER set
+            USER_MOBILEPHONE = #{userMobilephone,jdbcType=VARCHAR},
+            USER_EMAIL = #{userEmail,jdbcType=VARCHAR}
+        where LOGIN_CODE = #{userId,jdbcType=VARCHAR}
+    </update>
+    <select id="checkUpName" parameterType="java.lang.String" resultType="int">
+        SELECT  COUNT(cg.LOGIN_CODE) count FROM ADMIN_SM_USER cg where
+        LOGIN_CODE = #{loginCode,jdbcType=VARCHAR} and
+        rownum=1
+    </select>
+    <update id="updateUserInfo" parameterType="java.lang.String">
+        UPDATE ADMIN_SM_USER SET USER_ID=#{loginCode,jdbcType=VARCHAR} WHERE LOGIN_CODE = #{loginCode,jdbcType=VARCHAR}
+    </update>
+
+    <select id="checkUpNameName" parameterType="java.lang.String" resultType="int">
+        SELECT  COUNT(cg.ROLE_CODE) count FROM ADMIN_SM_ROLE cg where
+        ROLE_CODE = #{roleCode,jdbcType=VARCHAR} and
+        rownum=1
+    </select>
+
+    <update id="updateRoleInfo" parameterType="java.lang.String">
+        UPDATE ADMIN_SM_ROLE SET ROLE_ID=#{roleCode,jdbcType=VARCHAR} WHERE ROLE_CODE = #{roleCode,jdbcType=VARCHAR}
+    </update>
+    <select id="queryUserByPage" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+            resultType="java.util.Map" databaseId="oracle">
+        select s.user_id,s.login_code,s.user_name,s.cert_type,s.cert_no,s.user_code,s.deadline,s.org_id,
+        s.dpt_id,d.dpt_name,s.user_password,s.user_sex,s.user_birthday,s.user_email,s.user_mobilephone,s.user_officetel,s.user_education,
+        s.user_certificate,s.entrants_date,s.position_time,s.financial_job_time,s.position_degree,
+        s.user_avatar,s.offen_ip,s.user_sts,s.last_chg_usr,substr(s.LAST_CHG_DT, 0, 10) as LAST_CHG_DT,u.user_name as last_chg_name
+        from ADMIN_SM_USER s
+        <if test="condition.orgId != null and condition.orgId != ''">
+            left join sys_org_view o on o.org_id=s.org_id
+        </if>
+        left join admin_sm_user u on u.user_id=s.last_chg_usr
+        left join admin_sm_dpt d on s.dpt_id=d.DPT_CDE
+        <where>
+            <if test="condition.userInfo != null and condition.userInfo != ''">
+                and (s.LOGIN_CODE  LIKE CONCAT(CONCAT('%', #{condition.userInfo, jdbcType=VARCHAR}),'%')
+                or (s.USER_NAME  LIKE CONCAT(CONCAT('%', #{condition.userInfo, jdbcType=VARCHAR}),'%') )
+                or (s.USER_CODE  LIKE CONCAT(CONCAT('%', #{condition.userInfo, jdbcType=VARCHAR}),'%') ))
+            </if>
+
+            <if test="condition.userSts != null and condition.userSts != ''">
+                and s.USER_STS = #{condition.userSts , jdbcType=VARCHAR}
+            </if>
+            <if test="condition.deadline != null and condition.deadline != ''">
+                and s.deadline = #{condition.deadline , jdbcType=VARCHAR}
+            </if>
+            <if test="condition.orgId != null and condition.orgId != ''">
+                <choose>
+                    <when test="condition.orgId != null and condition.orgId =='500'">
+                        and (o.ORG_SEQ  LIKE (CONCAT(CONCAT('%', CONCAT(CONCAT(',',#{condition.orgId, jdbcType=VARCHAR}),',')),'%'))
+                        or s.org_id is null)
+                    </when>
+                    <otherwise>
+                        and o.ORG_SEQ  LIKE (CONCAT(CONCAT('%', CONCAT(CONCAT(',',#{condition.orgId, jdbcType=VARCHAR}),',')),'%'))
+                    </otherwise>
+                </choose>
+            </if>
+        </where>
+        <if test="sort != null">
+            order by ${sort}
+        </if>
+    </select>
+    <select id="loginCode" parameterType="java.lang.String" resultType="java.util.Map">
+        SELECT t.ORG_ID orgid,s.role_id roleid FROM ADMIN_SM_USER t INNER JOIN ADMIN_SM_USER_ROLE_REL s on
+        t.login_code=s.user_id
+        WHERE t.LOGIN_CODE=#{loginCode,jdbcType=VARCHAR} AND rownum=1
+    </select>
+</mapper>

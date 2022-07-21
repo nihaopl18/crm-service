@@ -1,0 +1,942 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.custpub.repository.mapper.OcrmFciAdmitBelongMapper">
+	
+	<!-- 查询当前登录所辖机构 -->
+	<select id="getOrglist" parameterType="String" resultType="java.util.Map">
+		select * from SYS_ORG_VIEW where  SYS_ORG_VIEW.ORG_SEQ like 
+		 CONCAT(CONCAT('%', #{orgCode, jdbcType=VARCHAR}),'%') 
+	</select>
+	
+	<!-- 查询当前登录所辖机构的客户经理角色人员 ad.ROLE_CODE需要指定客户经理的固定角色代码 -->
+	<select id="getMgrlist" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.Map">
+		SELECT a.org_level,t.org_id,a.org_name,t.user_id,t.user_name,t.login_code FROM ADMIN_SM_USER t
+		left join ADMIN_SM_USER_ROLE_REL sr on t.user_id = sr.user_id
+		left join ADMIN_SM_ROLE ad on ad.role_id = sr.role_id 
+		left join ADMIN_SM_ORG a on t.org_id = a.org_id 
+		where ad.ROLE_CODE  = '15' and t.USER_STS='A' 
+		and t.org_id in(select org_id from OCRM_F_CI_ADMIT_BELONG
+		 where cust_id = #{condition.custId, jdbcType=VARCHAR})
+	</select>
+	
+	<!-- 查询当前客户的机构（主办\协办） -->
+	<select id="qryOrgId" parameterType="String" resultType="java.util.Map">
+		select a.org_level,ad.* from OCRM_F_CI_ADMIT_BELONG ad left join ADMIN_SM_ORG a on ad.org_id = a.org_id 
+		where ad.cust_id=#{custId, jdbcType=VARCHAR}
+	</select>
+	
+	<!-- 查询当前客户经理（主办\协办） -->
+	<select id="qryMgrId" parameterType="String" resultType="java.util.Map">
+		select * from OCRM_F_CI_ADMIT_BELONG where  cust_id=#{custId, jdbcType=VARCHAR} and (MGR_TYPE＝'1' or MGR_TYPE＝'2')
+	</select>
+	
+	<!-- 查询分配调整历史 -->
+	<select id="qryBelongHis" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.Map">
+		SELECT M.SEQNO,M.CUST_ID,
+		M.ORG_ID_PRE,
+		M.ORG_NAME_PRE,
+		M.MGR_ID_PRE,
+		M.MGR_NAME_PRE,
+		M.MGR_TYPE_PRE,
+		M.ORG_ID,
+		M.ORG_NAME,
+		M.MGR_TYPE,
+		M.MGR_ID,
+		M.MGR_NAME,
+		M.ASSIGN_USER_NAME,
+		M.ASSIGN_USER_ID,
+		to_char(M.ASSIGN_DATE,'yyyy-mm-dd')assignDate,
+		M.ASSIGN_TYPE,
+		M.ASSIGN_STATUS,
+		M.CHANGE_REASON,
+        N.CUST_NAME
+		FROM OCRM_F_CI_BELONG_HIS_DATA M LEFT JOIN
+		ACRM_F_CI_PER_ADMIT_INFO N ON M.CUST_ID=N.CUST_ID
+        WHERE 1=1
+		<if test="condition.custId != null and condition.custId !=''">
+			and M.CUST_ID = #{condition.custId,jdbcType=VARCHAR}
+		</if>
+        <if test="condition.seqno != null and condition.seqno !=''">
+            AND M.SEQNO= #{condition.seqno, jdbcType=VARCHAR}
+        </if>
+		<if test="condition.assignType != null and condition.assignType !=''">
+			and M.ASSIGN_TYPE = #{condition.assignType,jdbcType=VARCHAR}
+		</if>
+
+       AND M.ASSIGN_STATUS='04'
+        ORDER BY M.ASSIGN_DATE
+<!--
+
+
+		SELECT n.cust_name,
+           m.last_update_sys,
+           m.last_update_user,
+           to_char(m.LAST_UPDATE_TM, 'yyyy-mm-dd hh24:mi:ss'),
+           m.last_update_org,
+           m.corp_org_code,
+           m.cust_id,
+           m.org_type,
+           m.org_type_pre,
+           m.org_id,
+           m.org_id_pre,
+           m.org_name,
+           m.org_name_pre,
+           m.mgr_type,
+           m.mgr_type_pre,
+           m.mgr_id,
+           m.mgr_id_pre,
+           m.mgr_name,
+           m.mgr_name_pre,
+           m.assign_user,
+           m.assign_date,
+           m.work_tran_reason,
+           m.work_tran_level,
+           m.work_tran_date,
+           p.user_name,
+           b.org_name as lastname,
+		case
+		when m.TYPE='01' then '分配'
+		when m.TYPE='02' then '调整'
+		else ''
+		end TYPE
+		FROM
+		    OCRM_F_CI_BELONG_HIS m
+		LEFT JOIN
+		    ACRM_F_CI_CUST_ALL n
+		ON
+		    m.cust_id=n.cust_id
+		LEFT JOIN
+		    ADMIN_SM_USER p
+		ON
+		    p.login_code=m.ASSIGN_USER
+		LEFT JOIN
+		    ADMIN_SM_ORG b
+		ON
+		    m.last_update_org=b.org_code
+	    where 
+		<if test="1==1">
+		 1=1 
+		 &lt;!&ndash; and n.IS_ADMIT_ENTER='1' &ndash;&gt;
+		</if>
+		<if test="condition.orgIdAuth =='500'">
+		</if>
+		<if test="condition.orgIdAuth !='500'">
+		 and (m.org_id IN (SELECT REGEXP_SUBSTR(#{condition.orgIdAuth, jdbcType = VARCHAR}, '[^,]+', 1, LEVEL, 'i') AS STR FROM DUAL CONNECT BY LEVEL &lt;= LENGTH(#{condition.orgIdAuth, jdbcType = VARCHAR}) - LENGTH(REGEXP_REPLACE(#{condition.orgIdAuth, jdbcType = VARCHAR}, ',', '')) + 1) or
+   m.org_id_pre IN (SELECT REGEXP_SUBSTR(#{condition.orgIdAuth, jdbcType = VARCHAR}, '[^,]+', 1, LEVEL, 'i') AS STR FROM DUAL CONNECT BY LEVEL &lt;= LENGTH(#{condition.orgIdAuth, jdbcType = VARCHAR}) - LENGTH(REGEXP_REPLACE(#{condition.orgIdAuth, jdbcType = VARCHAR}, ',', '')) + 1))
+		</if>
+		<if test="condition.workTranLevel != null and condition.workTranLevel !=''">
+			and m.work_tran_level like #{condition.workTranLevel,jdbcType=VARCHAR}
+		</if> 
+		<if test="condition.id != null and condition.id !=''">
+			and m.cust_id = #{condition.id,jdbcType=VARCHAR}
+		</if>
+		&lt;!&ndash;<if test="condition.custId != null and condition.custId !=''">
+			and m.cust_id like #{condition.custId,jdbcType=VARCHAR}
+		</if>
+		<if test="condition.custName != null and condition.custName !=''">
+			and n.cust_name like #{condition.custName,jdbcType=VARCHAR}
+		</if>
+		<if test="condition.beginDate != null and condition.beginDate !=''">
+				  and to_char(m.ASSIGN_DATE,'yyyy-MM-dd') &gt;= #{condition.beginDate}
+		</if>
+		<if test="condition.endDate != null and condition.endDate !=''">
+				  and to_char(m.ASSIGN_DATE,'yyyy-MM-dd') &lt;= #{condition.endDate}
+		</if>&ndash;&gt;
+		<if test="condition.mgrType != null and condition.mgrType !=''">
+			AND CC.MGR_TYPE= #{condition.mgrType, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.figureCode != null and condition.figureCode !=''">
+			AND P.APLIT_JOINT  LIKE '%|${condition.figureCode}|%'
+		</if>
+		<if test="condition.characterCode != null and condition.characterCode !=''">
+			AND P.APLIT_JOINT LIKE '%${condition.characterCode}%'
+		</if>-->
+	</select>
+
+	<select id="qrybelonglist" parameterType="java.util.Map" resultType="java.util.Map">
+		SELECT DISTINCT S.CUST_ID,
+		S.ORG_ID,
+		S.ORG_NAME,
+		S.MGR_TYPE,
+		S.MGR_ID,
+		S.MGR_NAME,
+		case when N.CUST_NAME is null then N.ENGLISH_NAME else N.CUST_NAME end CUST_NAME,
+		PJ.AUM_GRADE,
+		PJ.STATUS,
+		CC.ASSIGN_STATUS,
+		CC.SEQNO,
+		CC.ASSIGN_DATE,
+		CC.MGR_NAME trustmgrname,
+		CC.CHANGE_REASON,
+		CC.MGR_ID trustmgrid,
+		CC.ORG_ID trustorgid,
+		CC.ORG_NAME trustorgname,
+		CC.INSTANCE_ID instanceid,
+		PJ.INSTANCE_ID gradeinstanceid,
+		CC.ASSIGN_USER_NAME,
+		CC.ASSIGN_USER_ID,
+		PJ.ID id
+		FROM ACRM_F_CI_PER_ADMIT_INFO N
+		LEFT JOIN OCRM_F_CI_ADMIT_BELONG S ON S.CUST_ID=N.CUST_ID
+		<if test="mgrId != null and mgrId !=''">
+			AND S.MGR_ID= #{mgrId, jdbcType=VARCHAR}
+		</if>
+		AND length(S.MGR_ID)=8
+		LEFT JOIN v_app_cust_mod_grade_info PJ
+		ON PJ.ECIF_CUST_NO=N.CUST_ID
+		LEFT JOIN  (
+		select CUST_ID,SEQNO,ASSIGN_STATUS,MGR_ID,
+		ASSIGN_USER_NAME,ASSIGN_USER_ID,
+		ORG_ID,ORG_NAME,MGR_NAME,CHANGE_REASON,INSTANCE_ID,ASSIGN_DATE
+		,row_number() over(partition by CUST_ID order by ASSIGN_DATE desc) as rn
+		from OCRM_F_CI_BELONG_HIS_DATA WHERE ASSIGN_TYPE='02'
+		and ASSIGN_STATUS is not null ) CC
+		ON CC.CUST_ID = S.CUST_ID and CC.rn=1
+		WHERE 1=1
+		<if test="dataAuth != null and orgIdAuth =='500'">
+			<if test="mgrType != null and mgrType !=''">
+				AND S.MGR_TYPE= #{mgrType, jdbcType=VARCHAR}
+			</if>
+		</if>
+		<if test="dataAuth != null and orgIdAuth !='500'">
+			${dataAuth}
+		</if>
+		<if test="dataAuth == null">
+			<if test="mgrType != null and mgrType !=''">
+				AND S.MGR_TYPE= #{mgrType, jdbcType=VARCHAR}
+			</if>
+		</if>
+		<if test="figureCode != null and figureCode !=''">
+			AND N.APLIT_JOINT  LIKE   CONCAT(CONCAT(CONCAT(CONCAT('%','|'), #{figureCode, jdbcType=VARCHAR}),'|'),'%')
+		</if>
+		<if test="characterCode != null and characterCode !=''">
+			AND N.APLIT_JOINT  LIKE CONCAT(CONCAT('%', #{characterCode, jdbcType=VARCHAR}),'%')
+		</if>
+		ORDER BY CC.ASSIGN_STATUS,PJ.STATUS
+	</select>
+    <select id="qrybelonglistli" parameterType="java.util.Map" resultType="java.util.Map">
+		SELECT DISTINCT S.CUST_ID,
+		S.ORG_ID,
+		S.ORG_NAME,
+		S.MGR_TYPE,
+		S.MGR_ID,
+		S.MGR_NAME,
+		case when N.CUST_NAME is null then N.ENGLISH_NAME else N.CUST_NAME end CUST_NAME
+		FROM ACRM_F_CI_PER_ADMIT_INFO N
+		LEFT JOIN OCRM_F_CI_ADMIT_BELONG S ON S.CUST_ID=N.CUST_ID
+		<if test="mgrId != null and mgrId !=''">
+			AND S.MGR_ID= #{mgrId, jdbcType=VARCHAR}
+		</if>
+		<if test="mgrType != null and mgrType !=''">
+			AND S.MGR_TYPE= #{mgrType, jdbcType=VARCHAR}
+		</if>
+		<if test="assignType != null and assignType =='01'">
+			<choose>
+				<when test="orgId != null and orgId =='500'">
+					AND (length(S.MGR_ID)=4 or S.MGR_ID='500')
+				</when>
+				<otherwise>
+					AND length(S.MGR_ID)=4 and S.MGR_ID like '${orgId}%'
+				</otherwise>
+			</choose>
+		</if>
+		<if test="assignType != null and assignType =='02'">
+			AND length(S.MGR_ID)=8
+		</if>
+		WHERE 1=1
+		<if test="dataAuth != null and orgIdAuth =='500'">
+			<if test="mgrType != null and mgrType !=''">
+				AND S.MGR_TYPE= #{mgrType, jdbcType=VARCHAR}
+			</if>
+		</if>
+		<if test="dataAuth != null and orgIdAuth !='500'">
+			${dataAuth}
+		</if>
+		<if test="dataAuth == null">
+			<if test="mgrType != null and mgrType !=''">
+				AND S.MGR_TYPE= #{mgrType, jdbcType=VARCHAR}
+			</if>
+		</if>
+		<if test="figureCode != null and figureCode !=''">
+			AND N.APLIT_JOINT  LIKE   CONCAT(CONCAT(CONCAT(CONCAT('%','|'), #{figureCode, jdbcType=VARCHAR}),'|'),'%')
+		</if>
+		<if test="characterCode != null and characterCode !=''">
+			AND N.APLIT_JOINT  LIKE CONCAT(CONCAT('%', #{characterCode, jdbcType=VARCHAR}),'%')
+		</if>
+		AND S.CUST_ID NOT IN (SELECT CUST_ID FROM OCRM_F_CI_BELONG_HIS_DATA WHERE
+		ASSIGN_TYPE=#{assignType,jdbcType=VARCHAR}
+		AND ASSIGN_STATUS in ('01','03','05','02')
+		)
+		ORDER BY S.CUST_ID
+   </select>
+	<select id="qrybelonglistlis" parameterType="java.util.Map" resultType="java.util.Map">
+		SELECT DISTINCT S.CUST_ID,
+		S.ORG_ID,
+		S.ORG_NAME,
+		S.MGR_TYPE,
+		S.MGR_ID,
+		S.MGR_NAME,
+		case when TT.CUST_NAME is null then TT.ENGLISH_NAME else TT.CUST_NAME end CUST_NAME,
+		N.ASSIGN_STATUS,
+		N.SEQNO,
+		N.ASSIGN_DATE,
+		N.MGR_NAME trustmgrname,
+		N.CHANGE_REASON,
+		N.MGR_ID trustmgrid,
+		N.ORG_ID trustorgid,
+		N.ORG_NAME trustorgname,
+		N.INSTANCE_ID instanceid,
+		N.ASSIGN_USER_NAME,
+		N.ASSIGN_USER_ID
+		FROM OCRM_F_CI_BELONG_HIS_DATA N INNER JOIN OCRM_F_CI_ADMIT_BELONG S
+		ON  N.CUST_ID=S.CUST_ID
+		<if test="mgrId != null and mgrId !=''">
+			AND S.MGR_ID= #{mgrId, jdbcType=VARCHAR}
+		</if>
+		<if test="mgrType != null and mgrType !=''">
+			AND S.MGR_TYPE= #{mgrType, jdbcType=VARCHAR}
+		</if>
+		<if test="assignType != null and assignType =='01'">
+			<choose>
+				<when test="orgId != null and orgId =='500'">
+					AND (length(S.MGR_ID)=4 or S.MGR_ID='500')
+				</when>
+				<otherwise>
+					AND length(S.MGR_ID)=4 and S.MGR_ID like '${orgId}%'
+				</otherwise>
+			</choose>
+		</if>
+		<if test="assignType != null and assignType =='02'">
+			AND length(S.MGR_ID)=8
+		</if>
+			LEFT JOIN ACRM_F_CI_PER_ADMIT_INFO TT ON
+			S.CUST_ID=TT.CUST_ID
+		WHERE 1=1
+		<choose>
+			<when test="assignStatus != null and assignStatus !=''">
+				AND N.ASSIGN_STATUS=#{assignStatus,jdbcType=VARCHAR}
+			</when>
+			<otherwise>
+				AND N.ASSIGN_STATUS in ('01','03','04','05','02')
+			</otherwise>
+		</choose>
+		and N.ASSIGN_TYPE=#{assignType,jdbcType=VARCHAR}
+		<if test="figureCode != null and figureCode !=''">
+			AND TT.APLIT_JOINT  LIKE   CONCAT(CONCAT(CONCAT(CONCAT('%','|'), #{figureCode, jdbcType=VARCHAR}),'|'),'%')
+		</if>
+		<if test="characterCode != null and characterCode !=''">
+			AND TT.APLIT_JOINT  LIKE CONCAT(CONCAT('%', #{characterCode, jdbcType=VARCHAR}),'%')
+		</if>
+	</select>
+	<select id="qrybelonglistStringl" parameterType="java.util.Map" resultType="java.util.Map">
+		SELECT DISTINCT S.CUST_ID custid,S.MGR_ID mgrid,S.MGR_NAME mgrname,S.ORG_ID orgid,
+		S.ORG_NAME orgname,CC.SEQNO seqno
+		FROM ACRM_F_CI_PER_ADMIT_INFO N
+		LEFT JOIN OCRM_F_CI_ADMIT_BELONG S ON S.CUST_ID=N.CUST_ID
+		<if test="mgrId != null and mgrId !=''">
+			AND S.MGR_ID= #{mgrId, jdbcType=VARCHAR}
+		</if>
+		<if test="assignType != null and assignType =='01'">
+			<choose>
+				<when test="_orgCode != null and _orgCode =='500'">
+					AND (length(S.MGR_ID)=4 or S.MGR_ID='500')
+				</when>
+				<otherwise>
+					AND length(S.MGR_ID)=4 and S.MGR_ID like '${_orgCode}%'
+				</otherwise>
+			</choose>
+		</if>
+		<if test="assignType != null and assignType =='02'">
+			AND length(S.MGR_ID)=8
+		</if>
+		<if test="figureCode != null and figureCode !=''">
+			AND S.CUST_ID =#{figureCode, jdbcType=VARCHAR}
+		</if>
+		LEFT JOIN (select CUST_ID,
+		SEQNO,
+		row_number() over(partition by CUST_ID order by ASSIGN_DATE desc) as rn
+		from OCRM_F_CI_BELONG_HIS_DATA
+		WHERE 1=1
+		<if test="assignType != null and assignType !=''">
+			and ASSIGN_TYPE=#{assignType,jdbcType=VARCHAR}
+		</if>
+		and ASSIGN_STATUS is not null
+		) CC
+		ON CC.CUST_ID = S.CUST_ID
+		and CC.rn = 1
+		WHERE 1=1
+        <if test="assignType != null and assignType =='02'">
+            <if test="dataAuth != null and orgIdAuth =='500'">
+            </if>
+            <if test="dataAuth != null and orgIdAuth !='500'">
+                ${dataAuth}
+            </if>
+            <if test="dataAuth == null">
+            </if>
+        </if>
+		<if test="characterCode != null and characterCode !=''">
+			AND N.CUST_NAME  LIKE CONCAT(CONCAT('%', #{characterCode, jdbcType=VARCHAR}),'%')
+		</if>
+            <if test="mgrType != null and mgrType !=''">
+                AND S.MGR_TYPE= #{mgrType, jdbcType=VARCHAR}
+            </if>
+    </select>
+
+	<select id="qrybelonglistString" parameterType="java.util.Map" resultType="java.util.Map">
+		SELECT DISTINCT S.CUST_ID custid,S.MGR_ID mgrid,S.MGR_NAME mgrname,S.ORG_ID orgid,
+		S.ORG_NAME orgname
+		FROM ACRM_F_CI_PER_ADMIT_INFO N
+		LEFT JOIN OCRM_F_CI_ADMIT_BELONG S ON S.CUST_ID=N.CUST_ID
+		<if test="mgrId != null and mgrId !=''">
+			AND S.MGR_ID= #{mgrId, jdbcType=VARCHAR}
+		</if>
+		<if test="assignType != null and assignType =='01'">
+			<choose>
+				<when test="_orgCode != null and _orgCode =='500'">
+					AND (length(S.MGR_ID)=4 or S.MGR_ID='500')
+				</when>
+				<otherwise>
+					AND length(S.MGR_ID)=4 and S.MGR_ID like '${_orgCode}%'
+				</otherwise>
+			</choose>
+		</if>
+		<if test="assignType != null and assignType =='02'">
+			AND length(S.MGR_ID)=8
+		</if>
+		<if test="figureCode != null and figureCode !=''">
+			AND S.CUST_ID =#{figureCode, jdbcType=VARCHAR}
+		</if>
+		WHERE 1=1
+        <if test="assignType != null and assignType =='02'">
+            <if test="dataAuth != null and orgIdAuth =='500'">
+            </if>
+            <if test="dataAuth != null and orgIdAuth !='500'">
+                ${dataAuth}
+            </if>
+            <if test="dataAuth == null">
+            </if>
+        </if>
+		<if test="characterCode != null and characterCode !=''">
+			AND N.CUST_NAME  LIKE CONCAT(CONCAT('%', #{characterCode, jdbcType=VARCHAR}),'%')
+		</if>
+        <if test="mgrType != null and mgrType !=''">
+            AND S.MGR_TYPE= #{mgrType, jdbcType=VARCHAR}
+        </if>
+		AND S.CUST_ID NOT IN (SELECT CUST_ID FROM OCRM_F_CI_BELONG_HIS_DATA WHERE
+		ASSIGN_TYPE=#{assignType,jdbcType=VARCHAR}
+		AND ASSIGN_STATUS in ('01','03','05','02')
+		)
+	</select>
+	<select id="qrybelonglistStringS" parameterType="java.util.Map" resultType="java.util.Map">
+		SELECT N.SEQNO seqno, S.CUST_ID custid,
+		S.MGR_ID mgrid,S.MGR_NAME mgrname,S.ORG_ID orgid,S.ORG_NAME orgname
+		FROM OCRM_F_CI_BELONG_HIS_DATA N INNER JOIN OCRM_F_CI_ADMIT_BELONG S
+		ON  N.CUST_ID=S.CUST_ID
+		<if test="mgrId != null and mgrId !=''">
+			AND S.MGR_ID= #{mgrId, jdbcType=VARCHAR}
+		</if>
+		<if test="assignType != null and assignType =='01'">
+			<choose>
+				<when test="_orgCode != null and _orgCode =='500'">
+					AND (length(S.MGR_ID)=4 or S.MGR_ID='500')
+				</when>
+				<otherwise>
+					AND length(S.MGR_ID)=4 and S.MGR_ID like '${_orgCode}%'
+				</otherwise>
+			</choose>
+		</if>
+		<if test="assignType != null and assignType =='02'">
+			AND length(S.MGR_ID)=8
+		</if>
+		<if test="figureCode != null and figureCode !=''">
+			AND S.CUST_ID =#{figureCode, jdbcType=VARCHAR}
+		</if>
+		<if test="characterCode != null and characterCode !=''">
+			INNER JOIN ACRM_F_CI_PER_ADMIT_INFO TT ON
+			S.CUST_ID=TT.CUST_ID
+			AND TT.CUST_NAME  LIKE CONCAT(CONCAT('%', #{characterCode, jdbcType=VARCHAR}),'%')
+		</if>
+		WHERE 1=1
+		<choose>
+			<when test="assignStatus != null and assignStatus !=''">
+				AND N.ASSIGN_STATUS=#{assignStatus,jdbcType=VARCHAR}
+			</when>
+			<otherwise>
+				AND N.ASSIGN_STATUS in ('01','03','04','05')
+			</otherwise>
+		</choose>
+        <if test="mgrType != null and mgrType !=''">
+            AND N.MGR_TYPE= #{mgrType, jdbcType=VARCHAR}
+        </if>
+		and N.ASSIGN_TYPE=#{assignType,jdbcType=VARCHAR}
+	</select>
+	<select id="qrybelonglistlist" parameterType="java.util.Map" resultType="java.util.Map">
+		SELECT DISTINCT S.CUST_ID,
+		S.ORG_ID,
+		S.ORG_NAME,
+		S.MGR_TYPE,
+		S.MGR_ID,
+		S.MGR_NAME,
+		case when N.CUST_NAME is null then N.ENGLISH_NAME else N.CUST_NAME end CUST_NAME,
+		CC.ASSIGN_STATUS,
+		CC.SEQNO,
+		CC.ASSIGN_DATE,
+		CC.MGR_NAME trustmgrname,
+		CC.CHANGE_REASON,
+        CC.MGR_ID trustmgrid,
+		CC.ORG_ID trustorgid,
+		CC.ORG_NAME trustorgname,
+		CC.INSTANCE_ID instanceid,
+		CC.ASSIGN_USER_NAME,
+		CC.ASSIGN_USER_ID
+		FROM ACRM_F_CI_PER_ADMIT_INFO N
+		LEFT JOIN OCRM_F_CI_ADMIT_BELONG S ON S.CUST_ID=N.CUST_ID
+		<if test="figureCode != null and figureCode !=''">
+			AND S.CUST_ID =#{figureCode, jdbcType=VARCHAR}
+		</if>
+		<if test="mgrId != null and mgrId !=''">
+			AND S.MGR_ID= #{mgrId, jdbcType=VARCHAR}
+		</if>
+		LEFT JOIN  (
+		select CUST_ID,SEQNO,ASSIGN_STATUS,MGR_ID,
+		ASSIGN_USER_ID,ASSIGN_USER_NAME,
+		ORG_ID,ORG_NAME,MGR_NAME,CHANGE_REASON,INSTANCE_ID,ASSIGN_DATE
+		,row_number() over(partition by CUST_ID order by ASSIGN_DATE desc) as rn
+		from OCRM_F_CI_BELONG_HIS_DATA WHERE ASSIGN_TYPE='01' AND ASSIGN_STATUS !='04'
+		) CC
+		ON S.CUST_ID=CC.CUST_ID and CC.rn=1
+		WHERE 1=1
+		<choose>
+			<when test="orgId != null and orgId =='500'">
+				AND (length(S.MGR_ID)=4 or S.MGR_ID='500')
+			</when>
+			<otherwise>
+				AND length(S.MGR_ID)=4 and S.MGR_ID like '${orgId}%'
+			</otherwise>
+		</choose>
+		<if test="characterCode != null and characterCode !=''">
+			AND N.CUST_NAME  LIKE CONCAT(CONCAT('%', #{characterCode, jdbcType=VARCHAR}),'%')
+		</if>
+		<if test="mgrType != null and mgrType !=''">
+			AND S.MGR_TYPE= #{mgrType, jdbcType=VARCHAR}
+		</if>
+		ORDER BY CC.ASSIGN_STATUS
+	</select>
+	<delete id="deleteByCustId" parameterType="java.util.Map" >
+	    delete from OCRM_F_CI_ADMIT_BELONG where cust_id=#{custId, jdbcType=VARCHAR} and org_type='2'
+	</delete>
+	
+	<delete id="deletemgrByCustId" parameterType="java.util.Map" >
+	    delete from OCRM_F_CI_ADMIT_BELONG where cust_id=#{custId, jdbcType=VARCHAR} and MGR_TYPE='2'
+	</delete>
+	<delete id="deletemgrByCustId1" parameterType="java.util.Map" >
+	    delete from OCRM_F_CI_ADMIT_BELONG where cust_id=#{custId, jdbcType=VARCHAR} and MGR_TYPE='2' and mgr_id=#{mgrId, jdbcType=VARCHAR}
+	</delete>
+	
+	<update id="updateByCustid" parameterType="cn.com.yusys.yscrm.custpub.domain.OcrmFciAdmitBelong" >
+		UPDATE OCRM_F_CI_ADMIT_BELONG SET LAST_UPDATE_ORG =#{lastUpdateOrg, jdbcType=VARCHAR},MGR_TYPE =#{mgrType, jdbcType=VARCHAR},MGR_ID =#{mgrId, jdbcType=VARCHAR},MGR_NAME =#{mgrName, jdbcType=VARCHAR} WHERE CUST_ID =#{custId, jdbcType=VARCHAR} AND MGR_TYPE = '1' 
+	</update>
+	
+	<update id="updateOrgByCustid" parameterType="cn.com.yusys.yscrm.custpub.domain.OcrmFciAdmitBelong" >
+		UPDATE OCRM_F_CI_ADMIT_BELONG SET LAST_UPDATE_ORG =#{lastUpdateOrg, jdbcType=VARCHAR},ORG_TYPE =#{orgType, jdbcType=VARCHAR},ORG_ID =#{orgId, jdbcType=VARCHAR},ORG_NAME =#{orgName, jdbcType=VARCHAR},MGR_ID =#{mgrId, jdbcType=VARCHAR},MGR_NAME =#{mgrName, jdbcType=VARCHAR} WHERE CUST_ID =#{custId, jdbcType=VARCHAR} AND ORG_TYPE = '1' 
+	</update>
+	<update id="updateHost" parameterType="String" >
+		UPDATE OCRM_F_CI_ADMIT_BELONG SET ORG_TYPE ='2',MGR_TYPE = '2' WHERE CUST_ID =#{custId, jdbcType=VARCHAR} AND ORG_ID = #{orgId, jdbcType=VARCHAR} AND MGR_ID = #{mgrId, jdbcType=VARCHAR}
+	</update>
+	<!-- 查询客户归属信息通过用户ID，客户经理ID，机构ID -->
+	<select id="getBelongByCustIdAndMgrIdAndOrgId" parameterType="java.util.Map" resultType="cn.com.yusys.yscrm.custpub.domain.OcrmFciAdmitBelong">
+		select * from OCRM_F_CI_ADMIT_BELONG where  CUST_ID =#{custId, jdbcType=VARCHAR} AND ORG_ID = #{institution, jdbcType=VARCHAR} AND MGR_ID = #{userId, jdbcType=VARCHAR}
+	</select>
+	
+	<delete id="delBelongByCustIdMgrIdOrgId" parameterType="java.util.Map" >
+	    delete from OCRM_F_CI_ADMIT_BELONG where cust_id=#{custId, jdbcType=VARCHAR} and MGR_ID=#{mgrId, jdbcType=VARCHAR} and ORG_ID=#{orgId, jdbcType=VARCHAR}
+	</delete>
+	
+	<select id="getUpMgrlist" parameterType="String" resultType="java.util.Map">
+		SELECT a.org_level,a.org_id,a.org_name,t.* FROM ADMIN_SM_USER t
+		  left join ADMIN_SM_USER_ROLE_REL sr on t.user_id = sr.user_id
+		  left join ADMIN_SM_ROLE ad on ad.role_id = sr.role_id 
+		  left join ADMIN_SM_ORG a on ad.org_id = a.org_id 
+		  where ad.ROLE_CODE  = '15' and t.USER_STS='A' 
+		  and t.org_id in(select ORG_ID from ADMIN_SM_ORG start with ORG_id =#{orgCode, jdbcType=VARCHAR} connect by prior UP_ORG_ID = ORG_ID)
+	</select>
+	<!-- 查询非准入客户归属表里客户归属信息 -->
+	<select id="getNoAdminBelong" parameterType="String" resultType="java.util.Map">
+		select * from OCRM_F_CI_ADMIT_BELONG where  CUST_ID = #{custId, jdbcType=VARCHAR}
+	</select>
+	<!-- 查询准入客户主办机构 -->
+	<select id="getBelongOrgIdByCustId" parameterType="String" resultType="String">
+		<!-- select BELONG_BRCH from ACRM_F_CI_CUST_ADMIT_ALL where  CUST_ID = #{custId, jdbcType=VARCHAR} -->
+		select BELONG_BRCH from ACRM_F_CI_CUST_ALL where  CUST_ID = #{custId, jdbcType=VARCHAR}
+	</select>
+	<delete id="deleteByCustIdAndMgrId" parameterType="java.util.Map">
+		delete  from OCRM_F_CI_ADMIT_BELONG where  CUST_ID = #{custId, jdbcType=VARCHAR} AND MGR_ID = #{tMgrId, jdbcType=VARCHAR}
+	</delete>
+	<!-- <delete id="updateMgrType" parameterType="java.util.Map">
+		update OCRM_F_CI_ADMIT_BELONG set MGR_ty where  CUST_ID = #{custId, jdbcType=VARCHAR} AND MGR_ID = #{tMgrId, jdbcType=VARCHAR}
+	</delete> -->
+	<update id="updMainOrgTypeByOrgId" parameterType="java.util.Map">
+	UPDATE OCRM_F_CI_ADMIT_BELONG SET ORG_TYPE = '1' WHERE CUST_ID = #{custId, jdbcType=VARCHAR} AND  ORG_ID = #{institution, jdbcType=VARCHAR}
+	</update>
+	<update id="updAssistOrgTypeByOrgId" parameterType="java.util.Map">
+	UPDATE OCRM_F_CI_ADMIT_BELONG SET ORG_TYPE = '2' WHERE CUST_ID = #{custId, jdbcType=VARCHAR} AND  ORG_ID = #{institution, jdbcType=VARCHAR}
+	</update>
+	<update id="updateOrgType" parameterType="java.util.Map">
+	UPDATE OCRM_F_CI_ADMIT_BELONG SET ORG_TYPE = #{orgType, jdbcType=VARCHAR} WHERE CUST_ID = #{custId, jdbcType=VARCHAR} AND  ORG_ID = #{orgId, jdbcType=VARCHAR}
+	</update>
+	<update id="updatebelong" parameterType="cn.com.yusys.yscrm.custpub.domain.CrmFCiBelongHisData">
+		UPDATE OCRM_F_CI_BELONG_HIS_DATA SET ASSIGN_STATUS=#{assignStatus, jdbcType=VARCHAR}
+		<if test="assignDate != null">
+			,ASSIGN_DATE=#{assignDate, jdbcType=DATE}
+		</if>
+		<if test="instanceId != null and instanceId !=''">
+			,INSTANCE_ID=#{instanceId, jdbcType=VARCHAR}
+		</if>
+		WHERE SEQNO=#{seqno, jdbcType=VARCHAR} and ASSIGN_TYPE=#{assignType, jdbcType=VARCHAR}
+	</update>
+	<insert id="inserthisData" parameterType="java.util.List">
+		insert ALL
+		<foreach collection="list" item="item" index="index" separator="">
+			into OCRM_F_CI_BELONG_HIS_DATA (
+			SEQNO,
+			CUST_ID,
+			ORG_ID_PRE,
+			ORG_NAME_PRE,
+			MGR_ID_PRE,
+			MGR_NAME_PRE,
+			MGR_TYPE_PRE,
+			ORG_ID,
+			ORG_NAME,
+			MGR_TYPE,
+			MGR_ID,
+			MGR_NAME,
+			ASSIGN_USER_NAME,
+			ASSIGN_USER_ID,
+			ASSIGN_DATE,
+			ASSIGN_TYPE,
+			ASSIGN_STATUS,
+			CHANGE_REASON
+			) VALUES
+			(
+			#{item.seqno,jdbcType=VARCHAR},
+			#{item.custId,jdbcType=VARCHAR},
+			#{item.orgIdPre,jdbcType=VARCHAR},
+			#{item.orgNamePre,jdbcType=VARCHAR},
+			#{item.mgrIdPre,jdbcType=VARCHAR},
+			#{item.mgrNamePre,jdbcType=DATE},
+			#{item.mgrTypePre,jdbcType=DATE},
+			#{item.orgId,jdbcType=VARCHAR},
+			#{item.orgName,jdbcType=VARCHAR},
+			#{item.mgrType,jdbcType=VARCHAR},
+			#{item.mgrId,jdbcType=VARCHAR},
+			#{item.mgrName,jdbcType=VARCHAR},
+			#{item.assignUserName,jdbcType=VARCHAR},
+			#{item.assignUserId,jdbcType=VARCHAR},
+			#{item.assignDate,jdbcType=VARCHAR},
+			#{item.assignType,jdbcType=VARCHAR},
+			#{item.assignStatus,jdbcType=VARCHAR},
+			#{item.changeReason,jdbcType=VARCHAR}
+			)
+		</foreach>
+		SELECT 1 FROM DUAL
+	</insert>
+
+	<insert id="insertaumGrade" parameterType="java.util.Map">
+		insert into OCRM_F_CG_CUST_MANU_GRD
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null and id !=''">
+                ID,
+            </if>
+			<if test="custId != null and custId !=''">
+				ECIF_CUST_NO,
+			</if>
+			<if test="befModGrade != null and befModGrade !=''">
+				BEF_MOD_GRADE,
+			</if>
+			<if test="aftModGrade != null and aftModGrade !=''">
+				AFT_MOD_GRADE,
+			</if>
+			<if test="modGraValidFlag != null and modGraValidFlag !=''">
+				MOD_GRA_VALID_FLAG,
+			</if>
+			<if test="creUserId != null and creUserId !=''">
+				CRE_USER_ID,
+			</if>
+			<if test="status != null and status !=''">
+				STATUS,
+			</if>
+			<if test="expiredDate != null and expiredDate !=''">
+				EXPIRED_DATE,
+			</if>
+			<if test="effectDate != null and effectDate !=''">
+				EFFECT_DATE
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null and id !=''">
+                #{id,jdbcType=VARCHAR},
+            </if>
+            <if test="custId != null and custId !=''">
+				#{custId,jdbcType=VARCHAR},
+			</if>
+			<if test="befModGrade != null and befModGrade !=''">
+				#{befModGrade,jdbcType=VARCHAR},
+			</if>
+			<if test="aftModGrade != null and aftModGrade !=''">
+				#{aftModGrade,jdbcType=VARCHAR},
+			</if>
+			<if test="modGraValidFlag != null and modGraValidFlag !=''">
+				#{modGraValidFlag,jdbcType=VARCHAR},
+			</if>
+			<if test="creUserId != null and creUserId !=''">
+				#{creUserId,jdbcType=VARCHAR},
+			</if>
+			<if test="status != null and status !=''">
+				#{status,jdbcType=VARCHAR},
+			</if>
+			<if test="expiredDate != null and expiredDate !=''">
+				#{expiredDate,jdbcType=VARCHAR},
+			</if>
+			<if test="effectDate != null and effectDate !=''">
+				#{effectDate,jdbcType=VARCHAR}
+			</if>
+		</trim>
+	</insert>
+	<select id="checkUpNameId" parameterType="String" resultType="int" >
+		select  count(*) from OCRM_F_CG_CUST_MANU_GRD b
+		where 1=1
+			and b.ID = #{id, jdbcType=VARCHAR}
+	</select>
+	<update id="updateaumGradeGrade" parameterType="java.util.Map">
+		UPDATE OCRM_F_CG_CUST_MANU_GRD SET
+		ID=#{id, jdbcType=VARCHAR}
+		<if test="status != null and status !=''">
+			,STATUS=#{status, jdbcType=VARCHAR}
+		</if>
+		<if test="custId != null and custId !=''">
+			,ECIF_CUST_NO=#{custId,jdbcType=VARCHAR}
+		</if>
+		<if test="modGraValidFlag != null and modGraValidFlag !=''">
+			,MOD_GRA_VALID_FLAG=#{modGraValidFlag,jdbcType=VARCHAR}
+		</if>
+		<if test="examUserId != null and examUserId !=''">
+			,EXAM_USER_ID=#{examUserId, jdbcType=VARCHAR}
+		</if>
+		<if test="befModGrade != null and befModGrade !=''">
+			,BEF_MOD_GRADE=#{befModGrade,jdbcType=VARCHAR}
+		</if>
+		<if test="aftModGrade != null and aftModGrade !=''">
+			,AFT_MOD_GRADE=#{aftModGrade,jdbcType=VARCHAR}
+		</if>
+		<if test="creUserId != null and creUserId !=''">
+			,CRE_USER_ID=#{creUserId, jdbcType=VARCHAR}
+		</if>
+		<if test="effectDate != null and effectDate !=''">
+			,EFFECT_DATE=#{effectDate, jdbcType=VARCHAR}
+		</if>
+		<if test="instanceId != null and instanceId !=''">
+			,INSTANCE_ID=#{instanceId, jdbcType=VARCHAR}
+		</if>
+		<if test="examDt != null">
+			,EXAM_DT=#{examDt, jdbcType=DATE}
+		</if>
+		 WHERE ID=#{id, jdbcType=VARCHAR}
+
+	</update>
+	<update id="updatebelonghis" parameterType="java.util.Map">
+		UPDATE OCRM_F_CI_ADMIT_BELONG SET
+		ORG_ID=#{orgId,jdbcType=VARCHAR},
+		ORG_NAME=#{orgName,jdbcType=VARCHAR},
+		MGR_TYPE=#{mgrType,jdbcType=VARCHAR},
+		MGR_ID=#{mgrId,jdbcType=VARCHAR},
+		MGR_NAME=#{mgrName,jdbcType=VARCHAR}
+		WHERE 1=1
+		<if test="mgrTypePre != null and mgrTypePre !=''">
+			AND MGR_TYPE=#{mgrTypePre,jdbcType=VARCHAR}
+		</if>
+		AND CUST_ID in (SELECT M.CUST_ID FROM OCRM_F_CI_BELONG_HIS_DATA M LEFT JOIN
+		ACRM_F_CI_PER_ADMIT_INFO N ON M.CUST_ID=N.CUST_ID WHERE 1=1
+		AND M.SEQNO=#{seqno,jdbcType=VARCHAR}
+		)
+	</update>
+	<select id="selectById" parameterType="java.util.Map" resultType="java.util.Map">
+		select SEQNO seqno,CUST_ID custid,
+		MGR_ID_PRE mgrid,MGR_NAME_PRE mgrname,ORG_ID_PRE orgid,ORG_NAME_PRE orgname
+		from OCRM_F_CI_BELONG_HIS_DATA
+		where 1=1
+		and SEQNO ${strr}
+	</select>
+	<select id="selectCount" parameterType="java.util.Map" resultType="int">
+		SELECT COUNT(CUST_ID) FROM OCRM_F_CI_BELONG_HIS_DATA WHERE 1=1
+		AND SEQNO=#{seqno,jdbcType=VARCHAR} and ASSIGN_STATUS !='04'
+	</select>
+	<delete id="deleteByCustById" parameterType="java.util.Map">
+		delete  from OCRM_F_CI_BELONG_HIS_DATA b where 1=1
+		and b.SEQNO ${strt}
+		<if test="custid != null and custid !=''">
+			and b.CUST_ID=#{custid, jdbcType=VARCHAR}
+		</if>
+		and b.ASSIGN_STATUS !='04'
+	</delete>
+	<delete id="deleteByCustByIdl" parameterType="java.util.Map">
+		delete  from OCRM_F_CI_BELONG_HIS_DATA b where 1=1
+		and b.SEQNO =#{seqno, jdbcType=VARCHAR}
+		<if test="custid != null and custid !=''">
+			and b.CUST_ID=#{custid, jdbcType=VARCHAR}
+		</if>
+		and b.ASSIGN_STATUS !='04'
+	</delete>
+	<delete id="deleteByinse" parameterType="java.util.Map">
+		delete  from WF_INSTANCE_WHOLE_PROPERTY b WHERE b.BIZSEQNO=#{seqno, jdbcType=VARCHAR}
+	</delete>
+    <select id="selectmgrId" parameterType="String" resultType="String" >
+        select role_code from ADMIN_SM_ROLE where role_id=#{selectRole,jdbcType=VARCHAR}
+    </select>
+
+	<update id="updateFci" parameterType="cn.com.yusys.yscrm.custpub.domain.OcrmFciTrusteeshipApply">
+		UPDATE OCRM_F_CI_TRUSTEESHIP_APPLY SET TRUST_STAT=#{trustStat,jdbcType=VARCHAR}
+		<if test="instanceId != null and instanceId !=''">
+			,INSTANCE_ID=#{instanceId,jdbcType=VARCHAR}
+		</if>
+		WHERE APPLY_ID = #{applyId,jdbcType=INTEGER}
+	</update>
+	<update id="updateinformation" parameterType="java.util.Map">
+		UPDATE OCRM_F_CI_USER_INFORMATION SET STATUS=#{status,jdbcType=VARCHAR}
+		<if test="instanceId != null and instanceId !=''">
+			,INSTANCE_ID=#{instanceId,jdbcType=VARCHAR}
+		</if>
+		WHERE SEQNO=#{seqno,jdbcType=VARCHAR}
+	</update>
+	<update id="updateassets" parameterType="java.util.Map">
+		UPDATE OCRM_F_CI_USER_ASSETS SET STATUS=#{status,jdbcType=VARCHAR}
+		<if test="instanceId != null and instanceId !=''">
+			,INSTANCE_ID=#{instanceId,jdbcType=VARCHAR}
+		</if>
+		WHERE SEQNO=#{seqno,jdbcType=VARCHAR}
+	</update>
+	<select id="selectdata" parameterType="String" resultType="String">
+		select to_char(DEAD_LINE,'yyyy-mm-dd')DEAD_LINE from OCRM_F_CI_TRUSTEESHIP_APPLY where APPLY_ID=#{bizSeqNo,jdbcType=VARCHAR} and rownum=1
+	</select>
+	<select id="detailebelonghis" parameterType="String" resultType="java.util.Map">
+		select
+		t.SEQNO,
+		t.MGR_TYPE_PRE,
+		t.ORG_ID,
+		t.ORG_NAME,
+		t.MGR_TYPE,
+		t.MGR_ID,
+		t.MGR_NAME,
+		t.ASSIGN_USER_NAME,
+		t.ASSIGN_USER_ID,
+		t.ASSIGN_DATE,
+		t.ASSIGN_TYPE,
+		t.ASSIGN_STATUS,
+		t.CHANGE_REASON,
+        listagg(t.ORG_ID_PRE,',')within group (order by t.ORG_ID_PRE) orgIdPre,
+        listagg(t.ORG_NAME_PRE,',')within group (order by t.ORG_NAME_PRE) orgNamePre,
+		listagg(t.MGR_ID_PRE,',')within group (order by t.MGR_ID_PRE) mgrIdPre,
+		listagg(t.MGR_NAME_PRE,',')within group (order by t.MGR_NAME_PRE) mgrNamePre,
+		listagg(t.CUST_NAME,',')within group (order by t.CUST_NAME) custName,
+		listagg(t.CUST_ID,',')within group (order by t.CUST_ID) custId
+		from(
+		SELECT M.SEQNO,M.CUST_ID,
+		M.ORG_ID_PRE,
+		M.ORG_NAME_PRE,
+		M.MGR_ID_PRE,
+		M.MGR_NAME_PRE,
+		M.MGR_TYPE_PRE,
+		M.ORG_ID,
+		M.ORG_NAME,
+		M.MGR_TYPE,
+		M.MGR_ID,
+		M.MGR_NAME,
+		M.ASSIGN_USER_NAME,
+		M.ASSIGN_USER_ID,
+		M.ASSIGN_DATE,
+		M.ASSIGN_TYPE,
+		M.ASSIGN_STATUS,
+		M.CHANGE_REASON,
+		N.CUST_NAME
+		FROM OCRM_F_CI_BELONG_HIS_DATA M LEFT JOIN
+		ACRM_F_CI_PER_ADMIT_INFO N ON M.CUST_ID=N.CUST_ID
+		WHERE 1=1
+		AND M.SEQNO=#{seqno,jdbcType=VARCHAR} and rownum &lt; 101)t group by t.SEQNO,
+		t.MGR_TYPE_PRE,
+		t.ORG_ID,
+		t.ORG_NAME,
+		t.MGR_TYPE,
+		t.MGR_ID,
+		t.MGR_NAME,
+		t.ASSIGN_USER_NAME,
+		t.ASSIGN_USER_ID,
+		t.ASSIGN_DATE,
+		t.ASSIGN_TYPE,
+		t.ASSIGN_STATUS,
+		t.CHANGE_REASON
+	</select>
+	<select id="Gradelist" parameterType="String" resultType="java.util.Map">
+		SELECT  S.CUST_ID custid,
+		S.ORG_ID,
+		S.ORG_NAME,
+		S.MGR_TYPE,
+		S.MGR_ID,
+		S.MGR_NAME,
+		N.CUST_NAME custname,
+		PJ.AFT_MOD_GRADE aumGrade,
+		PJ.STATUS,
+		PJ.EXPIRED_DATE
+		FROM ACRM_F_CI_PER_ADMIT_INFO N
+		LEFT JOIN OCRM_F_CI_ADMIT_BELONG S ON S.CUST_ID=N.CUST_ID
+		LEFT JOIN OCRM_F_CG_CUST_MANU_GRD PJ
+		ON PJ.ECIF_CUST_NO=N.CUST_ID
+		WHERE 1=1
+		and PJ.ID=#{id,jdbcType=VARCHAR}
+		 and rownum=1
+	</select>
+	<select id="selectTeam" parameterType="String" resultType="String">
+		select MKT_TEAM_ID from OCRM_F_CM_TEAM_CUST_MANAGER where USER_ID=#{loginCode,jdbcType=VARCHAR} and rownum=1
+	</select>
+	<select id="selectgrade" parameterType="String" resultType="cn.com.yusys.yscrm.custpub.domain.AcrmCustVO">
+		SELECT EFFECT_DATE effectDate,
+		CASE WHEN AFT_MOD_GRADE='1' THEN '一般客户'
+		 WHEN AFT_MOD_GRADE='2' THEN '有效客户'
+		 WHEN AFT_MOD_GRADE='3' THEN '优慧客户'
+		 WHEN AFT_MOD_GRADE='4' THEN '显卓客户'
+		 WHEN AFT_MOD_GRADE='5' THEN '私行客户'
+		 WHEN AFT_MOD_GRADE='6' THEN '显卓钻石客户'
+		else '' end gradeName,
+		AFT_MOD_GRADE gradeNo,
+		ECIF_CUST_NO custId,
+		EXPIRED_DATE expiredDate
+		FROM OCRM_F_CG_CUST_MANU_GRD WHERE ID=#{id,jdbcType=VARCHAR} and rownum=1
+	</select>
+	<update id="updateGrade" parameterType="cn.com.yusys.yscrm.custpub.domain.AcrmCustVO">
+		UPDATE OCRM_F_CG_CUST_GRADE_INFO SET
+		AUM_GRADE=#{gradeNo,jdbcType=VARCHAR},
+		AUM_GRADE_DESC=#{gradeName,jdbcType=VARCHAR},
+		EFFECT_DATE=#{effectDate,jdbcType=VARCHAR},
+		EXPIRED_DATE=#{expiredDate,jdbcType=VARCHAR}
+		WHERE ECIF_CUST_NO=#{custId,jdbcType=VARCHAR}
+	</update>
+	<select id="selectmgr" parameterType="java.util.Map" resultType="java.util.Map">
+		SELECT  CUST_ID custid,
+		MGR_ID mgrid,MGR_NAME mgrname,ORG_ID orgid,ORG_NAME orgname
+	   FROM OCRM_F_CI_ADMIT_BELONG
+		where 1=1
+		and CUST_ID ${str}
+		<if test="mgrType != null and mgrType !=''">
+			and MGR_TYPE=#{mgrType,jdbcType=VARCHAR}
+		</if>
+	</select>
+	<update id="updateEsExportQuery" parameterType="java.util.Map">
+		UPDATE OCRM_F_ES_EXPORT_QUERY SET
+		SEQNO=#{seqno,jdbcType=VARCHAR}
+		<if test="instanceId != null and instanceId !=''">
+			,INSTANCE_ID=#{instanceId,jdbcType=VARCHAR}
+		</if>
+		<if test="status != null and status !=''">
+			,STATUS=#{status,jdbcType=VARCHAR}
+		</if>
+		WHERE SEQNO=#{seqno,jdbcType=VARCHAR}
+	</update>
+</mapper>

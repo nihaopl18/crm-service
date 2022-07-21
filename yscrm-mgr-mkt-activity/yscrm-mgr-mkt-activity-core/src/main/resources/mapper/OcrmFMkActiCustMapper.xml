@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.mktactivity.repository.mapper.OcrmFMkActiCustMapper">
+
+	<!-- 自增序列 -->
+	<select id="getSeq" resultType="BigDecimal">
+		SELECT mkt_seq.nextval FROM dual
+	</select>
+	<!-- 删除上次关联客户 -->
+	<delete id="lastCustDel" parameterType="cn.com.yusys.yscrm.mktactivity.domain.OcrmFMkActiCustInfo">
+		DELETE FROM OCRM_F_MK_ACTI_CUST WHERE ACTI_ID = #{actiId,jdbcType=DECIMAL}
+	</delete>
+	<!-- 查询关联产品的目标客户 -->
+	<select id="prodFitCustInfo" parameterType="java.util.Map" resultType="java.util.HashMap">
+		SELECT T2.CUST_NAME,T.CUST_ID,T1.ORG_ID,T1.ORG_NAME,T1.MGR_ID,T1.MGR_NAME,T2.CUST_STATUS FROM OCRM_F_PD_CUST_FIT_PROD T 
+        LEFT JOIN OCRM_F_CI_ADMIT_BELONG T1 ON T.CUST_ID = T1.CUST_ID AND T1.ORG_TYPE='1' and T1.MGR_TYPE='1'
+        <!-- left join ACRM_F_CI_CUST_ADMIT_ALL T2 ON T2.CUST_ID =T.CUST_ID -->
+        left join ACRM_F_CI_CUST_ALL T2 ON T2.CUST_ID =T.CUST_ID
+        where T2.IS_ADMIT_ENTER='1' and T.PROD_ID IN 
+        <if test="prodId != null and prodId != ''">
+        	<foreach collection="prodId" item="item" index="index" open="(" close=")" separator=",">
+        		#{item}
+        	</foreach>
+        </if>
+	</select>
+		<!-- 根据用户ID或者登陆号查询用户信息 -->
+	<select id="userInfoByNo" parameterType="java.util.Map" resultType="java.util.HashMap">
+		SELECT T.USER_NAME FROM ADMIN_SM_USER T 
+        <if test="userId != null and userId != ''">
+         where T.USER_ID IN 
+        	<foreach collection="userId" item="item" index="index" open="(" close=")" separator=",">
+        		#{item}
+        	</foreach>
+        	OR T.LOGIN_CODE IN 
+        	<foreach collection="userId" item="item" index="index" open="(" close=")" separator=",">
+        		#{item}
+        	</foreach>
+        </if>
+	</select>
+		<!-- 查询客户群中的客户信息 -->
+	<select id="custGroupCustInfo" parameterType="java.util.Map" resultType="java.util.HashMap">
+		SELECT T2.CUST_NAME,T.CUST_ID,T1.ORG_ID,T1.ORG_NAME,T1.MGR_ID,T1.MGR_NAME,T2.CUST_STATUS FROM OCRM_F_CI_CG_MEMBER T 
+        LEFT JOIN OCRM_F_CI_ADMIT_BELONG T1 ON T.CUST_ID = T1.CUST_ID AND T1.ORG_TYPE='1' and T1.MGR_TYPE='1'
+        <!-- left join ACRM_F_CI_CUST_ADMIT_ALL T2 ON T2.CUST_ID =T.CUST_ID -->
+        left join ACRM_F_CI_CUST_ALL T2 ON T2.CUST_ID =T.CUST_ID
+        where T2.IS_ADMIT_ENTER='1' and T.CUST_GROUP_ID IN 
+        <if test="groupId != null and groupId != ''">
+        	<foreach collection="groupId" item="item" index="index" open="(" close=")" separator=",">
+        		#{item}
+        	</foreach>
+        </if>
+	</select>
+	<!-- 查询指标信息 -->
+	<select id="getIndexInfoByProdId" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+		SELECT T.TARGET_ID,T.TARGET_NAME,T.VALUE_CONDITION,T2.PROD_NAME,T2.PRODUCT_ID FROM OCRM_F_MK_MKT_TARGET T 
+		left join ACRM_F_PD_PROD_INFO T2 ON T2.PRODUCT_ID=T.PROD_ID
+        where 1=1 
+        <if test="condition.prodId != null and condition.prodId != ''">
+        	and T.PROD_ID IN 
+        	<foreach collection="condition.prodId" item="item" index="index" open="(" close=")" separator=",">
+        		#{item}
+        	</foreach>
+        </if>
+	</select>
+	<!-- 查询活动的关联客户信息根据执行对象编号-->
+	<select id="getCustInfoByObj" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+		SELECT T.CUST_ID ,T.CUST_NAME,T2.USER_NAME AS MAJOR_MANGER,T3.ORG_NAME AS MAJOR_ORG,T.AIM_CUST_SOURCE,T.PROGRESS_STEP FROM OCRM_F_MK_ACTI_CUST T 
+		left join ADMIN_SM_USER T2 ON T2.USER_ID=T.CUST_MANAGER
+		LEFT JOIN ADMIN_SM_ORG T3 ON T3.ORG_ID=T.CUST_MANAGER_ORG
+        where 1=1 AND T.ACTI_ID= #{actiId,jdbcType=DECIMAL} AND T2.LOGIN_CODE=#{userId,jdbcType=VARCHAR}
+	</select>
+</mapper>

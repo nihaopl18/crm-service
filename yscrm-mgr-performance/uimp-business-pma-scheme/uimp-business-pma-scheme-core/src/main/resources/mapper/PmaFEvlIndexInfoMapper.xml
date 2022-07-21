@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.uimp.business.pma.scheme.evlIndex.repository.mapper.PmaFEvlIndexInfoMapper">
+    <resultMap id="BaseResultMap" type="cn.com.yusys.yusp.uimp.business.pma.scheme.evlIndex.domain.PmaFEvlIndexInfoVo">
+		<id column="ID" jdbcType="VARCHAR" property="id" />
+		<result column="INDEX_ID" jdbcType="VARCHAR" property="indexId" />
+		<result column="INDEX_NAME" jdbcType="VARCHAR" property="indexName" />
+		<result column="ORG_ID" jdbcType="VARCHAR" property="orgId" />
+		<result column="REMARK" jdbcType="VARCHAR" property="remark" />
+		<result column="FORMULA" jdbcType="VARCHAR" property="formula" />
+		<result column="FORMULA_NOTES" jdbcType="VARCHAR" property="formulaNotes" />
+		<result column="CREATOR" jdbcType="VARCHAR" property="creator" />
+		<result column="CREATE_DATE" jdbcType="VARCHAR" property="createDate" />
+		<result column="MODIFY_USER" jdbcType="VARCHAR" property="modifyUser" />
+		<result column="MODIFY_DATE" jdbcType="VARCHAR" property="modifyDate" />
+		<result column="METRIC_TYPE" jdbcType="VARCHAR" property="metricType" />
+		<result column="SCOPE_ORG_ID" jdbcType="VARCHAR" property="scopeOrgId" />
+		<result column="STAT_FLAG" jdbcType="VARCHAR" property="statFlag" />
+		<result column="BUSS_SYS_NO" jdbcType="VARCHAR" property="bussSysNo" />
+		<result column="EVL_OBJ_TYPE" jdbcType="VARCHAR" property="objType" />
+    </resultMap>
+    <sql id="Base_Column_List">
+	    ID,INDEX_ID,INDEX_NAME,ORG_ID,REMARK,FORMULA,FORMULA_NOTES,CREATOR,CREATE_DATE,MODIFY_USER,MODIFY_DATE,METRIC_TYPE,SCOPE_ORG_ID,STAT_FLAG,BUSS_SYS_NO
+    </sql>
+    <sql id="Sql_Count">
+    	select count(*) 
+    </sql>
+    <sql id="Data_Auth">
+    	:{dataAuth}
+    </sql>
+    
+     <!-- 查询基础指标列表数据 -->
+    <select id="querylist" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="cn.com.yusys.yusp.uimp.business.pma.scheme.evlIndex.domain.PmaFEvlIndexInfoVo">
+      select t1.id,
+		t1.index_id,
+		t1.index_name,
+		t1.org_id,
+		t1.remark,
+		t1.obj_type,
+		t1.formula,
+		t1.formula_notes,
+		t1.metric_type,
+		t1.scope_org_id,
+		t1.stat_flag,
+		t1.buss_sys_no,
+		t1.creator,
+		to_char(to_date(t1.create_date,'yyyy-MM-dd hh24:mi:ss'),'yyyy-MM-dd') as create_date,
+		t1.create_org,
+		t1.updater_id,
+		to_char(to_date(t1.update_date,'yyyy-MM-dd hh24:mi:ss'),'yyyy-MM-dd') as update_date,
+		t1.update_org,
+		t1.index_state,
+		SUT.unitname as ORG_NAME ,
+		USER1.USER_NAME AS CREATE_USER,
+		USER2.USER_NAME AS  UPDATE_USER
+      
+      from PMA_F_EVL_INDEX_INFO t1 
+      LEFT JOIN SYS_UNITS SUT ON T1.ORG_ID = SUT.UNITID
+      
+      LEFT JOIN ADMIN_SM_USER USER1 ON T1.CREATOR = USER1.LOGIN_CODE
+      
+      LEFT JOIN ADMIN_SM_USER USER2 ON T1.UPDATER_ID = USER2.LOGIN_CODE
+     	<where>
+      			<!-- 考核对象 -->
+			<if test="condition.objType != null and condition.objType  != ''">
+	      		AND t1.OBJ_TYPE=#{condition.objType,jdbcType=VARCHAR}
+		    </if>
+			<!-- 指标编号 -->
+			<if test="condition.indexId != null and condition.indexId  != ''">
+	      		AND t1.INDEX_ID LIKE concat(concat('%',#{condition.indexId,jdbcType=VARCHAR}),'%')
+		    </if>
+		    <!-- 指标名称-->
+			<if test="condition.indexName != null and condition.indexName  != ''">
+	      		AND t1.INDEX_NAME LIKE concat(concat('%',#{condition.indexName,jdbcType=VARCHAR}),'%')
+		    </if>
+		    <if test="condition.orgId != null and condition.orgId   != ''">
+	      		AND SUT.UNITSEQ LIKE  concat(concat('%',#{condition.orgId,jdbcType=VARCHAR}),'%')
+		    </if>
+			<if test="condition.indexState != null and condition.indexState  != ''">
+				AND t1.INDEX_STATE=#{condition.indexState,jdbcType=VARCHAR}
+			</if>
+			<if test="dataAuth != null" >
+				${dataAuth}
+			</if>
+	    </where>
+	    order by t1.UPDATE_DATE desc, t1.CREATE_DATE desc
+	</select>
+    
+    <select id="queryNames" parameterType="String" resultType="String">
+        select T.INDEX_NAME
+        from PMA_F_EVL_INDEX_INFO T
+        where T.INDEX_ID in 
+        <foreach collection="objId" item="objId" index="index" open="(" close=")" separator=",">
+        	#{objId}
+        </foreach>
+    </select>
+
+	<update id="startOrStopState" parameterType="java.util.HashMap">
+		update PMA_F_EVL_INDEX_INFO set INDEX_STATE=#{statFlag,jdbcType=VARCHAR} where INDEX_ID in
+		<foreach collection="ids"  item="item" open="(" separator="," close=")">
+			#{item, jdbcType=VARCHAR}
+		</foreach>
+	</update>
+</mapper>

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.mgr.sys.pdplan.repository.mapper.OcrmFpdProdColumnMapper">
+    <!-- 通过表定义ID删除产品展示表属性定义 -->
+    <delete id="delColumnsByTableId" parameterType="String">
+	delete OCRM_F_PD_PROD_COLUMN where TABLE_ID = #{tableid,jdbcType=VARCHAR}
+	</delete>
+    
+</mapper>

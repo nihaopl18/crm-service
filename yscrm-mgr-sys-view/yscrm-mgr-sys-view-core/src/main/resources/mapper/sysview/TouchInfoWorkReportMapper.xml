@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.sysview.repository.mapper.TouchInfoWorkReportMapper">
+
+    <resultMap id="BaseInfoMap" type="cn.com.yusys.yscrm.sysview.domain.TouchInfo">
+        <result column="COUNT" property="count"/>
+        <result column="CONTACT_TYPE" property="type"/>
+        <result column="CONTACT_DATE" property="date"/>
+    </resultMap>
+
+    <resultMap id="VisitInfoMap" type="cn.com.yusys.yscrm.sysview.domain.TouchInfoDate">
+        <result column="CONTACT_TYPE" property="type"/>
+        <collection property="date" ofType="string" javaType="list">
+            <result column="CONTACT_DATE"/>
+        </collection>
+    </resultMap>
+    <select id="getBaseInfo" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+            resultMap="BaseInfoMap">
+        SELECT COUNT(*) AS COUNT,RE.CONTACT_TYPE,RE.CONTACT_DATE FROM(
+        SELECT CONTACT_TYPE,TO_CHAR(CONTACT_DATE,'YYYY-MM') AS CONTACT_DATE FROM OCRM_F_WP_CUSTOMER_CONTACT
+        WHERE CONTACT_DATE>=add_months(trunc(sysdate,'MM'),-1)
+              AND CONTACT_CUST_ID=#{condition.custId, jdbcType=VARCHAR}
+              AND IS_DELETE = 'N' AND (IS_DRAFT = 'N' or SOURCE_TABLE != '0') ) RE
+        GROUP BY RE.CONTACT_TYPE,RE.CONTACT_DATE
+    </select>
+    <select id="getBaseBackInfo" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+            resultMap="BaseInfoMap">
+        SELECT COUNT(*) AS COUNT,RE.CONTACT_DATE FROM(
+            SELECT CONTACT_TYPE,TO_CHAR(CONTACT_DATE,'YYYY-MM') AS CONTACT_DATE FROM OCRM_F_WP_CUSTOMER_CONTACT
+            WHERE CONTACT_DATE>=add_months(trunc(sysdate,'MM'),-1)
+            AND (CONTACT_BACK != '' or CONTACT_BACK is not null )
+            AND CONTACT_CUST_ID=#{condition.custId, jdbcType=VARCHAR}
+            AND IS_DELETE = 'N' AND (IS_DRAFT = 'N' or SOURCE_TABLE != '0') ) RE
+        GROUP BY RE.CONTACT_TYPE,RE.CONTACT_DATE
+    </select>
+
+    <select id="getVisitInfo" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+            resultMap="VisitInfoMap">
+        SELECT TO_CHAR(CONTACT_DATE,'yyyy-MM-dd') AS CONTACT_DATE,CONTACT_TYPE FROM OCRM_F_WP_CUSTOMER_CONTACT
+        WHERE CONTACT_CUST_ID=#{condition.custId, jdbcType=VARCHAR} AND IS_DELETE = 'N' AND IS_DRAFT = 'N'
+    </select>
+    <select id="getVisitBackInfo" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+            resultType="java.lang.String">
+        SELECT distinct TO_CHAR(CONTACT_DATE,'yyyy-MM-dd') AS CONTACT_DATE FROM OCRM_F_WP_CUSTOMER_CONTACT
+        WHERE CONTACT_CUST_ID=#{condition.custId, jdbcType=VARCHAR} AND IS_DELETE = 'N' AND (IS_DRAFT = 'N' or SOURCE_TABLE != '0')
+          AND (CONTACT_BACK != '' or CONTACT_BACK is not null )
+    </select>
+
+    <select id="getVisitInfoDetail" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+            resultType="cn.com.yusys.yscrm.sysview.domain.TouchVisitInfoDetail">
+        SELECT to_char(CONTACT_DATE,'YYYY-MM-DD') AS
+        CONTACT_DATE,CONTACT_TYPE,CREATOR_NAME,CONTACT_GOAL,PRODUCT,CONTACT_BACK,WORK_REPORT_ID,SOURCE_TABLE,CUSTOMER_CONTACT_ID FROM OCRM_F_WP_CUSTOMER_CONTACT
+        WHERE IS_DELETE = 'N' AND (IS_DRAFT = 'N' or SOURCE_TABLE != '0') AND CONTACT_CUST_ID=#{condition.custId, jdbcType=VARCHAR}
+    </select>
+
+
+</mapper>

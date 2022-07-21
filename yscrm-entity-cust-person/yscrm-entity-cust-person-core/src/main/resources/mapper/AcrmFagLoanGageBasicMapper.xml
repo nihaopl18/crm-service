@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.cust.person.repository.mapper.AcrmFagLoanGageBasicMapper">
+    <sql id="Base_Column_List">
+	    CORP_ORG_CODE,DATA_DATE,SRC_NO,PAWN_ID,GUAR_NO,GUAR_CONT_NO,CUS_NO,CUS_TYP_CD,COM_LOAN_CARD_NO,GUAR_CUST_NM,GUAR_CARD_TYPE,GUAR_CARD_NO,GUAR_CARD_NUM,MAX_MORT_RATE,SET_MORT_RATE,MAX_MORT_AMT,GAGE_NM,GAGE_TYPE_CD,GAGE_TYPE_SUB_CD,STATUS_CD,CCY_CD,EVAL_CD,EVAL_PERSON,EVAL_ORG,EVAL_AMT,BOOK_EVAL_AMT,EVAL_DT,EVAL_END_DT,OUR_SET_GUARANTY_AMT,RIGHT_CERT_TYPE_CD,RIGHT_CERT_NO,CORE_GUAR_NO,USED_AMT,OUT_STOCK_FINACE_ORG,CORE_VALUE,APPLY_IN_DT,APPLY_OUT_DT,OUT_STOCK_REASON,RIGHT_ORG,IN_DT,OUT_DT,DEPOT_STATUS_CD,BOOK_NO,BOOK_ORG,BOOK_DT,BOOK_END_DT,CREATE_USER_NO,CREATE_ORG,CREATE_DT,BOOK_TERM,REF_NM,FLAG1_IND,FLAG2_IND,FLAG3_IND,FLAG4_IND,FLAG5_IND,REMARKS
+    </sql>
+    
+     <select id="querylist" parameterType="java.util.Map"  resultType="java.util.HashMap">
+		select t.corp_org_code,
+		       to_char(to_date(t.data_date, 'yyyy-mm-dd'),'yyyy-mm-dd') as data_dt,
+		       t.src_no,
+		       t.pawn_id,
+		       t.guar_no,
+		       t.guar_cont_no,
+		       t.cust_id as cus_no,
+		       t.cus_typ_cd,
+		       t.com_loan_card_no,
+		       t.gage_nm,
+		       t.gage_type_cd,
+		       t.gage_type_sub_cd,
+		       t.status_cd,
+		       t.ccy_cd,
+		       t.eval_cd,
+		       t.eval_person,
+		       t.eval_org,
+		       t.eval_amt,
+		       t.book_eval_amt,
+		       to_char(t.EVAL_DT, 'yyyy-mm-dd') as EVAL_DT,
+		       to_char(t.EVAL_END_DT, 'yyyy-mm-dd') as EVAL_END_DT,
+		       t.our_set_guaranty_amt,
+		       t.right_cert_type_cd,
+		       t.right_cert_no,
+		       t.right_org,
+		       to_char(t.IN_DT, 'yyyy-mm-dd') as IN_DT,
+		       to_char(t.OUT_DT, 'yyyy-mm-dd') as OUT_DT,
+		       t.depot_status_cd,
+		       t.book_no,
+		       t.book_org,
+		       to_char(t.BOOK_DT, 'yyyy-mm-dd') as BOOK_DT,
+		       to_char(t.BOOK_END_DT, 'yyyy-mm-dd') as BOOK_END_DT,
+		       t.create_user_no,
+		       t.create_org,
+		       to_char(t.create_dt, 'yyyy-mm-dd') as create_dt,
+		       t.book_term,
+		       t.ref_nm,
+		       t.flag1_ind,
+		       t.flag2_ind,
+		       t.flag3_ind,
+		       t.flag4_ind,
+		       t.flag5_ind,
+		       t.remarks,
+		       t.guar_cust_nm,
+		       org.ORG_NAME
+		  from ACRM_F_AG_LOAN_GAGE_BASIC t
+		  left join admin_sm_org org 
+		  on org.ORG_ID=t.eval_org 
+		  where 1 = 1
+
+		  <if  test="custId != null and custId != ''">
+	       		and t.CUST_ID =#{custId,jdbcType=VARCHAR} 
+		  </if>
+	</select>
+</mapper>

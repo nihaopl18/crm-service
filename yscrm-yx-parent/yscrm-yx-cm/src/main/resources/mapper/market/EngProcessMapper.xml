@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.cm.market.repository.mapper.EngProcessMapper">
+<!-- 引擎执行操作 hujun3 2019-06-13 -->
+
+	<!-- 获取权益规则的配置信息根据节点ID -->
+	<select id="getRuleByNodeId" parameterType="String"
+		resultType="java.util.HashMap">
+		select t.*from LOY_RL_ACTIVITY t WHERE  t.NODE_ID = #{nodeId,jdbcType=VARCHAR} 
+	</select>
+		<!-- 获取权益规则的配置信息根据流程活动ID -->
+	<select id="getRuleByFlowId" parameterType="String"
+		resultType="java.util.HashMap">
+		select t.*from LOY_RL_ACTIVITY t WHERE  t.TEMP_ID = #{tempId,jdbcType=VARCHAR} 
+	</select>
+   <!-- 获取权益规则的配置信息根据节点ID -->
+	<update id="updateEventSts" parameterType="java.util.Map">
+		update CM_F_RC_EVENT_INFO set USE_FLAG=#{sts,jdbcType=VARCHAR} where  ACTIVITY_ID = #{activityId,jdbcType=VARCHAR} 
+	</update>
+</mapper>

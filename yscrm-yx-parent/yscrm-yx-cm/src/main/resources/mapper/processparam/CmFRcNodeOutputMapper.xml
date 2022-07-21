@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.cm.processparam.repository.mapper.CmFRcNodeOutputMapper">
+	<!-- 查询节点下参数 -->
+	<select id="getList" parameterType="String" resultType="java.util.HashMap">
+		SELECT T.NODE_ID,R.FORM_IN_VAL,Y.FORM_OPERATION_VAL,G.FORM_OUT_VAL 
+       	FROM CIMP_CM_NODES_DISPLAY T
+        LEFT JOIN CIMP_CM_NODES_DISPLAY_INPUT R ON T.FORM_ID = R.FORM_ID
+        LEFT JOIN CIMP_CM_NODES_PRESENTATION Y ON T.FORM_ID = Y.FORM_ID
+        LEFT JOIN CIMP_CM_NODES_DISPLAY_OUTPUT G ON T.FORM_ID = G.FORM_ID
+        WHERE T.NODE_ID = #{nodeId}
+    </select>
+    <!-- 删除该节点下已有的数据 -->
+    <delete id="delSameNodeData" parameterType="String">
+		DELETE FROM CIMP_CM_NODES_DISPLAY_INPUT
+        WHERE EXISTS(SELECT 1 FROM CIMP_CM_NODES_DISPLAY 
+        WHERE CIMP_CM_NODES_DISPLAY_INPUT.FORM_ID = CIMP_CM_NODES_DISPLAY.FORM_ID
+        AND CIMP_CM_NODES_DISPLAY.NODE_ID = #{nodeId, jdbcType=VARCHAR})
+    </delete>
+    <!-- 删除节点输出参数-->
+    <delete id="deleteList" parameterType="cn.com.yusys.yusp.cm.productmanager.domain.CmFRcProdCatlInfo">
+		DELETE FROM CM_F_RC_NODES_DISPLAY_OUTPUT WHERE FORM_OUT_ID = #{formOutId}
+    </delete>
+    <!-- 插入流程节点表数据 -->
+    <insert id="addNodes" parameterType="cn.com.yusys.yusp.cm.processparam.domain.CmFRcNodeOutputInfo">
+    	INSERT INTO cimp_cm_nodes_display(FORM_ID,NODE_ID) VALUES(#{formId},#{nodeId})
+    </insert>
+    <update id="upd" parameterType="cn.com.yusys.yusp.cm.processparam.domain.CmFRcNodeOutputInfo">
+	UPDATE CIMP_CM_NODES_DISPLAY_OUTPUT i SET 
+	i.FORM_OUT_VAL = #{formOutVal,jdbcType=VARCHAR}
+	 WHERE i.FORM_ID = (SELECT FORM_ID FROM CIMP_CM_NODES_DISPLAY  WHERE NODE_ID = #{nodeId,jdbcType=VARCHAR})
+	</update>
+	<select id="checkBe" parameterType="String" resultType="int">
+    select count(*) FROM CIMP_CM_NODES_DISPLAY where NODE_ID = #{nodeId, jdbcType=VARCHAR}
+    </select>
+    <select id="checknodeid" parameterType="String" resultType="java.util.HashMap">
+    SELECT I.FORM_IN_VAL,O.FORM_OUT_VAL FROM CIMP_CM_NODES_DISPLAY_INPUT I left join CIMP_CM_NODES_DISPLAY_OUTPUT O
+	ON I.FORM_ID = O.FORM_ID  where I.form_id = (SELECT FORM_ID FROM CIMP_CM_NODES_DISPLAY WHERE NODE_ID = #{nodeId, jdbcType=VARCHAR})
+    </select>
+</mapper>

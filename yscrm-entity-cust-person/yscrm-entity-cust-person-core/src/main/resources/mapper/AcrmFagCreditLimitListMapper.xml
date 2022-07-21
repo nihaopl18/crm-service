@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.cust.person.repository.mapper.AcrmFagCreditLimitListMapper">
+    <sql id="Base_Column_List">
+	    CORP_ORG_CODE,DATA_DT,STATST_DT,BRC_NO,UP_BRC_NO,CUST_NO,CUST_NM,CUST_IND,CREDIT_LMT_IN,AGT_NO,AGT_STAT_CD,CCY_CD,START_DATE,END_DATE,TERM,TERM_UNIT_CD,APPROVER_NO,APPROVE_BRC_NO,LMT_TYPE_CD,FROZEN_IND,BIZ_PROP_CD,CUST_TYPE_CD,PRODUCT_CD,INDU_TYPE_CD,INDUSTRY_CD,GUAR_METH_CD,APPROVE_CONCLUSION_CD,APPLY_AMT,APPROVE_CREDIT_LIMIT,APPROVED_FREE_LIMIT,APPROVED_USED_LIMIT,GUARANTY_TYPE_CD,GUARANTY_AMT,GUARANTEE_TYPE,CURRENCY_CD,COLLATERAL_TYPE_CD
+    </sql>
+    
+    <select id="querylist" parameterType="java.util.Map"  resultType="java.util.HashMap">
+		 select t.CORP_ORG_CODE,
+		       to_char(to_date(t.DATA_DATE,'yyyy-MM-dd'),'yyyy-mm-dd') as DATA_DT,
+		       to_char(t.STATST_DT,'yyyy-MM-dd') as STATST_DT,
+		       t.BRC_NO,
+		       t.UP_BRC_NO,
+		       t.CUST_ID as cust_no,
+		       t.CUST_NM,
+		       t.CUST_IND,
+		       t.CREDIT_LMT_IN,
+		       t.AGT_NO,
+		       t.AGT_STAT_CD,
+		       t.CCY_CD,
+		       to_char(t.START_DATE,'yyyy-MM-dd') as START_DATE,
+		       to_char(t.END_DATE,'yyyy-MM-dd') as END_DATE,
+		       t.TERM,
+		       t.TERM_UNIT_CD,
+		       t.APPROVER_NO,
+		       t.APPROVE_BRC_NO,
+		       t.LMT_TYPE_CD,
+		       t.FROZEN_IND,
+		       t.BIZ_PROP_CD,
+		       t.CUST_TYPE_CD,
+		       t.PRODUCT_CD,
+		       t.INDU_TYPE_CD,
+		       t.INDUSTRY_CD,
+		       t.GUAR_METH_CD,
+		       t.APPROVE_CONCLUSION_CD,
+		       t.APPLY_AMT,
+		       t.APPROVE_CREDIT_LIMIT,
+		       t.APPROVED_FREE_LIMIT,
+		       t.APPROVED_USED_LIMIT,
+		       t.GUARANTY_TYPE_CD,
+		       t.GUARANTY_AMT,
+		       t.GUARANTEE_TYPE,
+		       t.CURRENCY_CD,
+		       t.COLLATERAL_TYPE_CD
+		  from ACRM_F_AG_CREDIT_LIMIT_LIST t
+		  where 1=1
+
+		  <if  test="custId != null and custId != ''">
+	       		and t.CUST_ID =#{custId,jdbcType=VARCHAR} 
+		  </if>
+	</select>
+</mapper>

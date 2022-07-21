@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper
+	namespace="cn.com.yusys.yusp.admin.repository.mapper.AdminSmDataAuthMapper">
+
+	<!--初始化左侧树,层级结构为模块、业务功能、控制点 -->
+	<select id="getTree" resultType="java.util.Map">
+		select '0' as up_tree_id
+		,m.mod_id as node_id ,m.mod_name
+		as node_name,'M'
+		as node_type from
+		admin_sm_func_mod m
+		union
+		select
+		mod_id as up_tree_id ,func_id as
+		node_id,func_name as node_name,'F'
+		as
+		node_type from admin_sm_busi_func
+		union
+		select func_id as
+		up_tree_id,contr_id as node_id,contr_name as
+		node_name,'C'
+		as node_type
+		from admin_sm_res_contr
+	</select>
+
+	<!--查询所有功能模块 -->
+	<select id="getAllFuncMods" resultType="java.util.Map">
+		select
+		'0' as up_tree_id,
+		m.mod_id as node_id,
+		m.mod_name as node_name,
+		'M' as node_type
+		from
+		admin_sm_func_mod m
+	</select>
+
+	<!--根据模块Id查询所有功能点，及其下属权限控制点 -->
+	<select id="getFunWithContrlByModId" parameterType="String"
+		resultType="java.util.Map">
+		select
+		f.mod_id as up_tree_id,
+		f.func_id as node_id,
+		f.func_name as node_name,
+		'F' as node_type
+		from
+		admin_sm_busi_func f
+		where
+		f.mod_id=#{nodeId}
+		union
+		select
+		c.func_id as up_tree_id,
+		c.contr_id as node_id,
+		c.contr_name
+		as node_name,
+		'C' as node_type
+		from
+		admin_sm_res_contr c
+		where c.func_id
+		in (select func_id from admin_sm_busi_func where mod_id=#{nodeId})
+	</select>
+
+	<!--根据数据权限模板编号查询引用该模板的数据权限的编号 -->
+	<select id="getDataAuthId" parameterType="String" resultType="String">
+		select a.auth_id from admin_sm_data_auth a where a.auth_tmpl_id in
+		<foreach item="authTmplIds" index="index" collection="array"
+			open="(" separator="," close=")">
+			#{authTmplIds}
+		</foreach>
+	</select>
+
+	<!--删除数据权限模板时对应删除引用该模板的数据 -->
+	<delete id="deleteDataInfo" parameterType="String">
+		delete from admin_sm_data_auth where auth_tmpl_id in
+		<foreach item="authTmplIds" index="index" collection="array"
+			open="(" separator="," close=")">
+			#{authTmplIds}
+		</foreach>
+	</delete>
+</mapper>

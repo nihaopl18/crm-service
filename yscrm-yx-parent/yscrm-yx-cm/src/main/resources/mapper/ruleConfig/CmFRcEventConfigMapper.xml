@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.cm.ruleConfig.repository.mapper.CmFRcEventConfigMapper">
+	<!-- 查询某交易类型的字段 -->
+	<select id="queryTransCode" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+		resultType="java.util.HashMap">
+		select t.* from 
+				loy_rl_field_ec_name t where t.IS_DISPLAY = '1' 
+			and  t.table_id = 
+					(select table_id from 
+						loy_rl_table_ec_name 
+						where (DELETE_SIGN is null or DELETE_SIGN != '1') 
+				<if test="condition.transactionCode != null and condition.transactionCode !=''">
+					and transaction_code  = #{condition.transactionCode, jdbcType=VARCHAR}
+				</if>
+				    )
+		order by t.field_id
+	</select>
+	<!-- 查询引用参数字段 -->
+	<select id="queryRuleParams" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+		resultType="java.util.Map">
+		SELECT T.PARAM_CODE     AS FIELD_E_NAME,
+	       T.PARAM_NAME     AS FIELD_C_NAME,
+	       T.PARAM_PROPERTY AS FIELD_TYPE,
+	       T.PARAM_MAPPING  AS FNAME,
+	       t.MAGNIFIER
+	  FROM LOY_ENG_RULE_PARAM T
+	 WHERE (T.PARAM_TYPE IS NULL OR T.PARAM_TYPE != '3')
+	</select>
+</mapper>

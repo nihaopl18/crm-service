@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.cust.person.repository.mapper.AcrmFagCcdAcctMapper">
+    <sql id="Base_Column_List">
+	    CORP_ORG_CODE,DATA_DATE,ACCT_NO,CUST_ID,PROD_CD,CCY_CD,CREDIT_LMT,TEMP_LMT,TEMP_LMT_S_DATE,TEMP_LMT_E_DATE,WITHDRAW_CASH_LMT,AUTH_UP_PERCENT,LMT_INSTAL_PERCENT,BAL,WITHDRAW_CASH_BAL,PRIN_BAL,LMT_INSTAL_BAL,ALL_AP_LMT,POINTS_BAL,CREATE_DATE,BILL_PERIOD,POST_BILL_IND,POST_BILL_ADDR,BILL_MEDIUM_TYEP,LOCK_CD,BILL_AGE,STPLT_REPAY_TYPE,STPLT_REPAY_BANK_NM,STPLT_REPAY_OPENBANK_NO,STPLT_REPAY_ACCT_NO,STPLT_REPAY_ACCT_NM,LAST_END_DATE,PLAN_END_DATE,MIN_REPAY_LMT,REPAY_HIS_INFO,LAST_REPAY_AMT,CUST_LAST_TRANS_DATE,ACTUAL_REPAY_AMT,CANCEL_AMT,CANCEL_DATE,UNBILL_BAL,RMK,CONSUME_TOYEAR,URGE_NUM,URGE_RSN
+    </sql>
+    
+     <select id="querylist" parameterType="java.util.Map"  resultType="java.util.HashMap">
+		  select t.CORP_ORG_CODE,
+		       to_char(to_date(t.DATA_DATE,'yyyy-mm-dd'),'yyyy-mm-dd') as DATA_DT,
+		       t.ACCT_NO,
+		       t.CUST_ID as CUST_NO,
+		       t.PROD_CD,
+		       t.CCY_CD,
+		       t.CREDIT_LMT,
+		       t.TEMP_LMT,
+		       to_char(t.TEMP_LMT_S_DATE,'yyyy-mm-dd') as TEMP_LMT_S_DATE,
+		       to_char(t.TEMP_LMT_E_DATE,'yyyy-mm-dd') as TEMP_LMT_E_DATE,
+		       t.WITHDRAW_CASH_LMT,
+		       t.AUTH_UP_PERCENT,
+		       t.LMT_INSTAL_PERCENT,
+		       t.BAL,
+		       t.WITHDRAW_CASH_BAL,
+		       t.PRIN_BAL,
+		       t.LMT_INSTAL_BAL,
+		       t.ALL_AP_LMT,
+		       t.POINTS_BAL,
+		       to_char(t.CREATE_DATE,'yyyy-mm-dd') as CREATE_DATE,
+		       t.BILL_PERIOD,
+		       t.POST_BILL_IND,
+		       t.POST_BILL_ADDR,
+		       t.BILL_MEDIUM_TYEP,
+		       t.LOCK_CD,
+		       t.BILL_AGE,
+		       t.STPLT_REPAY_TYPE,
+		       t.STPLT_REPAY_BANK_NM,
+		       t.STPLT_REPAY_OPENBANK_NO,
+		       t.STPLT_REPAY_ACCT_NO,
+		       t.STPLT_REPAY_ACCT_NM,
+		       to_char(t.LAST_END_DATE,'yyyy-mm-dd') as LAST_END_DATE,
+		       to_char(t.PLAN_END_DATE,'yyyy-mm-dd') as PLAN_END_DATE,
+		       t.MIN_REPAY_LMT,
+		       t.REPAY_HIS_INFO,
+		       t.LAST_REPAY_AMT,
+		       to_char(t.CUST_LAST_TRANS_DATE,'yyyy-mm-dd') as CUST_LAST_TRANS_DATE,
+		       t.ACTUAL_REPAY_AMT,
+		       t.CANCEL_AMT,
+		       to_char(t.CANCEL_DATE,'yyyy-mm-dd') as CANCEL_DATE,
+		       t.UNBILL_BAL,
+		       t.RMK,
+		       t.CONSUME_TOYEAR,
+		       t.URGE_NUM,
+		       t.URGE_RSN
+		  from ACRM_F_AG_CCD_ACCT t
+
+		  <if  test="custId != null and custId != ''">
+	       		where t.CUST_ID =#{custId,jdbcType=VARCHAR} 
+		  </if>
+	</select>
+	
+</mapper>

@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.user.schedule.repository.mapper.OcrmFwpScheduleMapper">
+    <resultMap id="BaseResultMap" type="cn.com.yusys.yscrm.user.schedule.domain.OcrmFwpSchedule">
+		<id column="SCHEDULE_ID" jdbcType="VARCHAR" property="scheduleId" />
+		<result column="CRAT_USR" jdbcType="VARCHAR" property="cratUsr" />
+		<result column="MGR_ID" jdbcType="VARCHAR" property="mgrId" />
+		<result column="MGR_NAME" jdbcType="VARCHAR" property="mgrName" />
+		<result column="CRAT_ORG" jdbcType="VARCHAR" property="cratOrg" />
+		<result column="CRAT_DT" jdbcType="VARCHAR" property="cratDt" />
+		<result column="LAST_CHG_USR" jdbcType="VARCHAR" property="lastChgUsr" />
+		<result column="LAST_CHG_DT" jdbcType="VARCHAR" property="lastChgDt" />
+		<result column="VISIT_COUNT" jdbcType="NUMERIC" property="visitCount" />
+		<result column="WEEK_COUNT" jdbcType="NUMERIC" property="weekCount" />
+		<result column="OTHER_COUNT" jdbcType="NUMERIC" property="otherCount" />
+		<result column="SCH_DATE" jdbcType="VARCHAR" property="schDate" />
+		<result column="CORP_ORG_CODE" jdbcType="VARCHAR" property="corpOrgCode" />
+    </resultMap>
+    <sql id="Base_Column_List">
+	    SCHEDULE_ID,CRAT_USR,MGR_ID,MGR_NAME,CRAT_ORG,CRAT_DT,LAST_CHG_USR,LAST_CHG_DT,VISIT_COUNT,WEEK_COUNT,OTHER_COUNT,SCH_DATE,CORP_ORG_CODE
+    </sql>
+    
+    <!-- 判断OCRM_F_WP_SCHEDULE表中 是否已有对应 客户经理、日程日期的数据 -->
+    <select id="hasSameData" parameterType="java.util.Map" resultType="java.util.HashMap">
+        select a.SCHEDULE_ID from OCRM_F_WP_SCHEDULE a
+          where a.MGR_ID = #{mgrId,jdbcType=VARCHAR} and a.SCH_DATE = #{schDate,jdbcType=VARCHAR}
+    </select>
+    
+    <!-- 日程安排 日历组件 简要数据查询 -->
+    <select id="querySchedule" parameterType="java.util.Map" resultType="java.util.HashMap">
+    select
+	t1.*,
+	t2.SCHEDULE_ID
+	from(
+        select rownum as ID, "DATE", 
+		  case when STATUS='DOING' then '执行中(' || COUNT || ')'
+		       when STATUS='DONE' then '已完成(' || COUNT || ')'
+		       when STATUS='UNDO' then '未下达(' || COUNT || ')' end as TEXT, 
+		  case when STATUS='DOING' then 1
+		       when STATUS='DONE' then 7
+		       when STATUS='UNDO' then 9 end as STATUS from (
+		       select aa."DATE",SUM(aa.DOING) as DOING,SUM(aa.UNDO) as UNDO ,SUM(aa.DONE) as DONE from (
+		        select 
+				  SCHEDULE_ID, 
+				  SCH_DATE as "DATE",
+				  (
+				    (select count(*) from OCRM_F_WP_SCHEDULE_VISIT b 
+				      where b.SCHEDULE_ID = a.SCHEDULE_ID and b.IS_DELETE = 'N' and b.VISIT_STAT = '2' and (b.MGR_ID =#{reporterId,jdbcType=VARCHAR} or b.ARANGE_ID=#{reporterId,jdbcType=VARCHAR})) +
+				    (select count(*) from OCRM_F_WP_SCHEDULE_PLAN c
+				      where c.SCHEDULE_ID = a.SCHEDULE_ID and c.IS_DELETE = 'N' and c.STAT in ('2', '3') and (c.MGR_ID =#{reporterId,jdbcType=VARCHAR} or c.ARANGE_ID=#{reporterId,jdbcType=VARCHAR})) +
+				    (select count(*) from OCRM_F_WP_SCHEDULE_OTHER d
+				      where d.SCHEDULE_ID = a.SCHEDULE_ID and d.IS_DELETE = 'N' and d.STAT in ('2', '3') and (d.MGR_ID =#{reporterId,jdbcType=VARCHAR} or d.ARANGE_ID=#{reporterId,jdbcType=VARCHAR}))
+				  ) as DOING,
+				  (
+				    (select count(*) from OCRM_F_WP_SCHEDULE_VISIT b 
+				      where b.SCHEDULE_ID = a.SCHEDULE_ID and b.IS_DELETE = 'N' and b.VISIT_STAT = '1' and (b.ARANGE_ID=#{reporterId,jdbcType=VARCHAR})) +
+				    (select count(*) from OCRM_F_WP_SCHEDULE_PLAN c
+				      where c.SCHEDULE_ID = a.SCHEDULE_ID and c.IS_DELETE = 'N' and c.STAT in ('1') and ( c.ARANGE_ID=#{reporterId,jdbcType=VARCHAR})) +
+				    (select count(*) from OCRM_F_WP_SCHEDULE_OTHER d
+				      where d.SCHEDULE_ID = a.SCHEDULE_ID and d.IS_DELETE = 'N' and d.STAT in ('1') and ( d.ARANGE_ID=#{reporterId,jdbcType=VARCHAR}))
+				  ) as UNDO,
+				  (
+				    (select count(*) from OCRM_F_WP_SCHEDULE_VISIT b 
+				      where b.SCHEDULE_ID = a.SCHEDULE_ID and b.IS_DELETE = 'N' and b.VISIT_STAT = '3' and (b.MGR_ID =#{reporterId,jdbcType=VARCHAR} or b.ARANGE_ID=#{reporterId,jdbcType=VARCHAR})) +
+				    (select count(*) from OCRM_F_WP_SCHEDULE_PLAN c
+				      where c.SCHEDULE_ID = a.SCHEDULE_ID and c.IS_DELETE = 'N' and c.STAT in ('4') and (c.MGR_ID =#{reporterId,jdbcType=VARCHAR} or c.ARANGE_ID=#{reporterId,jdbcType=VARCHAR})) +
+				    (select count(*) from OCRM_F_WP_SCHEDULE_OTHER d
+				      where d.SCHEDULE_ID = a.SCHEDULE_ID and d.IS_DELETE = 'N' and d.STAT in ('4') and (d.MGR_ID =#{reporterId,jdbcType=VARCHAR} or d.ARANGE_ID=#{reporterId,jdbcType=VARCHAR}))
+				  ) as DONE
+				from OCRM_F_WP_SCHEDULE  a where SCHEDULE_ID in (${scheduleIds}) 
+				 ) aa group by  aa."DATE"
+				 <!--  where MGR_ID = #{reporterId,jdbcType=VARCHAR} and 
+				  to_date(SCH_DATE, 'yyyy-MM-dd') between to_date(#{startDate,jdbcType=VARCHAR}, 'yyyy-MM-dd') and to_date(#{endDate,jdbcType=VARCHAR}, 'yyyy-MM-dd') -->
+		) unpivot (COUNT for STATUS in (DOING, DONE, UNDO)))t1
+         left join OCRM_F_WP_SCHEDULE t2
+         on t1."DATE" = t2.SCH_DATE and t2.CRAT_USR = #{reporterId,jdbcType=VARCHAR}
+    </select>
+    <select id="querySchedule1" parameterType="java.util.Map" resultType="java.util.HashMap">
+    	select mgr_id,SCHEDULE_ID from OCRM_F_WP_SCHEDULE where to_date(SCH_DATE, 'yyyy-MM-dd') between to_date(#{startDate,jdbcType=VARCHAR}, 'yyyy-MM-dd') and to_date(#{endDate,jdbcType=VARCHAR}, 'yyyy-MM-dd')
+    </select>
+    <update id="updateFun" parameterType="java.util.Map">
+		 update OCRM_F_WP_SCHEDULE set mgr_id=mgr_id||','||#{mgrId,jdbcType=VARCHAR} where schedule_id=#{scheduleId,jdbcType=VARCHAR}
+	</update>
+	<select id="selectMgr" parameterType="java.util.Map" resultType="java.util.HashMap">
+		 select mgr_id from OCRM_F_WP_SCHEDULE where schedule_id=#{scheduleId,jdbcType=VARCHAR}
+	</select>
+</mapper>

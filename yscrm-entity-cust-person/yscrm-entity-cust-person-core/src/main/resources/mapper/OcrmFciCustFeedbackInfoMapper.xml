@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.cust.person.repository.mapper.OcrmFciCustFeedbackInfoMapper">
+
+    <sql id="Base_Column_List">
+	    CORP_ORG_CODE,CUST_ID,CUST_NAME,FEEDBACK_TYPE,FEEDBACK_CHG,FEEDBACK_ID,WORK_ORDER_SOURCE,FEEDBACK_CONTENT,EMERGENCY_LEVEL,EXPIRY_DATE,CONDUCTOR_ID,CONDUCTOR_NAME,CONDUCTOR_ORG_ID,CONDUCTOR_ORG_NAME,NEED_RESOURCE,ACCT_NO,CUST_PHONE_NO,CUST_SEX,COMPLAIN_EMP_ID,COMPLAIN_EMP_NAME,COMPLAIN_CONTENT,CHECK_RESULT,CONDUCT_TM,ADJUNCT,IS_PROCESSED,FEEDBACK_TITLE,FEEDBACK_DATE,CUST_STATUS,CUST_GRADE,IS_PEANUTS,CUST_TYPE,FEEDBACK_PER
+    </sql>
+    
+    <!-- 反馈信息查询 -->
+	<select id="querylist" parameterType="java.util.Map" resultType="java.util.Map">
+		select t.CORP_ORG_CODE,
+		       t.CUST_ID,
+		       t.CUST_NAME,
+		       t.FEEDBACK_TYPE,
+		       t.FEEDBACK_CHG,
+		       t.FEEDBACK_ID,
+		       t.WORK_ORDER_SOURCE,
+		       t.FEEDBACK_CONTENT,
+		       t.EMERGENCY_LEVEL,
+		       to_char(t.EXPIRY_DATE,'yyyy-mm-dd') as EXPIRY_DATE,
+		       t.CONDUCTOR_ID,
+		       t.CONDUCTOR_NAME,
+		       t.CONDUCTOR_ORG_ID,
+		       t.CONDUCTOR_ORG_NAME,
+		       t.NEED_RESOURCE,
+		       t.ACCT_NO,
+		       t.CUST_PHONE_NO,
+		       t.CUST_SEX,
+		       t.COMPLAIN_EMP_ID,
+		       t.COMPLAIN_EMP_NAME,
+		       t.COMPLAIN_CONTENT,
+		       t.CHECK_RESULT,
+		       to_char(t.CONDUCT_TM,'yyyy-mm-dd') as CONDUCT_TM,
+		       t.ADJUNCT,
+		       t.IS_PROCESSED,
+		       t.FEEDBACK_TITLE,
+		       to_char(t.FEEDBACK_DATE,'yyyy-mm-dd') as FEEDBACK_DATE,
+		       t.IS_PEANUTS,
+		       t.FEEDBACK_PER,
+		       t.FEEDBACK_PER_ID
+		  from OCRM_F_CI_CUST_FEEDBACK_INFO t
+		  where 1=1
+		  
+		  <if  test="condition.custId != null and condition.custId != ''">
+       			and  t.CUST_ID =#{condition.custId,jdbcType=VARCHAR} 
+	  	  </if>
+	  	  <if  test="condition.startTM != null and condition.startTM != ''">
+       			and  to_char(t.FEEDBACK_DATE,'yyyy-mm-dd') &gt;= #{condition.startTM,jdbcType=VARCHAR} 
+		  </if>
+		  <if  test="condition.endTM != null and condition.endTM != ''">
+	       		and  to_char(t.FEEDBACK_DATE,'yyyy-mm-dd') &lt;= #{condition.endTM,jdbcType=VARCHAR} 
+		  </if>
+		  <if  test="condition.backChannel != null and condition.backChannel != ''">
+       			and  t.FEEDBACK_CHG =#{condition.backChannel,jdbcType=VARCHAR} 
+	 	  </if>
+		  <if  test="condition.backType != null and condition.backType != ''">
+       			and  t.FEEDBACK_TYPE =#{condition.backType,jdbcType=VARCHAR} 
+	 	  </if>
+	</select>
+	
+	<!-- 根据反馈编号删除反馈信息 -->
+	<delete id="deleteByFeedbackId" parameterType="String">
+		DELETE FROM OCRM_F_CI_CUST_FEEDBACK_INFO A WHERE A.FEEDBACK_ID = #{condition.feedbackId,jdbcType=VARCHAR}
+	</delete> 
+</mapper>

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<license build-time="Wed Mar 11 10:37:42 CST 2020" validate-code="685119224AAC704F43407CA7A1DF8CCA">
+  <element name="customer_name">售前演示环境</element>
+  <element name="contract_code"/>
+  <element name="license_code">0000015443</element>
+  <element name="product_code">0000001402</element>
+  <element name="product_name_zh-cn">宇信科技客户关系管理系统[简称：YSCRM客户关系管理系统]V6.0</element>
+  <element name="product_name_en-us">YSCRM</element>
+  <element name="version_major">6</element>
+  <element name="version_sub">0</element>
+  <element name="version_publish">1</element>
+  <element name="complie_date">2019-04-16</element>
+  <element name="license_type">产品演示许可证</element>
+  <element name="license_start_time">2020-03-11</element>
+  <element name="license_end_time">2020-06-09</element>
+</license>

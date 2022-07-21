@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.uimp.distribution.repository.mapper.PmaFComDepLoansPeriodMapper">
+
+	<select id="queryList" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+		select t.id           ,
+		t.loans_info_id,
+		t.oper_time    ,
+		t.effect_date  ,
+		t.expirate_date,
+		t.data_src     ,
+		t.oper_user_id ,
+		t.oper_org_id  ,
+		a.org_name as operOrgName,
+		t.oper_user_name,
+		t.creator      ,
+		t.create_date  ,
+		t.create_org   ,
+		t.updater_id   ,
+		t.update_date  ,
+		t.update_org
+		from PMA_F_COM_DEP_LOANS_PERIOD t left join PMA_F_COM_DEP_LOANS_INFO b
+		on t.loans_info_id = b.id
+		left join ADMIN_SM_ORG a
+		on t.oper_org_id = a.ORG_CODE
+		<where>
+			<if test="condition.id != null and condition.id != ''">
+				AND t.id = #{condition.id,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.loansInfoId != null and condition.loansInfoId != ''">
+				AND t.loans_info_id = #{condition.loansInfoId,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.operTime != null and condition.operTime != ''">
+				AND t.oper_time = #{condition.operTime,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.effectDate != null and condition.effectDate != ''">
+				<![CDATA[
+	                AND TO_DATE(t.effect_date, 'yyyy-MM-dd hh24:mi:ss') >= TO_DATE(#{condition.effectDate,jdbcType=VARCHAR}, 'yyyy-MM-dd')
+	            ]]>
+			</if>
+			<if test="condition.expirateDate != null and condition.expirateDate != ''">
+				<![CDATA[
+	                AND TO_DATE(t.expirate_date, 'yyyy-MM-dd hh24:mi:ss') <= TO_DATE(#{condition.expirateDate,jdbcType=VARCHAR}, 'yyyy-MM-dd')
+	            ]]>
+			</if>
+			<if test="condition.dataSrc != null and condition.dataSrc != ''">
+				AND t.data_src = #{condition.dataSrc,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.operUserId != null and condition.operUserId != ''">
+				AND t.oper_user_id = #{condition.operUserId,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.operOrgId != null and condition.operOrgId != ''">
+				AND t.oper_org_id = #{condition.operOrgId,jdbcType=VARCHAR}
+			</if>
+
+		</where>
+		order by t.CREATE_DATE desc
+	</select>
+
+
+	<delete id="delPmaFComDepPeriod" parameterType="String" >
+		delete from PMA_F_COM_DEP_LOANS_PERIOD t where  t.loans_info_id = #{id,jdbcType=VARCHAR}
+	</delete>
+
+	<insert id="batchInsertPeriod" parameterType="List">
+		INSERT INTO PMA_F_COM_DEP_LOANS_PERIOD (id			  ,
+		loans_info_id ,
+		oper_time     ,
+		effect_date   ,
+		expirate_date ,
+		data_src      ,
+		oper_user_id  ,
+		oper_user_name,
+		oper_org_id   ,
+		creator       ,
+		create_date   ,
+		create_org    ,
+		updater_id    ,
+		update_date   ,
+		update_org
+		)
+		<foreach collection="list" item="param" index="index" separator="union all" >
+			select #{param.id,jdbcType=VARCHAR},
+			#{param.loansInfoId,jdbcType=VARCHAR},
+			#{param.operTime,jdbcType=VARCHAR},
+			#{param.effectDate,jdbcType=VARCHAR},
+			#{param.expirateDate,jdbcType=VARCHAR},
+			#{param.dataSrc,jdbcType=VARCHAR},
+			#{param.operUserId,jdbcType=VARCHAR},
+			#{param.operUserName,jdbcType=VARCHAR},
+			#{param.operOrgId,jdbcType=VARCHAR},
+			#{param.creator,jdbcType=VARCHAR},
+			#{param.createDate,jdbcType=VARCHAR},
+			#{param.createOrg,jdbcType=VARCHAR},
+			#{param.updaterId,jdbcType=VARCHAR},
+			#{param.updateDate,jdbcType=VARCHAR},
+			#{param.updateOrg,jdbcType=VARCHAR}
+			from dual
+		</foreach>
+	</insert>
+
+</mapper>

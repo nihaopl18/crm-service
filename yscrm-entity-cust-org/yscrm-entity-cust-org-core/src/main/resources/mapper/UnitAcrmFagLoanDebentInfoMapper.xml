@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.cust.org.repository.mapper.UnitAcrmFagLoanDebentInfoMapper">
+    <sql id="Base_Column_List">
+	    CORP_ORG_CODE,DEBENTURE_NO,DEBENTURE_MDFR,CONTR_NO,CONTR_MDFR,CCY_CD,CUST_ID,CUST_NAME,DRAW_DT,MATURE_DT,LOAN_ACCT_ID,ACCT_TYPE,ORG_ID,OPEN_ORG_NAME,PROD_TYPE_CD,ORG_OR_PER_FLAG,PROD_CD,PROD_NAME,COMES_FROM,PRIN_AMT,DEB_INTR_BAL,MARGIN_AMT,CONTR_START_DT,CONTR_END_DT,REPAY_ACCT_ID,MAIN_SURETY_MODE_CD,COLLATERAL_TYPE_C,REPAY_METH_CD,BIZ_STAT_CD,RECD_STAT_CD,PROFIT_LOAN,RISK_CATEG_CD,BASE_RATE,FIXED_RATE,CONTR_AMT,CONTR_AMT_RMB,DRAW_AMT,DRAW_AMT_RMB,LOAN_BAL,LOAN_BAL_RMB,MONTH_AVG_REGULAR_BAL,QUARTER_AVG_REGULAR_BAL,YEAR_AVG_REGULAR_BAL,ETL_DATE
+    </sql>
+    
+    <select id="querylist" parameterType="java.util.Map"  resultType="java.util.HashMap">
+		  select t.CORP_ORG_CODE,
+		       t.DEBENTURE_NO,
+		       t.DEBENTURE_MDFR,
+		       t.CONTR_NO,
+		       t.CONTR_MDFR,
+		       t.CCY_CD,
+		       t.CUST_ID,
+		       t.CUST_NAME,
+		       to_char(t.DRAW_DT,'yyyy-mm-dd') as DRAW_DT,
+		       to_char(t.MATURE_DT,'yyyy-mm-dd') as MATURE_DT,
+		       t.LOAN_ACCT_ID,
+		       t.ACCT_TYPE,
+		       t.ORG_ID,
+		       t.OPEN_ORG_NAME,
+		       ca.catl_name as PROD_TYPE_CD,
+		       t.ORG_OR_PER_FLAG,
+		       t.PROD_CD,
+		       t.PROD_NAME,
+		       t.COMES_FROM,
+		       t.PRIN_AMT,
+		       t.DEB_INTR_BAL,
+		       t.MARGIN_AMT,
+		       to_char(t.CONTR_START_DT,'yyyy-mm-dd') as CONTR_START_DT,
+		       to_char(t.CONTR_END_DT,'yyyy-mm-dd') as CONTR_END_DT,
+		       t.REPAY_ACCT_ID,
+		       t.MAIN_SURETY_MODE_CD,
+		       t.COLLATERAL_TYPE_C,
+		       t.REPAY_METH_CD,
+		       t.BIZ_STAT_CD,
+		       t.RECD_STAT_CD,
+		       t.PROFIT_LOAN,
+		       t.RISK_CATEG_CD,
+		       t.BASE_RATE*100 as BASE_RATE,
+		       t.FIXED_RATE*100 as FIXED_RATE,
+		       t.CONTR_AMT,
+		       t.CONTR_AMT_RMB,
+		       t.DRAW_AMT,
+		       t.DRAW_AMT_RMB,
+		       t.LOAN_BAL,
+		       t.LOAN_BAL_RMB,
+		       t.MONTH_AVG_REGULAR_BAL,
+		       t.QUARTER_AVG_REGULAR_BAL,
+		       t.YEAR_AVG_REGULAR_BAL,
+		       to_char(to_date(t.DATA_DATE,'yyyy-mm-dd'),'yyyy-mm-dd') as ETL_DATE
+		  from ACRM_F_AG_LOAN_DEBENT_INFO t
+		  left join ACRM_F_PD_PROD_CATL ca on t.PROD_TYPE_CD =ca.catl_code
+		  where 1=1
+
+	  <if  test="custId != null and custId != ''">
+	      		and t.CUST_ID =#{custId,jdbcType=VARCHAR} 
+	  </if>
+	  <if  test="orgIdMgr != null and orgIdMgr != ''">
+	       		and t.ORG_ID =#{orgIdMgr,jdbcType=VARCHAR} 
+		  </if>
+		  order by decode(t.RECD_STAT_CD,'02','0','03','1','4','3','5','3','7','3','9','3','2'),t.LOAN_BAL_RMB desc
+	</select>
+	<select id="getMgrType" parameterType="java.util.Map"  resultType="java.util.HashMap">
+	select mgr_type from OCRM_F_CI_ADMIT_BELONG where cust_id=#{custId,jdbcType=VARCHAR} and mgr_id=#{loginCode,jdbcType=VARCHAR}
+	</select>
+</mapper>

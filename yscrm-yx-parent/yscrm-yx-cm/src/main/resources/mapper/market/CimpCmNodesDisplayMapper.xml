@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.cm.market.repository.mapper.CimpCmNodesDisplayMapper">
+	<select id="getDisplay" parameterType="String"
+		resultType="cn.com.yusys.yusp.cm.market.domain.CimpCmNodesDisplay">
+		select T.* from CIMP_CM_NODES_DISPLAY T
+		where rownum=1 and T.NODE_ID = #{nodeId, jdbcType=VARCHAR}
+	</select>
+	<select id="checkBe" parameterType="String"
+		resultType="String">
+		select T.FORM_ID from CIMP_CM_NODES_DISPLAY T
+		where T.NODE_ID = #{nodeId, jdbcType=VARCHAR}
+	</select>
+		<!-- 查询流程中的营销方式组件信息 -->
+	<select id="getMarketTypeByFlowId" parameterType="java.util.Map"
+		resultType="java.util.HashMap">
+		select t.NODE_ID as key,t.NODE_NAME as value from cimp_cm_nodeinfo t 
+		left join cimp_cm_asseminfo t1 on t1.assembly_id=t.assembly_id
+		WHERE  t1.CLASS_ID='9' AND t.temp_id = #{flowId,jdbcType=VARCHAR} 
+	</select>
+	<select id="getMarketTypeAllByFlowId" parameterType="java.util.Map"
+			resultType="java.util.HashMap">
+		select * from cimp_cm_nodeinfo t
+		left join cimp_cm_asseminfo t1 on t1.assembly_id=t.assembly_id
+		WHERE  t1.CLASS_ID='9' AND t.temp_id = #{flowId,jdbcType=VARCHAR}
+	</select>
+
+
+</mapper>

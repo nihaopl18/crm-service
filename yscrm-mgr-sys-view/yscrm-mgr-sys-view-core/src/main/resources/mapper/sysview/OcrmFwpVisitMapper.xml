@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.sysview.repository.mapper.OcrmFwpVisitMapper">
+
+    <resultMap id="AumDpsInfoMap" type="cn.com.yusys.yscrm.sysview.domain.WealthFunnel">
+        <result property="behaviorType" column="BEHAVIOR_TYPE"></result>
+        <collection property="behaviorInfo" ofType="cn.com.yusys.yscrm.sysview.domain.BehaviorInfo">
+            <result column="PROD_NAME" property="prodName"/>
+            <result column="VIEWS_NO" property="viewsNo"/>
+        </collection>
+    </resultMap>
+
+    <select id="getWealthFunnel" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+            resultMap="AumDpsInfoMap">
+        SELECT PROD_NAME,SUM(VIEWS_NO) AS VIEWS_NO,BEHAVIOR_TYPE FROM ACRM_F_BEHAVIOR_TRACK WHERE CUST_NO=#{condition.custId, jdbcType=VARCHAR} GROUP BY PROD_NAME,BEHAVIOR_TYPE
+    </select>
+
+    <select id="getProdClickInfo" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+            resultType="cn.com.yusys.yscrm.sysview.domain.BehaviorInfo">
+        SELECT RE.PROD_NAME,RE.VIEWS_NO FROM
+        (SELECT PROD_NAME,SUM(VIEWS_NO) AS VIEWS_NO FROM ACRM_F_BEHAVIOR_TRACK WHERE CUST_NO=#{condition.custId, jdbcType=VARCHAR} GROUP BY PROD_NAME,PROD_CODE) RE
+        ORDER BY RE.VIEWS_NO DESC
+    </select>
+
+
+</mapper>

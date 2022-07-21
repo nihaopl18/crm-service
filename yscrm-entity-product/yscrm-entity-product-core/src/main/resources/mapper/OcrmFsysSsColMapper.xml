@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.product.repository.mapper.OcrmFsysSsColMapper">
+	<select id="getScol" parameterType="java.util.Map"  resultType="java.util.HashMap">
+		SELECT *
+		  FROM ACRM_F_PD_PROD_SCOL t
+		 WHERE t.pro_id=#{condition.prodId, jdbcType=VARCHAR} and t.SS_COL_TYPE = '1'
+	</select>
+	
+	<!-- 根据产品编号和类型删除指标配置 -->
+	<delete id="delerteCol" parameterType="String">
+		DELETE FROM ACRM_F_PD_PROD_SCOL WHERE PRO_ID=#{prodId} and SS_COL_TYPE = '1'
+	</delete>
+	<select id="getColQuery" parameterType="java.util.Map" resultType="java.util.Map">
+		SELECT A.*, B.COL_NAME_C, CASE WHEN A.SS_COL_GJOIN ='and' THEN '并' WHEN A.SS_COL_GJOIN ='or' THEN '或' ELSE '' END AS SS_COL_GJOIN_NM  FROM OCRM_F_SYS_SS_COL A LEFT JOIN OCRM_F_CI_FQ_DBCOL B ON A.SS_COL_ITEM = B.ID WHERE SS_ID=#{condition.prodId, jdbcType=VARCHAR} AND SS_TYPE=#{condition.ssType, jdbcType=VARCHAR} ORDER BY SS_COL_GORDER
+	</select>
+	<select id="prepare" parameterType="string" resultType="java.util.HashMap">
+		${value} 
+	</select>
+	<select id="showcoltype" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+		SELECT * FROM ACRM_F_PD_PROD_LIMIT where id =#{condition.id}
+	</select>
+	
+	<select id="getCustScol" parameterType="java.util.Map"  resultType="java.util.HashMap">
+		SELECT *
+		  FROM ACRM_F_PD_PROD_SCOL t
+		 WHERE t.pro_id=#{condition.prodId, jdbcType=VARCHAR} and t.SS_COL_TYPE = '2'
+	</select>
+	
+	<!-- 根据产品编号和类型删除指标配置 -->
+	<delete id="delerteCustCol" parameterType="String">
+		DELETE FROM ACRM_F_PD_PROD_SCOL WHERE PRO_ID=#{prodId} and SS_COL_TYPE = '2'
+	</delete>
+</mapper>

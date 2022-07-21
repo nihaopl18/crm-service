@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.uimp.base.app.uaa.repository.mapper.PmaFappAgreementMapper">
+    <resultMap id="BaseResultMap" type="cn.com.yusys.yusp.uimp.base.app.uaa.domain.PmaFappAgreement">
+		<id column="AGREEMENT_CONTENT" jdbcType="VARCHAR" property="agreementContent" />
+    </resultMap>
+    <sql id="Base_Column_List">
+	    AGREEMENT_CONTENT
+    </sql>
+    <select id="queryList" resultType="String">
+
+		select * from pma_f_app_agreement t
+	</select>
+</mapper>

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.uimp.business.pma.scheme.indexImp.repository.mapper.PmaASchemeIndexRelMapper">
+    <resultMap id="BaseResultMap" type="cn.com.yusys.yusp.uimp.business.pma.scheme.indexImp.domain.PmaASchemeIndexRel">
+		<id column="ID" jdbcType="VARCHAR" property="id" />
+		<result column="SCHEME_ID" jdbcType="VARCHAR" property="schemeId" />
+		<result column="INDEX_ID" jdbcType="VARCHAR" property="indexId" />
+		<result column="INDEX_TYPE" jdbcType="VARCHAR" property="indexType" />
+		<result column="CREATER_ID" jdbcType="VARCHAR" property="createrId" />
+		<result column="CREATOR" jdbcType="VARCHAR" property="creator" />
+		<result column="CREATE_TIME" jdbcType="VARCHAR" property="createTime" />
+		<result column="MODIFY_USER_ID" jdbcType="VARCHAR" property="modifyUserId" />
+		<result column="MODIFY_USER_NAME" jdbcType="VARCHAR" property="modifyUserName" />
+		<result column="MODIFY_TIME" jdbcType="VARCHAR" property="modifyTime" />
+		<result column="BAL_TYPE_ID" jdbcType="VARCHAR" property="balTypeId" />
+		<result column="EVL_OBJ_TYPE" jdbcType="VARCHAR" property="evlObjType" />
+		<result column="APPLY_TYPE_ID" jdbcType="VARCHAR" property="applyTypeId" />
+		<result column="DIMENSION_ID" jdbcType="VARCHAR" property="dimensionId" />
+		<result column="APPRAISE_TYPE_ID" jdbcType="VARCHAR" property="appraiseTypeId" />
+		<result column="CUR_TYPE_ID" jdbcType="VARCHAR" property="curTypeId" />
+    </resultMap>
+    <sql id="Base_Column_List">
+	    ID,SCHEME_ID,INDEX_ID,INDEX_TYPE,CREATER_ID,CREATOR,CREATE_TIME,MODIFY_USER_ID,MODIFY_USER_NAME,MODIFY_TIME,BAL_TYPE_ID,EVL_OBJ_TYPE,APPLY_TYPE_ID,DIMENSION_ID,APPRAISE_TYPE_ID,CUR_TYPE_ID
+    </sql>
+    
+</mapper>

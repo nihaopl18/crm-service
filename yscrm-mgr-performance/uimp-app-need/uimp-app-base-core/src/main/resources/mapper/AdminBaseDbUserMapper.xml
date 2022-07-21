@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.uimp.base.repository.mapper.AdminBaseDbUserMapper">
+    <resultMap id="BaseResultMap" type="cn.com.yusys.yusp.uimp.base.domain.AdminBaseDbUser">
+		<id column="ID" jdbcType="VARCHAR" property="id" />
+		<result column="NAME" jdbcType="VARCHAR" property="name" />
+		<result column="PASSWORD" jdbcType="VARCHAR" property="password" />
+		<result column="TABLESPACE" jdbcType="VARCHAR" property="tablespace" />
+		<result column="TEMP_TABLESPACE" jdbcType="VARCHAR" property="tempTablespace" />
+		<result column="SYS_ID" jdbcType="VARCHAR" property="sysId" />
+		<result column="REMARK" jdbcType="VARCHAR" property="remark" />
+		<result column="CREATE_USER" jdbcType="VARCHAR" property="createUser" />
+		<result column="CREATE_DT" jdbcType="TIMESTAMP" property="createDt" />
+		<result column="LAST_UPDATE_USER" jdbcType="VARCHAR" property="lastUpdateUser" />
+		<result column="LAST_UPDATE_DT" jdbcType="TIMESTAMP" property="lastUpdateDt" />
+    </resultMap>
+    <sql id="Base_Column_List">
+	    ID,NAME,PASSWORD,TABLESPACE,TEMP_TABLESPACE,SYS_ID,REMARK,CREATE_USER,TO_CHAR(CREATE_DT,'yyyy-MM-dd') CREATE_DT,LAST_UPDATE_USER,TO_CHAR(LAST_UPDATE_DT,'yyyy-MM-dd') LAST_UPDATE_DT
+    </sql>
+    
+	<select id="querylist" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+		SELECT <include refid="Base_Column_List" /> FROM ADMIN_BASE_DB_USER T
+		<where>
+			<if test="condition.name != null and condition.name  != ''">
+	      		AND T.NAME LIKE concat(concat('%',#{condition.name,jdbcType=VARCHAR}),'%')
+		    </if>
+			<if test="condition.remark != null and condition.remark  != ''">
+	      		AND T.REMARK LIKE concat(concat('%',#{condition.remark,jdbcType=VARCHAR}),'%')
+		    </if>
+			<if test="condition.sysId != null and condition.sysId  != ''">
+	      		AND T.SYS_ID = #{condition.sysId,jdbcType=VARCHAR}
+		    </if>
+	    </where>
+	</select>
+    
+</mapper>

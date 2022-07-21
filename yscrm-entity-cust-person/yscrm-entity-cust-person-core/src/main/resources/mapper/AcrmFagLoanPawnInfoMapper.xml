@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.cust.person.repository.mapper.AcrmFagLoanPawnInfoMapper">
+    <sql id="Base_Column_List">
+	    CORP_ORG_CODE,DATA_DATE,SRC_NO,PAWN_ID,GUAR_NO,GUAR_CONT_NO,GUAR_CUST_NO,GUAR_CUST_NM,CUS_TYP_CD,COM_LOAN_CARD_NO,GUAR_CARD_TYPE,GUAR_CARD_NO,GUAR_CARD_NUM,PAWN_NM,PAWN_TYPE_CD,PAWN_TYPE_SUB_CD,STATUS_CD,MAX_MORT_RATE,SET_MORT_RATE,MAX_MORT_AMT,MORT_PLACE,LEASE_CASE,LEASE_DT,LEASE_YEAR_AMT,CUSTODIAN,MORT_REG_NO,MORT_REG_ORG,MORT_REG_DT,INS_TYPE,INS_NO,INS_AMT,INS_DT,INS_END_DT,INS_COM_NM,CREATE_USER_NO,CORE_GUAR_NUM,CORE_GUAR_NO,USED_AMT,CORE_VALUE,CCY_CD,EVAL_TYPE_CD,EVAL_PERSON,EVAL_ORG,EVAL_AMT,BOOK_AMT,EVAL_DT,EVAL_END_DT,OUR_SET_GUARANTY_AMT,RIGHT_CERT_TYPE_CD,RIGHT_CERT_NO,RIGHT_ORG,APPLY_IN_DT,APPLY_OUT_DT,IN_DT,OUT_DT,DEPOT_STATUS_CD,OUT_STOCK_REASON,OUT_STOCK_FINACE_ORG,BOOK_NO,BOOK_ORG,BOOK_DT,BOOK_END_DT,COMMON_OWNER_NM,RENTER_NM,WHOLE_MORTAGAGE_OUR_IND,PROPERTY_DISPUTED_IND,RENTAL_IND,IF_BOOK,COMMON_ASSETS_IND,IS_KEEP,REMARKS
+    </sql>
+    
+    <select id="querylist" parameterType="java.util.Map"  resultType="java.util.HashMap">
+		select t.corp_org_code,
+		       to_char(to_date(t.data_date, 'yyyy-mm-dd'),'yyyy-mm-dd') as data_dt,
+		       t.src_no,
+		       t.pawn_id,
+		       t.guar_no,
+		       t.guar_cont_no,
+		       t.guar_cust_no,
+		       t.cus_typ_cd,
+		       t.com_loan_card_no,
+		       t.pawn_nm,
+		       t.pawn_type_cd,
+		       t.pawn_type_sub_cd,
+		       t.status_cd,
+		       t.ccy_cd,
+		       t.eval_type_cd,
+		       t.eval_person,
+		       t.eval_org,
+		       t.eval_amt,
+		       t.book_amt,
+		       to_char(t.EVAL_DT, 'yyyy-mm-dd') as EVAL_DT,
+		       to_char(t.EVAL_END_DT, 'yyyy-mm-dd') as EVAL_END_DT,
+		       t.our_set_guaranty_amt,
+		       t.right_cert_type_cd,
+		       t.right_cert_no,
+		       t.right_org,
+		       to_char(t.IN_DT, 'yyyy-mm-dd') as IN_DT,
+		       to_char(t.OUT_DT, 'yyyy-mm-dd') as OUT_DT,
+		       t.depot_status_cd,
+		       t.book_no,
+		       t.book_org,
+		       to_char(t.BOOK_DT, 'yyyy-mm-dd') as BOOK_DT,
+		       to_char(t.BOOK_END_DT, 'yyyy-mm-dd') as BOOK_END_DT,
+		       t.common_owner_nm,
+		       t.renter_nm,
+		       t.whole_mortagage_our_ind,
+		       t.property_disputed_ind,
+		       t.rental_ind,
+		       t.if_book,
+		       t.common_assets_ind,
+		       t.remarks,
+		       t.guar_cust_nm,
+		       org.ORG_NAME
+		  from ACRM_F_AG_LOAN_PAWN_INFO t
+		   left join admin_sm_org org 
+		  on org.ORG_ID=t.BOOK_ORG 
+		  where 1 = 1
+
+		  <if  test="custId != null and custId != ''">
+	       		and t.GUAR_CUST_NO =#{custId,jdbcType=VARCHAR} 
+		  </if>
+	</select>
+</mapper>

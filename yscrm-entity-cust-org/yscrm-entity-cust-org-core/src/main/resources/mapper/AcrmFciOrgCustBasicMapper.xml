@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.cust.org.repository.mapper.AcrmFciOrgCustBasicMapper">
+    <sql id="Base_Column_List">
+	    DATA_DATE,LAST_UPDATE_SYS,LAST_UPDATE_USER,LAST_UPDATE_TM,LAST_UPDATE_ORG,CORP_ORG_CODE,CUST_ID,ECIF_CUST_ID,CUST_NAME,CERT_TYPE,CERT_NO,REG_CURR_CD,REG_CAPITAL,COM_SCALE,TOTAL_ASSETS,LOAN_CUST_TYPE,INV_TYPE,TOTAL_SALES,INDUS_CD,COM_MAIN_OPT_SCP,COM_PART_OPT_SCP,CUST_BANK_REL,HOLD_STOCK_AMT,COM_REL_DGR,BE_CUST_DATE,COM_INIT_LOAN_DATE,STOCK_FLG,REAL_CNTR,COM_ESTAB_DATE,EMP_NUM,COM_INS_REG_DATE,COM_INS_EXP_DATE,REG_CODE,REG_TYPE,REG_AREA_NAME,REG_ADDR,NAT_TAX_REG_CODE,LOC_TAX_REG_CODE,IS_BASE_BANK,CUR_BANK,FOR_BANK,CUR_ACCT_NO,FOR_ACCT_NO,BASE_ACCT_DATE,CORP_TYPE,ECON_PROPER,INS_CRED_COD,LEGAL_CUST_ID,LEGAL_NAME,CONT_MAN,CONT_TEL_NO,EFFECT_FLG,LOAN_SEVEN_LEV,CREDIT_LEV,SERV_LEV,VALUE_LEV,BELONG_MGR,BELONG_BRCH,CUST_ASSIGN_STAT,CUST_STATUS,SRC_CUST_STATUS,IS_LOAN_CUST,IS_STOCK_CUST,IS_CARD_VIP,IS_ADMIT_ENTER,REMARK
+    </sql>
+    <!-- 对公客户基本信息查询 -->
+	<select id="querylist" parameterType="java.util.Map" resultType="java.util.Map">
+		    SELECt t.DATA_DATE,
+		           t.LAST_UPDATE_SYS,
+		           t.LAST_UPDATE_USER,
+		           to_char(t.LAST_UPDATE_TM,'yyyy-mm-dd') as LAST_UPDATE_TM,
+		           t.LAST_UPDATE_ORG,
+		           t.CORP_ORG_CODE,
+		           t.CUST_ID,
+		           t.ECIF_CUST_ID,
+		           t.CUST_NAME,
+		           t.CERT_TYPE,
+		           t.CERT_NO,
+		           t.REG_CURR_CD,
+		           t.REG_CAPITAL,
+		           t.COM_SCALE,
+		           t.TOTAL_ASSETS,
+		           t.LOAN_CUST_TYPE,
+		           t.INV_TYPE,
+		           t.TOTAL_SALES,
+		           t.INDUS_CD,
+		           t.COM_MAIN_OPT_SCP,
+		           t.COM_PART_OPT_SCP,
+		           t.CUST_BANK_REL,
+		           t.HOLD_STOCK_AMT,
+		           t.COM_REL_DGR,
+		           t.BE_CUST_DATE,
+		           t.COM_INIT_LOAN_DATE,
+		           t.STOCK_FLG,
+		           t.REAL_CNTR,
+		           t.COM_ESTAB_DATE,
+		           t.EMP_NUM,
+		           t.COM_INS_REG_DATE,
+		           t.COM_INS_EXP_DATE,
+		           t.REG_CODE,
+		           t.REG_TYPE,
+		           t.REG_AREA_NAME,
+		           t.REG_ADDR,
+		           t.NAT_TAX_REG_CODE,
+		           t.LOC_TAX_REG_CODE,
+		           t.IS_BASE_BANK,
+		           t.CUR_BANK,
+		           t.FOR_BANK,
+		           t.CUR_ACCT_NO,
+		           t.FOR_ACCT_NO,
+		           t.BASE_ACCT_DATE,
+		           t.CORP_TYPE,
+		           t.ECON_PROPER,
+		           t.INS_CRED_COD,
+		           t.LEGAL_CUST_ID,
+		           t.LEGAL_NAME,
+		           t.CONT_MAN,
+		           t.CONT_TEL_NO,
+		           t.EFFECT_FLG,
+		           t.LOAN_SEVEN_LEV,
+		           t.CREDIT_LEV,
+		           t.SERV_LEV,
+		           t.VALUE_LEV,
+		           t.BELONG_MGR,
+		           t.BELONG_BRCH,
+		           t.CUST_ASSIGN_STAT,
+		           t.CUST_STATUS,
+		           t.SRC_CUST_STATUS,
+		           t.IS_LOAN_CUST,
+		           t.IS_STOCK_CUST,
+		           t.IS_CARD_VIP,
+		           t.IS_ADMIT_ENTER,
+		           t.REMARK,
+		           a.USER_NAME,
+		           b.ORG_NAME,
+		           m.MOBILE  as MGR_TEL,
+		           d.M_SUM_CONTRIBU,
+		          lt1.LOOKUP_ITEM_NAME  as INDUS_CD_NAME,
+		          lt2.LOOKUP_ITEM_NAME  as REG_CURR_CD_NAME,
+		          lt3.LOOKUP_ITEM_NAME  as VALUE_LEV_NAME,
+		          lt4.LOOKUP_ITEM_NAME  as SERV_LEV_NAME,
+		          lt5.LOOKUP_ITEM_NAME  as EFFECT_FLG_NAME,
+		          lt6.LOOKUP_ITEM_NAME  as CUST_STATUS_NAME,
+		          lt7.LOOKUP_ITEM_NAME  as CREDIT_LEV_NAME,
+		          it.LOOKUP_ITEM_NAME  as CERT_TYPE_NAME,
+		          it1.LOOKUP_ITEM_NAME  as LOAN_SEVEN_LEVNAME
+		      from ACRM_F_CI_ORG_CUST_INFO t
+		      left join ADMIN_SM_USER a on a.USER_CODE=t.BELONG_MGR
+		      left join ADMIN_SM_ORG b on b.ORG_ID=t.BELONG_BRCH
+		      left join ACRM_F_CM_CUST_MGR_INFO  m on m.CUST_MANAGER_ID=t.BELONG_MGR
+		      left join ACRM_F_AG_CONTRI_REPORT d on d.CUST_ID=t.CUST_ID
+		      left join admin_sm_lookup_item  lt1 on lt1.LOOKUP_ITEM_CODE=t.INDUS_CD  and lt1.LOOKUP_CODE='CD0050'
+		      left join admin_sm_lookup_item  lt2 on lt2.LOOKUP_ITEM_CODE=t.REG_CURR_CD  and lt2.LOOKUP_CODE='CD0071'
+		      left join admin_sm_lookup_item  lt3 on lt3.LOOKUP_ITEM_CODE=t.VALUE_LEV  and lt3.LOOKUP_CODE='CD0351'
+		      left join admin_sm_lookup_item  lt4 on lt4.LOOKUP_ITEM_CODE=t.SERV_LEV  and lt4.LOOKUP_CODE='CD0032'
+		      left join admin_sm_lookup_item  lt5 on lt5.LOOKUP_ITEM_CODE=t.EFFECT_FLG  and lt5.LOOKUP_CODE='CD0242'
+		      left join admin_sm_lookup_item  lt6 on lt6.LOOKUP_ITEM_CODE=t.CUST_STATUS  and lt6.LOOKUP_CODE='CD0019'
+		      left join admin_sm_lookup_item  lt7 on lt7.LOOKUP_ITEM_CODE=t.CREDIT_LEV  and lt7.LOOKUP_CODE='CD0422'
+		      left join admin_sm_lookup_item  it on it.LOOKUP_ITEM_CODE=t.CERT_TYPE and it.LOOKUP_CODE='CD0011'
+		      left join admin_sm_lookup_item  it1 on it1.LOOKUP_ITEM_CODE=t.LOAN_SEVEN_LEV and it1.LOOKUP_CODE='CD0315'
+		      where 1=1
+		  
+		  <if  test="condition.custId != null and condition.custId != ''">
+       			and  t.CUST_ID =#{condition.custId,jdbcType=VARCHAR} 
+	  	  </if>
+	</select>
+	
+	<select id="queryCustUpdateHis" parameterType="String"	resultType="java.util.HashMap">
+		select t.id,t.cust_id,t.chg_org_id,t.chg_usr,to_char(t.chg_dt,'YYYY-MM-dd HH24:MM:SS') as chg_dt,
+       t.chg_mod,t.chg_type, t.chg_eng_name,t.chg_chi_name,t.chg_bef_key_value,
+       t.chg_bef_value_value,t.chg_aft_key_value,t.chg_aft_value_value,t.table_name,t.if_use,
+       t2.org_name,t3.user_name
+		  from OCRM_F_CI_CUST_UPDATE_HIS t
+		  left join admin_sm_org t2
+		    on t.chg_org_id = t2.org_code
+		  left join admin_sm_user t3
+		  on t.chg_usr = t3.login_code
+		where t.CUST_ID = #{custId} and t.CHG_MOD = 'orgBaseView'
+	</select>
+	
+	<update id="updateIsUse" parameterType="String">
+		update OCRM_F_CI_CUST_UPDATE_HIS set IF_USE = '0' 
+		where cust_id = #{custId} and chg_eng_name in (${updateName})
+	</update>
+	<select id="getlookupItem" resultType="java.util.HashMap">
+	 <!-- select LOOKUP_ITEM_CODE,LOOKUP_ITEM_NAME,substr(LOOKUP_ITEM_CODE,0,1) as up_code from admin_sm_lookup_item where LOOKUP_CODE='CD0050' -->
+	select LOOKUP_ITEM_CODE,LOOKUP_ITEM_NAME,
+       case when LOOKUP_ITEM_CODE=up_code then ''
+       else up_code
+       end as up_code from(
+select LOOKUP_ITEM_CODE,LOOKUP_ITEM_NAME,substr(LOOKUP_ITEM_CODE,0,1) as up_code from admin_sm_lookup_item where LOOKUP_CODE='CD0050')
+	</select>  
+	
+	<select id="getItemName" parameterType="java.util.HashMap"	resultType="String">
+	select lookup_item_name from admin_sm_lookup_item where lookup_code=#{dataCode,jdbcType=VARCHAR} and lookup_item_code=#{itemCode,jdbcType=VARCHAR}
+	</select>
+</mapper>

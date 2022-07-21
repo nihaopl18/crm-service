@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.admin.repository.mapper.AdminSmDataAuthTmplMapper">
+
+  <select id="getTmplListBycodeOrName" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.Map" databaseId="DB2">
+        select 
+        t0.AUTH_TMPL_ID,t0.AUTH_TMPL_NAME, char(t0.SQL_STRING) as SQL_STRING,t0.SQL_NAME,t0.PRIORITY, char(t0.CONTR_INCLUDE) as CONTR_INCLUDE,u.user_name as LAST_CHG_USR,substr(t0.LAST_CHG_DT, 1, 10) as LAST_CHG_DT
+        from  ADMIN_SM_DATA_AUTH_TMPL t0
+        left join admin_sm_user u
+            on t0.last_chg_usr = u.user_id
+        <where>
+                
+                <if test="condition.authTmplName != null and condition.authTmplName !=''">
+                    and  t0.AUTH_TMPL_NAME like #{condition.authTmplName, jdbcType=VARCHAR}   
+                </if> 
+                <if test="condition.sqlName != null and condition.sqlName !=''">
+                    and  t0.SQL_NAME like #{condition.sqlName}   
+                </if> 
+
+        </where>
+         order by t0.last_chg_dt desc
+    </select>
+		
+</mapper>

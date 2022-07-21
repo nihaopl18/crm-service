@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.info.remind.repository.mapper.OcrmFwpRemindChlMapper">
+    
+    <!-- 列表查询 -->
+    <select id="queryChl" resultType="java.util.HashMap">
+	    select CHL_ID as KEY, CHL_NAME as VALUE from OCRM_F_WP_REMIND_CHL
+    </select>
+    
+    <!-- 列表查询 -->
+    <select id="queryChlByChlId" resultType="java.util.HashMap">
+	    select * from OCRM_F_WP_REMIND_CHL 
+	    where CHL_ID = #{chlId,jdbcType=VARCHAR} 
+    </select>
+</mapper>

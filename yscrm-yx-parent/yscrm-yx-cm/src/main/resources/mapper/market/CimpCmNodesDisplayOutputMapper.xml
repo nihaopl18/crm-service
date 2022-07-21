@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.cm.market.repository.mapper.CimpCmNodesDisplayOutputMapper">
+	<select id="getDisOutput" parameterType="String"
+		resultType="cn.com.yusys.yusp.cm.market.domain.CimpCmNodesDisplayOutput">
+		select T.* from CIMP_CM_NODES_DISPLAY_OUTPUT T
+		where T.FORM_ID = #{formId, jdbcType=VARCHAR}
+	</select>
+	
+</mapper>

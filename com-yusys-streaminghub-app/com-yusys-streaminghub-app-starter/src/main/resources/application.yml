@@ -1,0 +1,15 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: app
+  profiles:
+    active: dev
+# Mybatis 相关配置
+mybatis:
+  mapperLocations: classpath*:mapper/**/*.xml
+  #实体类别名，在mapper中不必写全路径类名了
+  type-aliases-package: com.yusys.streaminghub.app.domain
+  configuration:
+    map-underscore-to-camel-case: true

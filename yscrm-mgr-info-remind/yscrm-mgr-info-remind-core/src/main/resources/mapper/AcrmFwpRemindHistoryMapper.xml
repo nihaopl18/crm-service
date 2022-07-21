@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.info.remind.repository.mapper.AcrmFwpRemindHistoryMapper">
+    <select id="queryHistory" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+    	select A.TYPE_ID,A.TYPE_NAME,A.MESSAGE_SEND_ID,B.USER_NAME AS MESSAGE_SEND_NAME,C.USER_NAME AS MESSAGE_RECE_NAME,
+    	A.MESSAGE_INFO,A.SEND_TIME,MESSAGE_NAME 
+    	 from ACRM_F_WP_REMIND_HISTORY A 
+    	left join admin_sm_user B on A.MESSAGE_SEND_ID=B.user_id 
+    	left join admin_sm_user C on A.MESSAGE_RECE_ID=C.user_id
+    	<where>
+    	<if test="condition.typeId!=null and condition.typeId!=''">
+    		AND	A.TYPE_ID=#{condition.typeId,jdbcType=VARCHAR}
+    	</if>
+    	<if test="condition.sendTime!=null and condition.sendTime!=''">
+    		AND	A.SEND_TIME like CONCAT(#{condition.sendTime,jdbcType=VARCHAR},'%')
+    	</if>
+    	</where>
+    </select>
+    
+</mapper>

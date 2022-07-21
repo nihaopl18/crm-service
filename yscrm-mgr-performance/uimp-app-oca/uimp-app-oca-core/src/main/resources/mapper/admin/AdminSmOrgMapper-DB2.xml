@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.admin.repository.mapper.AdminSmOrgMapper">
+	<!-- 分页查询 -->
+	<select id="queryOrgByPage" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+		resultType="java.util.Map" databaseId="DB2">
+		  select a.org_id, a.instu_id, a.org_code, a.org_name,
+	       a.up_org_id, a.org_level,a.org_addr, a.zip_cde,
+	       a.cont_tel, a.cont_usr,a.org_sts,a.last_chg_usr,
+	       substr(a.LAST_CHG_DT, 1, 10) as LAST_CHG_DT,
+	       u.user_name as last_chg_name, i.INSTU_NAME,i.instu_sts,
+	       g.org_name as up_org_name
+		  from admin_sm_org a
+		  left join sys_org_view s
+		    on s.org_Code = a.org_Code
+		  inner join admin_sm_instu i
+		    on i.INSTU_ID = a.INSTU_ID and i.instu_sts ='A'
+		  left join admin_sm_user u on u.USER_ID=a.last_chg_usr
+		  left join admin_sm_org g on g.org_ID=a.up_org_id
+    	<where>
+			
+			<if test="condition.orgCode != null and condition.orgCode != ''">
+					and s.org_Code  LIKE CONCAT(CONCAT('%', #{condition.orgCode, jdbcType=VARCHAR}),'%') 
+			</if>
+			<if test="condition.unitOrgId != null and condition.unitOrgId != ''">
+                and s.ORG_SEQ  LIKE (CONCAT(CONCAT('%', CONCAT(CONCAT(',',#{condition.unitOrgId, jdbcType=VARCHAR}),',')),'%'))
+			</if>
+			<if test="condition.orgName != null and condition.orgName != ''">
+				and a.ORG_NAME LIKE CONCAT(CONCAT('%', #{condition.orgName, jdbcType=VARCHAR}),'%') 
+			</if>
+			<if test="condition.orgSts != null and condition.orgSts != ''">
+				and a.ORG_STS = #{condition.orgSts , jdbcType=VARCHAR}
+			</if>
+		</where>
+		<if test="sort != null">
+			order by ${sort}
+		</if>
+	</select>
+
+	<!-- 查询机构树信息 -->
+	<select id="queryOrgTreeInfo"  resultType="java.util.Map"  databaseId="DB2">
+		select o.org_code,o.org_name, o.up_org_Id as up_org_Id,o.ORG_ID,o.INSTU_ID,
+		i.instu_name,v.ORG_SEQ ,v.ORG_LEVEL,'G' as org_type from admin_sm_org o
+     	left JOIN admin_sm_instu i on i.instu_id=o.instu_id
+    	left join sys_org_view v on v.ORG_CODE=o.org_code 
+		<where>
+			<if test=" orgInfo !=null and orgInfo !=''">
+                and v.ORG_SEQ  LIKE (CONCAT(CONCAT('%', CONCAT(CONCAT(',',#{orgInfo, jdbcType=VARCHAR}),',')),'%'))
+			</if>
+			<if test=" orgSts !=null and orgSts !=''">
+				and o.org_sts= #{orgSts, jdbcType=VARCHAR}
+			</if>
+			<if test=" instuId !=null and instuId !=''">
+				and o.INSTU_ID= #{instuId, jdbcType=VARCHAR}
+			</if>
+		</where>
+        order by o.org_code
+	</select>
+	
+</mapper>

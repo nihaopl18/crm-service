@@ -1,0 +1,566 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper
+	namespace="cn.com.yusys.yusp.dycrm.todowork.repository.mapper.OcrmFwpTodoWorkMapper">
+	<!-- 条件列表查询 -->
+	<select id="queryMainlist" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+		resultType="java.util.HashMap">
+		select
+		f.TODO_WORK_ID,
+		f.TODO_WORK_TITLE,
+		f.TODO_WORK_TYPE,
+		f.TODO_WORK_CONTENT,
+		f.CREATOR_ID,
+		f.CREATOR_NAME,
+		f.CREATOR_ORG_ID,
+		f.CREATOR_ORG_NAME,
+		f.CREATE_DATE,
+		f.TODO_WORK_STATE,
+		f.END_DATE,
+		f.FINISHER,
+		f.IS_DELETE,
+		f.IS_NOTICE,
+		f.NOTICE_CYCLE,
+		f.START_DATE,
+		f.LAST_CHG_USR_ID,
+		f.LAST_CHG_USR_NAME,
+		f.LAST_CHG_USR_ORG_ID,
+		f.LAST_CHG_USR_ORG_NAME,
+		f.LAST_CHG_DATE,
+		f.CONTACT_TYPE,
+		f.CONTACT_GOAL,
+		f.RELATION_CUST
+		from
+		OCRM_F_WP_TODO_WORK f
+		LEFT JOIN (
+		SELECT
+		NOTICE_ID,
+		MIN(START_DATE)
+		START_DATE
+		FROM
+		OCRM_F_WP_TODO_WORK_SON
+		WHERE
+		IS_DELETE = 'N'
+		AND
+		TODO_WORK_STATE = '1'
+		GROUP BY
+		NOTICE_ID) s ON
+		f.TODO_WORK_ID =
+		s.NOTICE_ID
+		<where>
+			IS_DELETE = 'N'
+			<if test="condition.finisher != null and condition.finisher != ''">
+				AND FINISHER like #{condition.finisher,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.mySelect != null and condition.mySelect != ''">
+				AND (TODO_WORK_TITLE like
+				#{condition.mySelect,jdbcType=VARCHAR}
+				OR
+				RELATION_CUST like
+				#{condition.mySelect,jdbcType=VARCHAR})
+			</if>
+			<if
+				test="condition.todoWorkTitle != null and condition.todoWorkTitle != ''">
+				AND TODO_WORK_TITLE like
+				#{condition.todoWorkTitle,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.relationCust != null and condition.relationCust != ''">
+				AND RELATION_CUST like
+				#{condition.relationCust,jdbcType=VARCHAR}
+			</if>
+			<if
+				test="condition.todoWorkState != null and condition.todoWorkState != ''">
+				AND TODO_WORK_STATE =
+				#{condition.todoWorkState,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.todoWorkType != null and condition.todoWorkType != ''">
+				AND TODO_WORK_TYPE =
+				#{condition.todoWorkType,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.userId != null and condition.userId != ''">
+				AND FINISHER !=
+				#{condition.userId,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.creatorId != null and condition.creatorId != ''">
+				AND CREATOR_ID =
+				#{condition.creatorId,jdbcType=VARCHAR}
+			</if>
+			<if
+				test="condition.startDate != null and condition.startDate != '' and condition.endDate != null and condition.endDate != ''">
+                <![CDATA[
+	                AND ((TO_CHAR(f.START_DATE,'yyyy-MM-dd hh24:mi:ss') >= #{condition.startDate,jdbcType=VARCHAR}
+	                AND TO_CHAR(f.START_DATE,'yyyy-MM-dd hh24:mi:ss') <= #{condition.endDate,jdbcType=VARCHAR}
+	                AND s.START_DATE IS NULL)
+	                OR (TO_CHAR(s.START_DATE,'yyyy-MM-dd hh24:mi:ss') >= #{condition.startDate,jdbcType=VARCHAR}
+	                AND TO_CHAR(s.START_DATE,'yyyy-MM-dd hh24:mi:ss') <= #{condition.endDate,jdbcType=VARCHAR}))
+	            ]]>
+			</if>
+		</where>
+		ORDER BY
+		TODO_WORK_STATE,
+		IS_NOTICE DESC,
+		<!-- s.START_DATE DESC, -->
+		f.START_DATE
+		DESC
+	</select>
+	<!--获取当前登录用户角色信息 -->
+	<select id="getUserRoleInfo" parameterType="java.lang.String"
+		resultType="java.util.Map">
+		select t.role_id,t1.role_name from admin_sm_user_role_rel t
+		left join admin_sm_role t1 on t1.role_id=t.role_id
+		left join
+		admin_sm_user t2 on t2.user_id=t.user_id
+		where
+		t2.login_code=#{userId,jdbcType=VARCHAR}
+	</select>
+
+	<select id="indexQuery" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+		resultType="java.util.HashMap">
+		SELECT
+		TODO_WORK_ID,
+		TODO_WORK_TITLE,
+		TODO_WORK_TYPE,
+		TODO_WORK_CONTENT,
+		CREATOR_ID,
+		CREATOR_NAME,
+		CREATOR_ORG_ID,
+		CREATOR_ORG_NAME,
+		CREATE_DATE,
+		TODO_WORK_STATE,
+		FINISHER,
+		IS_DELETE,
+		START_DATE,
+		LAST_CHG_USR_ID,
+		LAST_CHG_USR_NAME,
+		LAST_CHG_USR_ORG_ID,
+		LAST_CHG_USR_ORG_NAME,
+		LAST_CHG_DATE,
+		RELATION_CUST,
+		CONTACT_TYPE,
+		CONTACT_GOAL,
+		NOTICE
+		FROM
+		(
+		SELECT
+		TODO_WORK_ID,
+		TODO_WORK_TITLE,
+		TODO_WORK_TYPE,
+		TODO_WORK_CONTENT,
+		CREATOR_ID,
+		CREATOR_NAME,
+		CREATOR_ORG_ID,
+		CREATOR_ORG_NAME,
+		CREATE_DATE,
+		TODO_WORK_STATE,
+		FINISHER,
+		IS_DELETE,
+		START_DATE,
+		LAST_CHG_USR_ID,
+		LAST_CHG_USR_NAME,
+		LAST_CHG_USR_ORG_ID,
+		LAST_CHG_USR_ORG_NAME,
+		LAST_CHG_DATE,
+		RELATION_CUST,
+		CONTACT_TYPE,
+		CONTACT_GOAL,
+		'1' AS NOTICE
+		FROM
+		OCRM_F_WP_TODO_WORK
+		WHERE
+		IS_NOTICE = 'N'
+		AND FINISHER LIKE
+		#{condition.finisher,jdbcType=VARCHAR}
+		AND TO_CHAR(START_DATE,
+		'yyyy-MM-dd') = #{condition.startDate,jdbcType=VARCHAR}
+		AND IS_DELETE =
+		'N'
+		UNION
+		SELECT
+		TODO_WORK_ID,
+		TODO_WORK_TITLE,
+		TODO_WORK_TYPE,
+		TODO_WORK_CONTENT,
+		CREATOR_ID,
+		CREATOR_NAME,
+		CREATOR_ORG_ID,
+		CREATOR_ORG_NAME,
+		CREATE_DATE,
+		TODO_WORK_STATE,
+		FINISHER,
+		IS_DELETE,
+		START_DATE,
+		LAST_CHG_USR_ID,
+		LAST_CHG_USR_NAME,
+		LAST_CHG_USR_ORG_ID,
+		LAST_CHG_USR_ORG_NAME,
+		LAST_CHG_DATE,
+		RELATION_CUST,
+		CONTACT_TYPE,
+		CONTACT_GOAL,
+		'2' AS NOTICE
+		FROM
+		OCRM_F_WP_TODO_WORK_SON
+		WHERE
+		FINISHER LIKE
+		#{condition.finisher,jdbcType=VARCHAR}
+		AND TO_CHAR(START_DATE,
+		'yyyy-MM-dd') =
+		#{condition.startDate,jdbcType=VARCHAR}
+		AND IS_DELETE =
+		'N' )
+		ORDER BY TODO_WORK_STATE,START_DATE,NOTICE DESC
+	</select>
+
+	<select id="queryFinished" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+		SELECT
+		TODO_WORK_ID,
+		TODO_WORK_TITLE,
+		TODO_WORK_TYPE,
+		TODO_WORK_CONTENT,
+		CREATOR_ID,
+		CREATOR_NAME,
+		CREATOR_ORG_ID,
+		CREATOR_ORG_NAME,
+		CREATE_DATE,
+		TODO_WORK_STATE,
+		FINISHER,
+		IS_DELETE,
+		START_DATE,
+		LAST_CHG_USR_ID,
+		LAST_CHG_USR_NAME,
+		LAST_CHG_USR_ORG_ID,
+		LAST_CHG_USR_ORG_NAME,
+		LAST_CHG_DATE,
+		RELATION_CUST,
+		CONTACT_TYPE,
+		CONTACT_GOAL,
+		NOTICE
+		FROM
+		(
+		SELECT
+		TODO_WORK_ID,
+		TODO_WORK_TITLE,
+		TODO_WORK_TYPE,
+		TODO_WORK_CONTENT,
+		CREATOR_ID,
+		CREATOR_NAME,
+		CREATOR_ORG_ID,
+		CREATOR_ORG_NAME,
+		CREATE_DATE,
+		TODO_WORK_STATE,
+		FINISHER,
+		IS_DELETE,
+		START_DATE,
+		LAST_CHG_USR_ID,
+		LAST_CHG_USR_NAME,
+		LAST_CHG_USR_ORG_ID,
+		LAST_CHG_USR_ORG_NAME,
+		LAST_CHG_DATE,
+		RELATION_CUST,
+		CONTACT_TYPE,
+		CONTACT_GOAL,
+		'1' AS NOTICE
+		FROM
+		OCRM_F_WP_TODO_WORK
+		WHERE
+		IS_NOTICE = 'N'
+		AND TODO_WORK_STATE = '2'
+		<if test="condition.reportType == '1'.toString()">
+		  AND TODO_WORK_TYPE != '5'
+		</if>
+		AND FINISHER LIKE
+		#{condition.finisher,jdbcType=VARCHAR}
+		<![CDATA[
+		  AND TO_CHAR(START_DATE, 'yyyy-MM-dd') >= #{condition.startDate,jdbcType=VARCHAR}
+		  AND TO_CHAR(START_DATE, 'yyyy-MM-dd') <= #{condition.endDate,jdbcType=VARCHAR}
+		]]>
+		AND IS_DELETE = 'N'
+		UNION
+		SELECT
+		TODO_WORK_ID,
+		TODO_WORK_TITLE,
+		TODO_WORK_TYPE,
+		TODO_WORK_CONTENT,
+		CREATOR_ID,
+		CREATOR_NAME,
+		CREATOR_ORG_ID,
+		CREATOR_ORG_NAME,
+		CREATE_DATE,
+		TODO_WORK_STATE,
+		FINISHER,
+		IS_DELETE,
+		START_DATE,
+		LAST_CHG_USR_ID,
+		LAST_CHG_USR_NAME,
+		LAST_CHG_USR_ORG_ID,
+		LAST_CHG_USR_ORG_NAME,
+		LAST_CHG_DATE,
+		RELATION_CUST,
+		CONTACT_TYPE,
+		CONTACT_GOAL,
+		'2' AS NOTICE
+		FROM
+		OCRM_F_WP_TODO_WORK_SON
+		WHERE
+		FINISHER
+		LIKE
+		#{condition.finisher,jdbcType=VARCHAR}
+		<if test="condition.reportType == '1'.toString()">
+			AND TODO_WORK_TYPE != '5'
+		</if>
+		AND TODO_WORK_STATE = '2'
+		<![CDATA[
+		  AND TO_CHAR(START_DATE, 'yyyy-MM-dd') >= #{condition.startDate,jdbcType=VARCHAR}
+		  AND TO_CHAR(START_DATE, 'yyyy-MM-dd') <= #{condition.endDate,jdbcType=VARCHAR}
+		]]>
+		AND IS_DELETE = 'N' )
+		ORDER BY TODO_WORK_STATE,START_DATE,NOTICE DESC
+	</select>
+
+	<select id="selectTodoNum" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+		resultType="java.lang.Integer">
+		SELECT F.NUM + S.NUM AS NUM
+		FROM (
+		SELECT
+		COUNT(TODO_WORK_ID)
+		AS NUM
+		FROM
+		OCRM_F_WP_TODO_WORK
+		WHERE
+		IS_NOTICE = 'N'
+		AND FINISHER LIKE
+		#{condition.finisher,jdbcType=VARCHAR}
+		AND TO_CHAR(START_DATE,
+		'yyyy-MM-dd') =
+		#{condition.startDate,jdbcType=VARCHAR}
+		AND IS_DELETE =
+		'N') F,
+		(
+		SELECT
+		COUNT(TODO_WORK_ID) AS NUM
+		FROM
+		OCRM_F_WP_TODO_WORK_SON
+		WHERE
+		FINISHER LIKE #{condition.finisher,jdbcType=VARCHAR}
+		AND
+		TO_CHAR(START_DATE, 'yyyy-MM-dd') =
+		#{condition.startDate,jdbcType=VARCHAR}
+		AND IS_DELETE = 'N') S
+	</select>
+
+	<select id="selectReportNum" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+		resultType="java.lang.Integer">
+		SELECT
+		COUNT(WORK_REPORT_ID)
+		AS NUM
+		FROM
+		OCRM_F_WP_WORK_REPORT
+		WHERE
+		CREATOR_ID =#{condition.userId,jdbcType=VARCHAR}
+		AND
+		TO_CHAR(CREATE_DATE,
+		'yyyy-MM-dd')
+		=#{condition.startDate,jdbcType=VARCHAR}
+		AND IS_DELETE =
+		'N'
+		AND IS_DRAFT
+		= 'N'
+	</select>
+
+	<select id="queryDetail" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+		resultType="java.util.HashMap">
+		select
+		TODO_WORK_ID,
+		TODO_WORK_TITLE,
+		TODO_WORK_TYPE,
+		TODO_WORK_CONTENT,
+		CREATOR_ID,
+		CREATOR_NAME,
+		CREATOR_ORG_ID,
+		CREATOR_ORG_NAME,
+		CREATE_DATE,
+		TODO_WORK_STATE,
+		END_DATE,
+		FINISHER,
+		IS_DELETE,
+		IS_NOTICE,
+		NOTICE_CYCLE,
+		START_DATE,
+		LAST_CHG_USR_ID,
+		LAST_CHG_USR_NAME,
+		LAST_CHG_USR_ORG_ID,
+		LAST_CHG_USR_ORG_NAME,
+		LAST_CHG_DATE,
+		RELATION_CUST,
+		CONTACT_TYPE,
+		CONTACT_GOAL
+		from
+		OCRM_F_WP_TODO_WORK
+		<where>
+			AND TODO_WORK_ID =
+			#{condition.todoWorkId,jdbcType=VARCHAR}
+		</where>
+	</select>
+
+	<select id="queryOneDetail" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+		resultType="cn.com.yusys.yusp.dycrm.todowork.domain.TodoWorkExcle">
+		select T.*, ROWNUM TODO_WORK_ID from (SELECT
+		'一次性待办' IS_NOTICE,
+		TW.TODO_WORK_TITLE,
+		TI1.LOOKUP_ITEM_NAME TODO_WORK_TYPE,
+		TW.TODO_WORK_CONTENT,
+		TW.CREATOR_ID,
+		TW.CREATOR_NAME,
+		TO_CHAR(TW.CREATE_DATE,'yyyy-MM-DD HH24:mi') CREATE_DATE,
+		TI2.LOOKUP_ITEM_NAME TODO_WORK_STATE,
+		TW.FINISHER,
+		TO_CHAR(TW.START_DATE,'yyyy-MM-DD HH24:mi') TODO_DATE,
+		TW.RELATION_CUST
+		FROM
+		OCRM_F_WP_TODO_WORK TW
+		LEFT JOIN ADMIN_SM_LOOKUP_ITEM TI1
+		ON TW.TODO_WORK_TYPE = TI1.LOOKUP_ITEM_CODE
+		AND TI1.LOOKUP_CODE = 'DY0002'
+		LEFT JOIN ADMIN_SM_LOOKUP_ITEM TI2
+		ON TW.TODO_WORK_STATE = TI2.LOOKUP_ITEM_CODE
+		AND TI2.LOOKUP_CODE = 'DY0001'
+		<where>
+			<if test="condition.oneList != null">
+				AND 1=1
+				AND TODO_WORK_ID in
+					<foreach collection="condition.oneList" item="todoWorkId" index="index" open="(" close=")" separator=",">
+				    #{todoWorkId}
+					</foreach>
+			</if>
+			<if test="condition.oneList == null">
+				AND 1 != 1
+			</if>
+		</where>
+		order by TW.CREATE_DATE desc ) T
+	</select>
+
+	<select id="queryCycleDetail" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+		resultType="cn.com.yusys.yusp.dycrm.todowork.domain.TodoWorkExcle">
+		SELECT
+		TW.TODO_WORK_ID,
+		'周期性待办' IS_NOTICE,
+		TW.TODO_WORK_TITLE,
+		TI1.LOOKUP_ITEM_NAME TODO_WORK_TYPE,
+		TWS.TODO_WORK_CONTENT,
+		TW.CREATOR_ID,
+		TW.CREATOR_NAME,
+		TO_CHAR(TW.CREATE_DATE,'yyyy-MM-DD HH24:mi') CREATE_DATE,
+		TI2.LOOKUP_ITEM_NAME TODO_WORK_STATE,
+		TWS.FINISHER,
+		TO_CHAR(TWS.START_DATE,'yyyy-MM-DD HH24:mi') TODO_DATE,
+		TWS.RELATION_CUST,
+		TI3.LOOKUP_ITEM_NAME NOTICE_CYCLE,
+		TO_CHAR(TW.START_DATE,'yyyy-MM-DD HH24:mi') START_DATE,
+		TO_CHAR(TW.END_DATE,'yyyy-MM-DD HH24:mi') END_DATE,
+		TWS.TODO_WORK_ID SON_TODO_WORK_ID
+		FROM
+		OCRM_F_WP_TODO_WORK TW
+		LEFT JOIN OCRM_F_WP_TODO_WORK_SON TWS
+		ON TW.TODO_WORK_ID = TWS.NOTICE_ID
+		AND TWS.IS_DELETE = 'N'
+		LEFT JOIN ADMIN_SM_LOOKUP_ITEM TI1
+		ON TW.TODO_WORK_TYPE = TI1.LOOKUP_ITEM_CODE
+		AND TI1.LOOKUP_CODE = 'DY0002'
+		LEFT JOIN ADMIN_SM_LOOKUP_ITEM TI2
+		ON TWS.TODO_WORK_STATE = TI2.LOOKUP_ITEM_CODE
+		AND TI2.LOOKUP_CODE = 'DY0001'
+		LEFT JOIN ADMIN_SM_LOOKUP_ITEM TI3
+		ON TW.NOTICE_CYCLE = TI3.LOOKUP_ITEM_CODE
+		AND TI3.LOOKUP_CODE = 'NOTICE_CYCLE'
+		<where>
+			<if test="condition.cycleList != null">
+				AND 1=1
+				AND TW.TODO_WORK_ID in
+					<foreach collection="condition.cycleList" item="todoWorkId"
+							 index="index" open="(" close=")" separator=",">
+						#{todoWorkId}
+					</foreach>
+			</if>
+			<if test="condition.cycleList == null">
+				AND 1!=1
+			</if>
+		</where>
+		order by TW.CREATE_DATE desc
+	</select>
+
+	<select id="listConTactByTodoWorkIds" parameterType="java.util.HashMap" resultType="cn.com.yusys.yusp.dycrm.todowork.domain.OcrmFwpTodoWork">
+		select f.TODO_WORK_ID, f.TODO_WORK_TITLE, f.TODO_WORK_TYPE, f.TODO_WORK_CONTENT, f.CREATOR_ID, f.CREATOR_NAME, f.CREATOR_ORG_ID,
+		       f.CREATOR_ORG_NAME, f.CREATE_DATE, f.TODO_WORK_STATE, f.END_DATE, f.FINISHER, f.IS_DELETE, f.IS_NOTICE, f.NOTICE_CYCLE, f.START_DATE,
+		       f.LAST_CHG_USR_ID, f.LAST_CHG_USR_NAME, f.LAST_CHG_USR_ORG_ID, f.LAST_CHG_USR_ORG_NAME, f.LAST_CHG_DATE, f.CONTACT_TYPE, f.CONTACT_GOAL, f.RELATION_CUST
+		from OCRM_F_WP_TODO_WORK f
+		where f.TODO_WORK_ID in
+			<foreach collection="todoWorkIds" item="todoWorkId" separator="," index="index" open="(" close=")">
+				#{todoWorkId}
+			</foreach>
+			and  f.IS_DELETE = 'N' and f.IS_NOTICE = 'N' and f.TODO_WORK_TYPE = '5' and f.TODO_WORK_STATE = '2'
+	</select>
+
+	<!-- 根据主键删除 逻辑删除 -->
+	<update id="deleteOne" parameterType="java.util.HashMap">
+		update OCRM_F_WP_TODO_WORK set
+		IS_DELETE = 'Y',
+		LAST_CHG_USR_ID = #{lastChgUsrId,jdbcType=VARCHAR},
+		LAST_CHG_USR_NAME = #{lastChgUsrName,jdbcType=VARCHAR},
+		LAST_CHG_USR_ORG_ID = #{lastChgUsrOrgId,jdbcType=VARCHAR},
+		LAST_CHG_USR_ORG_NAME = #{lastChgUsrOrgName,jdbcType=VARCHAR},
+		LAST_CHG_DATE = to_date(#{lastChgDate,jdbcType=VARCHAR},'yyyy-MM-dd hh24:mi:ss')
+		where
+		    TODO_WORK_ID in
+				<foreach collection="todoWorkIds" item="todoWorkId" index="index" open="(" close=")" separator=",">
+					#{todoWorkId}
+				</foreach>
+		    AND IS_DELETE = 'N'
+			AND TODO_WORK_STATE = '1'
+	</update>
+
+	<!-- 根据主键更新 -->
+	<update id="updateOne" parameterType="cn.com.yusys.yusp.dycrm.todowork.domain.OcrmFwpTodoWork">
+		update OCRM_F_WP_TODO_WORK set
+		TODO_WORK_CONTENT = #{todoWorkContent,jdbcType=VARCHAR},
+		START_DATE = #{startDate,jdbcType=VARCHAR},
+		RELATION_CUST = #{relationCust,jdbcType=VARCHAR},
+		LAST_CHG_USR_ID = #{lastChgUsrId,jdbcType=VARCHAR},
+		LAST_CHG_USR_NAME = #{lastChgUsrName,jdbcType=VARCHAR},
+		LAST_CHG_USR_ORG_ID = #{lastChgUsrOrgId,jdbcType=VARCHAR},
+		LAST_CHG_USR_ORG_NAME = #{lastChgUsrOrgName,jdbcType=VARCHAR},
+		LAST_CHG_DATE = #{lastChgDate,jdbcType=VARCHAR}
+		where TODO_WORK_ID = #{todoWorkId,jdbcType=VARCHAR}
+	</update>
+
+	<update id="updateCyCle" parameterType="cn.com.yusys.yusp.dycrm.todowork.domain.OcrmFwpTodoWork">
+		update OCRM_F_WP_TODO_WORK set
+		IS_DELETE = 'N',
+		START_DATE = #{startDate,jdbcType=VARCHAR},
+		END_DATE = #{endDate,jdbcType=VARCHAR},
+		NOTICE_CYCLE = #{noticeCycle,jdbcType=VARCHAR},
+		LAST_CHG_USR_ID = #{lastChgUsrId,jdbcType=VARCHAR},
+		LAST_CHG_USR_NAME = #{lastChgUsrName,jdbcType=VARCHAR},
+		LAST_CHG_USR_ORG_ID = #{lastChgUsrOrgId,jdbcType=VARCHAR},
+		LAST_CHG_USR_ORG_NAME = #{lastChgUsrOrgName,jdbcType=VARCHAR},
+		LAST_CHG_DATE = #{lastChgDate,jdbcType=VARCHAR}
+		where TODO_WORK_ID = #{todoWorkId,jdbcType=VARCHAR}
+	</update>
+
+	<update id="updateToDoWorkState" parameterType="java.util.HashMap">
+		update OCRM_F_WP_TODO_WORK set
+		TODO_WORK_STATE='2',
+		LAST_CHG_USR_ID = #{lastChgUsrId,jdbcType=VARCHAR},
+		LAST_CHG_USR_NAME = #{lastChgUsrName,jdbcType=VARCHAR},
+		LAST_CHG_USR_ORG_ID = #{lastChgUsrOrgId,jdbcType=VARCHAR},
+		LAST_CHG_USR_ORG_NAME = #{lastChgUsrOrgName,jdbcType=VARCHAR},
+		LAST_CHG_DATE = to_date(#{lastChgDate,jdbcType=VARCHAR},'yyyy-MM-dd hh24:mi:ss')
+		where
+		    TODO_WORK_ID in
+				<foreach collection="todoWorkIds" item="todoWorkId" index="index" open="(" close=")" separator=",">
+					#{todoWorkId}
+				</foreach>
+			AND IS_DELETE = 'N'
+			AND TODO_WORK_STATE = '1'
+	</update>
+
+</mapper>

@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper
+	namespace="cn.com.yusys.yusp.uimp.base.repository.mapper.AdminBaseMetaFunColumnMapper">
+	<resultMap id="BaseResultMap"
+		type="cn.com.yusys.yusp.uimp.base.domain.AdminBaseMetaFunColumn">
+		<id column="ID" jdbcType="VARCHAR" property="id" />
+		<result column="TABLE_CODE" jdbcType="VARCHAR" property="tableCode" />
+		<result column="COLUMN_CN_NAME" jdbcType="VARCHAR" property="columnCnName" />
+		<result column="COLUMN_NAME" jdbcType="VARCHAR" property="columnName" />
+		<result column="COLUMN_TYPE" jdbcType="VARCHAR" property="columnType" />
+		<result column="COLUMN_LENGTH" jdbcType="NUMERIC" property="columnLength" />
+		<result column="COLUMN_CODE" jdbcType="VARCHAR" property="columnCode" />
+		<result column="SORT" jdbcType="NUMERIC" property="sort" />
+	</resultMap>
+	<sql id="Base_Column_List">
+		ID,TABLE_CODE,COLUMN_CN_NAME,COLUMN_NAME,COLUMN_TYPE,COLUMN_LENGTH,COLUMN_CODE,SORT
+	</sql>
+	
+	<delete id="delFunColumnByTableCode">
+		delete from ADMIN_BASE_META_FUN_COLUMN where
+		TABLE_CODE = #{tableCode} AND COLUMN_NAME!='DSTR_STS'
+	</delete>
+
+	<select id="queryMetaFunColumn" resultMap="BaseResultMap">
+		select * from ADMIN_BASE_META_FUN_COLUMN t where t.TABLE_CODE = #{tableCode} and t.COLUMN_NAME = #{tableCode}
+	</select>
+	
+	<select id="querylist" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+		select a.*,
+		   (case when b.config_value is null then '0' else b.config_value end) as IS_PK,
+		   (case when c.config_value is null then '0' else c.config_value end) as IS_ORG,
+		   (case when d.config_value is null then '0' else d.config_value end) as IS_AMT,
+		   (case when e.config_value is null then '0' else e.config_value end) as IS_DEP 
+		 from admin_base_meta_fun_column a 
+		 left join (
+		   select config_value,column_code
+		   from admin_base_meta_fun_column_cfg 
+		   where config_name = 'IS_PK'
+		 ) b 
+		   on b.column_code = a.column_code 
+		 left join (
+		   select config_value,column_code
+		   from admin_base_meta_fun_column_cfg 
+		   where config_name = 'IS_ORG'
+		 ) c 
+		   on c.column_code = a.column_code 
+		 left join (
+		   select config_value,column_code
+		   from admin_base_meta_fun_column_cfg 
+		   where config_name = 'IS_AMT'
+		 ) d 
+		   on d.column_code = a.column_code 
+		 left join (
+		   select config_value,column_code
+		   from admin_base_meta_fun_column_cfg 
+		   where config_name = 'IS_DEP'
+		 ) e 
+		   on e.column_code = a.column_code 
+		 where a.TABLE_CODE = #{tableCode}
+		 order by a.sort
+	</select>
+	
+	<delete id="delColumnInfoByTableCode">
+		delete from ADMIN_BASE_META_FUN_COLUMN where TABLE_CODE = #{tableCode} AND COLUMN_NAME!='DSTR_STS'
+	</delete>
+	
+	<delete id="delPeriodPK">
+		DELETE FROM ADMIN_BASE_META_FUN_COLUMN WHERE
+		TABLE_CODE = #{tableCode} AND COLUMN_CODE > #{columnCode}
+	</delete>
+</mapper>

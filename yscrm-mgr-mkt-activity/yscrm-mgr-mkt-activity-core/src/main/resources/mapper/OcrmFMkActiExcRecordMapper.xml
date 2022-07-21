@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.mktactivity.repository.mapper.OcrmFMkActiExcRecordMapper">
+	<!-- 营销活动明细查询 -->
+	<select id="actiDetailListQuery" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="HashMap">
+		SELECT T.*，R.PRODUCT_ID,R.PRODUCT_NAME,T2.USER_NAME AS MAJOR_MANGER,T3.ORG_NAME AS MAJOR_ORG 
+    	FROM OCRM_F_MK_ACTI_CUST T 
+    	LEFT JOIN ocrm_f_mk_acti_product R ON R.ACTI_ID = T.ACTI_ID 
+    	left join ADMIN_SM_USER T2 ON T2.USER_ID=T.CUST_MANAGER
+		LEFT JOIN ADMIN_SM_ORG T3 ON T3.ORG_ID=T.CUST_MANAGER_ORG
+    	WHERE T.ACTI_ID= #{condition.actiId,jdbcType=DECIMAL} AND T2.LOGIN_CODE=#{condition.userId,jdbcType=VARCHAR}
+    	ORDER BY T.CREATE_DATE DESC
+	</select>
+	<!-- 营销活动执行明细查询 -->
+	<select id="actiExeDetailListQuery" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="HashMap">
+		SELECT T.RECORD_ID,T.ACTI_ID,T.CUST_ID,T.CUST_NAME,T.MAJOR_MANGER,T.MAJOR_ORG,
+    	T.PROGRESS_STAGE,T.RELATION_CUSTOMER,T.PRODUCT_ID,T.PRODUCT_NAME,
+    	T.EXECUTOR_NAME,T.EXECUTOR_CANAL,T.EXECUTOR_RESULT,T.PREP_EVENT,
+    	T.REMARK,T.CREATE_USER,T.CREATE_ORG,T.UPDATE_ORG,T.EXECUTOR_ID,
+    	TO_CHAR(T.CREATE_DATE,'YYYY-MM-DD') AS CREATE_DATE,
+    	TO_CHAR(T.EXECUTOR_DATE,'YYYY-MM-DD') AS EXECUTOR_DATE,
+    	TO_CHAR(T.UPDATE_DATE,'YYYY-MM-DD') AS UPDATE_DATE,
+    	R.AIM_CUST_SOURCE 
+    	FROM OCRM_F_MK_ACTI_EXC_RECORD T 
+    	LEFT JOIN OCRM_F_MK_ACTI_CUST R ON R.ACTI_ID = T.ACTI_ID and R.cust_id=t.cust_id
+    	WHERE T.ACTI_ID= #{condition.actiId,jdbcType=DECIMAL} AND T.CUST_ID=#{condition.custId,jdbcType=VARCHAR}
+    	ORDER BY T.CREATE_DATE DESC
+	</select>
+		<!-- 统计活动的执行明细总数 -->
+	<select id="countActiExeDetailList" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+		SELECT count(T.RECORD_ID) as ALL_NUM
+    	FROM OCRM_F_MK_ACTI_EXC_RECORD T 
+    	WHERE T.ACTI_ID= #{actiId,jdbcType=DECIMAL} AND T.CUST_ID=#{custId,jdbcType=VARCHAR}
+    	<if test="sts != null and sts != ''">
+       		and T.PROGRESS_STAGE =#{sts,jdbcType=VARCHAR}
+        </if>
+	</select>
+	<!-- 营销活动明细删除 -->
+	<delete id="actiExeDetailDel" parameterType="BigDecimal">
+		DELETE FROM OCRM_F_MK_ACTI_EXC_RECORD WHERE RECORD_ID = #{recordId,jdbcType=DECIMAL}
+	</delete>
+	<!-- 营销活动关联客户阶段状态休息 -->
+	<update id="updateCustStep" parameterType="java.util.HashMap">
+		update OCRM_F_MK_ACTI_CUST set PROGRESS_STEP= #{sts,jdbcType=VARCHAR},
+		UPDATE_USER = #{lastUpdateUser,jdbcType=VARCHAR},
+		UPDATE_DATE = #{lastUpdateTm,jdbcType=DATE},
+		UPDATE_ORG = #{lastUpdateOrg,jdbcType=VARCHAR}
+		 where ACTI_ID= #{actiId,jdbcType=DECIMAL} AND CUST_ID=#{custId,jdbcType=VARCHAR}
+	</update>
+</mapper>
+	

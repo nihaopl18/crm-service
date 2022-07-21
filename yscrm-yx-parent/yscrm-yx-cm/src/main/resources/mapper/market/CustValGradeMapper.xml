@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.cm.market.repository.mapper.CustValGradeMapper">
+<!-- 营销组件-渠道智能分发-客户价值等级 hujun3 2018-11-28 -->
+	<!-- 渠道信息-->
+	<select id="getChannelInfo" 
+		resultType="java.util.HashMap">
+		select CHANNEL_ID as key,CHANNEL_NAME as label from cm_f_rc_channel_mgr 
+	</select>
+	<!-- 查询组件对应星级适合的渠道信息-->
+	<select id="getChannelByGrade" parameterType="java.util.Map"
+		resultType="java.util.HashMap">
+		  SELECT s.form_id,s.FORM_OPERATION_FILED, wm_concat (s.channel_name) as channel_value
+			FROM (select t.*, t1.channel_name
+  				from cimp_cm_nodes_presentation t
+  				left join cm_f_rc_channel_mgr t1
+    			on instr(t.form_operation_val, t1.channel_id) > 0) s
+    		left join CIMP_CM_NODES_DISPLAY t1 on t1.FORM_ID =s.FORM_ID
+		 where t1.NODE_ID =#{nodeId,jdbcType=VARCHAR} 
+		 GROUP BY s.form_id,s.FORM_OPERATION_FILED
+	</select>
+</mapper>

@@ -1,0 +1,268 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper
+	namespace="cn.com.yusys.yscrm.custgrade.repository.mapper.CustGradeManualEvalMapper">
+	<sql id="Base_Column_List">
+		ID,CUST_ID,APP_HOURS,APPLICANT,APPL_INS,CUR_SER_LEVEL,APP_SER_LEVEL,APP_REA,RAT_VAL,LAST_THREE_MON_DAY_TOTAL_ASS,LAST_THREE_MON_DAY_TOTAL_LIA,LATE_YEAR_MID_BUS_DEGREE,LATE_YEAR_SET_VOL,LATE_YEAR_CRE_CARD_CON_AMO,CORP_ORG_CODE,APPROVE_STAT,CUST_NAME
+	</sql>
+	<select id="querylist" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+		resultType="java.util.HashMap">
+		SELECT 
+		<if test="condition.custType =='1'.toString()">
+		'1' as CUST_TYPE,
+		</if>
+		<if test="condition.custType =='2'.toString()">
+		'2' as CUST_TYPE,
+		</if>
+		T.CUST_ID,
+		T.CUST_NAME,
+		T.CERT_TYPE,
+		T.CERT_NO,
+		T.BELONG_BRCH,
+		T.BELONG_MGR,
+		T.VALUE_LEV,
+		T.SERV_LEV, 
+		C.EVALUATE_DATE,
+		SU.USER_NAME BELONG_MGR_NAME,
+		ORG.ORG_NAME 
+		BELONG_BRCH_NAME
+		,APP.APPROVE_STAT 
+		<if test="condition.custType =='1'.toString()">
+		FROM ACRM_F_CI_PER_ADMIT_INFO T
+		</if>
+		<if test="condition.custType =='2'.toString()">
+		FROM ACRM_F_CI_ORG_CUST_INFO T 
+		</if>
+		LEFT JOIN OCRM_F_CG_CPN_GRADE C 
+		ON T.CUST_ID = C.CUST_ID 
+		LEFT JOIN ADMIN_SM_USER SU 
+		ON
+		SU.LOGIN_CODE= T.BELONG_MGR
+		LEFT JOIN
+		ADMIN_SM_ORG ORG
+		ON ORG.ORG_ID =
+		T.BELONG_BRCH
+		LEFT JOIN
+		OCRM_F_CI_PRE_GRADE_APPLY_INFO APP
+		ON T.CUST_ID
+		=APP.CUST_ID AND
+		APP.APPROVE_STAT ='1'
+		<where>
+			<if test="condition.custId != null and condition.custId != ''">
+				AND T.CUST_ID LIKE CONCAT(CONCAT('%', #{condition.custId,
+				jdbcType=VARCHAR}),'%')
+			</if>
+			<if test="condition.custName != null and condition.custName != ''">
+				AND T.CUST_NAME= #{condition.custName,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.certType != null and condition.certType != ''">
+				AND T.CERT_TYPE= #{condition.certType,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.certNo != null and condition.certNo != ''">
+				AND T.CERT_NO= #{condition.certNo,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.servLev != null and condition.servLev != ''">
+				AND T.SERV_LEV= #{condition.servLev,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.valueLev != null and condition.valueLev != ''">
+				AND T.VALUE_LEV= #{condition.valueLev,jdbcType=VARCHAR}
+			</if>
+
+<!-- 			<if test="condition.dataDate != null and condition.dataDate != ''">  -->
+<!-- 				AND to_char(to_date(T.DATA_DATE,'yyyy-MM-dd'),'yyyy-mm-dd')= #{condition.dataDate,jdbcType=VARCHAR}  -->
+<!-- 			</if>  -->
+			<if test="condition.orgId != null and condition.orgId != ''">
+				AND T.BELONG_BRCH= #{condition.orgId,jdbcType=VARCHAR}
+			</if>
+
+			<if test="condition.mgrId != null and condition.mgrId != ''">
+				AND T.BELONG_MGR= #{condition.mgrId,jdbcType=VARCHAR}
+			</if>
+			
+			${dataAuth}
+		</where>
+<!-- 		and ORG.ORG_ID in (SELECT ORG_ID FROM ADMIN_SM_ORG START -->
+<!-- 		WITH ORG_ID = #{condition.orgIds,jdbcType=VARCHAR} -->
+<!-- 		CONNECT BY PRIOR ORG_ID = UP_ORG_ID) -->
+<!-- 		ORDER BY T.CUST_ID -->
+	</select>
+	
+	<select id="querylistSingle" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+		resultType="java.util.HashMap">
+		SELECT T.CUST_TYPE,
+		T.CUST_ID,
+		T.CUST_NAME,
+		T.CERT_TYPE,
+		T.CERT_NO,
+		T.BELONG_BRCH,
+		T.BELONG_MGR,
+		T.VALUE_LEV,
+		T.SERV_LEV, C.HAND_EXPIRED_DATE,
+		C.EVALUATE_TYPE,
+		C.EVALUATE_DATE,
+		C.PRE_MINUS_LEVEL,
+		C.GRADE_MINUS_CONTENT,
+		MX.GRADE_LEVEL1,MX.GRADE_LEVEL2,MX.GRADE_LEVEL3,MX.GRADE_LEVEL4,
+		MX.GRADE_LEVEL5,MX.AUM_M_AVG_3,MX.DEBT_M_AVG_BAL_3,MX.REPORT_MID_12,MX.SET_VOL_12,MX.REPORT_SUM_3,
+		decode(C.EVALUATE_TYPE,'1',to_char(C.Evaluate_DATE,
+		'yyyy-mm-dd'),'2',to_char(C.HAND_EVALUATE_DATE, 'yyyy-mm-dd')) as
+		HAND_EVALUATE_DATE,
+		SU.USER_NAME BELONG_MGR_NAME,
+		ORG.ORG_NAME 
+		BELONG_BRCH_NAME
+		,APP.APPROVE_STAT,APP.APP_REA,APP.RAT_VAL,APP.APP_SER_LEVEL 
+		FROM  ACRM_F_CI_CUST_ALL  T
+		LEFT JOIN OCRM_F_CG_CPN_GRADE C 
+		ON T.CUST_ID = C.CUST_ID 
+		LEFT JOIN ADMIN_SM_USER SU 
+		ON
+		SU.LOGIN_CODE= T.BELONG_MGR
+		LEFT JOIN
+		ADMIN_SM_ORG ORG
+		ON ORG.ORG_ID =
+		T.BELONG_BRCH
+		LEFT JOIN
+		OCRM_F_CI_PRE_GRADE_APPLY_INFO APP
+		ON T.CUST_ID
+		=APP.CUST_ID AND
+		APP.APPROVE_STAT ='1'
+		LEFT JOIN OCRM_F_CG_CPN_GRADE_MX MX ON T.CUST_ID=MX.CUST_ID
+		<where>
+			<if test="condition.custId != null and condition.custId != ''">
+				AND T.CUST_ID= #{condition.custId,jdbcType=VARCHAR}
+			</if>
+		</where>
+	</select>
+	
+	<select id="queryBuss" parameterType="String" resultType="java.util.HashMap">
+		SELECT T.*,A.CUST_TYPE FROM
+		<!-- OCRM_F_CI_PRE_GRADE_APPLY_INFO T WHERE T.CUST_ID=#{custId} -->
+		OCRM_F_CG_CPN_GRADE_MX T  LEFT JOIN ACRM_F_CI_CUST_ALL A ON T.CUST_ID=A.CUST_ID
+		WHERE T.CUST_ID=#{custId} 
+	</select>
+
+	<select id="queryIsApply" parameterType="String" resultType="int">
+		SELECT COUNT(1) FROM OCRM_F_CI_PRE_GRADE_APPLY_INFO WHERE CUST_ID
+		=#{custId} and APPROVE_STAT='1'
+	</select>
+
+	<update id="updateApply" parameterType="java.util.HashMap">
+		UPDATE
+		OCRM_F_CI_PRE_GRADE_APPLY_INFO SET APPROVE_STAT=#{approveStat} WHERE
+		ID=#{id}
+	</update>
+
+	<update id="updateCustServal" parameterType="java.util.HashMap">
+		UPDATE
+		OCRM_F_CG_CPN_GRADE SET
+		SERVICE_LEVEL=#{serviceLevel},
+		EVALUATE_TYPE='2',
+		HAND_SERVICE_LEVEL=#{handServiceLevel},
+		HAND_EVALUATE_DATE=sysdate,
+		HAND_EFFECTIVE_DATE=sysdate,
+		HAND_EXPIRED_DATE=to_date(#{handExpiredDate},'yyyy-MM-dd'),
+		LAST_CHG_USR=#{lastChgUsr},
+		LAST_CHG_DT=sysdate,
+		CORP_ORG_CODE=#{corpOrgCode}
+		WHERE CUST_ID=#{custId}
+	</update>
+
+	<update id="updatePerCustser" parameterType="java.util.HashMap">
+		update ACRM_F_CI_PER_ADMIT_INFO set SERV_LEV=#{serviceLevel} where cust_id
+		=#{custId}
+	</update>
+	<update id="updateOrgCustser" parameterType="java.util.HashMap">
+		update ACRM_F_CI_ORG_CUST_INFO set SERV_LEV=#{serviceLevel} where cust_id
+		=#{custId}
+	</update>
+	<update id="updatePerAdmit" parameterType="java.util.HashMap">
+		update ACRM_F_CI_PER_ADMIT_INFO set SERV_LEV=#{serviceLevel} where cust_id
+		=#{custId}
+	</update>
+	<update id="updateAdmitAll" parameterType="java.util.HashMap">
+		<!-- update ACRM_F_CI_CUST_ADMIT_ALL set SERV_LEV=#{serviceLevel} where cust_id -->
+		update ACRM_F_CI_CUST_ALL set SERV_LEV=#{serviceLevel} where cust_id
+		=#{custId}
+	</update>
+
+	<select id="queryBelongOrg" parameterType="String" resultType="java.util.HashMap">
+		SELECT CUST_ID,ORG_ID FROM OCRM_F_CI_ADMIT_BELONG WHERE CUST_ID
+		=#{custId}
+		<!-- and ORG_TYPE!='1' -->
+	</select>
+
+	<select id="queryApplyOrg" parameterType="java.util.HashMap"
+		resultType="java.util.HashMap">
+		SELECT CUST_ID, ORG_ID
+		FROM OCRM_F_CI_ADMIT_BELONG a
+		WHERE CUST_ID = #{custId,jdbcType=VARCHAR}
+		and mgr_type = '1'
+		and exists (select 1
+		from ADMIN_SM_USER b
+		where a.MGR_ID = b.user_id
+		and b.ORG_ID in
+		(SELECT ORG_ID
+		FROM ADMIN_SM_ORG
+		START WITH ORG_ID = #{orgIds,jdbcType=VARCHAR}
+		CONNECT BY PRIOR ORG_ID = UP_ORG_ID))
+	</select>
+	<select id="queryUpOrg" parameterType="String" resultType="java.util.HashMap">
+		SELECT ORG_ID,ORG_LEVEL FROM ADMIN_SM_ORG WHERE
+		ORG_ID = (SELECT
+		UP_ORG_ID FROM ADMIN_SM_ORG WHERE ORG_ID =#{org})
+	</select>
+
+	<select id="queryCurrOrg" parameterType="String" resultType="int">
+		SELECT count(1) FROM ADMIN_SM_ORG WHERE
+		ORG_ID = #{ORG} AND ORG_LEVEL
+		in ('1','2')
+	</select>
+
+	<select id="queryApplyInfo" parameterType="String" resultType="java.util.HashMap">
+		select T.*,SU.USER_NAME,ORG.ORG_NAME from
+		OCRM_F_CI_PRE_GRADE_APPLY_INFO T
+		LEFT JOIN ADMIN_SM_USER SU
+		ON SU.LOGIN_CODE= T.APPLICANT
+		LEFT JOIN
+		ADMIN_SM_ORG ORG
+		ON ORG.ORG_ID = T.APPL_INS
+		WHERE ID=#{applyId}
+	</select>
+
+<select id="querylistByCustId" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+		resultType="java.util.HashMap">
+		SELECT T.*, C.HAND_EXPIRED_DATE,
+		C.EVALUATE_TYPE,
+		C.EVALUATE_DATE,
+		C.PRE_MINUS_LEVEL,
+		C.GRADE_MINUS_CONTENT,
+		MX.GRADE_LEVEL1,MX.GRADE_LEVEL2,MX.GRADE_LEVEL3,MX.GRADE_LEVEL4,
+		MX.GRADE_LEVEL5,MX.AUM_M_AVG_3,MX.DEBT_M_AVG_BAL_3,MX.REPORT_MID_12,MX.SET_VOL_12,MX.REPORT_SUM_3,
+		decode(C.EVALUATE_TYPE,'1',to_char(C.Evaluate_DATE,
+		'yyyy-mm-dd'),'2',to_char(C.HAND_EVALUATE_DATE, 'yyyy-mm-dd')) as
+		HAND_EVALUATE_DATE
+		,APP.APPROVE_STAT,APP.APP_REA,APP.RAT_VAL,APP.APP_SER_LEVEL 
+		FROM   ACRM_F_CI_CUST_ALL T  
+		LEFT JOIN OCRM_F_CG_CPN_GRADE C 
+		ON T.CUST_ID = C.CUST_ID 
+		LEFT JOIN
+		OCRM_F_CI_PRE_GRADE_APPLY_INFO APP
+		ON T.CUST_ID
+		=APP.CUST_ID AND
+		APP.APPROVE_STAT ='1'
+		LEFT JOIN OCRM_F_CG_CPN_GRADE_MX MX ON T.CUST_ID=MX.CUST_ID
+		<where>
+			<if test="condition.custId != null and condition.custId != ''">
+				AND T.CUST_ID=#{condition.custId,jdbcType=VARCHAR}
+			</if>
+		</where>
+<!-- 		and ORG.ORG_ID in (SELECT ORG_ID FROM ADMIN_SM_ORG START -->
+<!-- 		WITH ORG_ID = #{condition.orgIds,jdbcType=VARCHAR} -->
+<!-- 		CONNECT BY PRIOR ORG_ID = UP_ORG_ID) -->
+<!-- 		ORDER BY T.CUST_ID -->
+	</select>
+<select id="getMgrType" parameterType="java.util.Map"  resultType="java.util.HashMap">
+	select mgr_type from OCRM_F_CI_ADMIT_BELONG where cust_id=#{custId,jdbcType=VARCHAR} and mgr_id=#{loginCode,jdbcType=VARCHAR}
+	</select>
+
+</mapper>

@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.knowledge.repository.mapper.OcrmFwpInfoSectionMapper">
+    <resultMap id="BaseResultMap" type="cn.com.yusys.yscrm.knowledge.domain.OcrmFwpInfoSection">
+		<id column="SECTION_ID" jdbcType="VARCHAR" property="sectionId" />
+		<result column="SECTION_NAME" jdbcType="VARCHAR" property="sectionName" />
+		<result column="PARENT_SECTION" jdbcType="VARCHAR" property="parentSection" />
+		<result column="SECTION_SORT" jdbcType="NUMERIC" property="sectionSort" />
+		<result column="CREATE_ORG" jdbcType="VARCHAR" property="createOrg" />
+		<result column="CREATE_ORG_NAME" jdbcType="VARCHAR" property="createOrgName" />
+		<result column="CREATOR" jdbcType="VARCHAR" property="creator" />
+		<result column="CREATOR_NAME" jdbcType="VARCHAR" property="creatorName" />
+		<result column="CREATE_TIME" jdbcType="DATE" property="createTime" />
+		<result column="CORP_ORG_CODE" jdbcType="VARCHAR" property="corpOrgCode" />
+		<result column="IS_DELETE" jdbcType="VARCHAR" property="isDelete" />
+    </resultMap>
+    <sql id="Base_Column_List">
+	    SECTION_ID,SECTION_NAME,PARENT_SECTION,SECTION_SORT,CREATE_ORG,CREATE_ORG_NAME,CREATOR,CREATOR_NAME,CREATE_TIME,CORP_ORG_CODE,IS_DELETE
+    </sql>
+    
+    <!-- 知识库栏目数据查询 -->
+    <select id="querySection" resultType="java.util.HashMap">
+        select a.SECTION_ID, a.SECTION_NAME, a.PARENT_SECTION, a.SECTION_SORT,
+            (select b.SECTION_NAME from OCRM_F_WP_INFO_SECTION b where b.SECTION_ID = a.PARENT_SECTION) as PARENT_SECTION_NAME
+			from OCRM_F_WP_INFO_SECTION a where IS_DELETE = 'N' 
+			order by SECTION_SORT
+    </select>
+
+	<!-- 知识库栏目数据同一校验 -->
+	<select id="sameSection" parameterType="cn.com.yusys.yscrm.knowledge.domain.OcrmFwpInfoSection" resultType="java.lang.Integer">
+		select
+			count(SECTION_ID)
+		from OCRM_F_WP_INFO_SECTION
+		where IS_DELETE = 'N'
+		  and PARENT_SECTION = #{parentSection,jdbcType=VARCHAR}
+		  and SECTION_NAME = #{sectionName,jdbcType=VARCHAR}
+		  <if test="sectionId != null and sectionId != ''">
+			and SECTION_ID != #{sectionId,jdbcType=VARCHAR}
+		  </if>
+	</select>
+    
+   	<!-- 根据主键删除 逻辑删除 -->
+    <update id="deleteSection" parameterType="String">
+        update OCRM_F_WP_INFO_SECTION set IS_DELETE = 'Y'
+          where SECTION_ID in (
+              select SECTION_ID from OCRM_F_WP_INFO_SECTION 
+		        where IS_DELETE = 'N'
+		          start with SECTION_ID = #{sectionId,jdbcType=VARCHAR} 
+		          connect by prior SECTION_ID = PARENT_SECTION
+		      )
+		    or
+		    SECTION_ID = #{sectionId,jdbcType=VARCHAR} 
+    </update>
+    
+</mapper>

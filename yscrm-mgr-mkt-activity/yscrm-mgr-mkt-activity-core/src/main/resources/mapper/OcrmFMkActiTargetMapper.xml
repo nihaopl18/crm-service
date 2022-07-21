@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.mktactivity.repository.mapper.OcrmFMkActiTargetMapper">
+	<!-- 自增序列 -->
+	<select id="getSeq" resultType="BigDecimal">
+		SELECT mkt_seq.nextval FROM dual
+	</select>
+		<!-- 查询执行对象的指标信息 -->
+	<select id="ActiviTargetByObj" parameterType="java.util.Map" resultType="java.util.HashMap">
+		SELECT T.* FROM OCRM_F_MK_ACTI_TARGET T 
+        where  1=1
+        <if test="objId != null and objId != ''">
+       		and T.EXE_OBJ_CODE =#{objId,jdbcType=VARCHAR}
+        </if>
+        <if test="actiId != null and actiId != ''">
+       		and T.ACTI_ID =#{actiId,jdbcType=DECIMAL}
+        </if>
+	</select>
+			<!-- 查询活动的指标信息 -->
+	<select id="ActiviTargetByActivity" parameterType="BigDecimal" resultType="java.util.HashMap">
+		SELECT DISTINCT T.TARGET_CODE,T.TARGET_NAME,T1.VALUE_CONDITION FROM OCRM_F_MK_ACTI_TARGET T 
+		LEFT JOIN OCRM_F_MK_MKT_TARGET T1 ON T1.TARGET_ID=T.TARGET_CODE
+        where  1=1
+        <if test="actiId != null and actiId != ''">
+       		and T.ACTI_ID =#{actiId,jdbcType=DECIMAL}
+        </if>
+	</select>
+	<!-- 删除上次关联的指标 -->
+	<delete id="lastTargetDel" parameterType="BigDecimal">
+		DELETE FROM OCRM_F_MK_ACTI_TARGET WHERE ACTI_ID = #{actiId,jdbcType=DECIMAL}
+	</delete>
+	<!-- 营销成效指标目标机构占比图 -->
+	<select id="getTargetPie" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="HashMap">
+		SELECT R.EXE_OBJ_NAME,SUM(T.TARGET_VALUE) AS TARGET_VALUE 
+		FROM OCRM_F_MK_ACTI_TARGET T
+		LEFT JOIN OCRM_F_MK_ACTI_EXCOBJ R ON t.exe_obj_code = r.exe_obj_code
+		WHERE R.EXE_OBJ_TYPE = '1' AND T.ACTI_ID = #{condition.actiId,jdbcType=DECIMAL}
+		GROUP BY R.EXE_OBJ_NAME
+	</select>
+	<!-- 营销成效指标目标机构完成情况对比图 -->
+	<select id="getTargetBar" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="HashMap">
+		SELECT R.EXE_OBJ_NAME,SUM(T.TARGET_VALUE) AS TARGET_VALUE,SUM(T.ACHIEVE_VALUE) AS ACHIEVE_VALUE 
+		FROM OCRM_F_MK_ACTI_TARGET T
+		LEFT JOIN OCRM_F_MK_ACTI_EXCOBJ R ON t.exe_obj_code = r.exe_obj_code
+		WHERE R.EXE_OBJ_TYPE = '1' AND T.ACTI_ID = #{condition.actiId,jdbcType=DECIMAL}
+		GROUP BY R.EXE_OBJ_NAME
+	</select>
+	<!-- 营销成效指标目标客户经理进展图 -->
+	<select id="getCmBar" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="HashMap">
+		SELECT R.EXE_OBJ_NAME,SUM(T.ACHIEVE_VALUE) AS ACHIEVE_VALUE 
+		FROM OCRM_F_MK_ACTI_TARGET T
+		LEFT JOIN OCRM_F_MK_ACTI_EXCOBJ R ON t.exe_obj_code = r.exe_obj_code
+		WHERE R.EXE_OBJ_TYPE = '0' AND T.ACTI_ID = #{condition.actiId,jdbcType=DECIMAL} 
+		GROUP BY R.EXE_OBJ_NAME
+	</select>
+	<!-- 营销成效指标目标客户经理占比图 -->
+	<select id="getCmPie" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="HashMap">
+		SELECT R.EXE_OBJ_NAME,COUNT(T.TARGET_CODE) AS TARGET_CODE 
+		FROM OCRM_F_MK_ACTI_TARGET T
+		LEFT JOIN OCRM_F_MK_ACTI_EXCOBJ R ON t.exe_obj_code = r.exe_obj_code
+		WHERE R.EXE_OBJ_TYPE = '0' AND T.ACTI_ID = #{condition.actiId,jdbcType=DECIMAL} 
+		GROUP BY R.EXE_OBJ_NAME
+	</select>
+</mapper>

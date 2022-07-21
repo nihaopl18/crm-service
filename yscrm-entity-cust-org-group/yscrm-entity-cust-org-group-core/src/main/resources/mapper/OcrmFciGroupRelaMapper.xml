@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.entity.cust.org.group.repository.mapper.OcrmFciGroupRelaMapper">
+   <delete id="delByGroupNo" parameterType="String">
+    DELETE OCRM_F_CI_GROUP_RELA where GROUP_NO = #{groupNo,jdbcType=VARCHAR}
+    </delete>
+        <!--查询关系图中的连接信息  -->
+    <select id="getRelaInfoByGroupNo" parameterType="java.lang.String"  resultType="java.util.HashMap">
+	 	SELECT * FROM OCRM_F_CI_GROUP_RELA  WHERE GROUP_NO = #{groupNo, jdbcType=VARCHAR}
+	</select>
+</mapper>

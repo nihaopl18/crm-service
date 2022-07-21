@@ -1,0 +1,143 @@
+# ===================================================================
+# Eureka properties
+# ===================================================================
+eureka:
+    instance:
+        prefer-ip-address: true
+    client:
+        service-url:
+            defaultZone: http://admin:${jhipster.registry.password}@localhost:8761/eureka/
+
+# ===================================================================
+# Spring properties
+# ===================================================================
+spring:
+    profiles:
+        active: dev
+        include: swagger
+    devtools:
+        restart:
+            enabled: false
+        livereload:
+            enabled: false # we use gulp + BrowserSync for livereload
+    jackson:
+        serialization.indent_output: true
+    datasource:
+        type: com.zaxxer.hikari.HikariDataSource
+        validation-query: SELECT 1 FROM DUAL   #根据数据源进行配置
+#        url: jdbc:mysql://localhost:3306/samplemicroservice?useUnicode=true&characterEncoding=utf8&useSSL=false
+#        url: jdbc:mysql://localhost:8066/yuspdb?useUnicode=true&characterEncoding=utf8&useSSL=false  
+#        url: jdbc:oracle:thin:@localhost:1521:ycorcl
+        url: jdbc:oracle:thin:@192.168.251.158:1521:ycorcl
+        driver: oracle.jdbc.driver.OracleDriver
+        username: YUCRM
+        password: YUCRM
+        hikari:
+            data-source-properties:
+                cachePrepStmts: true
+                prepStmtCacheSize: 250
+                prepStmtCacheSqlLimit: 2048
+                useServerPrepStmts: true
+    data:
+        elasticsearch:
+            cluster-name:
+            cluster-nodes:
+            properties:
+                path:
+                  logs: target/elasticsearch/log
+                  data: target/elasticsearch/data
+    mail:
+        host: localhost
+        port: 25
+        username:
+        password:
+    messages:
+        cache-seconds: 1
+    thymeleaf:
+        cache: false
+    redis:                  #redis配置
+      database: 0           #redis使用的数据库（0~15）
+      host: 192.168.251.151 #redis服务器 IP
+      port: 6379            #redis服务器端口
+      password: 123456      #redis密码
+      pool:
+        max-active: 20     # 在给定的时间，连接池中分配的最大连接数
+        max-wait: 20000    # 连接阻塞最大等待时间(以毫秒为单位)，连接池耗尽时抛出异常。使用负值无限期地阻塞
+        min-idle: 1        # 连接池最小的空闲连接数
+      timeout: 60000       # 连接超时时间(以毫秒为单位)
+    cache:                 # 配置Spring Cache
+        type: redis        # 缓存类型
+    zipkin:
+        base-url: http://localhost:9411
+        locator:
+            discovery:
+                enabled: true
+endpoints:
+    shutdown:
+        enabled: true     ##启用shutdown
+        sensitive: false  ##禁用密码验证
+    restart:
+        enabled: true     ##启用restart
+        sensitive: false  ##禁用密码验证      
+# ===================================================================
+# JHipster properties
+# ===================================================================
+jhipster:
+    http:
+        version: V_1_1 # To use HTTP/2 you will need SSL support (see above the "server.ssl" configuration)
+    # CORS is only enabled by default with the "dev" profile, so BrowserSync can access the API
+    cors:
+        allowed-origins: 
+        allowed-methods: GET, PUT, POST, DELETE, OPTIONS
+        allowed-headers: "*"
+        exposed-headers:
+        allow-credentials: true
+        max-age: 1800
+    security:
+        client-authorization:
+            access-token-uri: http://uaa/oauth/token
+            token-service-id: uaa
+            client-id: internal
+            client-secret: internal
+    mail: # specific JHipster mail property, for standard properties see MailProperties
+        from: ${spring.application.name}@localhost
+        base-url: http://127.0.0.1:8081
+    metrics: # DropWizard Metrics configuration, used by MetricsConfiguration
+        jmx.enabled: false
+        graphite: # Use the "graphite" Maven profile to have the Graphite dependencies
+            enabled: false
+            host: localhost
+            port: 2003
+            prefix: ${spring.application.name}
+        prometheus: # Use the "prometheus" Maven profile to have the Prometheus dependencies
+            enabled: false
+            endpoint: /prometheusMetrics
+        logs: # Reports Dropwizard metrics in the logs
+            enabled: false
+            report-frequency: 60 # in seconds
+    logging:
+        logstash: # Forward logs to logstash over a socket, used by LoggingConfiguration
+            enabled: false
+            host: localhost
+            port: 5000
+            queue-size: 512
+        spectator-metrics: # Reports Spectator Circuit Breaker metrics in the logs
+            enabled: false
+            # edit spring.metrics.export.delay-millis to set report frequency
+
+# ===================================================================
+# Application properties
+# ===================================================================
+application:
+    fileStorageType: localdisk  
+    fastdfsTrackIp: localhost:22122 # fastdfs setting
+    localDiskPath: D:/localDisk # localdisk setting
+    excel:
+      tempFileDir: D:/temp
+      batchSize: 50
+
+# apm 监控
+elastic:
+    apm-server:
+        url: http://localhost:8200
+        packages: cn.com.yusys

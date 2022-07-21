@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.uimp.business.pma.app.repository.mapper.AppRemindMapper">
+	<select id="queryAll" resultType="java.util.HashMap">
+		SELECT T.TYPE_ID, T.TYPE_NAME, COUNT(1) REMIND_NUM
+		  FROM PMA_F_REMIND_RES T
+		 WHERE T.IS_READ = '0'
+		AND T.RECE_USER = #{receUser}
+		AND to_char(t.REMIND_EXPIRE_DATE,'yyyyMMdd')>=(select TO_CHAR(TRUNC(to_date(etl_date, 'YYYYMMDD')-1), 'YYYYMMDD') AS etl_date
+  				from pma_f_etl_date
+ 				where etl_state = '1'
+   				AND ETL_TYPE = 'PMA')
+		GROUP BY T.TYPE_ID, T.TYPE_NAME
+		union all
+		select '3' as type_id,
+	       '待办任务' as type_name,
+	       count(t.instance_id) as remind_num
+		  from N_WF_USER_TODO t
+		 inner join N_WF_INSTANCE t2 on t.instance_id = t2.instance_id
+		 inner join admin_base_meta_fun_reg t3 on t2.biz_param1 = t3.fun_code
+		 left join admin_base_meta_fun_page_cfg a on a.fun_code = t3.fun_code
+		 where t.user_id = #{receUser}
+		 and a.config_name = 'APP_APPLY'
+		 and a.config_value = '1'
+	</select>
+	
+	<select id="queryTodoGroupList" resultType="java.util.HashMap">
+		select t3.fun_code, t3.fun_name, count(t1.instance_id) REMIND_NUM
+		  from N_WF_USER_TODO t1
+		 inner join N_WF_INSTANCE t2 on t1.instance_id = t2.instance_id
+		 inner join admin_base_meta_fun_reg t3 on t2.biz_param1 = t3.fun_code
+		 left join admin_base_meta_fun_page_cfg a on a.fun_code = t3.fun_code
+		 where t1.user_id = #{receUser}
+		 and a.config_name = 'APP_APPLY'
+		 and a.config_value = '1'
+	   group by t3.fun_code, t3.fun_name 
+	</select>
+	
+	
+	<select id="queryTodoMenu" resultType="java.util.HashMap">
+		select A.MENU_ID,A.FUNC_ID,A.MENU_NAME 
+		from admin_sm_menu A
+		left join admin_sm_busi_func B ON A.FUNC_ID = B.FUNC_ID
+		WHERE B.FUNC_URL =#{funCode}
+	</select>
+	
+</mapper>

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.product.repository.mapper.AcrmFpdSaleStatisticsMapper">
+	<!-- 产品统计情况查询 -->
+	<select id="salesSituationQuery" parameterType="java.util.Map" resultType="java.util.Map">
+		SELECT A.PROD_ID, A.PROD_NAME, A.PROD_NUM, A.SALE_SCALE, to_char(A.DATA_DATE,'yyyy-MM-dd') as DATA_DATE, A.CORP_ORG_CODE,
+		(SELECT SUM(SALE_SCALE) AS SALE_SCALE_SUM FROM ACRM_F_PD_SALE_STATISTICS A WHERE 1 = 1
+ 		<!-- 产品编号 -->
+		<if test="condition.prodId != null and condition.prodId != ''">
+      		AND A.PROD_ID = #{condition.prodId,jdbcType=VARCHAR}
+	    </if>
+ 		) as SALE_SCALE_SUM
+		FROM ACRM_F_PD_SALE_STATISTICS A 
+		WHERE 1=1
+		
+		<!-- 产品编号 -->
+		<if test="condition.prodId != null and condition.prodId != ''">
+      		AND A.PROD_ID = #{condition.prodId,jdbcType=VARCHAR}
+	    </if>
+		<!-- 统计日期 -->
+		<if test="condition.dataDate != null and condition.dataDate != ''">
+      		AND to_char(A.DATA_DATE,'yyyy-MM-dd') = #{condition.dataDate,jdbcType=VARCHAR}
+	    </if>
+	</select>
+    
+</mapper>

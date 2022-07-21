@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.climp.acty.repository.mapper.LoyEngRuleParamMapper">
+	<!-- 查询引用参数配置信息 -->
+	<select id="getParamList" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+		resultType="java.util.Map">
+		SELECT T.* FROM LOY_ENG_RULE_PARAM T
+		<where>
+			<if test="condition.paramCode != null and condition.paramCode !=''">
+				and T.PARAM_CODE  LIKE CONCAT(CONCAT('%', #{condition.paramCode, jdbcType=VARCHAR}),'%') 
+			</if>
+			<if test="condition.paramName != null and condition.paramName !=''">
+				and T.PARAM_NAME  LIKE CONCAT(CONCAT('%', #{condition.paramName, jdbcType=VARCHAR}),'%') 
+			</if>
+			<if test="condition.paramType != null and condition.paramType !=''">
+				and T.PARAM_TYPE  LIKE CONCAT(CONCAT('%', #{condition.paramType, jdbcType=VARCHAR}),'%') 
+			</if>
+			<if test="condition.paramProperty != null and condition.paramProperty !=''">
+				and T.PARAM_PROPERTY  LIKE CONCAT(CONCAT('%', #{condition.paramProperty, jdbcType=VARCHAR}),'%') 
+			</if>
+		</where>
+	</select>
+	
+	<select id="getRuleParamList" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.Map">
+    	select * from LOY_ENG_RULE_PARAM t 
+    	where t.PARAM_CODE = #{condition.paramCode}
+    </select>
+</mapper>

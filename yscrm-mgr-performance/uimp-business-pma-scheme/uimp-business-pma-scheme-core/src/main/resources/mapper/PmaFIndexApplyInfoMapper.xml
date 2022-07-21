@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.uimp.business.pma.scheme.dimension.repository.mapper.PmaFIndexApplyInfoMapper">
+    <resultMap id="BaseResultMap" type="cn.com.yusys.yusp.uimp.business.pma.scheme.dimension.domain.PmaFIndexApplyInfo">
+		<id column="ID" jdbcType="VARCHAR" property="id" />
+		<result column="INDEX_ID" jdbcType="VARCHAR" property="indexId" />
+		<result column="APPLY_TYPE_ID" jdbcType="VARCHAR" property="applyTypeId" />
+    </resultMap>
+    <sql id="Base_Column_List">
+	    ID,INDEX_ID,APPLY_TYPE_ID
+    </sql>
+    
+</mapper>

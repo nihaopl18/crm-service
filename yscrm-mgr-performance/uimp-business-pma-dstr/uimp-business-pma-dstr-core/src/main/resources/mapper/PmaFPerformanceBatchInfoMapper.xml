@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.uimp.distribution.repository.mapper.PmaFPerformanceBatchInfoMapper">
+    
+    <!-- 根据批次编号/业绩类型 更新执行状态 -->
+    <update id="updateStatusByBatchIdAndFunCode" parameterType="java.lang.String">
+        update PMA_F_PERFORMANCE_BATCH_INFO set
+	        STATUS = #{status,jdbcType=VARCHAR}
+        where BATCH_ID = #{batchId,jdbcType=VARCHAR} and FUN_CODE = #{funCode, jdbcType=VARCHAR}
+    </update>
+    
+    <!-- 根据批次编号/业绩类型 更新校验结果、执行状态字段 -->
+    <update id="updateCheckResultAndStatusByBatchIdAndFunCode" parameterType="java.lang.String">
+        update PMA_F_PERFORMANCE_BATCH_INFO set
+	        CHECK_RESULT = #{checkResult,jdbcType=VARCHAR}, STATUS = #{status, jdbcType=VARCHAR}
+        where BATCH_ID = #{batchId,jdbcType=VARCHAR} and FUN_CODE = #{funCode, jdbcType=VARCHAR}
+    </update>
+    
+    <!-- 根据批次编号/业绩类型 更新工作流总数字段值 -->
+    <update id="updateWfTotalCountByBatchIdAndFunCode" parameterType="java.lang.String">
+        update PMA_F_PERFORMANCE_BATCH_INFO set
+	        WF_TOTAL_COUNT = #{wfTotalCount,jdbcType=NUMERIC}
+        where BATCH_ID = #{batchId,jdbcType=VARCHAR} and FUN_CODE = #{funCode, jdbcType=VARCHAR}
+    </update>
+    
+	<select id="getExecuteBatchCount" resultType="java.lang.Integer">
+    	select count(*) from PMA_F_PERFORMANCE_BATCH_INFO where STATUS = '11'
+    </select>
+</mapper>

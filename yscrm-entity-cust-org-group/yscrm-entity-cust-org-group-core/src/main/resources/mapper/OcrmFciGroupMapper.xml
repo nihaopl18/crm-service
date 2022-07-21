@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.entity.cust.org.group.repository.mapper.OcrmFciGroupMapper">
+    <select id="getListByModel" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"  resultType="java.util.HashMap">
+	 SELECT DISTINCT g.group_no as gr,G.*,(select count(M.GROUP_MEMBER_ID) from OCRM_F_CI_GROUP_MEMBER mem where mem.GROUP_NO = G.GROUP_NO)as MEMBER_NUM,
+   u.user_name as update_user_name,o.org_name as CREATE_ORG_NAME FROM OCRM_F_CI_GROUP G
+   left join ocrm_f_ci_group_member m on m.group_no = g.group_no
+   left join admin_sm_user u on u.user_id=G.UPDATE_USER_ID
+   left join admin_sm_org o on o.org_id=G.CREATE_USER_ORG_ID
+	 <where>
+ 		1 = 1 	 
+		<if test="condition.groupRootCustId != null and condition.groupRootCustId !=''">
+				  and G.GROUP_ROOT_CUST_ID LIKE CONCAT(CONCAT('%', #{condition.groupRootCustId, jdbcType=VARCHAR}),'%')
+		</if>
+		<if test="condition.groupNo != null and condition.groupNo !=''">
+				  and G.GROUP_NO LIKE CONCAT(CONCAT('%', #{condition.groupNo, jdbcType=VARCHAR}),'%')
+		</if>
+		<if test="condition.custName != null and condition.custName !=''">
+				  and M.CUST_NAME LIKE CONCAT(CONCAT('%', #{condition.custName, jdbcType=VARCHAR}),'%')
+		</if>
+		<if test="condition.groupNameMain != null and condition.groupNameMain !=''">
+				  and G.GROUP_NAME_MAIN LIKE CONCAT(CONCAT('%', #{condition.groupNameMain, jdbcType=VARCHAR}),'%')
+		</if>
+    </where>
+	</select>
+	
+    <select id="getGroupInfoByGroupNo" parameterType="String"  resultType="java.util.HashMap">
+	 SELECT * FROM OCRM_F_CI_GROUP G WHERE G.GROUP_NO = #{groupNo, jdbcType=VARCHAR}
+	</select>
+</mapper>

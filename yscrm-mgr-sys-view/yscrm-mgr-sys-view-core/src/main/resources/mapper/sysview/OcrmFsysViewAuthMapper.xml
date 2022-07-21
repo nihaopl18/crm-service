@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.sysview.repository.mapper.OcrmFsysViewAuthMapper">
+    <resultMap id="BaseResultMap" type="cn.com.yusys.yscrm.sysview.domain.OcrmFsysViewAuth">
+		<id column="AUTH_RECO_ID" jdbcType="VARCHAR" property="authRecoId" />
+		<result column="SYS_ID" jdbcType="VARCHAR" property="sysId" />
+		<result column="AUTHOBJ_TYPE" jdbcType="VARCHAR" property="authobjType" />
+		<result column="AUTHOBJ_ID" jdbcType="VARCHAR" property="authobjId" />
+		<result column="AUTHRES_TYPE" jdbcType="VARCHAR" property="authresType" />
+		<result column="AUTHRES_ID" jdbcType="VARCHAR" property="authresId" />
+		<result column="LAST_CHG_USR" jdbcType="VARCHAR" property="lastChgUsr" />
+		<result column="LAST_CHG_DT" jdbcType="VARCHAR" property="lastChgDt" />
+		<result column="VIEW_ID" jdbcType="VARCHAR" property="viewId" />
+    </resultMap>
+    <sql id="Base_Column_List">
+	    AUTH_RECO_ID,SYS_ID,AUTHOBJ_TYPE,AUTHOBJ_ID,AUTHRES_TYPE,AUTHRES_ID,LAST_CHG_USR,LAST_CHG_DT,VIEW_ID
+    </sql>
+    <delete id="deleteContrInfo" parameterType="String">
+		 DELETE FROM OCRM_F_SYS_VIEW_AUTH WHERE AUTHRES_TYPE = 'C' AND AUTHRES_ID IN
+		 <foreach item="contrId" index="index" collection="array" open="(" separator="," close=")">  
+ 			#{contrId} 
+ 		</foreach>
+	</delete>
+	
+	<select id="getRecoInfo" parameterType="java.util.Map" resultType="java.util.Map">
+		select a.* from OCRM_F_SYS_VIEW_AUTH a
+		<where>
+			<if test="objectType != null and objectType != ''">
+				 a.AUTHOBJ_TYPE = #{objectType , jdbcType=VARCHAR}
+			</if>
+			<if test="resType != null">
+				and a.AUTHRES_TYPE in
+				<foreach  item="item" collection="resType" index="index"  open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+			<if test="objectId != null and objectId != ''">
+				and a.AUTHOBJ_ID = #{objectId , jdbcType=VARCHAR}
+			</if>
+            <if test="sysId != null and sysId != ''">
+                and a.SYS_ID = #{sysId, jdbcType=VARCHAR}
+            </if>
+
+		</where>
+		<if test="sort != null">
+			order by ${sort}
+		</if>
+	</select>
+	
+	<select id="qryViewTree" parameterType="String" resultType="java.util.Map">
+        select  b.ID,b.NAME,b.PARENT_ID,'M' as MENU_TYPE,b.ID from (select *
+			    from OCRM_F_SYS_VIEW_MANAGER M where M.SYS_Id=#{sysId}
+			    and M.PARENT_ID = '0' ORDER BY M.ORDERS) b
+		UNION ALL
+		  select  a.ID,a.NAME,a.PARENT_ID,'M' as MENU_TYPE,a.ID from (select *
+			    from OCRM_F_SYS_VIEW_MANAGER M where M.SYS_Id=#{sysId}
+			    and M.PARENT_ID != '0'
+			     ORDER BY M.ORDERS)a
+		 UNION ALL
+		   select t.contr_id as ID,t.contr_name as NAME,m.id as PARENT_ID
+			    ,'C' AS MENU_TYPE,m.id from OCRM_F_SYS_VIEW_CONTR t
+			    left join OCRM_F_SYS_VIEW_MANAGER m on m.VIEW_ITEM_ID=t.VIEW_ITEM_ID WHERE t.contr_id !='*' AND M.SYS_Id=#{sysId}
+	</select>
+	
+	<select id="quryParentIdById" parameterType="java.util.Map" resultType="java.util.Map" >
+        select distinct id as id_item,menu_type,parent_id,id from (select id,'M' as menu_type,parent_id
+        from OCRM_F_SYS_VIEW_MANAGER 
+        start with id in
+        <foreach item="id" index="index" collection="list" open="(" separator="," close=")">  
+            #{id} 
+        </foreach> 
+        connect by prior parent_id = id
+        )
+    </select>  
+    
+    <delete id="deleteRelInfo" parameterType="java.util.Map">
+	 delete from OCRM_F_SYS_VIEW_AUTH 
+	 <where>
+			<if test="objectType != null and objectType != ''">
+				and AUTHOBJ_TYPE = #{objectType , jdbcType=VARCHAR}
+			</if>
+			<if test="resType != null">
+				and AUTHRES_TYPE in
+				<foreach  item="item" collection="resType" index="index"  open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+			<if test="objectId != null and objectId != ''">
+				and AUTHOBJ_ID = #{objectId , jdbcType=VARCHAR}
+			</if>
+		</where>
+	</delete>
+	
+	<delete id="deleteMenuInfo" parameterType="String">
+		 DELETE FROM OCRM_F_SYS_VIEW_AUTH WHERE ID = #{id}
+	</delete>
+
+	 <!--查询授权的视图树数据-->
+	<select id="selectViewTree" parameterType="java.util.Map" resultType="java.util.HashMap">
+		SELECT DISTINCT T_MENU.ID,T_MENU.NAME,T_MENU.PARENT_ID,T_MENU.ORDERS,T_MENU.VIEW_ITEM_ID,
+		       T_FUNC.VIEW_ADDR,T_MENU.SYS_ID FROM
+		  OCRM_F_SYS_VIEW_AUTH T_RECO
+		  JOIN (
+		      SELECT T_USER.USER_ID USER_ID,
+		        T_USER.ORG_ID ORG_ID,T_USER.DPT_ID DPT_ID,T_ROELREL.ROLE_ID ROLE_ID FROM
+		       ADMIN_SM_USER T_USER LEFT JOIN
+		       ADMIN_SM_USER_ROLE_REL T_ROELREL ON (T_USER.USER_ID=T_ROELREL.USER_ID)
+		    <where>
+	            <if test="loginCode != null">
+	                 T_USER.LOGIN_CODE=#{loginCode}
+	            </if>
+            </where>
+		  ) T_AUTHOBJ
+		  ON(
+		         T_RECO.AUTHOBJ_TYPE='R' AND T_RECO.AUTHOBJ_ID = T_AUTHOBJ.ROLE_ID
+		   )
+		   JOIN OCRM_F_SYS_VIEW_MANAGER T_MENU ON(T_RECO.AUTHRES_TYPE ='M' AND T_RECO.AUTHRES_ID=T_MENU.ID)
+		   LEFT JOIN OCRM_F_SYS_VIEW_ITEM T_FUNC ON(T_MENU.VIEW_ITEM_ID = T_FUNC.ID)
+        <where>
+            <if test="sysId != null">
+             T_MENU.SYS_ID=#{sysId}
+            </if>
+        </where>
+		   ORDER BY T_MENU.PARENT_ID,T_MENU.ORDERS ASC
+	</select>
+	
+	 <!--查询授权的控制点数据-->
+    <select id="selectContrList" parameterType="java.util.Map" resultType="java.util.HashMap">
+			  SELECT DISTINCT T_RESCTRL.VIEW_ITEM_ID,T_RESCTRL.CONTR_CODE,T_RESCTRL.CONTR_NAME,T_RESCTRL.CONTR_URL,T_RESCTRL.METHOD_TYPE,T_RECO.SYS_ID FROM
+		      OCRM_F_SYS_VIEW_AUTH T_RECO
+		      JOIN (
+		          SELECT T_USER.USER_ID USER_ID,
+		            T_USER.ORG_ID ORG_ID,T_USER.DPT_ID DPT_ID,T_ROELREL.ROLE_ID ROLE_ID FROM
+		           ADMIN_SM_USER T_USER LEFT JOIN
+		           ADMIN_SM_USER_ROLE_REL T_ROELREL ON (T_USER.USER_ID=T_ROELREL.USER_ID)
+	           <where>
+	                <if test="loginCode != null">
+	                     T_USER.LOGIN_CODE=#{loginCode}
+	                </if>
+                </where>
+		             ) T_AUTHOBJ
+		      ON(
+		             T_RECO.AUTHOBJ_TYPE='R' AND T_RECO.AUTHOBJ_ID = T_AUTHOBJ.ROLE_ID
+		       )
+		       JOIN OCRM_F_SYS_VIEW_CONTR T_RESCTRL ON(T_RECO.AUTHRES_TYPE ='C' AND T_RECO.AUTHRES_ID=T_RESCTRL.CONTR_ID)
+                <where>
+                    <if test="sysId != null">
+                        T_RECO.SYS_ID=#{sysId}
+                    </if>
+                </where>
+     </select>
+     
+	 <select id="qryGrantList" parameterType="java.util.Map" resultType="cn.com.yusys.yscrm.sysview.domain.OcrmFsysViewAuth">
+		select b.GRANT_VIEW_ITEM as id from OCRM_F_CI_GRANT_LIST a ,OCRM_F_CI_GRANT_APPLY b where a.APPLY_NO=b.APPLY_ID and b.GRANT_STAT='1' and
+		a.cust_id=#{custId} and b.mgr_id=#{mgrId}
+	 </select>
+	 
+	 <select id="qryViewList" parameterType="String" resultType="java.util.HashMap">
+		SELECT DISTINCT T_MENU.ID,T_MENU.NAME,T_MENU.PARENT_ID,T_MENU.ORDERS,T_MENU.VIEW_ITEM_ID,T_FUNC.VIEW_ADDR,T_MENU.SYS_ID FROM
+		OCRM_F_SYS_VIEW_MANAGER T_MENU 
+		LEFT JOIN OCRM_F_SYS_VIEW_ITEM T_FUNC ON(T_MENU.VIEW_ITEM_ID = T_FUNC.ID) 
+		where T_MENU.SYS_ID='1cab27def8fb4c0f9486dcf844b783c0' and T_MENU.ID in
+		<foreach collection="array" item="id" index="index" open="(" close=")" separator=",">
+         	#{id}
+        </foreach>
+	 </select>
+</mapper>

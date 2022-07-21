@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.custpub.repository.mapper.AcrmFciOrgKeyManMapper">
+    <!--潜在客户修改地址信息 -->
+	<update id="updatePoten" parameterType="cn.com.yusys.yscrm.custpub.domain.AcrmFciOrgKeyMan">
+			UPDATE ACRM_F_CI_ORG_KEY_MAN t SET  t.CUST_NAME=#{custName,jdbcType=VARCHAR},
+			t.CUST_NAME_REL=#{custNameRel,jdbcType=VARCHAR},t.MOBILE_NO=#{mobileNo,jdbcType=VARCHAR},
+			t.CERT_TYPE=#{certType,jdbcType=VARCHAR},t.CERT_NO=#{certNo,jdbcType=VARCHAR},
+			t.LAST_CHG_SYS=#{lastChgSys,jdbcType=VARCHAR},t.LAST_CHG_USR=#{lastChgUsr,jdbcType=VARCHAR},
+			t.LAST_CHG_DT=#{lastChgDt,jdbcType=DATE}
+			WHERE t.CUST_ID = #{custId,jdbcType=VARCHAR} AND MAX(t.CONT_PRIO)
+	</update>
+    
+</mapper>

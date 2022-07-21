@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.info.custlosswarn.repository.mapper.AcrmFwpLossCustWarnOMapper">
+    <resultMap id="BaseResultMap" type="cn.com.yusys.yscrm.info.custlosswarn.domain.AcrmFwpLossCustWarnO">
+		<id column="LOSS_ID" jdbcType="VARCHAR" property="lossId" />
+		<result column="LEVEL_DATE" jdbcType="VARCHAR" property="levelDate" />
+		<result column="CUST_ID" jdbcType="VARCHAR" property="custId" />
+		<result column="CUST_NAME" jdbcType="VARCHAR" property="custName" />
+		<result column="LOSS_WARN_LEV" jdbcType="VARCHAR" property="lossWarnLev" />
+		<result column="IF_DETENTION" jdbcType="VARCHAR" property="ifDetention" />
+		<result column="DETENTION_RESULT" jdbcType="VARCHAR" property="detentionResult" />
+		<result column="DEP_M_BAL_SYB" jdbcType="VARCHAR" property="depMbalSyb" />
+		<result column="DEP_M_BAL_MJC" jdbcType="VARCHAR" property="depMbalMjc" />
+		<result column="DEP_M_BAL_MJT" jdbcType="VARCHAR" property="depMbalMjt" />
+		<result column="LOA_M_BAL_SYB" jdbcType="VARCHAR" property="loaMbalSyb" />
+		<result column="LOA_M_BAL_MJC" jdbcType="VARCHAR" property="loaMbalMjc" />
+		<result column="LOA_M_BAL_MJT" jdbcType="VARCHAR" property="loaMbalMjt" />
+		<result column="HOL_PRO_SYB" jdbcType="VARCHAR" property="holProSyb" />
+		<result column="HOL_PRO_MJC" jdbcType="VARCHAR" property="holProMjc" />
+		<result column="HOL_PRO_MJT" jdbcType="VARCHAR" property="holProMjt" />
+		<result column="MON_STA_SYB" jdbcType="VARCHAR" property="monStaSyb" />
+		<result column="MON_STA_MJC" jdbcType="VARCHAR" property="monStaMjc" />
+		<result column="MON_STA_MJT" jdbcType="VARCHAR" property="monStaMjt" />
+		<result column="LOA_TO_DEP_SYB" jdbcType="VARCHAR" property="loaToDepSyb" />
+		<result column="LOA_TO_DEP_MJC" jdbcType="VARCHAR" property="loaToDepMjc" />
+		<result column="LOA_TO_DEP_MJT" jdbcType="VARCHAR" property="loaToDepMjt" />
+		<result column="DEA_SUM_SYB" jdbcType="VARCHAR" property="deaSumSyb" />
+		<result column="DEA_SUM_MJC" jdbcType="VARCHAR" property="deaSumMjc" />
+		<result column="DEA_SUM_MJT" jdbcType="VARCHAR" property="deaSumMjt" />
+		<result column="INT_BUS_SUM_SYB" jdbcType="VARCHAR" property="intBusSumSyb" />
+		<result column="INT_BUS_SUM_MJC" jdbcType="VARCHAR" property="intBusSumMjc" />
+		<result column="INT_BUS_SUM_MJT" jdbcType="VARCHAR" property="intBusSumMjt" />
+		<result column="INT_BUS_NUM_SYB" jdbcType="VARCHAR" property="intBusNumSyb" />
+		<result column="INT_BUS_NUM_MJC" jdbcType="VARCHAR" property="intBusNumMjc" />
+		<result column="INT_BUS_NUM_MJT" jdbcType="VARCHAR" property="intBusNumMjt" />
+		<result column="CORP_ORG_CODE" jdbcType="VARCHAR" property="corpOrgCode" />
+    </resultMap>
+    <sql id="Base_Column_List">
+	    LOSS_ID,to_char(to_date(LEVEL_DATE,'yyyyMMdd'),'yyyy-MM-dd') AS LEVEL_DATE,CUST_ID,CUST_NAME,LOSS_WARN_LEV,IF_DETENTION,DETENTION_RESULT,DEP_M_BAL_SYB,DEP_M_BAL_MJC,DEP_M_BAL_MJT,LOA_M_BAL_SYB,LOA_M_BAL_MJC,LOA_M_BAL_MJT,HOL_PRO_SYB,HOL_PRO_MJC,HOL_PRO_MJT,MON_STA_SYB,MON_STA_MJC,MON_STA_MJT,LOA_TO_DEP_SYB,LOA_TO_DEP_MJC,LOA_TO_DEP_MJT,DEA_SUM_SYB,DEA_SUM_MJC,DEA_SUM_MJT,INT_BUS_SUM_SYB,INT_BUS_SUM_MJC,INT_BUS_SUM_MJT,INT_BUS_NUM_SYB,INT_BUS_NUM_MJC,INT_BUS_NUM_MJT,CORP_ORG_CODE
+    </sql>
+    
+    <!-- 条件列表查询 -->
+    <select id="queryList" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+        select  a.LOSS_ID,to_char(to_date(a.LEVEL_DATE,'yyyyMMdd'),'yyyy-MM-dd') as LEVEL_DATE,
+         a.CUST_ID, a.CUST_NAME, a.LOSS_WARN_LEV, a.IF_DETENTION, a.DETENTION_RESULT,
+          '2' as CUST_TYPE 
+        from ACRM_F_WP_LOSS_CUST_WARN_O a 
+               left join ACRM_F_CI_ORG_CUST_INFO c on a.CUST_ID = c.CUST_ID 
+        <where>
+            <if test="condition.levelDate != null and condition.levelDate != ''">
+                AND a.LEVEL_DATE = to_char(TO_DATE(#{condition.levelDate,jdbcType=DATE}, 'yyyy-MM-dd'),'yyyyMMdd')
+            </if>
+            <if test="condition.custId != null and condition.custId != ''">
+                AND a.CUST_ID = #{condition.custId,jdbcType=VARCHAR} 
+            </if>
+            <if test="condition.lossWarnLev != null and condition.lossWarnLev != ''">
+                AND a.LOSS_WARN_LEV = #{condition.lossWarnLev,jdbcType=VARCHAR}
+            </if>
+            <if test="condition.ifDetention != null and condition.ifDetention != ''">
+                AND a.IF_DETENTION = #{condition.ifDetention,jdbcType=VARCHAR}
+            </if>
+            <if test="condition.detentionResult != null and condition.detentionResult != ''">
+                <choose>
+                    <when test="@cn.com.yusys.yusp.commons.mapper.provider.OGNLUtil@like(condition.detentionResult)"> AND a.DETENTION_RESULT like #{condition.detentionResult,jdbcType=VARCHAR }</when>
+                    <otherwise> AND a.DETENTION_RESULT = #{condition.detentionResult,jdbcType=VARCHAR} </otherwise>
+                </choose>
+            </if>
+           <!--  <if test="condition.custType != null and condition.custType != ''">
+                AND b.CUST_TYPE = #{condition.custType,jdbcType=VARCHAR}
+            </if> -->
+<!--             ${condition.uncertain} -->${dataAuth}
+        </where>
+        <if test="sort != null"> order by ${sort} </if>
+    </select>
+    
+    <!-- 根据主键查询 -->
+    <select id="selectByLossId" parameterType="java.lang.String" resultMap="BaseResultMap">
+        select
+        	<include refid="Base_Column_List" />
+        from ACRM_F_WP_LOSS_CUST_WARN_O
+        where LOSS_ID = #{lossId,jdbcType=VARCHAR}
+    </select>
+    
+</mapper>

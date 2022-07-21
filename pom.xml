@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">  
+  <modelVersion>4.0.0</modelVersion>  
+  <!-- 当前工程信息 -->  
+  <groupId>cn.com.yusys.yscrm</groupId>  
+  <artifactId>crm-service</artifactId>  
+  <description>YUSP应用框架</description>  
+  <version>2.0.0-SNAPSHOT</version>  
+  <packaging>pom</packaging>  
+  <!-- 包含的子模块 -->  
+  <modules> 
+     
+    <module>yscrm-entity-cust-person</module>  
+    <module>yscrm-entity-cust-group</module>  
+    <module>yscrm-mgr-cust-flex</module>  
+    <module>yscrm-mgr-sys-view</module>  
+    <module>yscrm-mgr-mkt-salesoppor</module>  
+    <!-- 客户公共服务 -->  
+    <module>yscrm-entity-cust-pub</module>  
+    <!-- 首页服务 -->  
+    <module>yscrm-mgr-sys-homepage</module>  
+    <!-- 集团服务 -->  
+    <module>yscrm-entity-cust-org-group</module>  
+    <!-- 产品服务 -->  
+    <module>yscrm-entity-product</module>  
+    <!-- 营销活动服务 -->  
+    <module>yscrm-mgr-mkt-activity</module>  
+    <!-- 客户准入服务 -->  
+    <module>yscrm-mgr-cust-admit</module>  
+    <!-- 对公客户服务 -->  
+    <module>yscrm-entity-cust-org</module>  
+    <!-- 客户反馈服务 -->  
+    <module>yscrm-mgr-cust-service</module>  
+    <!-- 客户经理团队服务 -->  
+    <module>yscrm-entity-cust-mgr-group</module>  
+    <!-- 客户经理服务 -->  
+    <module>yscrm-entity-cust-mgr</module>  
+    <!-- 金融小工具服务 -->  
+    <module>yscrm-func-info-calculator</module>  
+    <!-- 产品方案服务 -->  
+    <module>yscrm-mgr-sys-pdplan</module>  
+    <!-- 日程安排服务 -->  
+    <module>yscrm-mgr-user-schedule</module>  
+    <!-- 客户经理业务指标服务 -->  
+    <module>yscrm-business-cust-mgr</module>  
+    <!-- 客户业务指标公共服务 -->  
+    <module>yscrm-business-cust-pub</module>
+    <!-- PCRM公共代码 -->
+    <module>yscrm-pcrm-common</module>
+    <!-- 客户业务指标个人服务 -->  
+    <module>yscrm-business-cust-person</module>  
+    <!-- 客户业务指标对公服务 -->  
+    <module>yscrm-business-cust-org</module>  
+    <!-- 账户指标公共服务 -->  
+    <module>yscrm-business-acct-pub</module>  
+    <!-- 账户指标个人服务 -->  
+    <module>yscrm-business-acct-person</module>  
+    <!-- 工作平台提醒服务 -->  
+    <module>yscrm-mgr-info-remind</module>  
+    <!-- 工作平台流失预警服务 -->  
+    <module>yscrm-mgr-info-custlosswarn</module>  
+    <!-- 工作平台工作报告服务 -->  
+    <module>yscrm-mgr-info-workreport</module>  
+    <!-- 工作平台交流区服务 -->  
+    <module>yscrm-mgr-exchange</module>  
+    <!-- 工作平台知识库服务 -->  
+    <module>yscrm-mgr-knowledge-base</module>  
+    <!-- 客户评级服务 -->  
+    <module>yscrm-mgr-cust-grade</module>
+    <!-- 营销权益模块-->
+    <module>yscrm-yx-parent</module>
+    <module>yusp-crm-single-starter</module>
+    <module>com-yusys-streaminghub-app</module>
+    <module>com-yusys-streaminghub-rpc</module>
+    <module>yscrm-mgr-performance</module>
+  </modules>
+  <!-- 公共属性 -->  
+  <properties>
+    <yusp-dependencies.version>2.0.0-SNAPSHOT</yusp-dependencies.version>  
+    <maven.compiler.source>1.8</maven.compiler.source>  
+    <maven.compiler.target>1.8</maven.compiler.target>  
+    <maven.compiler.compilerVersion>1.8</maven.compiler.compilerVersion>  
+    <spring.lombok.version>1.18.22</spring.lombok.version>
+    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>  
+    <maven.compiler.encoding>UTF-8</maven.compiler.encoding>  
+    <spring-boot-maven-plugin.version>2.0.4.RELEASE</spring-boot-maven-plugin.version>
+    <yusp-common.version>V2.2.2.20190822.RELEASE</yusp-common.version>
+    <!-- 整合ES 使用  -->
+    <elasticsearch.version>6.6.0</elasticsearch.version>
+    <spring.data.elasticsearch.version>3.1.5.RELEASE</spring.data.elasticsearch.version>
+    <uimp-version>2.0.0-SNAPSHOT</uimp-version>
+    <uimp-app-framework.version>2.0.0-SNAPSHOT</uimp-app-framework.version>
+    <yusp-common.version>V2.2.2.20190822.RELEASE</yusp-common.version>
+    <yusp-platform-service.version>V2.2.2.20190822.RELEASE</yusp-platform-service.version>
+    <apache-ant.version>1.8.3</apache-ant.version>
+    <biapp-rpt.version>1.0.0-RELEASE</biapp-rpt.version>
+    <swagger-bootstrap-ui.version>1.9.3</swagger-bootstrap-ui.version>
+    <yusp-echain-server.version>V2.2.2.20190822.RELEASE</yusp-echain-server.version>
+    <yusp-file-core.version>2.0.0-SNAPSHOT</yusp-file-core.version>
+  </properties>
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>cn.com.yusys.yusp</groupId>
+        <artifactId>yusp-file-core</artifactId>
+        <version>2.0.0-SNAPSHOT</version>
+      </dependency>
+      <dependency>
+        <groupId>cn.com.yusys.yusp</groupId>  
+        <artifactId>yusp-dependencies</artifactId>  
+        <version>${yusp-dependencies.version}</version>  
+        <type>pom</type>  
+        <scope>import</scope> 
+      </dependency>  
+      <dependency> 
+        <groupId>cn.com.yusys.yusp</groupId>  
+        <artifactId>yusp-commons</artifactId>  
+        <version>2.0.0-SNAPSHOT</version> 
+      </dependency>
+      <dependency>
+        <groupId>cn.com.yusys.yusp</groupId>
+        <artifactId>yusp-sequence-core</artifactId>
+        <version>${yusp-platform-service.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>cn.com.yusys.yusp</groupId>
+        <artifactId>yusp-common-job</artifactId>
+        <version>${yusp-common.version}</version>
+      </dependency>
+    </dependencies> 
+  </dependencyManagement>  
+  <!-- maven私服，用于deploy私有jar包 -->  
+  <distributionManagement> 
+      <!-- <snapshotRepository> 
+      <id>yusys-snapshots</id>  
+      <url>http://192.168.251.151:8081/repository/maven-snapshots/</url> 
+    </snapshotRepository>  
+    <repository> 
+      <id>yusys-releases</id>  
+      <url>http://192.168.251.151:8081/repository/maven-releases/</url> 
+    </repository> -->  
+  </distributionManagement> 
+</project>

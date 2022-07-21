@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.sysview.repository.mapper.OcrmFsysViewMapper">
+    <resultMap id="BaseResultMap" type="cn.com.yusys.yscrm.sysview.domain.OcrmFsysView">
+		<id column="VIEW_ID" jdbcType="VARCHAR" property="viewId" />
+		<result column="VIEW_NAME" jdbcType="VARCHAR" property="viewName" />
+		<result column="VIEW_TYPE" jdbcType="VARCHAR" property="viewType" />
+		<result column="NOTES" jdbcType="VARCHAR" property="notes" />
+    </resultMap>
+    <sql id="Base_Column_List">
+	    VIEW_ID,VIEW_NAME,VIEW_TYPE,NOTES
+    </sql>
+	<!--查询视图项信息 -->
+	<select id="getViewlist" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+		resultType="java.util.HashMap">
+		select *
+		from OCRM_F_SYS_VIEW m 
+		<where>
+			<if test="condition.viewName != null and condition.viewName !=''">
+				and m.view_name like #{condition.viewName,jdbcType=VARCHAR}
+			</if>
+		</where>
+		ORDER BY m.view_type
+	</select>
+	
+	<!--保存数据前查询视图名称是否已经存在-->
+	<select id="checkName" parameterType="java.util.Map" resultType="java.util.HashMap">
+		select m.view_id from OCRM_F_SYS_VIEW m where m.view_name = #{viewName}
+		<if test=" viewId!=null and viewId!='' ">
+			and m.view_id &lt;&gt; #{viewId}
+		</if>
+	</select>
+	
+	<!--删除前校验查询视图是否关联视图项-->
+	<select id="getItemByViewId" parameterType="String" resultType="java.lang.Integer">
+		select count(*) from OCRM_F_SYS_VIEW_ITEM where view_id= #{viewId}
+	</select>
+</mapper>

@@ -1,0 +1,2043 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.custpub.repository.mapper.GovernedCustMapper">
+	<select id="getListPer" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"  resultType="java.util.HashMap">
+	SELECT P.CUST_STATUS,
+       P.CUST_ID,
+       P.CUST_NAME,
+       P.CERT_TYPE,
+       P.CERT_NO,
+       P.BELONG_MGR,
+       P.BELONG_BRCH,
+       P.SERV_LEV,
+       P.VALUE_LEV,
+       P.CUST_ASSIGN_STAT,
+       P.IS_LOAN_CUST,
+       B.REPORT_SUM as REPORT_SUM_NUMBER,
+       P.WHE_AGR_REL_CUS,
+       P.EFFECT_FLG,
+       U.USER_NAME,
+       O.ORG_NAME,
+       O.ORG_LEVEL,
+       B.AUM_BAL,
+       B.DPS_BAL,
+       B.LOAN_BAL,
+       B.DPS_Y_AVG_BAL,
+       B.LOAN_Y_AVG_BAL,
+       '1' as CUST_TYPE
+  
+              <if test="dataAuth != null and condition.orgIdAuth =='500'">
+              		,'1' AS POWER_LEV FROM ACRM_F_CI_PER_ADMIT_INFO P
+              		
+				  LEFT JOIN ACRM_A_CI_PER_BUSI_SUM_D B
+    ON B.CUST_ID = P.CUST_ID
+  LEFT JOIN ADMIN_SM_USER U
+    ON U.USER_ID = P.BELONG_MGR
+  LEFT JOIN ADMIN_SM_ORG O
+    ON O.ORG_CODE = P.BELONG_BRCH
+				  LEFT JOIN OCRM_F_CG_CUST_GRADE_INFO PJ
+				  ON PJ.ECIF_CUST_NO=P.CUST_ID
+				  LEFT JOIN OCRM_F_CI_TRUSTEESHIP_LIST R ON R.CUST_ID=P.CUST_ID
+				  LEFT JOIN OCRM_F_CI_TRUSTEESHIP_APPLY TT ON TT.APPLY_ID = R.APPLY_NO
+				  AND TT.TRUST_STAT='04'
+				  AND TT.DEAD_LINE &gt;= to_date('${condition.dataDate}','yyyy-mm-dd')
+    <where>
+    (${condition.busiType})
+		<if test="condition.effectFlg != null and condition.effectFlg !=''">
+				  and P.EFFECT_FLG = #{condition.effectFlg, jdbcType=VARCHAR}
+		</if>
+	
+		<if test="condition.ettenCustId != null and condition.ettenCustId !=''">
+				  and P.CUST_ID = #{condition.ettenCustId, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.isAdmitEnter != null and condition.isAdmitEnter !=''">
+				  and P.IS_ADMIT_ENTER = #{condition.isAdmitEnter, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.custStatus != null and condition.custStatus !=''">
+				  and P.CUST_STATUS = #{condition.custStatus, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.custId != null and condition.custId !=''">
+				  and P.CUST_ID LIKE CONCAT(CONCAT('%', #{condition.custId, jdbcType=VARCHAR}),'%')
+		</if>
+		<if test="condition.custName != null and condition.custName !=''">
+				  and P.CUST_NAME LIKE CONCAT(CONCAT('%', #{condition.custName, jdbcType=VARCHAR}),'%')
+		</if>
+		<if test="condition.ndsCustNo != null and condition.ndsCustNo !=''">
+			and P.NDS_CUST_ID = #{condition.ndsCustNo, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.custPhoneNo != null and condition.custPhoneNo !=''">
+			and P.PHONE_NO = #{condition.custPhoneNo, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.custGrade != null and condition.custGrade !=''">
+			AND PJ.AUM_GRADE=#{condition.custGrade, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.figureCode != null and condition.figureCode !=''">
+			AND P.APLIT_JOINT  LIKE CONCAT(CONCAT(CONCAT(CONCAT('%','|'), #{condition.figureCode, jdbcType=VARCHAR}),'|'),'%')
+		</if>
+		<if test="condition.characterCode != null and condition.characterCode !=''">
+			AND P.APLIT_JOINT  LIKE CONCAT(CONCAT('%', #{condition.characterCode, jdbcType=VARCHAR}),'%')
+		</if>
+		<if test="condition.certType != null and condition.certType !=''">
+				  and P.CERT_TYPE = #{condition.certType, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.certNo != null and condition.certNo !=''">
+				  and P.CERT_NO LIKE CONCAT(CONCAT('%', #{condition.certNo, jdbcType=VARCHAR}),'%')
+		</if>
+		<if test="condition.belongBrch != null and condition.belongBrch !=''">
+				  and P.BELONG_BRCH IN (select org_code from sys_org_view where sys_org_view.org_seq like '%'||#{condition.belongBrch, jdbcType=VARCHAR}||',%') 
+		</if>
+		<if test="condition.belongMgr != null and condition.belongMgr !=''">
+				  and P.BELONG_MGR = #{condition.belongMgr, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.valueLev != null and condition.valueLev !=''">
+				  and P.VALUE_LEV = #{condition.valueLev, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.servLev != null and condition.servLev !=''">
+				  and P.SERV_LEV = #{condition.servLev, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.custAssignStat != null and condition.custAssignStat !=''">
+				  and P.CUST_ASSIGN_STAT = #{condition.custAssignStat, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.wheAgrRelCus != null and condition.wheAgrRelCus !=''">
+				  and P.WHE_AGR_REL_CUS = #{condition.wheAgrRelCus, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.custGroupId != null and condition.custGroupId !=''">
+				  and P.CUST_ID NOT IN (SELECT CUST_ID FROM OCRM_F_CI_CG_MEMBER WHERE CUST_GROUP_ID = #{condition.custGroupId, jdbcType=VARCHAR})
+		</if>
+		<if test="condition.dspBal != null and condition.dspBal !=''">
+				  and B.DPS_BAL &gt;= #{condition.dspBal, jdbcType=NUMERIC}
+		</if>
+		<if test="condition.loanBal != null and condition.loanBal !=''">
+				  and B.LOAN_BAL &gt;= #{condition.loanBal, jdbcType=NUMERIC}
+		</if>
+		<if test="condition.aumBal != null and condition.aumBal !=''">
+				  and B.AUM_BAL &gt;= #{condition.aumBal, jdbcType=NUMERIC}
+		</if>
+		<if test="condition.aumBalLow != null and condition.aumBalLow !=''">
+				  and B.AUM_BAL &gt;= #{condition.aumBalLow, jdbcType=NUMERIC}
+		</if>
+		<if test="condition.aumBalHigh != null and condition.aumBalHigh !=''">
+				  and B.AUM_BAL &lt;= #{condition.aumBalHigh, jdbcType=NUMERIC}
+		</if>
+		<if test="condition.queryAll != null and condition.queryAll !=''">
+				   and P.CUST_ID LIKE CONCAT(CONCAT('%', #{condition.queryAll, jdbcType=VARCHAR}),'%')
+				   OR P.CUST_NAME LIKE CONCAT(CONCAT('%', #{condition.queryAll, jdbcType=VARCHAR}),'%')
+				   OR P.CERT_NO LIKE CONCAT(CONCAT('%', #{condition.queryAll, jdbcType=VARCHAR}),'%')
+		</if>
+		
+    </where>
+     <if test="condition.isAdmitEnter!=null and condition.isAdmitEnter ==1 or condition.isAdmitEnter!=null and condition.isAdmitEnter =='1'">
+				   ORDER BY B.AUM_BAL DESC NULLS LAST
+		</if>
+		</if>
+		<if test="dataAuth != null and condition.orgIdAuth !='500'">
+		,MIN(PER.POWER_LEV) AS POWER_LEV
+		FROM ACRM_F_CI_PER_ADMIT_INFO P
+ INNER JOIN (
+		SELECT B.CUST_ID, '2' AS POWER_LEV
+               FROM OCRM_F_CI_ADMIT_BELONG B
+              WHERE B.MGR_ID = #{condition.userId, jdbcType = VARCHAR}
+             UNION ALL
+             SELECT L.CUST_ID, '3' AS POWER_LEV
+               FROM OCRM_F_CI_TRUSTEESHIP_APPLY A
+               LEFT JOIN OCRM_F_CI_TRUSTEESHIP_LIST L
+                 ON A.APPLY_ID = L.APPLY_NO
+              WHERE A.TRUST_STAT = '1'
+                AND A.TRUST_MGR_ID = #{condition.userId,
+              jdbcType = VARCHAR}
+             UNION ALL
+             SELECT L.CUST_ID, '4' AS POWER_LEV
+               FROM OCRM_F_CI_GRANT_APPLY A
+               LEFT JOIN OCRM_F_CI_GRANT_LIST L
+                 ON A.APPLY_ID = L.APPLY_NO
+              WHERE GRANT_STAT = '1'
+                AND GRANT_MGR_ID = #{condition.userId,
+              jdbcType = VARCHAR} 
+					${dataAuth} 
+				   ) PER
+    ON PER.CUST_ID = P.CUST_ID
+    LEFT JOIN ACRM_A_CI_PER_BUSI_SUM_D B
+    ON B.CUST_ID = P.CUST_ID
+  LEFT JOIN ADMIN_SM_USER U
+    ON U.USER_ID = P.BELONG_MGR
+  LEFT JOIN ADMIN_SM_ORG O
+    ON O.ORG_CODE = P.BELONG_BRCH
+			LEFT JOIN OCRM_F_CG_CUST_GRADE_INFO PJ
+			ON PJ.ECIF_CUST_NO=P.CUST_ID
+			LEFT JOIN OCRM_F_CI_TRUSTEESHIP_LIST R ON R.CUST_ID=P.CUST_ID
+			LEFT JOIN OCRM_F_CI_TRUSTEESHIP_APPLY TT ON TT.APPLY_ID = R.APPLY_NO
+			AND TT.TRUST_STAT='04'
+			AND TT.DEAD_LINE &gt;= to_date('${condition.dataDate}','yyyy-mm-dd')
+    <where>
+    1=1
+    <if test="condition.busiType != null and condition.busiType !=''">
+				AND (PER.POWER_LEV = '1' AND (${condition.busiType})  OR PER.POWER_LEV = '2' OR PER.POWER_LEV = '3' OR PER.POWER_LEV = '4')
+		</if>
+		<if test="condition.effectFlg != null and condition.effectFlg !=''">
+				  and P.EFFECT_FLG = #{condition.effectFlg, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.isAdmitEnter != null and condition.isAdmitEnter !=''">
+				  and P.IS_ADMIT_ENTER = #{condition.isAdmitEnter, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.custStatus != null and condition.custStatus !=''">
+				  and P.CUST_STATUS = #{condition.custStatus, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.custId != null and condition.custId !=''">
+				  and P.CUST_ID LIKE CONCAT(CONCAT('%', #{condition.custId, jdbcType=VARCHAR}),'%')
+		</if>
+		<if test="condition.ettenCustId != null and condition.ettenCustId !=''">
+				  and P.CUST_ID = #{condition.ettenCustId, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.custName != null and condition.custName !=''">
+				  and P.CUST_NAME LIKE CONCAT(CONCAT('%', #{condition.custName, jdbcType=VARCHAR}),'%')
+		</if>
+		<if test="condition.ndsCustNo != null and condition.ndsCustNo !=''">
+			and P.NDS_CUST_ID = #{condition.ndsCustNo, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.custPhoneNo != null and condition.custPhoneNo !=''">
+			and P.PHONE_NO = #{condition.custPhoneNo, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.custGrade != null and condition.custGrade !=''">
+			AND PJ.AUM_GRADE=#{condition.custGrade, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.figureCode != null and condition.figureCode !=''">
+			AND P.APLIT_JOINT  LIKE CONCAT(CONCAT(CONCAT(CONCAT('%','|'), #{condition.figureCode, jdbcType=VARCHAR}),'|'),'%')
+
+		</if>
+		<if test="condition.characterCode != null and condition.characterCode !=''">
+			AND P.APLIT_JOINT  LIKE CONCAT(CONCAT('%', #{condition.characterCode, jdbcType=VARCHAR}),'%')
+
+		</if>
+		<if test="condition.certType != null and condition.certType !=''">
+				  and P.CERT_TYPE = #{condition.certType, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.certNo != null and condition.certNo !=''">
+				  and P.CERT_NO LIKE CONCAT(CONCAT('%', #{condition.certNo, jdbcType=VARCHAR}),'%')
+		</if>
+		<if test="condition.belongBrch != null and condition.belongBrch !=''">
+				  and P.BELONG_BRCH IN (select org_code from sys_org_view where sys_org_view.org_seq like '%'||#{condition.belongBrch, jdbcType=VARCHAR}||',%') 
+		</if>
+		<if test="condition.belongMgr != null and condition.belongMgr !=''">
+				  and P.BELONG_MGR = #{condition.belongMgr, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.valueLev != null and condition.valueLev !=''">
+				  and P.VALUE_LEV = #{condition.valueLev, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.servLev != null and condition.servLev !=''">
+				  and P.SERV_LEV = #{condition.servLev, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.custAssignStat != null and condition.custAssignStat !=''">
+				  and P.CUST_ASSIGN_STAT = #{condition.custAssignStat, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.wheAgrRelCus != null and condition.wheAgrRelCus !=''">
+				  and P.WHE_AGR_REL_CUS = #{condition.wheAgrRelCus, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.custGroupId != null and condition.custGroupId !=''">
+				  and P.CUST_ID NOT IN (SELECT CUST_ID FROM OCRM_F_CI_CG_MEMBER WHERE CUST_GROUP_ID = #{condition.custGroupId, jdbcType=VARCHAR})
+		</if>
+		<if test="condition.dspBal != null and condition.dspBal !=''">
+				  and B.DPS_BAL &gt;= #{condition.dspBal, jdbcType=NUMERIC}
+		</if>
+		<if test="condition.loanBal != null and condition.loanBal !=''">
+				  and B.LOAN_BAL &gt;= #{condition.loanBal, jdbcType=NUMERIC}
+		</if>
+		<if test="condition.aumBal != null and condition.aumBal !=''">
+				  and B.AUM_BAL &gt;= #{condition.aumBal, jdbcType=NUMERIC}
+		</if>
+		<if test="condition.aumBalLow != null and condition.aumBalLow !=''">
+				  and B.AUM_BAL &gt;= #{condition.aumBalLow, jdbcType=NUMERIC}
+		</if>
+		<if test="condition.aumBalHigh != null and condition.aumBalHigh !=''">
+				  and B.AUM_BAL &lt;= #{condition.aumBalHigh, jdbcType=NUMERIC}
+		</if>
+		<if test="condition.queryAll != null and condition.queryAll !=''">
+				   and P.CUST_ID LIKE CONCAT(CONCAT('%', #{condition.queryAll, jdbcType=VARCHAR}),'%')
+				   OR P.CUST_NAME LIKE CONCAT(CONCAT('%', #{condition.queryAll, jdbcType=VARCHAR}),'%')
+				   OR P.CERT_NO LIKE CONCAT(CONCAT('%', #{condition.queryAll, jdbcType=VARCHAR}),'%')
+		</if>
+    </where>
+    GROUP BY P.CUST_STATUS,
+          P.CUST_ID,
+          P.CUST_NAME,
+          P.CERT_TYPE,
+          P.CERT_NO,
+          P.BELONG_MGR,
+          P.BELONG_BRCH,
+          P.SERV_LEV,
+          P.VALUE_LEV,
+          P.IS_LOAN_CUST,
+          P.CUST_ASSIGN_STAT,
+          B.REPORT_SUM,
+          P.WHE_AGR_REL_CUS,
+          P.EFFECT_FLG,
+          U.USER_NAME,
+          O.ORG_NAME,
+          O.ORG_LEVEL,
+          B.AUM_BAL,
+          B.DPS_BAL,
+          B.LOAN_BAL,
+          B.DPS_Y_AVG_BAL,
+          B.LOAN_Y_AVG_BAL
+           <if test="condition.isAdmitEnter!=null and condition.isAdmitEnter ==1 or condition.isAdmitEnter!=null and condition.isAdmitEnter =='1'">
+				   ORDER BY B.AUM_BAL DESC NULLS LAST
+		</if>
+		</if>
+         <if test="dataAuth == null">
+         ,MIN(PER.POWER_LEV) AS POWER_LEV
+		FROM ACRM_F_CI_PER_ADMIT_INFO P
+ INNER JOIN (
+		SELECT B.CUST_ID, '2' AS POWER_LEV
+               FROM OCRM_F_CI_ADMIT_BELONG B
+              WHERE B.MGR_ID = #{condition.userId, jdbcType = VARCHAR}
+             UNION ALL
+             SELECT L.CUST_ID, '3' AS POWER_LEV
+               FROM OCRM_F_CI_TRUSTEESHIP_APPLY A
+               LEFT JOIN OCRM_F_CI_TRUSTEESHIP_LIST L
+                 ON A.APPLY_ID = L.APPLY_NO
+              WHERE A.TRUST_STAT = '1'
+                AND A.TRUST_MGR_ID = #{condition.userId,
+              jdbcType = VARCHAR}
+             UNION ALL
+             SELECT L.CUST_ID, '4' AS POWER_LEV
+               FROM OCRM_F_CI_GRANT_APPLY A
+               LEFT JOIN OCRM_F_CI_GRANT_LIST L
+                 ON A.APPLY_ID = L.APPLY_NO
+              WHERE GRANT_STAT = '1'
+                AND GRANT_MGR_ID = #{condition.userId,
+              jdbcType = VARCHAR} 
+				   ) PER
+    ON PER.CUST_ID = P.CUST_ID
+    LEFT JOIN ACRM_A_CI_PER_BUSI_SUM_D B
+    ON B.CUST_ID = P.CUST_ID
+  LEFT JOIN ADMIN_SM_USER U
+    ON U.USER_ID = P.BELONG_MGR
+  LEFT JOIN ADMIN_SM_ORG O
+    ON O.ORG_CODE = P.BELONG_BRCH
+			 LEFT JOIN OCRM_F_CG_CUST_GRADE_INFO PJ
+			 ON PJ.ECIF_CUST_NO=P.CUST_ID
+			 LEFT JOIN OCRM_F_CI_TRUSTEESHIP_LIST R ON R.CUST_ID=P.CUST_ID
+			 LEFT JOIN OCRM_F_CI_TRUSTEESHIP_APPLY TT ON TT.APPLY_ID = R.APPLY_NO
+			 AND TT.TRUST_STAT='04'
+			 AND TT.DEAD_LINE &gt;= to_date('${condition.dataDate}','yyyy-mm-dd')
+    <where>
+    1=1
+		<if test="condition.custStatus != null and condition.custStatus !=''">
+				  and P.CUST_STATUS = #{condition.custStatus, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.isAdmitEnter != null and condition.isAdmitEnter !=''">
+				  and P.IS_ADMIT_ENTER = #{condition.isAdmitEnter, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.effectFlg != null and condition.effectFlg !=''">
+				  and P.EFFECT_FLG = #{condition.effectFlg, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.custId != null and condition.custId !=''">
+				  and P.CUST_ID LIKE CONCAT(CONCAT('%', #{condition.custId, jdbcType=VARCHAR}),'%')
+		</if>
+		<if test="condition.ettenCustId != null and condition.ettenCustId !=''">
+				  and P.CUST_ID = #{condition.ettenCustId, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.custName != null and condition.custName !=''">
+				  and P.CUST_NAME LIKE CONCAT(CONCAT('%', #{condition.custName, jdbcType=VARCHAR}),'%')
+		</if>
+		<if test="condition.ndsCustNo != null and condition.ndsCustNo !=''">
+			and P.NDS_CUST_ID = #{condition.ndsCustNo, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.custPhoneNo != null and condition.custPhoneNo !=''">
+			and P.PHONE_NO = #{condition.custPhoneNo, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.custGrade != null and condition.custGrade !=''">
+			AND PJ.AUM_GRADE=#{condition.custGrade, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.figureCode != null and condition.figureCode !=''">
+			AND P.APLIT_JOINT  LIKE CONCAT(CONCAT(CONCAT(CONCAT('%','|'), #{condition.figureCode, jdbcType=VARCHAR}),'|'),'%')
+
+		</if>
+		<if test="condition.characterCode != null and condition.characterCode !=''">
+			AND P.APLIT_JOINT  LIKE CONCAT(CONCAT('%', #{condition.characterCode, jdbcType=VARCHAR}),'%')
+
+		</if>
+		<if test="condition.certType != null and condition.certType !=''">
+				  and P.CERT_TYPE = #{condition.certType, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.certNo != null and condition.certNo !=''">
+				  and P.CERT_NO LIKE CONCAT(CONCAT('%', #{condition.certNo, jdbcType=VARCHAR}),'%')
+		</if>
+		<if test="condition.belongBrch != null and condition.belongBrch !=''">
+				  and P.BELONG_BRCH IN (select org_code from sys_org_view where sys_org_view.org_seq like '%'||#{condition.belongBrch, jdbcType=VARCHAR}||',%') 
+		</if>
+		<if test="condition.belongMgr != null and condition.belongMgr !=''">
+				  and P.BELONG_MGR = #{condition.belongMgr, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.valueLev != null and condition.valueLev !=''">
+				  and P.VALUE_LEV = #{condition.valueLev, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.servLev != null and condition.servLev !=''">
+				  and P.SERV_LEV = #{condition.servLev, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.custAssignStat != null and condition.custAssignStat !=''">
+				  and P.CUST_ASSIGN_STAT = #{condition.custAssignStat, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.wheAgrRelCus != null and condition.wheAgrRelCus !=''">
+				  and P.WHE_AGR_REL_CUS = #{condition.wheAgrRelCus, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.custGroupId != null and condition.custGroupId !=''">
+				  and P.CUST_ID NOT IN (SELECT CUST_ID FROM OCRM_F_CI_CG_MEMBER WHERE CUST_GROUP_ID = #{condition.custGroupId, jdbcType=VARCHAR})
+		</if>
+		<if test="condition.dspBal != null and condition.dspBal !=''">
+				  and B.DPS_BAL &gt;= #{condition.dspBal, jdbcType=NUMERIC}
+		</if>
+		<if test="condition.loanBal != null and condition.loanBal !=''">
+				  and B.LOAN_BAL &gt;= #{condition.loanBal, jdbcType=NUMERIC}
+		</if>
+		<if test="condition.aumBal != null and condition.aumBal !=''">
+				  and B.AUM_BAL &gt;= #{condition.aumBal, jdbcType=NUMERIC}
+		</if>
+		<if test="condition.aumBalLow != null and condition.aumBalLow !=''">
+				  and B.AUM_BAL &gt;= #{condition.aumBalLow, jdbcType=NUMERIC}
+		</if>
+		<if test="condition.aumBalHigh != null and condition.aumBalHigh !=''">
+				  and B.AUM_BAL &lt;= #{condition.aumBalHigh, jdbcType=NUMERIC}
+		</if>
+		<if test="condition.queryAll != null and condition.queryAll !=''">
+				   and P.CUST_ID LIKE CONCAT(CONCAT('%', #{condition.queryAll, jdbcType=VARCHAR}),'%')
+				   OR P.CUST_NAME LIKE CONCAT(CONCAT('%', #{condition.queryAll, jdbcType=VARCHAR}),'%')
+				   OR P.CERT_NO LIKE CONCAT(CONCAT('%', #{condition.queryAll, jdbcType=VARCHAR}),'%')
+		</if>
+    </where>
+    GROUP BY P.CUST_STATUS,
+          P.CUST_ID,
+          P.CUST_NAME,
+          P.CERT_TYPE,
+          P.CERT_NO,
+          P.BELONG_MGR,
+          P.BELONG_BRCH,
+          P.SERV_LEV,
+          P.VALUE_LEV,
+          P.IS_LOAN_CUST,
+          P.CUST_ASSIGN_STAT,
+          B.REPORT_SUM,
+          P.WHE_AGR_REL_CUS,
+          P.EFFECT_FLG,
+          U.USER_NAME,
+          O.ORG_NAME,
+          O.ORG_LEVEL,
+          B.AUM_BAL,
+          B.DPS_BAL,
+          B.LOAN_BAL,
+          B.DPS_Y_AVG_BAL,
+          B.LOAN_Y_AVG_BAL
+          <if test="condition.isAdmitEnter!=null and condition.isAdmitEnter ==1 or condition.isAdmitEnter!=null and condition.isAdmitEnter =='1'">
+				   ORDER BY B.AUM_BAL DESC NULLS LAST
+		</if>
+		</if>    
+  
+	</select>
+	<!-- 个人全条线所辖 -->
+	<select id="getListPerAll" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"  resultType="java.util.HashMap">
+	SELECT P.CUST_STATUS,
+       P.CUST_ID,
+       P.CUST_NAME,
+       P.CERT_TYPE,
+       P.CERT_NO,
+       P.BELONG_MGR,
+       P.BELONG_BRCH,
+       P.SERV_LEV,
+       P.VALUE_LEV,
+       P.IS_LOAN_CUST,
+       P.CUST_ASSIGN_STAT,
+       P.WHE_AGR_REL_CUS,
+       B.REPORT_SUM as REPORT_SUM_NUMBER,
+       P.EFFECT_FLG,
+       U.USER_NAME,
+       O.ORG_NAME,
+       O.ORG_LEVEL,
+       B.AUM_BAL,
+       B.DPS_BAL,
+       B.LOAN_BAL,
+       B.DPS_Y_AVG_BAL,
+       B.LOAN_Y_AVG_BAL,
+       '1' as CUST_TYPE
+  
+              <if test="dataAuth != null and condition.orgIdAuth =='500'">
+              		,'1' AS POWER_LEV FROM ACRM_F_CI_PER_ADMIT_INFO P
+				  LEFT JOIN ACRM_A_CI_PER_BUSI_SUM_D B
+    ON B.CUST_ID = P.CUST_ID
+  LEFT JOIN ADMIN_SM_USER U
+    ON U.USER_ID = P.BELONG_MGR
+  LEFT JOIN ADMIN_SM_ORG O
+    ON O.ORG_CODE = P.BELONG_BRCH
+  LEFT JOIN OCRM_F_CG_CUST_GRADE_INFO PJ
+	 ON PJ.ECIF_CUST_NO=P.CUST_ID
+				  LEFT JOIN OCRM_F_CI_TRUSTEESHIP_LIST R ON R.CUST_ID=P.CUST_ID
+				  LEFT JOIN OCRM_F_CI_TRUSTEESHIP_APPLY TT ON TT.APPLY_ID = R.APPLY_NO
+				  AND TT.TRUST_STAT='04'
+				  AND TT.DEAD_LINE &gt;= to_date('${condition.dataDate}','yyyy-mm-dd')
+    <where>
+    1 = 1
+		<if test="condition.custStatus != null and condition.custStatus !=''">
+				  and P.CUST_STATUS = #{condition.custStatus, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.isAdmitEnter != null and condition.isAdmitEnter !=''">
+				  and P.IS_ADMIT_ENTER = #{condition.isAdmitEnter, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.effectFlg != null and condition.effectFlg !=''">
+				  and P.EFFECT_FLG = #{condition.effectFlg, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.custId != null and condition.custId !=''">
+				  and P.CUST_ID LIKE CONCAT(CONCAT('%', #{condition.custId, jdbcType=VARCHAR}),'%')
+		</if>
+		<if test="condition.ettenCustId != null and condition.ettenCustId !=''">
+				  and P.CUST_ID = #{condition.ettenCustId, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.custName != null and condition.custName !=''">
+				  and P.CUST_NAME LIKE CONCAT(CONCAT('%', #{condition.custName, jdbcType=VARCHAR}),'%')
+		</if>
+		<if test="condition.ndsCustNo != null and condition.ndsCustNo !=''">
+			and P.NDS_CUST_ID = #{condition.ndsCustNo, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.custPhoneNo != null and condition.custPhoneNo !=''">
+			and P.PHONE_NO = #{condition.custPhoneNo, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.custGrade != null and condition.custGrade !=''">
+			AND PJ.AUM_GRADE=#{condition.custGrade, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.figureCode != null and condition.figureCode !=''">
+			AND P.APLIT_JOINT   LIKE CONCAT(CONCAT(CONCAT(CONCAT('%','|'), #{condition.figureCode, jdbcType=VARCHAR}),'|'),'%')
+
+		</if>
+		<if test="condition.characterCode != null and condition.characterCode !=''">
+			AND P.APLIT_JOINT  LIKE CONCAT(CONCAT('%', #{condition.characterCode, jdbcType=VARCHAR}),'%')
+
+		</if>
+		<if test="condition.certType != null and condition.certType !=''">
+				  and P.CERT_TYPE = #{condition.certType, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.certNo != null and condition.certNo !=''">
+				  and P.CERT_NO LIKE CONCAT(CONCAT('%', #{condition.certNo, jdbcType=VARCHAR}),'%')
+		</if>
+		<if test="condition.belongBrch != null and condition.belongBrch !=''">
+				  and P.BELONG_BRCH IN (select org_code from sys_org_view where sys_org_view.org_seq like '%'||#{condition.belongBrch, jdbcType=VARCHAR}||',%') 
+		</if>
+		<if test="condition.belongMgr != null and condition.belongMgr !=''">
+				  and P.BELONG_MGR = #{condition.belongMgr, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.valueLev != null and condition.valueLev !=''">
+				  and P.VALUE_LEV = #{condition.valueLev, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.servLev != null and condition.servLev !=''">
+				  and P.SERV_LEV = #{condition.servLev, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.custAssignStat != null and condition.custAssignStat !=''">
+				  and P.CUST_ASSIGN_STAT = #{condition.custAssignStat, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.wheAgrRelCus != null and condition.wheAgrRelCus !=''">
+				  and P.WHE_AGR_REL_CUS = #{condition.wheAgrRelCus, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.custGroupId != null and condition.custGroupId !=''">
+				  and P.CUST_ID NOT IN (SELECT CUST_ID FROM OCRM_F_CI_CG_MEMBER WHERE CUST_GROUP_ID = #{condition.custGroupId, jdbcType=VARCHAR})
+		</if>
+		<if test="condition.dspBal != null and condition.dspBal !=''">
+				  and B.DPS_BAL &gt;= #{condition.dspBal, jdbcType=NUMERIC}
+		</if>
+		<if test="condition.loanBal != null and condition.loanBal !=''">
+				  and B.LOAN_BAL &gt;= #{condition.loanBal, jdbcType=NUMERIC}
+		</if>
+		<if test="condition.aumBal != null and condition.aumBal !=''">
+				  and B.AUM_BAL &gt;= #{condition.aumBal, jdbcType=NUMERIC}
+		</if>
+		<if test="condition.aumBalLow != null and condition.aumBalLow !=''">
+				  and B.AUM_BAL &gt;= #{condition.aumBalLow, jdbcType=NUMERIC}
+		</if>
+		<if test="condition.aumBalHigh != null and condition.aumBalHigh !=''">
+				  and B.AUM_BAL &lt;= #{condition.aumBalHigh, jdbcType=NUMERIC}
+		</if>
+		<if test="condition.queryAll != null and condition.queryAll !=''">
+				   and P.CUST_ID LIKE CONCAT(CONCAT('%', #{condition.queryAll, jdbcType=VARCHAR}),'%')
+				   OR P.CUST_NAME LIKE CONCAT(CONCAT('%', #{condition.queryAll, jdbcType=VARCHAR}),'%')
+				   OR P.CERT_NO LIKE CONCAT(CONCAT('%', #{condition.queryAll, jdbcType=VARCHAR}),'%')
+		</if>
+		
+    </where>
+        <if test="condition.isAdmitEnter!=null and condition.isAdmitEnter ==1 or condition.isAdmitEnter!=null and condition.isAdmitEnter =='1'">
+				   ORDER BY B.AUM_BAL DESC NULLS LAST
+		</if>
+		</if>
+		<if test="dataAuth != null and condition.orgIdAuth !='500'">
+		,MIN(PER.POWER_LEV) AS POWER_LEV
+		FROM ACRM_F_CI_PER_ADMIT_INFO P
+ INNER JOIN (
+		SELECT B.CUST_ID, '2' AS POWER_LEV
+               FROM OCRM_F_CI_ADMIT_BELONG B
+              WHERE B.MGR_ID = #{condition.userId, jdbcType = VARCHAR}
+             UNION ALL
+             SELECT L.CUST_ID, '3' AS POWER_LEV
+               FROM OCRM_F_CI_TRUSTEESHIP_APPLY A
+               LEFT JOIN OCRM_F_CI_TRUSTEESHIP_LIST L
+                 ON A.APPLY_ID = L.APPLY_NO
+              WHERE A.TRUST_STAT = '1'
+                AND A.TRUST_MGR_ID = #{condition.userId,
+              jdbcType = VARCHAR}
+             UNION ALL
+             SELECT L.CUST_ID, '4' AS POWER_LEV
+               FROM OCRM_F_CI_GRANT_APPLY A
+               LEFT JOIN OCRM_F_CI_GRANT_LIST L
+                 ON A.APPLY_ID = L.APPLY_NO
+              WHERE GRANT_STAT = '1'
+                AND GRANT_MGR_ID = #{condition.userId,
+              jdbcType = VARCHAR} 
+					${dataAuth} 
+				   ) PER
+    ON PER.CUST_ID = P.CUST_ID
+    LEFT JOIN ACRM_A_CI_PER_BUSI_SUM_D B
+    ON B.CUST_ID = P.CUST_ID
+  LEFT JOIN ADMIN_SM_USER U
+    ON U.USER_ID = P.BELONG_MGR
+  LEFT JOIN ADMIN_SM_ORG O
+    ON O.ORG_CODE = P.BELONG_BRCH
+			LEFT JOIN OCRM_F_CG_CUST_GRADE_INFO PJ
+			ON PJ.ECIF_CUST_NO=P.CUST_ID
+			LEFT JOIN OCRM_F_CI_TRUSTEESHIP_LIST R ON R.CUST_ID=P.CUST_ID
+			LEFT JOIN OCRM_F_CI_TRUSTEESHIP_APPLY TT ON TT.APPLY_ID = R.APPLY_NO
+			AND TT.TRUST_STAT='04'
+			AND TT.DEAD_LINE &gt;= to_date('${condition.dataDate}','yyyy-mm-dd')
+    <where>
+    1=1 
+		<if test="condition.custStatus != null and condition.custStatus !=''">
+				  and P.CUST_STATUS = #{condition.custStatus, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.isAdmitEnter != null and condition.isAdmitEnter !=''">
+				  and P.IS_ADMIT_ENTER = #{condition.isAdmitEnter, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.effectFlg != null and condition.effectFlg !=''">
+				  and P.EFFECT_FLG = #{condition.effectFlg, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.custId != null and condition.custId !=''">
+				  and P.CUST_ID LIKE CONCAT(CONCAT('%', #{condition.custId, jdbcType=VARCHAR}),'%')
+		</if>
+		<if test="condition.ettenCustId != null and condition.ettenCustId !=''">
+				  and P.CUST_ID = #{condition.ettenCustId, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.custName != null and condition.custName !=''">
+				  and P.CUST_NAME LIKE CONCAT(CONCAT('%', #{condition.custName, jdbcType=VARCHAR}),'%')
+		</if>
+		<if test="condition.ndsCustNo != null and condition.ndsCustNo !=''">
+			AND P.NDS_CUST_ID = #{condition.ndsCustNo, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.custPhoneNo != null and condition.custPhoneNo !=''">
+			AND P.PHONE_NO = #{condition.custPhoneNo, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.custGrade != null and condition.custGrade !=''">
+			AND PJ.AUM_GRADE=#{condition.custGrade, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.figureCode != null and condition.figureCode !=''">
+			AND P.APLIT_JOINT  LIKE CONCAT(CONCAT(CONCAT(CONCAT('%','|'), #{condition.figureCode, jdbcType=VARCHAR}),'|'),'%')
+
+		</if>
+		<if test="condition.characterCode != null and condition.characterCode !=''">
+			AND P.APLIT_JOINT  LIKE CONCAT(CONCAT('%', #{condition.characterCode, jdbcType=VARCHAR}),'%')
+		</if>
+		<if test="condition.certType != null and condition.certType !=''">
+				  and P.CERT_TYPE = #{condition.certType, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.certNo != null and condition.certNo !=''">
+				  and P.CERT_NO LIKE CONCAT(CONCAT('%', #{condition.certNo, jdbcType=VARCHAR}),'%')
+		</if>
+		<if test="condition.belongBrch != null and condition.belongBrch !=''">
+				  and P.BELONG_BRCH IN (select org_code from sys_org_view where sys_org_view.org_seq like '%'||#{condition.belongBrch, jdbcType=VARCHAR}||',%') 
+		</if>
+		<if test="condition.belongMgr != null and condition.belongMgr !=''">
+				  and P.BELONG_MGR = #{condition.belongMgr, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.valueLev != null and condition.valueLev !=''">
+				  and P.VALUE_LEV = #{condition.valueLev, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.servLev != null and condition.servLev !=''">
+				  and P.SERV_LEV = #{condition.servLev, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.custAssignStat != null and condition.custAssignStat !=''">
+				  and P.CUST_ASSIGN_STAT = #{condition.custAssignStat, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.wheAgrRelCus != null and condition.wheAgrRelCus !=''">
+				  and P.WHE_AGR_REL_CUS = #{condition.wheAgrRelCus, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.custGroupId != null and condition.custGroupId !=''">
+				  and P.CUST_ID NOT IN (SELECT CUST_ID FROM OCRM_F_CI_CG_MEMBER WHERE CUST_GROUP_ID = #{condition.custGroupId, jdbcType=VARCHAR})
+		</if>
+		<if test="condition.dspBal != null and condition.dspBal !=''">
+				  and B.DPS_BAL &gt;= #{condition.dspBal, jdbcType=NUMERIC}
+		</if>
+		<if test="condition.loanBal != null and condition.loanBal !=''">
+				  and B.LOAN_BAL &gt;= #{condition.loanBal, jdbcType=NUMERIC}
+		</if>
+		<if test="condition.aumBal != null and condition.aumBal !=''">
+				  and B.AUM_BAL &gt;= #{condition.aumBal, jdbcType=NUMERIC}
+		</if>
+		<if test="condition.aumBalLow != null and condition.aumBalLow !=''">
+				  and B.AUM_BAL &gt;= #{condition.aumBalLow, jdbcType=NUMERIC}
+		</if>
+		<if test="condition.aumBalHigh != null and condition.aumBalHigh !=''">
+				  and B.AUM_BAL &lt;= #{condition.aumBalHigh, jdbcType=NUMERIC}
+		</if>
+		<if test="condition.queryAll != null and condition.queryAll !=''">
+				   and P.CUST_ID LIKE CONCAT(CONCAT('%', #{condition.queryAll, jdbcType=VARCHAR}),'%')
+				   OR P.CUST_NAME LIKE CONCAT(CONCAT('%', #{condition.queryAll, jdbcType=VARCHAR}),'%')
+				   OR P.CERT_NO LIKE CONCAT(CONCAT('%', #{condition.queryAll, jdbcType=VARCHAR}),'%')
+		</if>
+    </where>
+    GROUP BY P.CUST_STATUS,
+          P.CUST_ID,
+          P.CUST_NAME,
+          P.CERT_TYPE,
+          P.CERT_NO,
+          P.BELONG_MGR,
+          P.BELONG_BRCH,
+          P.SERV_LEV,
+          P.VALUE_LEV,
+          P.IS_LOAN_CUST,
+          P.CUST_ASSIGN_STAT,
+          B.REPORT_SUM,
+          P.WHE_AGR_REL_CUS,
+          P.EFFECT_FLG,
+          U.USER_NAME,
+          O.ORG_NAME,
+          O.ORG_LEVEL,
+          B.AUM_BAL,
+          B.DPS_BAL,
+          B.LOAN_BAL,
+          B.DPS_Y_AVG_BAL,
+          B.LOAN_Y_AVG_BAL
+           <if test="condition.isAdmitEnter!=null and condition.isAdmitEnter ==1 or condition.isAdmitEnter!=null and condition.isAdmitEnter =='1'">
+				   ORDER BY B.AUM_BAL DESC NULLS LAST
+		</if>
+		</if>
+         <if test="dataAuth == null">
+         ,MIN(PER.POWER_LEV) AS POWER_LEV
+		FROM ACRM_F_CI_PER_ADMIT_INFO P
+ INNER JOIN (
+		SELECT B.CUST_ID, '2' AS POWER_LEV
+               FROM OCRM_F_CI_ADMIT_BELONG B
+              WHERE B.MGR_ID = #{condition.userId, jdbcType = VARCHAR}
+             UNION ALL
+             SELECT L.CUST_ID, '3' AS POWER_LEV
+               FROM OCRM_F_CI_TRUSTEESHIP_APPLY A
+               LEFT JOIN OCRM_F_CI_TRUSTEESHIP_LIST L
+                 ON A.APPLY_ID = L.APPLY_NO
+              WHERE A.TRUST_STAT = '1'
+                AND A.TRUST_MGR_ID = #{condition.userId,
+              jdbcType = VARCHAR}
+             UNION ALL
+             SELECT L.CUST_ID, '4' AS POWER_LEV
+               FROM OCRM_F_CI_GRANT_APPLY A
+               LEFT JOIN OCRM_F_CI_GRANT_LIST L
+                 ON A.APPLY_ID = L.APPLY_NO
+              WHERE GRANT_STAT = '1'
+                AND GRANT_MGR_ID = #{condition.userId,
+              jdbcType = VARCHAR} 
+				   ) PER
+    ON PER.CUST_ID = P.CUST_ID
+    LEFT JOIN ACRM_A_CI_PER_BUSI_SUM_D B
+    ON B.CUST_ID = P.CUST_ID
+  LEFT JOIN ADMIN_SM_USER U
+    ON U.USER_ID = P.BELONG_MGR
+  LEFT JOIN ADMIN_SM_ORG O
+    ON O.ORG_CODE = P.BELONG_BRCH
+			 LEFT JOIN OCRM_F_CG_CUST_GRADE_INFO PJ
+			 ON PJ.ECIF_CUST_NO=P.CUST_ID
+			 LEFT JOIN OCRM_F_CI_TRUSTEESHIP_LIST R ON R.CUST_ID=P.CUST_ID
+			 LEFT JOIN OCRM_F_CI_TRUSTEESHIP_APPLY TT ON TT.APPLY_ID = R.APPLY_NO
+			 AND TT.TRUST_STAT='04'
+			 AND TT.DEAD_LINE &gt;= to_date('${condition.dataDate}','yyyy-mm-dd')
+    <where>
+    1=1
+		<if test="condition.custStatus != null and condition.custStatus !=''">
+				  and P.CUST_STATUS = #{condition.custStatus, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.isAdmitEnter != null and condition.isAdmitEnter !=''">
+				  and P.IS_ADMIT_ENTER = #{condition.isAdmitEnter, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.effectFlg != null and condition.effectFlg !=''">
+				  and P.EFFECT_FLG = #{condition.effectFlg, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.custId != null and condition.custId !=''">
+				  and P.CUST_ID LIKE CONCAT(CONCAT('%', #{condition.custId, jdbcType=VARCHAR}),'%')
+		</if>
+		<if test="condition.ettenCustId != null and condition.ettenCustId !=''">
+				  and P.CUST_ID = #{condition.ettenCustId, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.custName != null and condition.custName !=''">
+				  and P.CUST_NAME LIKE CONCAT(CONCAT('%', #{condition.custName, jdbcType=VARCHAR}),'%')
+		</if>
+		<if test="condition.ndsCustNo != null and condition.ndsCustNo !=''">
+			AND P.NDS_CUST_ID = #{condition.ndsCustNo, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.custPhoneNo != null and condition.custPhoneNo !=''">
+			AND P.PHONE_NO = #{condition.custPhoneNo, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.custGrade != null and condition.custGrade !=''">
+			AND PJ.AUM_GRADE=#{condition.custGrade, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.figureCode != null and condition.figureCode !=''">
+			AND P.APLIT_JOINT   LIKE CONCAT(CONCAT(CONCAT(CONCAT('%','|'), #{condition.figureCode, jdbcType=VARCHAR}),'|'),'%')
+
+		</if>
+		<if test="condition.characterCode != null and condition.characterCode !=''">
+			AND P.APLIT_JOINT  LIKE CONCAT(CONCAT('%', #{condition.characterCode, jdbcType=VARCHAR}),'%')
+
+		</if>
+		<if test="condition.certType != null and condition.certType !=''">
+				  and P.CERT_TYPE = #{condition.certType, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.certNo != null and condition.certNo !=''">
+				  and P.CERT_NO LIKE CONCAT(CONCAT('%', #{condition.certNo, jdbcType=VARCHAR}),'%')
+		</if>
+		<if test="condition.belongBrch != null and condition.belongBrch !=''">
+				  and P.BELONG_BRCH IN (select org_code from sys_org_view where sys_org_view.org_seq like '%'||#{condition.belongBrch, jdbcType=VARCHAR}||',%') 
+		</if>
+		<if test="condition.belongMgr != null and condition.belongMgr !=''">
+				  and P.BELONG_MGR = #{condition.belongMgr, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.valueLev != null and condition.valueLev !=''">
+				  and P.VALUE_LEV = #{condition.valueLev, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.servLev != null and condition.servLev !=''">
+				  and P.SERV_LEV = #{condition.servLev, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.custAssignStat != null and condition.custAssignStat !=''">
+				  and P.CUST_ASSIGN_STAT = #{condition.custAssignStat, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.wheAgrRelCus != null and condition.wheAgrRelCus !=''">
+				  and P.WHE_AGR_REL_CUS = #{condition.wheAgrRelCus, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.custGroupId != null and condition.custGroupId !=''">
+				  and P.CUST_ID NOT IN (SELECT CUST_ID FROM OCRM_F_CI_CG_MEMBER WHERE CUST_GROUP_ID = #{condition.custGroupId, jdbcType=VARCHAR})
+		</if>
+		<if test="condition.dspBal != null and condition.dspBal !=''">
+				  and B.DPS_BAL &gt;= #{condition.dspBal, jdbcType=NUMERIC}
+		</if>
+		<if test="condition.loanBal != null and condition.loanBal !=''">
+				  and B.LOAN_BAL &gt;= #{condition.loanBal, jdbcType=NUMERIC}
+		</if>
+		<if test="condition.aumBal != null and condition.aumBal !=''">
+				  and B.AUM_BAL &gt;= #{condition.aumBal, jdbcType=NUMERIC}
+		</if>
+		<if test="condition.aumBalLow != null and condition.aumBalLow !=''">
+				  and B.AUM_BAL &gt;= #{condition.aumBalLow, jdbcType=NUMERIC}
+		</if>
+		<if test="condition.aumBalHigh != null and condition.aumBalHigh !=''">
+				  and B.AUM_BAL &lt;= #{condition.aumBalHigh, jdbcType=NUMERIC}
+		</if>
+		<if test="condition.queryAll != null and condition.queryAll !=''">
+				   and P.CUST_ID LIKE CONCAT(CONCAT('%', #{condition.queryAll, jdbcType=VARCHAR}),'%')
+				   OR P.CUST_NAME LIKE CONCAT(CONCAT('%', #{condition.queryAll, jdbcType=VARCHAR}),'%')
+				   OR P.CERT_NO LIKE CONCAT(CONCAT('%', #{condition.queryAll, jdbcType=VARCHAR}),'%')
+		</if>
+    </where>
+    GROUP BY P.CUST_STATUS,
+          P.CUST_ID,
+          P.CUST_NAME,
+          P.CERT_TYPE,
+          P.CERT_NO,
+          P.BELONG_MGR,
+          P.BELONG_BRCH,
+          P.SERV_LEV,
+          P.VALUE_LEV,
+          P.IS_LOAN_CUST,
+          P.CUST_ASSIGN_STAT,
+          B.REPORT_SUM,
+          P.WHE_AGR_REL_CUS,
+          P.EFFECT_FLG,
+          U.USER_NAME,
+          O.ORG_NAME,
+          O.ORG_LEVEL,
+          B.AUM_BAL,
+          B.DPS_BAL,
+          B.LOAN_BAL,
+          B.DPS_Y_AVG_BAL,
+          B.LOAN_Y_AVG_BAL
+           <if test="condition.isAdmitEnter!=null and condition.isAdmitEnter ==1 or condition.isAdmitEnter!=null and condition.isAdmitEnter =='1'">
+				   ORDER BY B.AUM_BAL DESC NULLS LAST
+		</if>
+		</if>    
+  
+	</select>
+	<!-- 对公非全条线所辖 -->
+	<select id="getListOrg" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"  resultType="java.util.HashMap">
+	
+	SELECT P.CUST_STATUS,
+       P.CUST_ID,
+       P.CUST_NAME,
+       P.CERT_TYPE,
+       P.CERT_NO,
+       P.BELONG_MGR,
+       P.BELONG_BRCH,
+       P.SERV_LEV,
+       P.VALUE_LEV,
+       P.IS_LOAN_CUST,
+       P.CUST_ASSIGN_STAT,
+       B.REPORT_SUM as REPORT_SUM_NUMBER,
+       P.WHE_AGR_REL_CUS,
+       P.EFFECT_FLG,
+       U.USER_NAME,
+       O.ORG_NAME,
+       O.ORG_LEVEL,
+       B.AUM_BAL,
+       B.DPS_BAL,
+       B.LOAN_BAL,
+       B.DPS_Y_AVG_BAL,
+       B.LOAN_Y_AVG_BAL,
+       '2' as CUST_TYPE
+  <if test="dataAuth != null and condition.orgIdAuth =='500'">
+              		,'1' AS POWER_LEV FROM ACRM_F_CI_ORG_CUST_INFO P
+				  LEFT JOIN ACRM_A_CI_ORG_BUSI_SUM_D B
+    ON B.CUST_ID = P.CUST_ID
+  LEFT JOIN ADMIN_SM_USER U
+    ON U.USER_ID = P.BELONG_MGR
+  LEFT JOIN ADMIN_SM_ORG O
+    ON O.ORG_CODE = P.BELONG_BRCH
+    <where>
+    	(${condition.busiType} )
+		<if test="condition.custStatus != null and condition.custStatus !=''">
+				  and P.CUST_STATUS = #{condition.custStatus, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.isAdmitEnter != null and condition.isAdmitEnter !=''">
+				  and P.IS_ADMIT_ENTER = #{condition.isAdmitEnter, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.custId != null and condition.custId !=''">
+				  and P.CUST_ID LIKE CONCAT(CONCAT('%', #{condition.custId, jdbcType=VARCHAR}),'%')
+		</if>
+		<if test="condition.ettenCustId != null and condition.ettenCustId !=''">
+				  and P.CUST_ID = #{condition.ettenCustId, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.effectFlg != null and condition.effectFlg !=''">
+				  and P.EFFECT_FLG = #{condition.effectFlg, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.custName != null and condition.custName !=''">
+				  and P.CUST_NAME LIKE CONCAT(CONCAT('%', #{condition.custName, jdbcType=VARCHAR}),'%')
+		</if>
+		<if test="condition.certType != null and condition.certType !=''">
+				  and P.CERT_TYPE = #{condition.certType, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.certNo != null and condition.certNo !=''">
+				  and P.CERT_NO LIKE CONCAT(CONCAT('%', #{condition.certNo, jdbcType=VARCHAR}),'%')
+		</if>
+		<if test="condition.belongBrch != null and condition.belongBrch !=''">
+				  and P.BELONG_BRCH IN (select org_code from sys_org_view where sys_org_view.org_seq like '%'||#{condition.belongBrch, jdbcType=VARCHAR}||',%') 
+		</if>
+		<if test="condition.belongMgr != null and condition.belongMgr !=''">
+				  and P.BELONG_MGR = #{condition.belongMgr, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.valueLev != null and condition.valueLev !=''">
+				  and P.VALUE_LEV = #{condition.valueLev, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.servLev != null and condition.servLev !=''">
+				  and P.SERV_LEV = #{condition.servLev, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.custAssignStat != null and condition.custAssignStat !=''">
+				  and P.CUST_ASSIGN_STAT = #{condition.custAssignStat, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.wheAgrRelCus != null and condition.wheAgrRelCus !=''">
+				  and P.WHE_AGR_REL_CUS = #{condition.wheAgrRelCus, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.custGroupId != null and condition.custGroupId !=''">
+				  and P.CUST_ID NOT IN (SELECT CUST_ID FROM OCRM_F_CI_CG_MEMBER WHERE CUST_GROUP_ID = #{condition.custGroupId, jdbcType=VARCHAR})
+		</if>
+		<if test="condition.dspBal != null and condition.dspBal !=''">
+				  and B.DPS_BAL &gt;= #{condition.dspBal, jdbcType=NUMERIC}
+		</if>
+		<if test="condition.loanBal != null and condition.loanBal !=''">
+				  and B.LOAN_BAL &gt;= #{condition.loanBal, jdbcType=NUMERIC}
+		</if>
+		<if test="condition.aumBal != null and condition.aumBal !=''">
+				  and B.AUM_BAL &gt;= #{condition.aumBal, jdbcType=NUMERIC}
+		</if>
+		<if test="condition.aumBalLow != null and condition.aumBalLow !=''">
+				  and B.AUM_BAL &gt;= #{condition.aumBalLow, jdbcType=NUMERIC}
+		</if>
+		<if test="condition.aumBalHigh != null and condition.aumBalHigh !=''">
+				  and B.AUM_BAL &lt;= #{condition.aumBalHigh, jdbcType=NUMERIC}
+		</if>
+		<if test="condition.queryAll != null and condition.queryAll !=''">
+				   and P.CUST_ID LIKE CONCAT(CONCAT('%', #{condition.queryAll, jdbcType=VARCHAR}),'%')
+				   OR P.CUST_NAME LIKE CONCAT(CONCAT('%', #{condition.queryAll, jdbcType=VARCHAR}),'%')
+				   OR P.CERT_NO LIKE CONCAT(CONCAT('%', #{condition.queryAll, jdbcType=VARCHAR}),'%')
+		</if>
+    </where>
+    <if test="condition.isAdmitEnter!=null and condition.isAdmitEnter ==1 or condition.isAdmitEnter!=null and condition.isAdmitEnter =='1'">
+				   ORDER BY B.AUM_BAL DESC NULLS LAST
+		</if>
+		</if>
+		<if test="dataAuth != null and condition.orgIdAuth !='500'">
+		,MIN(ORG.POWER_LEV) AS POWER_LEV
+		FROM ACRM_F_CI_ORG_CUST_INFO P
+ INNER JOIN (
+		SELECT B.CUST_ID, '2' AS POWER_LEV
+               FROM OCRM_F_CI_ADMIT_BELONG B
+              WHERE B.MGR_ID = #{condition.userId, jdbcType = VARCHAR}
+             UNION ALL
+             SELECT L.CUST_ID, '3' AS POWER_LEV
+               FROM OCRM_F_CI_TRUSTEESHIP_APPLY A
+               LEFT JOIN OCRM_F_CI_TRUSTEESHIP_LIST L
+                 ON A.APPLY_ID = L.APPLY_NO
+              WHERE A.TRUST_STAT = '1'
+                AND A.TRUST_MGR_ID = #{condition.userId,
+              jdbcType = VARCHAR}
+             UNION ALL
+             SELECT L.CUST_ID, '4' AS POWER_LEV
+               FROM OCRM_F_CI_GRANT_APPLY A
+               LEFT JOIN OCRM_F_CI_GRANT_LIST L
+                 ON A.APPLY_ID = L.APPLY_NO
+              WHERE GRANT_STAT = '1'
+                AND GRANT_MGR_ID = #{condition.userId,
+              jdbcType = VARCHAR} 
+					${dataAuth} 
+				   ) ORG
+    ON ORG.CUST_ID = P.CUST_ID
+    LEFT JOIN ACRM_A_CI_ORG_BUSI_SUM_D B
+    ON B.CUST_ID = P.CUST_ID
+  LEFT JOIN ADMIN_SM_USER U
+    ON U.USER_ID = P.BELONG_MGR
+  LEFT JOIN ADMIN_SM_ORG O
+    ON O.ORG_CODE = P.BELONG_BRCH
+
+    <where>
+    1=1
+    	<if test="condition.busiType != null and condition.busiType !=''">
+				AND ((ORG.POWER_LEV = '1' AND (${condition.busiType}) ) OR ORG.POWER_LEV = '2' OR ORG.POWER_LEV = '3' OR ORG.POWER_LEV = '4')
+		</if>
+		<if test="condition.isAdmitEnter != null and condition.isAdmitEnter !=''">
+				  and P.IS_ADMIT_ENTER = #{condition.isAdmitEnter, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.custStatus != null and condition.custStatus !=''">
+				  and P.CUST_STATUS = #{condition.custStatus, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.ettenCustId != null and condition.ettenCustId !=''">
+				  and P.CUST_ID = #{condition.ettenCustId, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.custId != null and condition.custId !=''">
+				  and P.CUST_ID LIKE CONCAT(CONCAT('%', #{condition.custId, jdbcType=VARCHAR}),'%')
+		</if>
+		<if test="condition.effectFlg != null and condition.effectFlg !=''">
+				  and P.EFFECT_FLG = #{condition.effectFlg, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.custName != null and condition.custName !=''">
+				  and P.CUST_NAME LIKE CONCAT(CONCAT('%', #{condition.custName, jdbcType=VARCHAR}),'%')
+		</if>
+		<if test="condition.certType != null and condition.certType !=''">
+				  and P.CERT_TYPE = #{condition.certType, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.certNo != null and condition.certNo !=''">
+				  and P.CERT_NO LIKE CONCAT(CONCAT('%', #{condition.certNo, jdbcType=VARCHAR}),'%')
+		</if>
+		<if test="condition.belongBrch != null and condition.belongBrch !=''">
+				  and P.BELONG_BRCH IN (select org_code from sys_org_view where sys_org_view.org_seq like '%'||#{condition.belongBrch, jdbcType=VARCHAR}||',%') 
+		</if>
+		<if test="condition.belongMgr != null and condition.belongMgr !=''">
+				  and P.BELONG_MGR = #{condition.belongMgr, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.valueLev != null and condition.valueLev !=''">
+				  and P.VALUE_LEV = #{condition.valueLev, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.servLev != null and condition.servLev !=''">
+				  and P.SERV_LEV = #{condition.servLev, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.custAssignStat != null and condition.custAssignStat !=''">
+				  and P.CUST_ASSIGN_STAT = #{condition.custAssignStat, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.wheAgrRelCus != null and condition.wheAgrRelCus !=''">
+				  and P.WHE_AGR_REL_CUS = #{condition.wheAgrRelCus, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.aumBal != null and condition.aumBal !=''">
+				  and B.AUM_BAL &gt;= #{condition.aumBal, jdbcType=NUMERIC}
+		</if>
+		<if test="condition.aumBalLow != null and condition.aumBalLow !=''">
+				  and B.AUM_BAL &gt;= #{condition.aumBalLow, jdbcType=NUMERIC}
+		</if>
+		<if test="condition.aumBalHigh != null and condition.aumBalHigh !=''">
+				  and B.AUM_BAL &lt;= #{condition.aumBalHigh, jdbcType=NUMERIC}
+		</if>
+		<if test="condition.custGroupId != null and condition.custGroupId !=''">
+				  and P.CUST_ID NOT IN (SELECT CUST_ID FROM OCRM_F_CI_CG_MEMBER WHERE CUST_GROUP_ID = #{condition.custGroupId, jdbcType=VARCHAR})
+		</if>
+		<if test="condition.dspBal != null and condition.dspBal !=''">
+				  and B.DPS_BAL &gt;= #{condition.dspBal, jdbcType=NUMERIC}
+		</if>
+		<if test="condition.loanBal != null and condition.loanBal !=''">
+				  and B.LOAN_BAL &gt;= #{condition.loanBal, jdbcType=NUMERIC}
+		</if>
+		<if test="condition.queryAll != null and condition.queryAll !=''">
+				   and P.CUST_ID LIKE CONCAT(CONCAT('%', #{condition.queryAll, jdbcType=VARCHAR}),'%')
+				   OR P.CUST_NAME LIKE CONCAT(CONCAT('%', #{condition.queryAll, jdbcType=VARCHAR}),'%')
+				   OR P.CERT_NO LIKE CONCAT(CONCAT('%', #{condition.queryAll, jdbcType=VARCHAR}),'%')
+		</if>
+    </where>
+    GROUP BY P.CUST_STATUS,
+          P.CUST_ID,
+          P.CUST_NAME,
+          P.CERT_TYPE,
+          P.CERT_NO,
+          P.BELONG_MGR,
+          P.BELONG_BRCH,
+          P.SERV_LEV,
+          P.VALUE_LEV,
+          P.IS_LOAN_CUST,
+          P.CUST_ASSIGN_STAT,
+          B.REPORT_SUM,
+          P.WHE_AGR_REL_CUS,
+          P.EFFECT_FLG,
+          U.USER_NAME,
+          O.ORG_NAME,
+          O.ORG_LEVEL,
+          B.AUM_BAL,
+          B.DPS_BAL,
+          B.LOAN_BAL,
+          B.DPS_Y_AVG_BAL,
+          B.LOAN_Y_AVG_BAL
+           <if test="condition.isAdmitEnter!=null and condition.isAdmitEnter ==1 or condition.isAdmitEnter!=null and condition.isAdmitEnter =='1'">
+				   ORDER BY B.AUM_BAL DESC NULLS LAST
+		</if>
+		</if>
+         <if test="dataAuth == null">
+         ,MIN(ORG.POWER_LEV) AS POWER_LEV
+		FROM ACRM_F_CI_ORG_CUST_INFO P
+ INNER JOIN (
+		SELECT B.CUST_ID, '2' AS POWER_LEV
+               FROM OCRM_F_CI_ADMIT_BELONG B
+              WHERE B.MGR_ID = #{condition.userId, jdbcType = VARCHAR}
+             UNION ALL
+             SELECT L.CUST_ID, '3' AS POWER_LEV
+               FROM OCRM_F_CI_TRUSTEESHIP_APPLY A
+               LEFT JOIN OCRM_F_CI_TRUSTEESHIP_LIST L
+                 ON A.APPLY_ID = L.APPLY_NO
+              WHERE A.TRUST_STAT = '1'
+                AND A.TRUST_MGR_ID = #{condition.userId,
+              jdbcType = VARCHAR}
+             UNION ALL
+             SELECT L.CUST_ID, '4' AS POWER_LEV
+               FROM OCRM_F_CI_GRANT_APPLY A
+               LEFT JOIN OCRM_F_CI_GRANT_LIST L
+                 ON A.APPLY_ID = L.APPLY_NO
+              WHERE GRANT_STAT = '1'
+                AND GRANT_MGR_ID = #{condition.userId,
+              jdbcType = VARCHAR} 
+				   ) ORG
+    ON ORG.CUST_ID = P.CUST_ID
+    LEFT JOIN ACRM_A_CI_ORG_BUSI_SUM_D B
+    ON B.CUST_ID = P.CUST_ID
+  LEFT JOIN ADMIN_SM_USER U
+    ON U.USER_ID = P.BELONG_MGR
+  LEFT JOIN ADMIN_SM_ORG O
+    ON O.ORG_CODE = P.BELONG_BRCH
+
+    <where>
+    1=1
+		<if test="condition.custStatus != null and condition.custStatus !=''">
+				  and P.CUST_STATUS = #{condition.custStatus, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.isAdmitEnter != null and condition.isAdmitEnter !=''">
+				  and P.IS_ADMIT_ENTER = #{condition.isAdmitEnter, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.custId != null and condition.custId !=''">
+				  and P.CUST_ID LIKE CONCAT(CONCAT('%', #{condition.custId, jdbcType=VARCHAR}),'%')
+		</if>
+		<if test="condition.ettenCustId != null and condition.ettenCustId !=''">
+				  and P.CUST_ID = #{condition.ettenCustId, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.effectFlg != null and condition.effectFlg !=''">
+				  and P.EFFECT_FLG = #{condition.effectFlg, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.custName != null and condition.custName !=''">
+				  and P.CUST_NAME LIKE CONCAT(CONCAT('%', #{condition.custName, jdbcType=VARCHAR}),'%')
+		</if>
+		<if test="condition.certType != null and condition.certType !=''">
+				  and P.CERT_TYPE = #{condition.certType, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.certNo != null and condition.certNo !=''">
+				  and P.CERT_NO LIKE CONCAT(CONCAT('%', #{condition.certNo, jdbcType=VARCHAR}),'%')
+		</if>
+		<if test="condition.belongBrch != null and condition.belongBrch !=''">
+				  and P.BELONG_BRCH IN (select org_code from sys_org_view where sys_org_view.org_seq like '%'||#{condition.belongBrch, jdbcType=VARCHAR}||',%') 
+		</if>
+		<if test="condition.belongMgr != null and condition.belongMgr !=''">
+				  and P.BELONG_MGR = #{condition.belongMgr, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.valueLev != null and condition.valueLev !=''">
+				  and P.VALUE_LEV = #{condition.valueLev, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.servLev != null and condition.servLev !=''">
+				  and P.SERV_LEV = #{condition.servLev, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.custAssignStat != null and condition.custAssignStat !=''">
+				  and P.CUST_ASSIGN_STAT = #{condition.custAssignStat, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.wheAgrRelCus != null and condition.wheAgrRelCus !=''">
+				  and P.WHE_AGR_REL_CUS = #{condition.wheAgrRelCus, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.aumBal != null and condition.aumBal !=''">
+				  and B.AUM_BAL &gt;= #{condition.aumBal, jdbcType=NUMERIC}
+		</if>
+		<if test="condition.aumBalLow != null and condition.aumBalLow !=''">
+				  and B.AUM_BAL &gt;= #{condition.aumBalLow, jdbcType=NUMERIC}
+		</if>
+		<if test="condition.aumBalHigh != null and condition.aumBalHigh !=''">
+				  and B.AUM_BAL &lt;= #{condition.aumBalHigh, jdbcType=NUMERIC}
+		</if>
+		<if test="condition.custGroupId != null and condition.custGroupId !=''">
+				  and P.CUST_ID NOT IN (SELECT CUST_ID FROM OCRM_F_CI_CG_MEMBER WHERE CUST_GROUP_ID = #{condition.custGroupId, jdbcType=VARCHAR})
+		</if>
+		<if test="condition.dspBal != null and condition.dspBal !=''">
+				  and B.DPS_BAL &gt;= #{condition.dspBal, jdbcType=NUMERIC}
+		</if>
+		<if test="condition.loanBal != null and condition.loanBal !=''">
+				  and B.LOAN_BAL &gt;= #{condition.loanBal, jdbcType=NUMERIC}
+		</if>
+		<if test="condition.queryAll != null and condition.queryAll !=''">
+				   and P.CUST_ID LIKE CONCAT(CONCAT('%', #{condition.queryAll, jdbcType=VARCHAR}),'%')
+				   OR P.CUST_NAME LIKE CONCAT(CONCAT('%', #{condition.queryAll, jdbcType=VARCHAR}),'%')
+				   OR P.CERT_NO LIKE CONCAT(CONCAT('%', #{condition.queryAll, jdbcType=VARCHAR}),'%')
+		</if>
+    </where>
+    GROUP BY P.CUST_STATUS,
+          P.CUST_ID,
+          P.CUST_NAME,
+          P.CERT_TYPE,
+          P.CERT_NO,
+          P.BELONG_MGR,
+          P.BELONG_BRCH,
+          P.SERV_LEV,
+          P.VALUE_LEV,
+          P.IS_LOAN_CUST,
+          P.CUST_ASSIGN_STAT,
+          B.REPORT_SUM,
+          P.WHE_AGR_REL_CUS,
+          P.EFFECT_FLG,
+          U.USER_NAME,
+          O.ORG_NAME,
+          O.ORG_LEVEL,
+          B.AUM_BAL,
+          B.DPS_BAL,
+          B.LOAN_BAL,
+          B.DPS_Y_AVG_BAL,
+          B.LOAN_Y_AVG_BAL
+           <if test="condition.isAdmitEnter!=null and condition.isAdmitEnter ==1 or condition.isAdmitEnter!=null and condition.isAdmitEnter =='1'">
+				   ORDER BY B.AUM_BAL DESC NULLS LAST
+		</if>
+		</if>
+	</select>
+	
+	<!-- 对公全条线所辖 -->
+	<select id="getListOrgAll" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"  resultType="java.util.HashMap">
+	
+	SELECT P.CUST_STATUS,
+       P.CUST_ID,
+       P.CUST_NAME,
+       P.CERT_TYPE,
+       P.CERT_NO,
+       P.BELONG_MGR,
+       P.BELONG_BRCH,
+       P.SERV_LEV,
+       P.VALUE_LEV,
+       P.IS_LOAN_CUST,
+       P.CUST_ASSIGN_STAT,
+       B.REPORT_SUM as REPORT_SUM_NUMBER,
+       P.WHE_AGR_REL_CUS,
+       P.EFFECT_FLG,
+       U.USER_NAME,
+       O.ORG_NAME,
+       O.ORG_LEVEL,
+       B.AUM_BAL,
+       B.DPS_BAL,
+       B.LOAN_BAL,
+       B.DPS_Y_AVG_BAL,
+       B.LOAN_Y_AVG_BAL,
+       '2' as CUST_TYPE
+  <if test="dataAuth != null and condition.orgIdAuth =='500'">
+              		,'1' AS POWER_LEV FROM ACRM_F_CI_ORG_CUST_INFO P
+				  LEFT JOIN ACRM_A_CI_ORG_BUSI_SUM_D B
+    ON B.CUST_ID = P.CUST_ID
+  LEFT JOIN ADMIN_SM_USER U
+    ON U.USER_ID = P.BELONG_MGR
+  LEFT JOIN ADMIN_SM_ORG O
+    ON O.ORG_CODE = P.BELONG_BRCH
+    <where>
+     	1=1
+		<if test="condition.custStatus != null and condition.custStatus !=''">
+				  and P.CUST_STATUS = #{condition.custStatus, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.isAdmitEnter != null and condition.isAdmitEnter !=''">
+				  and P.IS_ADMIT_ENTER = #{condition.isAdmitEnter, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.custId != null and condition.custId !=''">
+				  and P.CUST_ID LIKE CONCAT(CONCAT('%', #{condition.custId, jdbcType=VARCHAR}),'%')
+		</if>
+		<if test="condition.effectFlg != null and condition.effectFlg !=''">
+				  and P.EFFECT_FLG = #{condition.effectFlg, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.ettenCustId != null and condition.ettenCustId !=''">
+				  and P.CUST_ID = #{condition.ettenCustId, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.custName != null and condition.custName !=''">
+				  and P.CUST_NAME LIKE CONCAT(CONCAT('%', #{condition.custName, jdbcType=VARCHAR}),'%')
+		</if>
+		<if test="condition.certType != null and condition.certType !=''">
+				  and P.CERT_TYPE = #{condition.certType, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.certNo != null and condition.certNo !=''">
+				  and P.CERT_NO LIKE CONCAT(CONCAT('%', #{condition.certNo, jdbcType=VARCHAR}),'%')
+		</if>
+		<if test="condition.belongBrch != null and condition.belongBrch !=''">
+				  and P.BELONG_BRCH IN (select org_code from sys_org_view where sys_org_view.org_seq like '%'||#{condition.belongBrch, jdbcType=VARCHAR}||',%') 
+		</if>
+		<if test="condition.belongMgr != null and condition.belongMgr !=''">
+				  and P.BELONG_MGR = #{condition.belongMgr, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.valueLev != null and condition.valueLev !=''">
+				  and P.VALUE_LEV = #{condition.valueLev, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.servLev != null and condition.servLev !=''">
+				  and P.SERV_LEV = #{condition.servLev, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.custAssignStat != null and condition.custAssignStat !=''">
+				  and P.CUST_ASSIGN_STAT = #{condition.custAssignStat, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.wheAgrRelCus != null and condition.wheAgrRelCus !=''">
+				  and P.WHE_AGR_REL_CUS = #{condition.wheAgrRelCus, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.custGroupId != null and condition.custGroupId !=''">
+				  and P.CUST_ID NOT IN (SELECT CUST_ID FROM OCRM_F_CI_CG_MEMBER WHERE CUST_GROUP_ID = #{condition.custGroupId, jdbcType=VARCHAR})
+		</if>
+		<if test="condition.aumBal != null and condition.aumBal !=''">
+				  and B.AUM_BAL &gt;= #{condition.aumBal, jdbcType=NUMERIC}
+		</if>
+		<if test="condition.aumBalLow != null and condition.aumBalLow !=''">
+				  and B.AUM_BAL &gt;= #{condition.aumBalLow, jdbcType=NUMERIC}
+		</if>
+		<if test="condition.aumBalHigh != null and condition.aumBalHigh !=''">
+				  and B.AUM_BAL &lt;= #{condition.aumBalHigh, jdbcType=NUMERIC}
+		</if>
+		<if test="condition.dspBal != null and condition.dspBal !=''">
+				  and B.DPS_BAL &gt;= #{condition.dspBal, jdbcType=NUMERIC}
+		</if>
+		<if test="condition.loanBal != null and condition.loanBal !=''">
+				  and B.LOAN_BAL &gt;= #{condition.loanBal, jdbcType=NUMERIC}
+		</if>
+		<if test="condition.queryAll != null and condition.queryAll !=''">
+				   and P.CUST_ID LIKE CONCAT(CONCAT('%', #{condition.queryAll, jdbcType=VARCHAR}),'%')
+				   OR P.CUST_NAME LIKE CONCAT(CONCAT('%', #{condition.queryAll, jdbcType=VARCHAR}),'%')
+				   OR P.CERT_NO LIKE CONCAT(CONCAT('%', #{condition.queryAll, jdbcType=VARCHAR}),'%')
+		</if>
+    </where>
+     <if test="condition.isAdmitEnter!=null and condition.isAdmitEnter ==1 or condition.isAdmitEnter!=null and condition.isAdmitEnter =='1'">
+				   ORDER BY B.AUM_BAL DESC NULLS LAST
+		</if>
+		</if>
+		<if test="dataAuth != null and condition.orgIdAuth !='500'">
+		,MIN(ORG.POWER_LEV) AS POWER_LEV
+		FROM ACRM_F_CI_ORG_CUST_INFO P
+ INNER JOIN (
+		SELECT B.CUST_ID, '2' AS POWER_LEV
+               FROM OCRM_F_CI_ADMIT_BELONG B
+              WHERE B.MGR_ID = #{condition.userId, jdbcType = VARCHAR}
+             UNION ALL
+             SELECT L.CUST_ID, '3' AS POWER_LEV
+               FROM OCRM_F_CI_TRUSTEESHIP_APPLY A
+               LEFT JOIN OCRM_F_CI_TRUSTEESHIP_LIST L
+                 ON A.APPLY_ID = L.APPLY_NO
+              WHERE A.TRUST_STAT = '1'
+                AND A.TRUST_MGR_ID = #{condition.userId,
+              jdbcType = VARCHAR}
+             UNION ALL
+             SELECT L.CUST_ID, '4' AS POWER_LEV
+               FROM OCRM_F_CI_GRANT_APPLY A
+               LEFT JOIN OCRM_F_CI_GRANT_LIST L
+                 ON A.APPLY_ID = L.APPLY_NO
+              WHERE GRANT_STAT = '1'
+                AND GRANT_MGR_ID = #{condition.userId,
+              jdbcType = VARCHAR} 
+					${dataAuth} 
+				   ) ORG
+    ON ORG.CUST_ID = P.CUST_ID
+    LEFT JOIN ACRM_A_CI_ORG_BUSI_SUM_D B
+    ON B.CUST_ID = P.CUST_ID
+  LEFT JOIN ADMIN_SM_USER U
+    ON U.USER_ID = P.BELONG_MGR
+  LEFT JOIN ADMIN_SM_ORG O
+    ON O.ORG_CODE = P.BELONG_BRCH
+
+    <where>
+    	 1=1
+		<if test="condition.custStatus != null and condition.custStatus !=''">
+				  and P.CUST_STATUS = #{condition.custStatus, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.isAdmitEnter != null and condition.isAdmitEnter !=''">
+				  and P.IS_ADMIT_ENTER = #{condition.isAdmitEnter, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.custId != null and condition.custId !=''">
+				  and P.CUST_ID LIKE CONCAT(CONCAT('%', #{condition.custId, jdbcType=VARCHAR}),'%')
+		</if>
+		<if test="condition.ettenCustId != null and condition.ettenCustId !=''">
+				  and P.CUST_ID = #{condition.ettenCustId, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.effectFlg != null and condition.effectFlg !=''">
+				  and P.EFFECT_FLG = #{condition.effectFlg, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.custName != null and condition.custName !=''">
+				  and P.CUST_NAME LIKE CONCAT(CONCAT('%', #{condition.custName, jdbcType=VARCHAR}),'%')
+		</if>
+		<if test="condition.certType != null and condition.certType !=''">
+				  and P.CERT_TYPE = #{condition.certType, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.certNo != null and condition.certNo !=''">
+				  and P.CERT_NO LIKE CONCAT(CONCAT('%', #{condition.certNo, jdbcType=VARCHAR}),'%')
+		</if>
+		<if test="condition.belongBrch != null and condition.belongBrch !=''">
+				  and P.BELONG_BRCH IN (select org_code from sys_org_view where sys_org_view.org_seq like '%'||#{condition.belongBrch, jdbcType=VARCHAR}||',%') 
+		</if>
+		<if test="condition.belongMgr != null and condition.belongMgr !=''">
+				  and P.BELONG_MGR = #{condition.belongMgr, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.valueLev != null and condition.valueLev !=''">
+				  and P.VALUE_LEV = #{condition.valueLev, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.servLev != null and condition.servLev !=''">
+				  and P.SERV_LEV = #{condition.servLev, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.custAssignStat != null and condition.custAssignStat !=''">
+				  and P.CUST_ASSIGN_STAT = #{condition.custAssignStat, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.wheAgrRelCus != null and condition.wheAgrRelCus !=''">
+				  and P.WHE_AGR_REL_CUS = #{condition.wheAgrRelCus, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.custGroupId != null and condition.custGroupId !=''">
+				  and P.CUST_ID NOT IN (SELECT CUST_ID FROM OCRM_F_CI_CG_MEMBER WHERE CUST_GROUP_ID = #{condition.custGroupId, jdbcType=VARCHAR})
+		</if>
+		<if test="condition.aumBal != null and condition.aumBal !=''">
+				  and B.AUM_BAL &gt;= #{condition.aumBal, jdbcType=NUMERIC}
+		</if>
+		<if test="condition.aumBalLow != null and condition.aumBalLow !=''">
+				  and B.AUM_BAL &gt;= #{condition.aumBalLow, jdbcType=NUMERIC}
+		</if>
+		<if test="condition.aumBalHigh != null and condition.aumBalHigh !=''">
+				  and B.AUM_BAL &lt;= #{condition.aumBalHigh, jdbcType=NUMERIC}
+		</if>
+		<if test="condition.dspBal != null and condition.dspBal !=''">
+				  and B.DPS_BAL &gt;= #{condition.dspBal, jdbcType=NUMERIC}
+		</if>
+		<if test="condition.loanBal != null and condition.loanBal !=''">
+				  and B.LOAN_BAL &gt;= #{condition.loanBal, jdbcType=NUMERIC}
+		</if>
+		<if test="condition.queryAll != null and condition.queryAll !=''">
+				   and P.CUST_ID LIKE CONCAT(CONCAT('%', #{condition.queryAll, jdbcType=VARCHAR}),'%')
+				   OR P.CUST_NAME LIKE CONCAT(CONCAT('%', #{condition.queryAll, jdbcType=VARCHAR}),'%')
+				   OR P.CERT_NO LIKE CONCAT(CONCAT('%', #{condition.queryAll, jdbcType=VARCHAR}),'%')
+		</if>
+    </where>
+    GROUP BY P.CUST_STATUS,
+          P.CUST_ID,
+          P.CUST_NAME,
+          P.CERT_TYPE,
+          P.CERT_NO,
+          P.BELONG_MGR,
+          P.BELONG_BRCH,
+          P.SERV_LEV,
+          P.VALUE_LEV,
+          P.IS_LOAN_CUST,
+          P.CUST_ASSIGN_STAT,
+          B.REPORT_SUM,
+          P.WHE_AGR_REL_CUS,
+          P.EFFECT_FLG,
+          U.USER_NAME,
+          O.ORG_NAME,
+          O.ORG_LEVEL,
+          B.AUM_BAL,
+          B.DPS_BAL,
+          B.LOAN_BAL,
+          B.DPS_Y_AVG_BAL,
+          B.LOAN_Y_AVG_BAL
+           <if test="condition.isAdmitEnter!=null and condition.isAdmitEnter ==1 or condition.isAdmitEnter!=null and condition.isAdmitEnter =='1'">
+				   ORDER BY B.AUM_BAL DESC NULLS LAST
+		</if>
+		</if>
+         <if test="dataAuth == null">
+         ,MIN(ORG.POWER_LEV) AS POWER_LEV
+		FROM ACRM_F_CI_ORG_CUST_INFO P
+ INNER JOIN (
+		SELECT B.CUST_ID, '2' AS POWER_LEV
+               FROM OCRM_F_CI_ADMIT_BELONG B
+              WHERE B.MGR_ID = #{condition.userId, jdbcType = VARCHAR}
+             UNION ALL
+             SELECT L.CUST_ID, '3' AS POWER_LEV
+               FROM OCRM_F_CI_TRUSTEESHIP_APPLY A
+               LEFT JOIN OCRM_F_CI_TRUSTEESHIP_LIST L
+                 ON A.APPLY_ID = L.APPLY_NO
+              WHERE A.TRUST_STAT = '1'
+                AND A.TRUST_MGR_ID = #{condition.userId,
+              jdbcType = VARCHAR}
+             UNION ALL
+             SELECT L.CUST_ID, '4' AS POWER_LEV
+               FROM OCRM_F_CI_GRANT_APPLY A
+               LEFT JOIN OCRM_F_CI_GRANT_LIST L
+                 ON A.APPLY_ID = L.APPLY_NO
+              WHERE GRANT_STAT = '1'
+                AND GRANT_MGR_ID = #{condition.userId,
+              jdbcType = VARCHAR} 
+				   ) ORG
+    ON ORG.CUST_ID = P.CUST_ID
+    LEFT JOIN ACRM_A_CI_ORG_BUSI_SUM_D B
+    ON B.CUST_ID = P.CUST_ID
+  LEFT JOIN ADMIN_SM_USER U
+    ON U.USER_ID = P.BELONG_MGR
+  LEFT JOIN ADMIN_SM_ORG O
+    ON O.ORG_CODE = P.BELONG_BRCH
+
+    <where>
+    	1=1
+		<if test="condition.custStatus != null and condition.custStatus !=''">
+				  and P.CUST_STATUS = #{condition.custStatus, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.isAdmitEnter != null and condition.isAdmitEnter !=''">
+				  and P.IS_ADMIT_ENTER = #{condition.isAdmitEnter, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.custId != null and condition.custId !=''">
+				  and P.CUST_ID LIKE CONCAT(CONCAT('%', #{condition.custId, jdbcType=VARCHAR}),'%')
+		</if>
+		<if test="condition.ettenCustId != null and condition.ettenCustId !=''">
+				  and P.CUST_ID = #{condition.ettenCustId, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.custName != null and condition.custName !=''">
+				  and P.CUST_NAME LIKE CONCAT(CONCAT('%', #{condition.custName, jdbcType=VARCHAR}),'%')
+		</if>
+		<if test="condition.effectFlg != null and condition.effectFlg !=''">
+				  and P.EFFECT_FLG = #{condition.effectFlg, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.certType != null and condition.certType !=''">
+				  and P.CERT_TYPE = #{condition.certType, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.certNo != null and condition.certNo !=''">
+				  and P.CERT_NO LIKE CONCAT(CONCAT('%', #{condition.certNo, jdbcType=VARCHAR}),'%')
+		</if>
+		<if test="condition.belongBrch != null and condition.belongBrch !=''">
+				  and P.BELONG_BRCH IN (select org_code from sys_org_view where sys_org_view.org_seq like '%'||#{condition.belongBrch, jdbcType=VARCHAR}||',%') 
+		</if>
+		<if test="condition.belongMgr != null and condition.belongMgr !=''">
+				  and P.BELONG_MGR = #{condition.belongMgr, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.valueLev != null and condition.valueLev !=''">
+				  and P.VALUE_LEV = #{condition.valueLev, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.servLev != null and condition.servLev !=''">
+				  and P.SERV_LEV = #{condition.servLev, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.custAssignStat != null and condition.custAssignStat !=''">
+				  and P.CUST_ASSIGN_STAT = #{condition.custAssignStat, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.wheAgrRelCus != null and condition.wheAgrRelCus !=''">
+				  and P.WHE_AGR_REL_CUS = #{condition.wheAgrRelCus, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.custGroupId != null and condition.custGroupId !=''">
+				  and P.CUST_ID NOT IN (SELECT CUST_ID FROM OCRM_F_CI_CG_MEMBER WHERE CUST_GROUP_ID = #{condition.custGroupId, jdbcType=VARCHAR})
+		</if>
+		<if test="condition.aumBal != null and condition.aumBal !=''">
+				  and B.AUM_BAL &gt;= #{condition.aumBal, jdbcType=NUMERIC}
+		</if>
+		<if test="condition.aumBalLow != null and condition.aumBalLow !=''">
+				  and B.AUM_BAL &gt;= #{condition.aumBalLow, jdbcType=NUMERIC}
+		</if>
+		<if test="condition.aumBalHigh != null and condition.aumBalHigh !=''">
+				  and B.AUM_BAL &lt;= #{condition.aumBalHigh, jdbcType=NUMERIC}
+		</if>
+		<if test="condition.dspBal != null and condition.dspBal !=''">
+				  and B.DPS_BAL &gt;= #{condition.dspBal, jdbcType=NUMERIC}
+		</if>
+		<if test="condition.loanBal != null and condition.loanBal !=''">
+				  and B.LOAN_BAL &gt;= #{condition.loanBal, jdbcType=NUMERIC}
+		</if>
+		<if test="condition.queryAll != null and condition.queryAll !=''">
+				   and P.CUST_ID LIKE CONCAT(CONCAT('%', #{condition.queryAll, jdbcType=VARCHAR}),'%')
+				   OR P.CUST_NAME LIKE CONCAT(CONCAT('%', #{condition.queryAll, jdbcType=VARCHAR}),'%')
+				   OR P.CERT_NO LIKE CONCAT(CONCAT('%', #{condition.queryAll, jdbcType=VARCHAR}),'%')
+		</if>
+    </where>
+    GROUP BY P.CUST_STATUS,
+          P.CUST_ID,
+          P.CUST_NAME,
+          P.CERT_TYPE,
+          P.CERT_NO,
+          P.BELONG_MGR,
+          P.BELONG_BRCH,
+          P.SERV_LEV,
+          P.VALUE_LEV,
+          P.IS_LOAN_CUST,
+          P.CUST_ASSIGN_STAT,
+          B.REPORT_SUM,
+          P.WHE_AGR_REL_CUS,
+          P.EFFECT_FLG,
+          U.USER_NAME,
+          O.ORG_NAME,
+          O.ORG_LEVEL,
+          B.AUM_BAL,
+          B.DPS_BAL,
+          B.LOAN_BAL,
+          B.DPS_Y_AVG_BAL,
+          B.LOAN_Y_AVG_BAL
+           <if test="condition.isAdmitEnter!=null and condition.isAdmitEnter ==1 or condition.isAdmitEnter!=null and condition.isAdmitEnter =='1'">
+				   ORDER BY B.AUM_BAL DESC NULLS LAST
+		</if>
+		</if>
+	</select>
+	<select id="getListAll" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"  resultType="java.util.HashMap">
+	SELECT P.CUST_STATUS,
+       P.CUST_TYPE,
+       P.CUST_ID,
+       P.CUST_NAME,
+       P.CERT_TYPE,
+       P.CERT_NO,
+       P.BELONG_MGR,
+       P.BELONG_BRCH,
+       U.USER_NAME,
+       O.ORG_NAME,
+       O.ORG_LEVEL
+  
+              <if test="dataAuth != null and condition.orgIdAuth =='500'">
+              		<!-- ,'1' AS POWER_LEV FROM ACRM_F_CI_CUST_ADMIT_ALL P -->
+              		,'1' AS POWER_LEV FROM ACRM_F_CI_CUST_ALL P
+				  LEFT JOIN ACRM_A_CI_PER_BUSI_SUM_D 
+  LEFT JOIN ADMIN_SM_USER U
+    ON U.USER_ID = P.BELONG_MGR
+  LEFT JOIN ADMIN_SM_ORG O
+    ON O.ORG_CODE = P.BELONG_BRCH
+    <where>
+    (${condition.busiType})
+		<if test="condition.custStatus != null and condition.custStatus !=''">
+				  and P.CUST_STATUS = #{condition.custStatus, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.isAdmitEnter != null and condition.isAdmitEnter !=''">
+				  and P.IS_ADMIT_ENTER = #{condition.isAdmitEnter, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.custId != null and condition.custId !=''">
+				  and P.CUST_ID LIKE CONCAT(CONCAT('%', #{condition.custId, jdbcType=VARCHAR}),'%')
+		</if>
+		<if test="condition.custName != null and condition.custName !=''">
+				  and P.CUST_NAME LIKE CONCAT(CONCAT('%', #{condition.custName, jdbcType=VARCHAR}),'%')
+		</if>
+		<if test="condition.effectFlg != null and condition.effectFlg !=''">
+				  and P.EFFECT_FLG = #{condition.effectFlg, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.certType != null and condition.certType !=''">
+				  and P.CERT_TYPE = #{condition.certType, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.certNo != null and condition.certNo !=''">
+				  and P.CERT_NO LIKE CONCAT(CONCAT('%', #{condition.certNo, jdbcType=VARCHAR}),'%')
+		</if>
+		<if test="condition.belongBrch != null and condition.belongBrch !=''">
+				  and P.BELONG_BRCH IN (select org_code from sys_org_view where sys_org_view.org_seq like '%'||#{condition.belongBrch, jdbcType=VARCHAR}||',%') 
+		</if>
+		<if test="condition.belongMgr != null and condition.belongMgr !=''">
+				  and P.BELONG_MGR = #{condition.belongMgr, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.custGroupId != null and condition.custGroupId !=''">
+				  and P.CUST_ID NOT IN (SELECT CUST_ID FROM OCRM_F_CI_CG_MEMBER WHERE CUST_GROUP_ID = #{condition.custGroupId, jdbcType=VARCHAR})
+		</if>
+		
+    </where>
+		</if>
+		<if test="dataAuth != null and condition.orgIdAuth !='500'">
+		,MIN(PER.POWER_LEV) AS POWER_LEV
+		<!-- FROM ACRM_F_CI_CUST_ADMIT_ALL P -->
+		FROM ACRM_F_CI_CUST_ALL P
+ INNER JOIN (
+		SELECT B.CUST_ID, '2' AS POWER_LEV
+               FROM OCRM_F_CI_ADMIT_BELONG B
+              WHERE B.MGR_ID = #{condition.userId, jdbcType = VARCHAR}
+             UNION ALL
+             SELECT L.CUST_ID, '3' AS POWER_LEV
+               FROM OCRM_F_CI_TRUSTEESHIP_APPLY A
+               LEFT JOIN OCRM_F_CI_TRUSTEESHIP_LIST L
+                 ON A.APPLY_ID = L.APPLY_NO
+              WHERE A.TRUST_STAT = '1'
+                AND A.TRUST_MGR_ID = #{condition.userId,
+              jdbcType = VARCHAR}
+             UNION ALL
+             SELECT L.CUST_ID, '4' AS POWER_LEV
+               FROM OCRM_F_CI_GRANT_APPLY A
+               LEFT JOIN OCRM_F_CI_GRANT_LIST L
+                 ON A.APPLY_ID = L.APPLY_NO
+              WHERE GRANT_STAT = '1'
+                AND GRANT_MGR_ID = #{condition.userId,
+              jdbcType = VARCHAR} 
+					${dataAuth} 
+				   ) PER
+    ON PER.CUST_ID = P.CUST_ID
+  LEFT JOIN ADMIN_SM_USER U
+    ON U.USER_ID = P.BELONG_MGR
+  LEFT JOIN ADMIN_SM_ORG O
+    ON O.ORG_CODE = P.BELONG_BRCH
+    <where>
+    1=1
+    <if test="condition.busiType != null and condition.busiType !=''">
+				AND (PER.POWER_LEV = '1' AND (${condition.busiType})  OR PER.POWER_LEV = '2' OR PER.POWER_LEV = '3' OR PER.POWER_LEV = '4')
+		</if>
+		<if test="condition.isAdmitEnter != null and condition.isAdmitEnter !=''">
+				  and P.IS_ADMIT_ENTER = #{condition.isAdmitEnter, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.custStatus != null and condition.custStatus !=''">
+				  and P.CUST_STATUS = #{condition.custStatus, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.custId != null and condition.custId !=''">
+				  and P.CUST_ID LIKE CONCAT(CONCAT('%', #{condition.custId, jdbcType=VARCHAR}),'%')
+		</if>
+		<if test="condition.custName != null and condition.custName !=''">
+				  and P.CUST_NAME LIKE CONCAT(CONCAT('%', #{condition.custName, jdbcType=VARCHAR}),'%')
+		</if>
+		<if test="condition.effectFlg != null and condition.effectFlg !=''">
+				  and P.EFFECT_FLG = #{condition.effectFlg, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.certType != null and condition.certType !=''">
+				  and P.CERT_TYPE = #{condition.certType, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.certNo != null and condition.certNo !=''">
+				  and P.CERT_NO LIKE CONCAT(CONCAT('%', #{condition.certNo, jdbcType=VARCHAR}),'%')
+		</if>
+		<if test="condition.belongBrch != null and condition.belongBrch !=''">
+				  and P.BELONG_BRCH IN (select org_code from sys_org_view where sys_org_view.org_seq like '%'||#{condition.belongBrch, jdbcType=VARCHAR}||',%') 
+		</if>
+		<if test="condition.belongMgr != null and condition.belongMgr !=''">
+				  and P.BELONG_MGR = #{condition.belongMgr, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.custGroupId != null and condition.custGroupId !=''">
+				  and P.CUST_ID NOT IN (SELECT CUST_ID FROM OCRM_F_CI_CG_MEMBER WHERE CUST_GROUP_ID = #{condition.custGroupId, jdbcType=VARCHAR})
+		</if>
+    </where>
+    GROUP BY P.CUST_STATUS,
+          P.CUST_TYPE,
+          P.CUST_ID,
+          P.CUST_NAME,
+          P.CERT_TYPE,
+          P.CERT_NO,
+          P.BELONG_MGR,
+          P.BELONG_BRCH,
+          U.USER_NAME,
+          O.ORG_NAME,
+          O.ORG_LEVEL
+		</if>
+         <if test="dataAuth == null">
+         ,MIN(PER.POWER_LEV) AS POWER_LEV
+		<!-- FROM ACRM_F_CI_CUST_ADMIT_ALL P -->
+		FROM ACRM_F_CI_CUST_ALL P
+ INNER JOIN (
+		SELECT B.CUST_ID, '2' AS POWER_LEV
+               FROM OCRM_F_CI_ADMIT_BELONG B
+              WHERE B.MGR_ID = #{condition.userId, jdbcType = VARCHAR}
+             UNION ALL
+             SELECT L.CUST_ID, '3' AS POWER_LEV
+               FROM OCRM_F_CI_TRUSTEESHIP_APPLY A
+               LEFT JOIN OCRM_F_CI_TRUSTEESHIP_LIST L
+                 ON A.APPLY_ID = L.APPLY_NO
+              WHERE A.TRUST_STAT = '1'
+                AND A.TRUST_MGR_ID = #{condition.userId,
+              jdbcType = VARCHAR}
+             UNION ALL
+             SELECT L.CUST_ID, '4' AS POWER_LEV
+               FROM OCRM_F_CI_GRANT_APPLY A
+               LEFT JOIN OCRM_F_CI_GRANT_LIST L
+                 ON A.APPLY_ID = L.APPLY_NO
+              WHERE GRANT_STAT = '1'
+                AND GRANT_MGR_ID = #{condition.userId,
+              jdbcType = VARCHAR} 
+				   ) PER
+    ON PER.CUST_ID = P.CUST_ID
+  LEFT JOIN ADMIN_SM_USER U
+    ON U.USER_ID = P.BELONG_MGR
+  LEFT JOIN ADMIN_SM_ORG O
+    ON O.ORG_CODE = P.BELONG_BRCH
+
+    <where>
+    1=1
+    		<if test="condition.custType != null and condition.custType !=''">
+				  and P.CUST_TYPE = #{condition.custType, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.isAdmitEnter != null and condition.isAdmitEnter !=''">
+				  and P.IS_ADMIT_ENTER = #{condition.isAdmitEnter, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.custStatus != null and condition.custStatus !=''">
+				  and P.CUST_STATUS = #{condition.custStatus, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.custId != null and condition.custId !=''">
+				  and P.CUST_ID LIKE CONCAT(CONCAT('%', #{condition.custId, jdbcType=VARCHAR}),'%')
+		</if>
+		<if test="condition.effectFlg != null and condition.effectFlg !=''">
+				  and P.EFFECT_FLG = #{condition.effectFlg, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.custName != null and condition.custName !=''">
+				  and P.CUST_NAME LIKE CONCAT(CONCAT('%', #{condition.custName, jdbcType=VARCHAR}),'%')
+		</if>
+		<if test="condition.certType != null and condition.certType !=''">
+				  and P.CERT_TYPE = #{condition.certType, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.certNo != null and condition.certNo !=''">
+				  and P.CERT_NO LIKE CONCAT(CONCAT('%', #{condition.certNo, jdbcType=VARCHAR}),'%')
+		</if>
+		<if test="condition.belongBrch != null and condition.belongBrch !=''">
+				  and P.BELONG_BRCH IN (select org_code from sys_org_view where sys_org_view.org_seq like '%'||#{condition.belongBrch, jdbcType=VARCHAR}||',%') 
+		</if>
+		<if test="condition.belongMgr != null and condition.belongMgr !=''">
+				  and P.BELONG_MGR = #{condition.belongMgr, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.custGroupId != null and condition.custGroupId !=''">
+				  and P.CUST_ID NOT IN (SELECT CUST_ID FROM OCRM_F_CI_CG_MEMBER WHERE CUST_GROUP_ID = #{condition.custGroupId, jdbcType=VARCHAR})
+		</if>
+    </where>
+    GROUP BY P.CUST_STATUS,
+    	  P.CUST_TYPE,
+          P.CUST_ID,
+          P.CUST_NAME,
+          P.CERT_TYPE,
+          P.CERT_NO,
+          P.BELONG_MGR,
+          P.BELONG_BRCH,
+          U.USER_NAME,
+          O.ORG_NAME,
+          O.ORG_LEVEL
+		</if>    
+  
+	</select>
+	
+	
+	<select id="getBusiTypeByUserId" parameterType="String"  resultType="java.util.HashMap">
+	select busi_type from ADMIN_SM_USER_ATTR where login_code = #{loginCode, jdbcType=VARCHAR}
+	</select>
+	
+	
+	<select id="getOrgIdByUserId" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"  resultType="java.util.HashMap">
+	SELECT DISTINCT ORG_ID FROM ADMIN_SM_USER_MGR_ORG WHERE USER_ID = #{condition.userId, jdbcType=VARCHAR}
+	
+	</select>
+	<!-- 客户关系图 客户查询 -->
+	<select id="getManageCustPerList" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"  resultType="java.util.HashMap">
+	SELECT P.CUST_STATUS,
+       P.CUST_ID,
+       P.CUST_NAME,
+       P.CERT_TYPE,
+       P.CERT_NO,
+       P.BELONG_MGR,
+       P.BELONG_BRCH,
+       P.SERV_LEV,
+       P.VALUE_LEV,
+       P.CUST_ASSIGN_STAT,
+       B.REPORT_SUM as REPORT_SUM_NUMBER,
+       P.WHE_AGR_REL_CUS,
+       P.EFFECT_FLG,
+       U.USER_NAME,
+       O.ORG_NAME,
+       O.ORG_LEVEL,
+       B.DPS_BAL,
+       B.LOAN_BAL,
+       B.DPS_Y_AVG_BAL,
+       B.LOAN_Y_AVG_BAL,
+       '1' as CUST_TYPE,
+       MIN(PER.POWER_LEV) AS POWER_LEV
+  FROM ACRM_F_CI_PER_ADMIT_INFO P
+ INNER JOIN (SELECT B.CUST_ID, '2' AS POWER_LEV
+               FROM OCRM_F_CI_ADMIT_BELONG B
+              WHERE B.MGR_ID = #{condition.userId, jdbcType = VARCHAR}
+             UNION ALL
+             SELECT L.CUST_ID, '3' AS POWER_LEV
+               FROM OCRM_F_CI_TRUSTEESHIP_APPLY A
+               LEFT JOIN OCRM_F_CI_TRUSTEESHIP_LIST L
+                 ON A.APPLY_ID = L.APPLY_NO
+              WHERE A.TRUST_STAT = '1'
+                AND A.TRUST_MGR_ID = #{condition.userId,
+              jdbcType = VARCHAR}
+             UNION ALL
+             SELECT L.CUST_ID, '4' AS POWER_LEV
+               FROM OCRM_F_CI_GRANT_APPLY A
+               LEFT JOIN OCRM_F_CI_GRANT_LIST L
+                 ON A.APPLY_ID = L.APPLY_NO
+              WHERE GRANT_STAT = '1'
+                AND GRANT_MGR_ID = #{condition.userId,
+              jdbcType = VARCHAR}) PER
+    ON PER.CUST_ID = P.CUST_ID
+  LEFT JOIN ACRM_A_CI_PER_BUSI_SUM_D B
+    ON B.CUST_ID = P.CUST_ID
+  LEFT JOIN ADMIN_SM_USER U
+    ON U.USER_ID = P.BELONG_MGR
+  LEFT JOIN ADMIN_SM_ORG O
+    ON O.ORG_CODE = P.BELONG_BRCH
+    <where>
+    1=1
+		<if test="condition.custStatus != null and condition.custStatus !=''">
+				  and P.CUST_STATUS = #{condition.custStatus, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.custId != null and condition.custId !=''">
+				  and P.CUST_ID LIKE CONCAT(CONCAT('%', #{condition.custId, jdbcType=VARCHAR}),'%')
+		</if>
+		<if test="condition.custName != null and condition.custName !=''">
+				  and P.CUST_NAME LIKE CONCAT(CONCAT('%', #{condition.custName, jdbcType=VARCHAR}),'%')
+		</if>
+		<if test="condition.certType != null and condition.certType !=''">
+				  and P.CERT_TYPE = #{condition.certType, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.certNo != null and condition.certNo !=''">
+				  and P.CERT_NO LIKE CONCAT(CONCAT('%', #{condition.certNo, jdbcType=VARCHAR}),'%')
+		</if>
+		<if test="condition.belongOrg != null and condition.belongOrg !=''">
+				  and P.BELONG_ORG = #{condition.belongOrg, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.belongMgr != null and condition.belongMgr !=''">
+				  and P.BELONG_MGR = #{condition.belongMgr, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.valueLev != null and condition.valueLev !=''">
+				  and P.VALUE_LEV = #{condition.valueLev, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.servLev != null and condition.servLev !=''">
+				  and P.SERV_LEV = #{condition.servLev, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.custAssignStat != null and condition.custAssignStat !=''">
+				  and P.CUST_ASSIGN_STAT = #{condition.custAssignStat, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.wheAgrRelCus != null and condition.wheAgrRelCus !=''">
+				  and P.WHE_AGR_REL_CUS = #{condition.wheAgrRelCus, jdbcType=VARCHAR}
+		</if>
+		
+    </where>
+    GROUP BY P.CUST_STATUS,
+          P.CUST_ID,
+          P.CUST_NAME,
+          P.CERT_TYPE,
+          P.CERT_NO,
+          P.BELONG_MGR,
+          P.BELONG_BRCH,
+          P.SERV_LEV,
+          P.VALUE_LEV,
+          P.CUST_ASSIGN_STAT,
+          B.REPORT_SUM,
+          P.WHE_AGR_REL_CUS,
+          P.EFFECT_FLG,
+          U.USER_NAME,
+          O.ORG_NAME,
+          O.ORG_LEVEL,
+          B.DPS_BAL,
+          B.LOAN_BAL,
+          B.DPS_Y_AVG_BAL,
+          B.LOAN_Y_AVG_BAL
+	</select>
+	<!-- 客户关系图 客户查询 -->
+	<select id="getManageCustOrgList" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"  resultType="java.util.HashMap">
+	
+	SELECT P.CUST_STATUS,
+       P.CUST_ID,
+       P.CUST_NAME,
+       P.CERT_TYPE,
+       P.CERT_NO,
+       P.BELONG_MGR,
+       P.BELONG_BRCH,
+       P.SERV_LEV,
+       P.VALUE_LEV,
+       P.CUST_ASSIGN_STAT,
+       B.REPORT_SUM as REPORT_SUM_NUMBER,
+       P.WHE_AGR_REL_CUS,
+       P.EFFECT_FLG,
+       U.USER_NAME,
+       O.ORG_NAME,
+       O.ORG_LEVEL,
+       B.DPS_BAL,
+       B.LOAN_BAL,
+       B.DPS_Y_AVG_BAL,
+       B.LOAN_Y_AVG_BAL,
+       '2' as CUST_TYPE,
+       MIN(ORG.POWER_LEV) AS POWER_LEV
+  FROM ACRM_F_CI_ORG_CUST_INFO P
+ INNER JOIN (SELECT B.CUST_ID, '2' AS POWER_LEV
+               FROM OCRM_F_CI_ADMIT_BELONG B
+              WHERE B.MGR_ID = #{condition.userId, jdbcType = VARCHAR}
+             UNION ALL
+             SELECT L.CUST_ID, '3' AS POWER_LEV
+               FROM OCRM_F_CI_TRUSTEESHIP_APPLY A
+               LEFT JOIN OCRM_F_CI_TRUSTEESHIP_LIST L
+                 ON A.APPLY_ID = L.APPLY_NO
+              WHERE A.TRUST_STAT = '1'
+                AND A.TRUST_MGR_ID = #{condition.userId,
+              jdbcType = VARCHAR}
+             UNION ALL
+             SELECT L.CUST_ID, '4' AS POWER_LEV
+               FROM OCRM_F_CI_GRANT_APPLY A
+               LEFT JOIN OCRM_F_CI_GRANT_LIST L
+                 ON A.APPLY_ID = L.APPLY_NO
+              WHERE GRANT_STAT = '1'
+                AND GRANT_MGR_ID = #{condition.userId,
+              jdbcType = VARCHAR}) ORG
+    ON ORG.CUST_ID = P.CUST_ID
+  LEFT JOIN ACRM_A_CI_ORG_BUSI_SUM_D B
+    ON B.CUST_ID = P.CUST_ID
+  LEFT JOIN ADMIN_SM_USER U
+    ON U.USER_ID = P.BELONG_MGR
+  LEFT JOIN ADMIN_SM_ORG O
+    ON O.ORG_CODE = P.BELONG_BRCH
+
+    <where>
+    1=1
+		<if test="condition.custStatus != null and condition.custStatus !=''">
+				  and P.CUST_STATUS = #{condition.custStatus, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.custId != null and condition.custId !=''">
+				  and P.CUST_ID LIKE CONCAT(CONCAT('%', #{condition.custId, jdbcType=VARCHAR}),'%')
+		</if>
+		<if test="condition.custName != null and condition.custName !=''">
+				  and P.CUST_NAME LIKE CONCAT(CONCAT('%', #{condition.custName, jdbcType=VARCHAR}),'%')
+		</if>
+		<if test="condition.certType != null and condition.certType !=''">
+				  and P.CERT_TYPE = #{condition.certType, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.certNo != null and condition.certNo !=''">
+				  and P.CERT_NO LIKE CONCAT(CONCAT('%', #{condition.certNo, jdbcType=VARCHAR}),'%')
+		</if>
+		<if test="condition.belongOrg != null and condition.belongOrg !=''">
+				  and P.BELONG_ORG = #{condition.belongOrg, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.belongMgr != null and condition.belongMgr !=''">
+				  and P.BELONG_MGR = #{condition.belongMgr, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.valueLev != null and condition.valueLev !=''">
+				  and P.VALUE_LEV = #{condition.valueLev, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.servLev != null and condition.servLev !=''">
+				  and P.SERV_LEV = #{condition.servLev, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.custAssignStat != null and condition.custAssignStat !=''">
+				  and P.CUST_ASSIGN_STAT = #{condition.custAssignStat, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.wheAgrRelCus != null and condition.wheAgrRelCus !=''">
+				  and P.WHE_AGR_REL_CUS = #{condition.wheAgrRelCus, jdbcType=VARCHAR}
+		</if>
+		
+    </where>
+    GROUP BY P.CUST_STATUS,
+          P.CUST_ID,
+          P.CUST_NAME,
+          P.CERT_TYPE,
+          P.CERT_NO,
+          P.BELONG_MGR,
+          P.BELONG_BRCH,
+          P.SERV_LEV,
+          P.VALUE_LEV,
+          P.CUST_ASSIGN_STAT,
+          B.REPORT_SUM,
+          P.WHE_AGR_REL_CUS,
+          P.EFFECT_FLG,
+          U.USER_NAME,
+          O.ORG_NAME,
+          O.ORG_LEVEL,
+          B.DPS_BAL,
+          B.LOAN_BAL,
+          B.DPS_Y_AVG_BAL,
+          B.LOAN_Y_AVG_BAL
+	</select>
+	<select id="getOrgIdBySql" parameterType="java.util.HashMap"  resultType="java.util.HashMap">
+	${sql}
+	</select>
+	<select id="custQueryList" resultType="cn.com.yusys.yscrm.custpub.domain.AcrmCustCountVO">
+		SELECT DISTINCT custId, custName from (SELECT DATA_DATE dataDate,CUST_ID custId,CUST_NAME custName,SAM_ID samId,ORG_ID orgId  FROM OCRM_F_CG_CUST_COUNT WHERE
+		ORG_ID=#{orgId} AND SAM_ID=#{samId} and CUST_NAME is not null ORDER BY dataDate desc)cc  where rownum &lt; 6
+	</select>
+	<!-- 非准入客户查询 -->
+	
+</mapper>

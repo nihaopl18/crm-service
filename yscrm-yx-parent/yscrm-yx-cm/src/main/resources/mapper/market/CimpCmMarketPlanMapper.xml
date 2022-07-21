@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.cm.market.repository.mapper.CimpCmMarkePlanMapper">
+
+	<!-- 营销策划查询 -->
+	<select id="getMarketPlanList" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+		resultType="java.util.Map">
+		SELECT T.TEMP_ID,T.MODEL_ID,T.ACTIVITY_NAME,T.ACTIVITY_ORG as ORG_ID,O.org_name as ACTIVITY_ORG,T.CUSTOMER_TYPE,to_char(T.START_DATE, 'YYYY-MM-DD') as START_DATE,
+		to_char(T.END_DATE, 'YYYY-MM-DD') as END_DATE,T.ACTIVITY_DESC,D.User_Name as LAST_CHG_USR,to_char(T.LAST_CHG_DT, 'YYYY-MM-DD') as LAST_CHG_DT,
+	    D.User_Name as CRAT_USR,to_char(T.CRAT_DT, 'YYYY-MM-DD') as CRAT_DT,T.ACTIVITY_TYPE,T.INSTU_ID,ACTIVITY_STS,T.WF_APP_STATUS,I.INSTU_NAME AS INSTU_NAME,O.org_name as CRAT_ORG_NAME
+	    ,T.IF_TIME_TASK,T.TASK_FREQ FROM CIMP_CM_MARKETPLAN T 
+	    LEFT JOIN  sys_org_view O ON T.ACTIVITY_ORG = O.ORG_CODE AND T.CRAT_ORG = O.ORG_CODE
+	    left join admin_sm_user D on T.Crat_Usr =D.Login_Code AND T.LAST_CHG_USR = D.Login_Code
+	    left join ADMIN_SM_INSTU I on T.INSTU_ID =I.INSTU_CDE 
+		<where>
+		<if test="condition.id != null and condition.id !=''">
+				and T.TEMP_ID = #{condition.id, jdbcType=VARCHAR}
+			</if>
+			<if test="condition.tempId != null and condition.tempId !=''">
+				and T.TEMP_ID  LIKE CONCAT(CONCAT('%', #{condition.tempId, jdbcType=VARCHAR}),'%') 
+			</if>
+			<if test="condition.activityName != null and condition.activityName !=''">
+				and T.ACTIVITY_NAME  LIKE CONCAT(CONCAT('%', #{condition.activityName, jdbcType=VARCHAR}),'%') 
+			</if>
+			<if test="condition.activityType != null and condition.activityType !=''">
+				and T.ACTIVITY_TYPE  = #{condition.activityType, jdbcType=VARCHAR} 
+			</if>
+			<if test="condition.activitySts != null and condition.activitySts !=''">
+				and T.ACTIVITY_STS  = #{condition.activitySts, jdbcType=VARCHAR} 
+			</if>
+			<if test="condition.wfAppStatus != null and condition.wfAppStatus !=''">
+				and T.WF_APP_STATUS  = #{condition.wfAppStatus, jdbcType=VARCHAR} 
+			</if>
+			<if test="condition.startDate != null and condition.startDate !=''">
+        		AND TO_CHAR(T.START_DATE,'yyyy-MM-dd') = #{condition.startDate}
+        	</if>
+        	<if test="condition.endDate != null and condition.endDate !=''">
+        		AND TO_CHAR(T.END_DATE,'yyyy-MM-dd') = #{condition.endDate}
+        	</if>
+		</where>
+		 ORDER BY T.CRAT_DT DESC, T.TEMP_ID DESC
+	</select>
+	<!-- 新增获取id -->
+	<select id="getSeq" resultType="String">
+		select ysc_sequence.nextval from dual
+	</select>	
+	<select id="deletePlan" resultType="String" parameterType="String">
+		DELETE FROM CIMP_CM_MARKETPLAN  where TEMP_ID in (${ids})
+	</select>
+	<!-- 获取流程nodeId、formId -->
+	<select id="getNodeIdFormId" parameterType="String" resultType="java.util.Map">
+		SELECT T.NODE_ID,T.FORM_ID FROM CIMP_CM_NODES_DISPLAY T
+		LEFT JOIN CIMP_CM_NODEINFO R ON R.NODE_ID = T.NODE_ID
+		WHERE R.TEMP_ID = #{tempId,jdbcType=VARCHAR}
+	</select>
+	<!-- 删除节点操作表 -->
+	<delete id="delPresentation" parameterType="String">
+		DELETE FROM Cimp_Cm_Nodes_Presentation WHERE FORM_ID = #{formId,jdbcType=VARCHAR}
+	</delete>
+	<!-- 删除节点展现表 -->
+	<delete id="delDisplay" parameterType="String">
+		DELETE FROM CIMP_CM_NODES_DISPLAY WHERE FORM_ID = #{formId,jdbcType=VARCHAR}
+	</delete>
+	<!-- 删除节点信息表 -->
+	<delete id="delInfo" parameterType="String">
+		DELETE FROM CIMP_CM_NODEINFO WHERE TEMP_ID = #{tempId,jdbcType=VARCHAR}
+	</delete>
+	<!-- 删除卡片信息表 -->
+	<delete id="delCard" parameterType="String">
+		DELETE FROM cimp_app_card_info WHERE ACTY_ID = #{actyId,jdbcType=VARCHAR}
+	</delete>
+	<!-- 新增获取id -->
+	<select id="getFieldsInfo" resultType="java.util.HashMap" parameterType="java.util.Map">
+		select t.field_e_name,t.field_c_name,t.field_type,t.FNAME from 
+        cm_f_rc_field_ec_name t where t.IS_DISPLAY = '1' 
+        and  t.table_id = 
+          (select table_id from 
+            cm_f_rc_table_ec_name 
+            where (DELETE_SIGN is null or DELETE_SIGN != '1') 
+			and transaction_code  = (select transaction_code 
+			from cm_f_rc_event_info where ACTIVITY_ID=#{activityId,jdbcType=VARCHAR}  and rownum=1)
+		 )
+	</select>
+		<!-- 获取节点营销位内容信息 -->
+	<select id="getmktPositContent" resultType="java.util.HashMap" parameterType="String">
+		select t.*,a.DETAIL_CONTENT from CIMP_CM_MARKET_POSIT_CT t left join LOY_QY_MATERIAL_LIST a on t.ct_node_id = a.id where CHANNEL_NODE_ID = #{nodeId,jdbcType=VARCHAR}
+	</select>
+	<!-- 修改流程状态 -->
+	<update id="updateFlowStsById"  parameterType="java.util.Map">
+	    update CIMP_CM_MARKETPLAN set ACTIVITY_STS=#{sts,jdbcType=VARCHAR},LAST_CHG_USR=#{userId,jdbcType=VARCHAR},
+	    LAST_CHG_DT=to_date(#{date,jdbcType=VARCHAR},'yyyy-mm-dd hh24:mi:ss'),LAST_CHG_ORG=#{orgId,jdbcType=VARCHAR} where TEMP_ID=#{flowId,jdbcType=VARCHAR}
+	</update>
+	<!-- 查询日期区间内是否有营销位信息 -->
+	<select id="queryPositCtDate" resultType="java.util.HashMap" parameterType="cn.com.yusys.yusp.cm.market.domain.CimpCmMarketPositCt">
+  		select *from CIMP_CM_MARKET_POSIT_CT where ASSAMLY_ID = #{assamlyId,jdbcType=VARCHAR}  and ACTIVITY_ID in (select TEMP_ID from CIMP_CM_MARKETPLAN where ACTIVITY_STS='02' ) 
+  			and CHANNEL_NODE_ID <![CDATA[!= ]]> #{channelNodeId,jdbcType=VARCHAR}
+		    and ((to_Date(VS_START_DATE,'yyyy-MM-dd') &lt;= to_Date(#{vsStartDate,jdbcType=VARCHAR},'yyyy-MM-dd') and to_Date(VS_END_DATE,'yyyy-MM-dd') &gt;= to_Date(#{vsEndDate,jdbcType=VARCHAR},'yyyy-MM-dd')) or 
+			(to_Date(VS_END_DATE,'yyyy-MM-dd') &gt;= to_Date(#{vsStartDate,jdbcType=VARCHAR},'yyyy-MM-dd') and to_Date(VS_END_DATE,'yyyy-MM-dd') &lt;= to_Date(#{vsEndDate,jdbcType=VARCHAR},'yyyy-MM-dd')) or
+			(to_Date(VS_START_DATE,'yyyy-MM-dd') &gt;= to_Date(#{vsStartDate,jdbcType=VARCHAR},'yyyy-MM-dd') and to_Date(VS_END_DATE,'yyyy-MM-dd') &lt;= to_Date(#{vsEndDate,jdbcType=VARCHAR},'yyyy-MM-dd')) or 
+			(to_Date(VS_START_DATE,'yyyy-MM-dd') &gt;= to_Date(#{vsStartDate,jdbcType=VARCHAR},'yyyy-MM-dd') and to_Date(VS_START_DATE,'yyyy-MM-dd')&lt;= to_Date(#{vsEndDate,jdbcType=VARCHAR},'yyyy-MM-dd')))
+	</select>	
+	<select id="gettempById" resultType="cn.com.yusys.yusp.cm.market.domain.CimpCmMarketplan" parameterType="String">
+		SELECT * FROM CIMP_CM_MARKETPLAN WHERE TEMP_ID = #{tempId,jdbcType=VARCHAR}
+	</select>
+	<!-- 删除节点中的营销位内容信息 -->
+	<delete id="deleteMktPositContent" parameterType="String">
+		delete from CIMP_CM_MARKET_POSIT_CT where CHANNEL_NODE_ID = #{nodeId,jdbcType=VARCHAR}
+	</delete>
+	<!-- 根据节点ct_node_id删除营销位内容信息表 -->
+	<delete id="delMktPositByCtNodeId" parameterType="String">
+		delete from CIMP_CM_MARKET_POSIT_CT where CT_NODE_ID = #{nodeId,jdbcType=VARCHAR}
+	</delete>
+	<!-- 更新活动审批状态 -->
+	<update id="updateWfStatus" parameterType="java.util.Map">
+		UPDATE CIMP_CM_MARKETPLAN SET WF_APP_STATUS = #{wfstatus,jdbcType=VARCHAR}
+		WHERE TEMP_ID = #{tempId,jdbcType=VARCHAR}
+	</update>
+
+
+	<select id="getMarketTypeIdByActId" parameterType="String" resultType="String">
+		select t.market_type_id from CIMP_CM_MARKET_POSIT_CT t WHERE t.market_type_id is not null and t.activity_id = #{actId}
+	</select>
+</mapper>

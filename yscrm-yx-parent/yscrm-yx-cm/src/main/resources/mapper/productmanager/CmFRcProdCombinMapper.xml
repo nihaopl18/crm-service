@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.cm.productmanager.repository.mapper.CmFRcProdCombinMapper">
+	<!-- 查询组合产品管理表 -->
+	<select id="getList" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+		SELECT T.*,P.PROD_NAME,P.RATE,P.RISK_LEVEL FROM CM_F_RC_PROD_COMBIN T 
+       	LEFT JOIN CM_F_RC_PROD_INFO P ON P.PRODUCT_ID = T.PRODUCT_ID 
+       	WHERE T.PARENT_PROD_ID = #{condition.parentProdId, jdbcType=NUMERIC}
+       	ORDER BY T.PRODUCT_ID DESC
+    </select>
+    <!-- 删除组合子产品 -->
+    <delete id="deleteList" parameterType="cn.com.yusys.yusp.cm.productmanager.domain.CmFRcProdCombinInfo">
+		DELETE FROM cm_f_rc_prod_combin WHERE PRODUCT_ID = #{productId, jdbcType=NUMERIC} AND PARENT_PROD_ID = #{parentProdId, jdbcType=NUMERIC}
+    </delete>
+    <!-- 更新组合产品状态-->
+    <update id="updateList" parameterType="cn.com.yusys.yusp.cm.productmanager.domain.CmFRcProdCombinInfo">
+    	UPDATE cm_f_rc_prod_combin
+   		SET PARENT_PROD_RISK = #{parentProdRisk,jdbcType=VARCHAR},
+   		PARENT_PROD_INCOME = #{parentProdIncome,jdbcType=VARCHAR},
+   		PARENT_PROD_WEIGHT = #{parentProdWeight,jdbcType=VARCHAR},
+		CREAT_USER = #{creatUser},
+		CREAT_DATE = #{creatDate},
+		UPDATA_USER = #{updataUser},
+		UPDATA_DATE = #{updataDate}
+ 		WHERE PARENT_PROD_ID = #{parentProdId} AND PRODUCT_ID = #{productId}
+    </update>
+    <!-- 返回重复子产品id-->
+    <select id="getSameId" parameterType="cn.com.yusys.yusp.cm.productmanager.domain.CmFRcProdCombinInfo" resultType="String">
+    	SELECT COUNT(PRODUCT_ID) FROM cm_f_rc_prod_combin WHERE PRODUCT_ID = #{productId} AND PARENT_PROD_ID = #{parentProdId}
+    </select>
+    <!-- 删除组合产品 -->
+    <delete id="deleteListParent" parameterType="cn.com.yusys.yusp.cm.productmanager.domain.CmFRcProdCombinInfo">
+    	DELETE FROM cm_f_rc_prod_combin WHERE PARENT_PROD_ID = #{parentProdId}
+    </delete>
+    <!-- 返回产品组合配比总和 -->
+    <select id="getWeight" parameterType="cn.com.yusys.yusp.cm.productmanager.domain.CmFRcProdCombinInfo" resultType="float">
+    	SELECT SUM(TO_NUMBER(SUBSTR(PARENT_PROD_WEIGHT,0,LENGTH(PARENT_PROD_WEIGHT)-1)))
+       	FROM cm_f_rc_prod_combin WHERE PARENT_PROD_ID = #{parentProdId} AND PRODUCT_ID <![CDATA[!= ]]> #{productId}
+    </select>
+    <!-- 返回组合产品标识 -->
+    <select id="getProdCombin" parameterType="String" resultType="String">
+    	SELECT IS_COMBINATION FROM CM_F_RC_PROD_INFO WHERE PRODUCT_ID = #{productId}
+    </select>
+</mapper>

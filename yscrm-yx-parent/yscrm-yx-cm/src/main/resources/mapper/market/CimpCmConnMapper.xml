@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.cm.market.repository.mapper.CimpCmConnMapper">
+	<select id="getConnByTempId" parameterType="String"
+		resultType="cn.com.yusys.yusp.cm.market.domain.CimpCmConninfo">
+		select T.* from CIMP_CM_CONNINFO T
+		where T.TEMP_ID = #{tempId, jdbcType=VARCHAR}
+	</select>
+	
+	<select id="getTargetId" parameterType="String"
+		resultType="cn.com.yusys.yusp.cm.market.domain.CimpCmConninfo">
+		select T.* from CIMP_CM_CONNINFO T
+		where T.SOURCE_ID = #{sourceId, jdbcType=VARCHAR}
+	</select>
+	<!--根据节点id删除连线信息 -->
+	<delete id="delConn" parameterType="String">
+		delete from CIMP_CM_CONNINFO t where
+		 t.source_id = #{nodeId, jdbcType=VARCHAR}
+		 or t.target_id = #{nodeId, jdbcType=VARCHAR}
+	</delete>
+</mapper>

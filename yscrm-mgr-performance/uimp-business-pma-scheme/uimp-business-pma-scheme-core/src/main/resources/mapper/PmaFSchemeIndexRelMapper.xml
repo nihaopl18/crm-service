@@ -1,0 +1,337 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.uimp.business.pma.scheme.schememain.repository.mapper.PmaFSchemeIndexRelMapper">
+    <resultMap id="BaseResultMap" type="cn.com.yusys.yusp.uimp.business.pma.scheme.schememain.domain.PmaFSchemeIndexRel">
+		<id column="ID" jdbcType="VARCHAR" property="id" />
+		<result column="SCHEME_ID" jdbcType="VARCHAR" property="schemeId" />
+		<result column="INDEX_ID" jdbcType="VARCHAR" property="indexId" />
+		<result column="INDEX_TYPE" jdbcType="VARCHAR" property="indexType" />
+		<result column="CREATOR" jdbcType="VARCHAR" property="creator" />
+		<result column="CREATE_DATE" jdbcType="VARCHAR" property="createDate" />
+		<result column="UPDATER_ID" jdbcType="VARCHAR" property="updaterId" />
+		<result column="UPDATE_DATE" jdbcType="VARCHAR" property="updateDate" />
+		<result column="BAL_TYPE_ID" jdbcType="VARCHAR" property="balTypeId" />
+		<result column="EVL_OBJ_TYPE" jdbcType="VARCHAR" property="evlObjType" />
+		<result column="APPLY_TYPE_ID" jdbcType="VARCHAR" property="applyTypeId" />
+		<result column="DIMENSION_ID" jdbcType="VARCHAR" property="dimensionId" />
+    </resultMap>
+    <sql id="Base_Column_List">
+	    ID,SCHEME_ID,INDEX_ID,INDEX_TYPE,CREATOR,CREATE_DATE,UPDATER_ID,UPDATE_DATE,BAL_TYPE_ID,EVL_OBJ_TYPE,APPLY_TYPE_ID,DIMENSION_ID
+    </sql>
+        <!-- 考核指标查询sql -->
+    <select id="queryIndex" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+    	select T.ID,T.SCHEME_ID,T.INDEX_ID,T.INDEX_TYPE
+    	,T.CREATOR,T.CREATE_DATE,T.UPDATER_ID,
+    	T.UPDATE_DATE,T.BAL_TYPE_ID,T.EVL_OBJ_TYPE,
+    	T.APPLY_TYPE_ID,T.DIMENSION_ID,T1.INDEX_NAME ,MBONE.LOOKUP_ITEM_NAME AS YU_TYPE,MBTWO.LOOKUP_ITEM_NAME AS INDEX_APPLY_TYPE,
+    	MBTHREE.LOOKUP_ITEM_NAME AS OBJ,
+    	T.INDEX_ID||'['||T.EVL_OBJ_TYPE||'.'||T.APPLY_TYPE_ID||'.'||T.BAL_TYPE_ID||']' as scheme_index_id,
+        T1.INDEX_NAME||'['||MBTHREE.LOOKUP_ITEM_NAME||'.'||MBTWO.LOOKUP_ITEM_NAME||'.'||MBONE.LOOKUP_ITEM_NAME||']' as scheme_index_Name
+    	FROM PMA_F_SCHEME_INDEX_REL T
+    	 INNER JOIN (SELECT A.INDEX_ID,A.INDEX_NAME,'' as INDEX_TYPE
+    	  FROM PMA_F_EVL_INDEX_INFO A 
+    	   UNION SELECT B.INDEX_ID,B.INDEX_NAME,B.INDEX_TYPE
+    	    FROM PMA_F_BASE_INDEX_INFO B) T1 
+    	     ON T.INDEX_ID = T1.INDEX_ID
+    	 INNER JOIN ADMIN_SM_LOOKUP_ITEM MBONE ON MBONE.LOOKUP_CODE ='YE_TYPE' AND MBONE.LOOKUP_ITEM_CODE = T.BAL_TYPE_ID
+         INNER JOIN ADMIN_SM_LOOKUP_ITEM MBTWO ON MBTWO.LOOKUP_CODE ='INDEX_APPLY_TYPE' AND MBTWO.LOOKUP_ITEM_CODE = T.APPLY_TYPE_ID
+         INNER JOIN ADMIN_SM_LOOKUP_ITEM MBTHREE ON MBTHREE.LOOKUP_CODE ='OBJ' AND MBTHREE.LOOKUP_ITEM_CODE = T.EVL_OBJ_TYPE
+       <where>
+			<!-- 指标编号 -->
+			<if test="condition.schemeId != null and condition.schemeId  != ''">
+	      		AND T.SCHEME_ID = #{condition.schemeId,jdbcType=VARCHAR}
+		    </if>
+		    <!-- 指标名称-->
+			<if test="condition.indexName != null and condition.indexName  != ''">
+	      		AND T1.INDEX_NAME LIKE concat(concat('%',#{condition.indexName,jdbcType=VARCHAR}),'%')
+		    </if>
+		     <!-- 目录编号-->
+			<if test="condition.indexId != null and condition.indexId  != ''">
+	      		AND T.INDEX_ID LIKE concat(concat('%',#{condition.indexId,jdbcType=VARCHAR}),'%')
+		    </if>
+		    <!--放大镜参数条件-->
+		    <if test="condition.fdjFlag != null and condition.fdjFlag  != ''">
+	      		AND T.INDEX_TYPE = '01'
+	      		AND (T.APPLY_TYPE_ID = '01' OR T1.INDEX_TYPE ='03')
+		    </if>
+	    </where>
+    </select>
+       <!-- 指标补录指标放大镜考核指标查询sql -->
+    <select id="querySchemeIndex" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+    	select B.INDEX_NAME ,MBONE.LOOKUP_ITEM_NAME AS YU_TYPE,MBTWO.LOOKUP_ITEM_NAME AS INDEX_APPLY_TYPE,T.INDEX_ID,
+    	MBTHREE.LOOKUP_ITEM_NAME AS OBJ,
+    	T.INDEX_ID||'['||T.EVL_OBJ_TYPE||'.'||T.APPLY_TYPE_ID||'.'||T.BAL_TYPE_ID||']' as scheme_index_id,
+        B.INDEX_NAME||'['||MBTHREE.LOOKUP_ITEM_NAME||'.'||MBTWO.LOOKUP_ITEM_NAME||'.'||MBONE.LOOKUP_ITEM_NAME||']' as scheme_index_Name
+    	FROM PMA_F_SCHEME_INDEX_SPLIT T
+    	left join pma_f_base_index_info b  on b.INDEX_ID=T.INDEX_ID
+    	INNER JOIN ADMIN_SM_LOOKUP_ITEM MBONE ON MBONE.LOOKUP_CODE ='YE_TYPE' AND MBONE.LOOKUP_ITEM_CODE = T.BAL_TYPE_ID
+        INNER JOIN ADMIN_SM_LOOKUP_ITEM MBTWO ON MBTWO.LOOKUP_CODE ='INDEX_APPLY_TYPE' AND MBTWO.LOOKUP_ITEM_CODE = T.APPLY_TYPE_ID
+        INNER JOIN ADMIN_SM_LOOKUP_ITEM MBTHREE ON MBTHREE.LOOKUP_CODE ='OBJ' AND MBTHREE.LOOKUP_ITEM_CODE = T.EVL_OBJ_TYPE
+         where  (b.INDEX_TYPE='03' or T.APPLY_TYPE_ID='01' or T.APPLY_TYPE_ID='05') 
+    	
+			<!-- 指标编号 -->
+			<if test="condition.schemeId != null and condition.schemeId  != ''">
+	      		AND T.SCHEME_ID = #{condition.schemeId,jdbcType=VARCHAR}
+		    </if>
+		    <if test="condition.indexId != null and condition.indexId  != ''">
+                and T.index_id=#{condition.indexId,jdbcType=VARCHAR}
+            </if>
+	       <if test="condition.indexName != null and condition.indexName  != ''">
+	           and B.index_name=#{condition.indexName,jdbcType=VARCHAR}
+	       </if>
+	       <if test="condition.applyTypeId != null and condition.applyTypeId  != ''">
+	           and T.APPLY_TYPE_ID=#{condition.applyTypeId,jdbcType=VARCHAR}
+	       </if>
+	   
+    </select>
+	<select id="querySchemeAndIndex" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+		select a.INDEX_NAME,a.CREATE_ORG,a.INDEX_ID,a.INDEX_TYPE,a.CURRENCY,
+		b.SCHEME_ID,b.BAL_TYPE_ID,b.APPLY_TYPE_ID,b.EVL_OBJ_TYPE
+		from PMA_F_BASE_INDEX_INFO a
+		left join PMA_F_SCHEME_INDEX_REL b on a.index_id=b.index_id
+		<where>
+		<!-- 指标编号 -->
+		<if test="condition.schemeId != null and condition.schemeId  != ''">
+			AND b.SCHEME_ID = #{condition.schemeId,jdbcType=VARCHAR}
+		</if>
+		<if test="condition.indexId != null and condition.indexId  != ''">
+			and a.index_id=#{condition.indexId,jdbcType=VARCHAR}
+		</if>
+		<if test="condition.indexName != null and condition.indexName  != ''">
+			and a.index_name like concat(concat('%',#{condition.indexName,jdbcType=VARCHAR}),'%')
+		</if>
+		<if test="condition.applyTypeId != null and condition.applyTypeId  != ''">
+			and b.APPLY_TYPE_ID=#{condition.applyTypeId,jdbcType=VARCHAR}
+		</if>
+		</where>
+	</select>
+    <delete id="delIndex" parameterType="hashmap"  >
+	   delete from   PMA_F_SCHEME_INDEX_REL  where SCHEME_ID=#{schemeId} and INDEX_TYPE=#{indexType} 
+	   and INDEX_ID=#{indexId}
+	   and BAL_TYPE_ID=#{balTypeId}
+	   and EVL_OBJ_TYPE=#{evlObjType}
+	   and APPLY_TYPE_ID=#{applyTypeId}
+	</delete>
+	
+	    <!-- 根据方案编号 查询方案名称，可以包含多个 -->
+    <select id="queryNames" parameterType="String" resultType="String">
+        select T1.INDEX_NAME||'['||MBTHREE.LOOKUP_ITEM_NAME||'.'||MBTWO.LOOKUP_ITEM_NAME||'.'||MBONE.LOOKUP_ITEM_NAME||']' as scheme_index_Name 
+        from PMA_F_SCHEME_INDEX_SPLIT T
+        INNER JOIN (
+           SELECT A.INDEX_ID,A.INDEX_NAME,'' as INDEX_TYPE FROM PMA_F_EVL_INDEX_INFO A 
+           UNION 
+           SELECT B.INDEX_ID,B.INDEX_NAME,B.INDEX_TYPE FROM PMA_F_BASE_INDEX_INFO B) T1 
+         ON T.INDEX_ID = T1.INDEX_ID
+    	 INNER JOIN ADMIN_SM_LOOKUP_ITEM MBONE ON MBONE.LOOKUP_CODE ='YE_TYPE' AND MBONE.LOOKUP_ITEM_CODE = T.BAL_TYPE_ID
+         INNER JOIN ADMIN_SM_LOOKUP_ITEM MBTWO ON MBTWO.LOOKUP_CODE ='INDEX_APPLY_TYPE' AND MBTWO.LOOKUP_ITEM_CODE = T.APPLY_TYPE_ID
+         INNER JOIN ADMIN_SM_LOOKUP_ITEM MBTHREE ON MBTHREE.LOOKUP_CODE ='OBJ' AND MBTHREE.LOOKUP_ITEM_CODE = T.EVL_OBJ_TYPE
+        where T.INDEX_ID||'['||T.EVL_OBJ_TYPE||'.'||T.APPLY_TYPE_ID||'.'||T.BAL_TYPE_ID||']' in 
+        <foreach collection="objId" item="objId" index="index" open="(" close=")" separator=",">
+        	#{objId}
+        </foreach>
+    </select>
+    
+    
+     <select id="queryByMap" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+     	select distinct T.index_id ,T1.index_name
+     	from pma_f_scheme_index_split T
+        INNER JOIN (
+           SELECT A.INDEX_ID,A.INDEX_NAME,'' as INDEX_TYPE FROM PMA_F_EVL_INDEX_INFO A 
+           UNION 
+           SELECT B.INDEX_ID,B.INDEX_NAME,B.INDEX_TYPE FROM PMA_F_BASE_INDEX_INFO B) T1 
+         ON T.INDEX_ID = T1.INDEX_ID
+         where APPLY_TYPE_ID in ('00','01')
+         <if test="condition.schemeId != null and condition.schemeId  != ''">
+	      	AND T.SCHEME_ID = #{condition.schemeId,jdbcType=VARCHAR}
+		 </if>
+     </select>
+     <select id="queryEvlIndex" parameterType="String" resultType="java.util.HashMap">
+         SELECT A.FORMULA FROM PMA_F_EVL_INDEX_INFO A WHERE INDEX_ID =#{indexId,jdbcType=VARCHAR}  AND A.FORMULA IS NOT NULL
+     </select>
+     <select id="queryImpIndex" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+           select index_id,index_name,BAL_TYPE,EVL_OBJ_TYPE,APPLY_TYPE,
+           INDEX_ID||'['||EVL_OBJ_TYPE||'.'||APPLY_TYPE||'.'||BAL_TYPE||']' as scheme_index_id,
+           MBONE.LOOKUP_ITEM_NAME AS YU_TYPE,MBTWO.LOOKUP_ITEM_NAME AS INDEX_APPLY_TYPE,
+    	MBTHREE.LOOKUP_ITEM_NAME AS OBJ,
+           INDEX_NAME||'['||MBTHREE.LOOKUP_ITEM_NAME||'.'||MBTWO.LOOKUP_ITEM_NAME||'.'||MBONE.LOOKUP_ITEM_NAME||']' as scheme_index_Name 
+           from INDEX_DIM_VIEW
+           INNER JOIN ADMIN_SM_LOOKUP_ITEM MBONE ON MBONE.LOOKUP_CODE ='YE_TYPE' AND MBONE.LOOKUP_ITEM_CODE = BAL_TYPE
+           INNER JOIN ADMIN_SM_LOOKUP_ITEM MBTWO ON MBTWO.LOOKUP_CODE ='INDEX_APPLY_TYPE' AND MBTWO.LOOKUP_ITEM_CODE = APPLY_TYPE
+           INNER JOIN ADMIN_SM_LOOKUP_ITEM MBTHREE ON MBTHREE.LOOKUP_CODE ='OBJ' AND MBTHREE.LOOKUP_ITEM_CODE = EVL_OBJ_TYPE
+           where  (LOGIC_TYPE='03' or APPLY_TYPE='01' or APPLY_TYPE='05')  and  index_id||'['||BAL_TYPE||','||APPLY_TYPE||','||EVL_OBJ_TYPE||']'  in 
+          <foreach collection="condition.indexIdStr"  item="item" open="(" separator="," close=")">
+               #{item}
+       </foreach>
+       <if test="condition.indexId != null and condition.indexId  != ''">
+           and index_id=#{condition.indexId,jdbcType=VARCHAR}
+       </if>
+       <if test="condition.indexName != null and condition.indexName  != ''">
+           and index_name=#{condition.indexName,jdbcType=VARCHAR}
+       </if>
+     </select>
+     <select id="queryIndexByDash" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+        select distinct T.INDEX_ID,b.INDEX_NAME, T.BAL_TYPE_ID, T.EVL_OBJ_TYPE, T.APPLY_TYPE_ID
+    	FROM PMA_F_SCHEME_INDEX_SPLIT T
+    	left join pma_f_base_index_info b  on b.INDEX_ID=T.INDEX_ID
+    	 where  (T.APPLY_TYPE_ID='01' or T.APPLY_TYPE_ID='00') 
+    	 <!-- 指标编号 -->
+			<if test="condition.schemeId != null and condition.schemeId  != ''">
+	      		AND T.SCHEME_ID = #{condition.schemeId,jdbcType=VARCHAR}
+		    </if>
+		    <if test="condition.indexId != null and condition.indexId  != ''">
+                and T.index_id=#{condition.indexId,jdbcType=VARCHAR}
+            </if>
+	       <if test="condition.indexName != null and condition.indexName  != ''">
+	           and B.index_name=#{condition.indexName,jdbcType=VARCHAR}
+	       </if>
+     </select>
+     <select id="queryNamesByDash" parameterType="String" resultType="String">
+        select T.INDEX_NAME
+        from PMA_F_BASE_INDEX_INFO T
+        where T.INDEX_ID in 
+        <foreach collection="objId" item="objId" index="index" open="(" close=")" separator=",">
+        	#{objId}
+        </foreach>
+     </select>
+    <!-- 考核指标查询sql -->
+    <select id="selectDrawSchemeIndex"  resultType="cn.com.yusys.yusp.uimp.business.pma.scheme.schememain.domain.PmaFSchemeIndexRel">
+    	select SCHEME_ID,
+    			INDEX_ID,
+    			INDEX_TYPE,
+    			CREATOR,
+    			CREATE_DATE,
+    			UPDATER_ID,
+    			UPDATE_DATE,
+    			BAL_TYPE_ID,
+    			EVL_OBJ_TYPE,
+    			APPLY_TYPE_ID,
+    			DIMENSION_ID
+    	FROM PMA_F_SCHEME_INDEX_REL 
+      where SCHEME_ID =  #{schemeId,jdbcType=VARCHAR}
+    </select>
+    
+   	<delete id="deleteBySchemeId" parameterType="java.lang.String">
+		delete from PMA_F_SCHEME_INDEX_REL where SCHEME_ID = #{schemeId, jdbcType=VARCHAR}
+	</delete>
+     
+  	<insert id="batchInsert" parameterType="cn.com.yusys.yusp.uimp.business.pma.scheme.schememain.domain.PmaFSchemeIndexRel">
+ 		insert all 
+ 		<foreach collection="dataList" item="item" separator=" ">
+	 		into PMA_F_SCHEME_INDEX_REL
+	 		(
+		  	    ID,
+		  	    SCHEME_ID,
+		  	    INDEX_ID,
+		  	    INDEX_TYPE,
+		  	    BAL_TYPE_ID,
+		  	    EVL_OBJ_TYPE,
+		  	    APPLY_TYPE_ID
+			)
+			values 
+			(
+				sys_guid(),
+				#{item.schemeId, jdbcType=VARCHAR},
+				#{item.indexId, jdbcType=VARCHAR},
+				#{item.indexType, jdbcType=VARCHAR},
+				#{item.balTypeId, jdbcType=VARCHAR},
+				#{item.evlObjType, jdbcType=VARCHAR},
+				#{item.applyTypeId, jdbcType=VARCHAR}
+			)
+ 		</foreach>
+	 	select 1 from dual
+	</insert>
+	
+	<insert id="copySchemeInf" parameterType="java.lang.String">
+    	insert into PMA_F_SCHEME_INDEX_REL(ID, SCHEME_ID, INDEX_ID, INDEX_TYPE, CREATOR, CREATE_DATE,
+			UPDATER_ID,  UPDATE_DATE, BAL_TYPE_ID, EVL_OBJ_TYPE, APPLY_TYPE_ID, DIMENSION_ID)
+    	select sys_guid(), #{newSchemeId}, INDEX_ID, INDEX_TYPE, CREATOR, CREATE_DATE,
+    		UPDATER_ID,  UPDATE_DATE, BAL_TYPE_ID, EVL_OBJ_TYPE, APPLY_TYPE_ID, DIMENSION_ID
+    	from PMA_F_SCHEME_INDEX_REL where SCHEME_ID = #{schemeId}
+    </insert>
+    
+        <!-- 指标值调整指标放大镜考核指标查询sql -->
+    <select id="queryIndexRes" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+    	select B.INDEX_NAME ,MBONE.LOOKUP_ITEM_NAME AS YU_TYPE,MBTWO.LOOKUP_ITEM_NAME AS INDEX_APPLY_TYPE,T.INDEX_ID,
+    	MBTHREE.LOOKUP_ITEM_NAME AS OBJ,
+    	T.INDEX_ID||'['||T.EVL_OBJ_TYPE||'.'||T.BAL_TYPE_ID||'.'||T.APPLY_TYPE_ID||']' as scheme_index_id,
+        B.INDEX_NAME||'['||MBTHREE.LOOKUP_ITEM_NAME||'.'||MBONE.LOOKUP_ITEM_NAME||'.'||MBTWO.LOOKUP_ITEM_NAME||']' as scheme_index_Name
+    	FROM PMA_F_SCHEME_INDEX_SPLIT T
+    	left join pma_f_base_index_info b  on b.INDEX_ID=T.INDEX_ID
+    	INNER JOIN ADMIN_SM_LOOKUP_ITEM MBONE ON MBONE.LOOKUP_CODE ='YE_TYPE' AND MBONE.LOOKUP_ITEM_CODE = T.BAL_TYPE_ID
+        INNER JOIN ADMIN_SM_LOOKUP_ITEM MBTWO ON MBTWO.LOOKUP_CODE ='INDEX_APPLY_TYPE' AND MBTWO.LOOKUP_ITEM_CODE = T.APPLY_TYPE_ID
+        INNER JOIN ADMIN_SM_LOOKUP_ITEM MBTHREE ON MBTHREE.LOOKUP_CODE ='OBJ' AND MBTHREE.LOOKUP_ITEM_CODE = T.EVL_OBJ_TYPE
+         <where>
+			<!-- 指标编号 -->
+			<if test="condition.schemeId != null and condition.schemeId  != ''">
+	      		AND T.SCHEME_ID = #{condition.schemeId,jdbcType=VARCHAR}
+		    </if>
+		    <if test="condition.indexId != null and condition.indexId  != ''">
+                and T.index_id=#{condition.indexId,jdbcType=VARCHAR}
+            </if>
+	       <if test="condition.indexName != null and condition.indexName  != ''">
+	           and B.index_name=#{condition.indexName,jdbcType=VARCHAR}
+	       </if>
+	       <if test="condition.applyTypeId != null and condition.applyTypeId  != ''">
+	           and T.APPLY_TYPE_ID=#{condition.applyTypeId,jdbcType=VARCHAR}
+	       </if>
+	    </where>  
+    </select>
+	<select id="queryIndexForScore" parameterType="String"  resultType="java.util.Map">
+
+		SELECT distinct
+		T.ID,
+		T.SCHEME_ID,
+		T.INDEX_ID,
+		T.INDEX_TYPE ,
+		T.BAL_TYPE_ID,
+		T.EVL_OBJ_TYPE,
+		T.APPLY_TYPE_ID,
+		T.DIMENSION_ID,
+		T1.INDEX_NAME ,
+		T1.CURRENCY,
+		MBONE.LOOKUP_ITEM_NAME AS YU_TYPE,
+		MBTWO.LOOKUP_ITEM_NAME AS INDEX_APPLY_TYPE,
+		CASE WHEN  T2.ID IS NOT NULL THEN  '1' ELSE '0' END AS SCORE_FLAG,
+		T2.SCORE_WEIGHT
+		FROM
+		PMA_F_SCHEME_INDEX_REL T
+		INNER JOIN (
+		SELECT
+		A.INDEX_ID,
+		A.INDEX_NAME,
+		'02' AS INDEX_TYPE,
+		'' as CURRENCY
+		FROM
+		PMA_F_EVL_INDEX_INFO A
+		UNION
+		SELECT
+		B.INDEX_ID,
+		B.INDEX_NAME,
+		B.INDEX_TYPE,
+		B.CURRENCY
+		FROM
+		PMA_F_BASE_INDEX_INFO B) T1 ON
+		T.INDEX_ID = T1.INDEX_ID
+		INNER JOIN ADMIN_SM_LOOKUP_ITEM MBONE ON
+		MBONE.LOOKUP_CODE = 'YE_TYPE'
+		AND MBONE.LOOKUP_ITEM_CODE = T.BAL_TYPE_ID
+		INNER JOIN ADMIN_SM_LOOKUP_ITEM MBTWO ON
+		MBTWO.LOOKUP_CODE = 'INDEX_APPLY_TYPE'
+		AND MBTWO.LOOKUP_ITEM_CODE = T.APPLY_TYPE_ID
+		LEFT JOIN PMA_F_SCHEME_INDEX_SCORE T2 ON T.SCHEME_ID = T2.SCHEME_ID AND T.INDEX_ID = T2.INDEX_ID AND T.APPLY_TYPE_ID = T2.APPLY_TYPE_ID AND T.BAL_TYPE_ID = T2.BAL_TYPE_ID AND T.EVL_OBJ_TYPE = T2.EVL_OBJ_TYPE
+		<where>
+			T.SCHEME_ID = #{condition.schemeId,jdbcType=VARCHAR}
+			<if test="condition.indexId != null and condition.indexId  != ''">
+				and T.index_id=#{condition.indexId,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.indexName != null and condition.indexName  != ''">
+				and T1.index_name=#{condition.indexName,jdbcType=VARCHAR}
+			</if>
+		</where>
+
+	</select>
+
+	<select id="countBySchemeId" resultType="java.lang.Integer">
+		SELECT COUNT(1) FROM PMA_F_SCHEME_INDEX_REL WHERE SCHEME_ID=#{schemeId,jdbcType=VARCHAR}
+	</select>
+</mapper>

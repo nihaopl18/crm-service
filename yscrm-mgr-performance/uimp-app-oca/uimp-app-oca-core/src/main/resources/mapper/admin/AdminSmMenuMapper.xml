@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.admin.repository.mapper.AdminSmMenuMapper">
+
+	<!--初始化登入逻辑系统的菜单树 -->
+	<select id="getMenuTree" parameterType="String" resultType="java.util.Map">
+		SELECT DISTINCT M.MENU_ID,M.MENU_NAME,M.UP_MENU_ID,M.MENU_ORDER
+		FROM
+		ADMIN_SM_MENU M
+		WHERE M.SYS_ID = #{sysId}
+		ORDER BY M.MENU_ORDER
+	</select>
+
+	<!--初始化登入逻辑系统的菜单树(懒加载) -->
+	<select id="getMenuTreeLazy" resultType="java.util.Map">
+		SELECT DISTINCT M.MENU_ID,M.MENU_NAME,M.UP_MENU_ID,M.MENU_ORDER
+		FROM
+		ADMIN_SM_MENU M
+		WHERE M.SYS_ID = #{sysId}
+		<if test="menuId !=null and menuId !=''">
+			and M.UP_MENU_ID= #{menuId, jdbcType=VARCHAR}
+		</if>
+		ORDER BY M.MENU_ORDER
+	</select>
+
+	<!--根据节点查询菜单信息 -->
+	<select id="getMenuInfo" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+		resultType="java.util.Map">
+		SELECT M.*,F.FUNC_NAME,
+		(SELECT M1.MENU_NAME FROM
+		ADMIN_SM_MENU M1 WHERE M1.MENU_ID = M.UP_MENU_ID) AS UP_MENU_NAME
+		FROM
+		ADMIN_SM_MENU M
+		LEFT JOIN ADMIN_SM_BUSI_FUNC F ON (M.FUNC_ID =
+		F.FUNC_ID)
+		WHERE M.MENU_ID=#{MENUID}
+	</select>
+
+	<!--查询业务功能列表 -->
+	<select id="getFuncInfo" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+		resultType="java.util.Map">
+		select m.mod_name,f.func_id,f.func_name,f.func_desc,f.func_url
+		from
+		admin_sm_func_mod m,admin_sm_busi_func f
+		where m.mod_id = f.mod_id
+		<if test="condition.queryKey!= null and condition.queryKey != ''">
+			and ( m.mod_name like #{condition.queryKey,
+			jdbcType=VARCHAR}
+			or (f.func_name like #{condition.queryKey,
+			jdbcType=VARCHAR}
+			or f.func_url like #{condition.queryKey,
+			jdbcType=VARCHAR} )
+			)
+		</if>
+		order by m.mod_name,f.func_order ASC
+	</select>
+</mapper>

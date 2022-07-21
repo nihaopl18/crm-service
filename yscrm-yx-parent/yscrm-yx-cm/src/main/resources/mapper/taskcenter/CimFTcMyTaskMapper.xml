@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.cm.taskcenter.repository.mapper.CimFTcMyTaskMapper">
+ 	<!--查询我的任务 -->
+	<select id="getMyTaskList" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+		select t.TASK_ID,t.TASK_NAME,t.TASK_TYPE,t.TASK_STATE,
+		TO_CHAR(m.ALLOT_TIME,'yyyy-MM-dd') AS ALLOT_TIME,
+		TO_CHAR(t.START_TIME,'yyyy-MM-dd') AS START_TIME,
+		TO_CHAR(t.END_TIME,'yyyy-MM-dd') AS END_TIME,
+		s.user_name as dutyUser,a.user_name as allotUser,ROW_NUMBER() 
+		over 
+		(partition by DECODE(task_state,'IMPLEMENTING',1,'SUCCESSEND',2,'FAILEND',3) 
+		order by 
+		m.LAST_UPDATE_DT DESC)row_number 
+		from CIMP_TC_MYTASK_INFO m
+    	LEFT JOIN CIMP_TC_TASKPOOL_INFO t ON t.TASK_ID = m.TASK_ID 
+    	left join admin_sm_user s on m.duty_user=s.login_code
+        left join admin_sm_user a on m.allot_user=a.login_code
+
+		<where>
+			<if test="condition.taskName != null and condition.taskName !=''">
+				and t.TASK_NAME  LIKE CONCAT(CONCAT('%', #{condition.taskName, jdbcType=VARCHAR}),'%') 
+			</if>
+			<if test="condition.taskType != null and condition.taskType !=''">
+				and t.TASK_TYPE = #{condition.taskType, jdbcType=VARCHAR} 
+			</if>
+			<if test="condition.taskState != null and condition.taskState !=''">
+				and t.TASK_STATE = #{condition.taskState, jdbcType=VARCHAR}  
+			</if>
+				and m.DUTY_USER  = #{condition.admin, jdbcType=VARCHAR}
+		</where>
+	</select>
+	
+	<!--我的任务申领 -->
+	<insert id="applyMyTaskState" parameterType="cn.com.yusys.yusp.cm.taskcenter.domain.CimFTcMyTask">
+		INSERT INTO CIMP_TC_MYTASK_INFO m 
+		(
+	     m.TASK_ID,m.DUTY_USER,m.LAST_UPDATE_DT,m.LAST_UPDATE_USER)
+		VALUES 
+		(
+		#{taskId, jdbcType=VARCHAR},
+		#{dutyUser, jdbcType=VARCHAR},
+		#{lastUpdateDt, jdbcType=DATE},
+		#{lastUpdateUser, jdbcType=VARCHAR}
+		)
+	</insert> 
+	
+	<!-- 更新审批中的任务状态 -->
+	<update id="applyUpdate" parameterType="java.util.Map">
+		update CIMP_TC_MYTASK_INFO m set 
+		m.ALLOT_USER = #{lastUpdateUser, jdbcType=VARCHAR},
+		m.ALLOT_TIME = #{lastUpdateDt, jdbcType=DATE},
+		m.LAST_UPDATE_DT = #{lastUpdateDt, jdbcType=DATE},
+		m.LAST_UPDATE_USER = #{lastUpdateUser, jdbcType=VARCHAR}
+		where m.TASK_ID = #{taskId, jdbcType=VARCHAR}
+	</update>
+	
+	<!-- 商机申领后修改执行人 -->
+	<update id="updateNickUser" parameterType="java.util.Map">
+		update CIMP_TC_NICHE_INFO n set 
+		n.EXECUTE_USER = #{executeUser, jdbcType=VARCHAR},
+		n.LAST_UPDATE_DT = #{lastUpdateDt, jdbcType=DATE},
+		n.LAST_UPDATE_USER = #{lastUpdateUser, jdbcType=VARCHAR}
+		where n.TASK_ID = #{taskId, jdbcType=VARCHAR}
+	</update>
+	
+	<!-- 更新审批中的任务状态 -->
+	<delete id="applyBack" parameterType="java.util.Map">
+		delete from CIMP_TC_MYTASK_INFO m where m.TASK_ID = #{taskId, jdbcType=VARCHAR}
+	</delete>
+	
+	<!--分配任务新增 -->
+	<insert id="insertMyTask" parameterType="cn.com.yusys.yusp.cm.taskcenter.domain.CimFTcMyTask">
+		INSERT INTO CIMP_TC_MYTASK_INFO m 
+		(
+	    	m.TASK_ID,m.DUTY_USER,m.LAST_UPDATE_DT,m.LAST_UPDATE_USER,m.ALLOT_USER,m.ALLOT_TIME
+	    )
+		VALUES 
+		(
+			#{taskId, jdbcType=VARCHAR},
+			#{dutyUser, jdbcType=VARCHAR},
+			#{lastUpdateDt, jdbcType=DATE},
+			#{lastUpdateUser, jdbcType=VARCHAR},
+			#{lastUpdateUser, jdbcType=VARCHAR},
+			#{lastUpdateDt, jdbcType=DATE}
+		)
+	</insert> 
+	<!-- 更新风险反馈信息 -->
+	<update id="riskBackUpdate" parameterType="cn.com.yusys.yusp.cm.taskcenter.domain.CimFTcRisk">
+		update CIMP_TC_RISK_INFO r set 
+		r.FEEDBACK_CONTENT = #{feedbackContent, jdbcType=VARCHAR},
+		r.EXECUTION = #{execution, jdbcType=VARCHAR},
+		r.FEEDBACK_TIME = #{feedbackTime, jdbcType=VARCHAR},
+		r.LAST_UPDATE_DT = #{lastUpdateDt, jdbcType=DATE},
+		r.LAST_UPDATE_USER = #{lastUpdateUser, jdbcType=VARCHAR}
+		where r.TASK_ID = #{taskId, jdbcType=VARCHAR}
+	</update>
+	
+	<!-- 更新关怀任务反馈信息 -->
+	<update id="careBackUpdate" parameterType="cn.com.yusys.yusp.cm.taskcenter.domain.CimpTcCareInfo">
+		update CIMP_TC_CARE_INFO r set 
+		r.FEEDBACK_CONTENT = #{feedbackContent, jdbcType=VARCHAR},
+		r.EXECUTION = #{execution, jdbcType=VARCHAR},
+		r.FEEDBACK_TIME = #{feedbackTime, jdbcType=VARCHAR},
+		r.LAST_UPDATE_DT = #{lastUpdateDt, jdbcType=DATE},
+		r.LAST_UPDATE_USER = #{lastUpdateUser, jdbcType=VARCHAR}
+		where r.TASK_ID = #{taskId, jdbcType=VARCHAR}
+	</update>
+	
+	<!--商机任务信息查询 -->
+	<select id="nicheInfolist" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+		select n.NICHE_NAME, n.NICHE_STATE,n.NICHE_STAGE,n.NICHE_TYPE,
+		n.NICHE_CONTENT,n.CUSTOMER_NAME,
+		n.ESTIMATED_AMOUNT,n.COST_BUDGET,
+		a.user_name as lastUpdateUser,
+		b.user_name as executeUser,
+        c.user_name as customerContacts,
+        d.org_name as executeAgency,
+		TO_CHAR(n.NICHE_START_DT,'yyyy-MM-dd') AS NICHE_START_DT,
+		TO_CHAR(n.NICHE_END_DT,'yyyy-MM-dd') AS NICHE_END_DT,
+		TO_CHAR(n.NICHE_EFFECTIVE_DT,'yyyy-MM-dd') AS NICHE_EFFECTIVE_DT,
+		TO_CHAR(n.NICHE_RISE_DT,'yyyy-MM-dd') AS NICHE_RISE_DT,
+		TO_CHAR(n.LAST_UPDATE_DT,'yyyy-MM-dd') AS LAST_UPDATE_DT
+        from CIMP_TC_NICHE_INFO n
+        left join admin_sm_user a on n.last_update_user=a.login_code
+        left join admin_sm_user b on n.execute_user=b.login_code
+        left join admin_sm_user c on n.customer_contacts=c.login_code
+        left join ADMIN_SM_ORG d on n.EXECUTE_AGENCY=d.org_code
+        WHERE 
+        n.TASK_ID =#{condition.taskId, jdbcType=VARCHAR} 
+	</select>
+
+
+	<!--商机任务反馈新增 -->
+	<insert id="insertNicheback" parameterType="cn.com.yusys.yusp.cm.taskcenter.domain.CimFTcNicheback">
+		INSERT INTO CIMP_TC_NICHEBACK_INFO n 
+		(
+	    	n.TASK_ID,n.NICHE_STAGE,n.LAST_UPDATE_DT,n.LAST_UPDATE_USER,n.YES_NO,n.FEEDBACK_TIME,SITUATION
+	    )
+		VALUES 
+		(
+			#{taskId, jdbcType=VARCHAR},
+			#{nicheStage, jdbcType=VARCHAR},
+			#{lastUpdateDt, jdbcType=DATE},
+			#{lastUpdateUser, jdbcType=VARCHAR},
+			#{yesNo, jdbcType=VARCHAR},
+			#{feedbackTime, jdbcType=VARCHAR},
+			#{situation, jdbcType=VARCHAR}
+		)
+	</insert> 
+	
+	<!--已完成任务数查询 -->
+	<select id="completedTotal" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+		select * from cimp_tc_taskpool_info t 
+		left join 
+		cimp_tc_mytask_info m 
+		on 
+		t.task_id=m.task_id 
+		where 
+		t.task_state ='SUCCESSEND'and m.duty_user=#{condition.sessionLoginCode, jdbcType=VARCHAR} 
+		or 
+		t.task_state='FAILEND' and m.duty_user=#{condition.sessionLoginCode, jdbcType=VARCHAR}
+
+	</select>
+	
+	<!--总任务数查询 -->
+	<select id="taskTotal" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+		select * from cimp_tc_taskpool_info t 
+		left join 
+		cimp_tc_mytask_info m 
+		on 
+		t.task_id=m.task_id 
+		where 
+		t.task_state='IMPLEMENTING' and m.duty_user=#{condition.sessionLoginCode, jdbcType=VARCHAR}
+		or		
+		t.task_state ='SUCCESSEND'and m.duty_user=#{condition.sessionLoginCode, jdbcType=VARCHAR} 
+		or 
+		t.task_state='FAILEND' and m.duty_user=#{condition.sessionLoginCode, jdbcType=VARCHAR}
+	</select>
+	
+	<!--审批时列出任务信息 -->
+	<select id="getlist"  parameterType="String" resultType="cn.com.yusys.yusp.cm.taskcenter.domain.CimFTcTP">
+		select t.task_id from CIMP_TC_TP_INFO t  
+		where 
+		t.BIZ_SEQ_NO = #{BizSeqNo, jdbcType=VARCHAR}
+	</select>
+	
+	<!-- 更新营销反馈表 -->
+	<update id="marketBack" parameterType="java.util.Map">
+		update CM_F_RC_MARKET_BACK m set 
+		m.TOUCH_STATE = #{touchState, jdbcType=VARCHAR},
+		m.EXECUTE_RESULT = #{executeResult, jdbcType=VARCHAR},
+		m.EXECUTE_USER = #{executeUser, jdbcType=VARCHAR}
+		where m.TASK_ID = #{taskId, jdbcType=VARCHAR}
+	</update>
+	
+	<!-- 申领修改商机信息表-->
+	<update id="applyUser" parameterType="java.util.Map">
+		update CIMP_TC_NICHE_INFO n set 
+		n.LAST_UPDATE_DT = #{lastUpdateDt, jdbcType=DATE},
+		n.LAST_UPDATE_USER = #{lastUpdateUser, jdbcType=VARCHAR},
+		n.EXECUTE_USER = null
+		where n.TASK_ID = #{taskId, jdbcType=VARCHAR}
+	</update>
+	
+	<!-- 分配修改商机信息表-->
+	<update id="updateAllotNickUser" parameterType="java.util.Map">
+		update CIMP_TC_NICHE_INFO n set 
+		n.LAST_UPDATE_DT = #{lastUpdateDt, jdbcType=DATE},
+		n.LAST_UPDATE_USER = #{lastUpdateUser, jdbcType=VARCHAR},
+		n.EXECUTE_USER = #{executeUser, jdbcType=VARCHAR}
+		where n.TASK_ID = #{taskId, jdbcType=VARCHAR}
+	</update>
+	
+	
+	
+	
+</mapper>

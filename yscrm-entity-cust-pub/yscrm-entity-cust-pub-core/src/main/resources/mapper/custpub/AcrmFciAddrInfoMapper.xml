@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.custpub.repository.mapper.AcrmFciAddrInfoMapper">
+    <!-- 根据客户id查询数据 -->
+	<select id="queryAddrList" parameterType="java.util.Map"
+		resultType="java.util.Map">
+	     select t.ID,t.DATA_DT,t.CRAT_DT,t.CRAT_ORG_ID,t.CRAT_USR,t.LAST_CHG_SYS,t.LAST_CHG_USR,to_char(t.LAST_CHG_DT,'yyyy-mm-dd') as LAST_CHG_DT
+	     ,t.CORP_ORG_CODE,t.CUST_ID,t.CUST_TYPE,t.ADDR_TYPE_CD,t.ADDR_COMM_ONE ,t.ADDR_COMM_TWO,t.ADDR_COMM_THREE,t.POST_CD
+	     ,t.NATION_CD,t.PROV_CD,t.CITY_NAME,t.AREA_CD,t.TOWN_NAME,t.STREET_NAME,t.FULL_ADDR,t.MAIN_ADDR_FLG,t.FLG_SET_SYS 
+	     ,cust.USER_NAME
+         from ACRM_F_CI_ADDR_INFO t
+         left join ADMIN_SM_USER cust on cust.LOGIN_CODE= t.CRAT_USR
+		    <if  test="custId != null and custId != ''">
+		       		where t.CUST_ID =#{custId,jdbcType=VARCHAR} 
+		    </if>
+		   
+	</select>
+ 	<update id="removeById" parameterType="java.util.Map">
+		DELETE FROM ACRM_F_CI_ADDR_INFO  WHERE  ID =#{id,jdbcType=VARCHAR} 
+	</update>
+	<!--主地址标识 -->
+  <update id="updateMainAddrFlag" parameterType="java.util.Map">
+			UPDATE ACRM_F_CI_ADDR_INFO t SET 
+			
+			t.MAIN_ADDR_FLG=#{mainAddrFlg,jdbcType=VARCHAR}
+		
+			WHERE t.CUST_ID = #{custId,jdbcType=VARCHAR}
+	</update>
+</mapper>

@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.uimp.business.pma.scheme.schememain.repository.mapper.PmaFSchemeEvlobjRelMapper">
+    <resultMap id="BaseResultMap" type="cn.com.yusys.yusp.uimp.business.pma.scheme.schememain.domain.PmaFSchemeEvlobjRel">
+		<id column="ID" jdbcType="VARCHAR" property="id" />
+		<result column="SCHEME_ID" jdbcType="VARCHAR" property="schemeId" />
+		<result column="EVL_OBJ_TYPE" jdbcType="VARCHAR" property="evlObjType" />
+		<result column="EVL_OBJ_ID" jdbcType="VARCHAR" property="evlObjId" />
+    </resultMap>
+    <sql id="Base_Column_List">
+	    ID,SCHEME_ID,EVL_OBJ_TYPE,EVL_OBJ_ID
+    </sql>
+    
+    <!-- 考核对象查询sql -->
+    <select id="listByModel" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+        select * from (SELECT A.ID,A.SCHEME_ID,A.EVL_OBJ_TYPE,A.EVL_OBJ_ID,
+        CASE
+         WHEN A.EVL_OBJ_TYPE = '01' THEN
+          (SELECT B.USER_NAME
+             FROM ADMIN_SM_USER B
+            WHERE B.LOGIN_CODE = A.EVL_OBJ_ID)
+         ELSE
+          (SELECT C.ORG_NAME
+             FROM ADMIN_SM_ORG C
+            WHERE C.ORG_CODE = A.EVL_OBJ_ID)
+        END AS EVL_OBJ_NAME
+        FROM PMA_F_SCHEME_EVLOBJ_REL A)
+         <where>
+         	<!-- 针对考核方案编号为空的情况，也查询返回空 -->
+         	AND SCHEME_ID = #{condition.schemeId,jdbcType=VARCHAR}
+            <!-- <if test="condition.schemeId != null and condition.schemeId  != ''">
+	      		AND SCHEME_ID = #{condition.schemeId,jdbcType=VARCHAR}
+		    </if> -->
+		    <if test="condition.evlObjId != null and condition.evlObjId  != ''">
+	      		AND EVL_OBJ_ID = #{condition.evlObjId,jdbcType=VARCHAR}
+		    </if>
+			<if test="condition.evlObjName != null and condition.evlObjName  != ''">
+	      		AND EVL_OBJ_NAME  LIKE concat(concat('%',#{condition.evlObjName,jdbcType=VARCHAR}),'%')
+		    </if>
+         </where>
+    </select>
+    
+    <!-- 根据方案编号 查询方案名称，可以包含多个 -->
+    <select id="queryNames" parameterType="String" resultType="String">
+        select DISTINCT CASE
+         WHEN A.EVL_OBJ_TYPE = '01' THEN
+          (SELECT B.USER_NAME
+             FROM ADMIN_SM_USER B
+            WHERE B.LOGIN_CODE = A.EVL_OBJ_ID)
+         ELSE
+          (SELECT C.ORG_NAME
+             FROM ADMIN_SM_ORG C
+            WHERE C.ORG_CODE = A.EVL_OBJ_ID)
+        END AS EVL_OBJ_NAME from PMA_F_SCHEME_EVLOBJ_REL A
+        where EVL_OBJ_ID in 
+        <foreach collection="objId" item="objId" index="index" open="(" close=")" separator=",">
+        	#{objId}
+        </foreach>
+    </select>
+    
+    <!-- 根据考核方案ID，查询该考核方案所有考核对象数据 -->
+    <select id="getEvlObjBySchemeId" parameterType="String" resultType="java.util.Map">
+    	select '03' as P_ID, '1' as TYPE, main.EVL_OBJ_ID as ID, main.EVL_OBJ_NAME as NAME
+    	from (SELECT A.SCHEME_ID, A.EVL_OBJ_ID, 
+        		CASE WHEN A.EVL_OBJ_TYPE = '01' THEN
+		          (SELECT B.USER_NAME FROM ADMIN_SM_USER B
+		            WHERE B.LOGIN_CODE = A.EVL_OBJ_ID)
+         		ELSE
+		          (SELECT C.ORG_NAME FROM ADMIN_SM_ORG C
+		            WHERE C.ORG_CODE = A.EVL_OBJ_ID)
+        		END AS EVL_OBJ_NAME
+        	FROM PMA_F_SCHEME_EVLOBJ_REL A) main
+        where main.SCHEME_ID = #{schemeId, jdbcType=VARCHAR}
+    </select>
+    <select id="countBySchemeId" resultType="java.lang.Integer">
+        SELECT COUNT(1) FROM PMA_F_SCHEME_EVLOBJ_REL WHERE SCHEME_ID = #{schemeId, jdbcType=VARCHAR}
+    </select>
+
+    <delete id="deleteBackupTableDataBySchemeIdAndEtlDate" parameterType="String">
+    	delete from PMA_F_SCHEME_EVLOBJ_REL_BAK where SCHEME_ID = #{schemeId, jdbcType=VARCHAR} and ETL_DATE = #{etlDate, jdbcType=VARCHAR}
+    </delete>
+    
+    <insert id="insertBackupTableData" parameterType="String">
+    	insert into PMA_F_SCHEME_EVLOBJ_REL_BAK(ID, SCHEME_ID, EVL_OBJ_TYPE, EVL_OBJ_ID, ETL_DATE)
+    	select sys_guid(), SCHEME_ID, EVL_OBJ_TYPE, EVL_OBJ_ID, #{etlDate, jdbcType=VARCHAR} 
+    		from PMA_F_SCHEME_EVLOBJ_REL where SCHEME_ID = #{schemeId, jdbcType=VARCHAR}
+    </insert>
+    
+    <insert id="copySchemeInf" parameterType="java.lang.String">
+    	insert into PMA_F_SCHEME_EVLOBJ_REL(ID, SCHEME_ID, EVL_OBJ_TYPE, EVL_OBJ_ID)
+    	select sys_guid(), #{newSchemeId}, EVL_OBJ_TYPE, EVL_OBJ_ID from PMA_F_SCHEME_EVLOBJ_REL where SCHEME_ID = #{schemeId}
+    </insert>
+
+    <insert id="batchInsert" parameterType="List">
+        INSERT INTO PMA_F_SCHEME_EVLOBJ_REL (ID,SCHEME_ID, EVL_OBJ_TYPE, EVL_OBJ_ID)
+        <foreach collection="list" item="evl" index="index" separator="union all" >
+            select #{evl.id},#{evl.schemeId},#{evl.evlObjType},#{evl.evlObjId}
+            from dual
+        </foreach>
+    </insert>
+</mapper>

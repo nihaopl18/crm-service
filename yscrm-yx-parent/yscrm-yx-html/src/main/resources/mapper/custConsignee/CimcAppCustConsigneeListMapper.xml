@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscimc.myaddress.repository.mapper.CimcAppCustConsigneeListMapper">
+	<!-- 用户地址查询 -->
+	<select id="getCustConsignee" parameterType="String" resultType="java.util.Map">
+		SELECT * FROM CMIC_APP_CUST_CONSIGNEE_LIST WHERE CONSIGNEE_CUST_ID = #{custId,jdbcType=VARCHAR}
+	</select>
+	<!-- 取消用户默认地址 -->
+	<update id="editDefaultMark" parameterType="String">
+		UPDATE CMIC_APP_CUST_CONSIGNEE_LIST SET CONSIGNEE_DEFAULT_MARK = '0' 
+		WHERE CONSIGNEE_CUST_ID = #{custId,jdbcType=VARCHAR}
+	</update>
+	<!-- 编辑用户地址 -->
+	<update id="editCustConsignee" parameterType="cn.com.yusys.yscimc.myaddress.domain.CmicAppCustConsigneeList">
+		UPDATE CMIC_APP_CUST_CONSIGNEE_LIST SET 
+		CONSIGNEE_NAME = #{consigneeName,jdbcType=VARCHAR},
+		CONSIGNEE_ADDRESS = #{consigneeAddress,jdbcType=VARCHAR},
+		CONSIGNEE_NUMBER = #{consigneeNumber,jdbcType=VARCHAR},
+		CONSIGNEE_DEFAULT_MARK = #{consigneeDefaultMark,jdbcType=VARCHAR},
+		CONSIGNEE_AREA = #{consigneeArea,jdbcType=VARCHAR}
+		WHERE CONSIGNEE_ID = #{consigneeId,jdbcType=VARCHAR}
+	</update>
+	
+	<!-- 获取用户默认收货地址 -->
+	<select id="getDefaultAddress" parameterType="String" resultType="java.util.Map">
+		SELECT * FROM CMIC_APP_CUST_CONSIGNEE_LIST 
+		WHERE CONSIGNEE_CUST_ID = #{custId,jdbcType=VARCHAR} AND CONSIGNEE_DEFAULT_MARK = '1'
+	</select>
+</mapper>

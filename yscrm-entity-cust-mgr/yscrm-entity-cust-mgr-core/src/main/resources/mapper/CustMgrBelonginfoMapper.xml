@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.custmgr.repository.mapper.CustMgrBelonginfoMapper">
+    <!-- 列表查询 -->
+	<select id="querylist" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+		resultType="java.util.Map">
+		select t1.cust_id,
+		       t1.cust_name,
+		       t1.cert_type,
+		       t1.cert_no,
+		       t1.cust_type,
+		       t1.cust_status,
+		       t4.mgr_type,
+		       t1.value_lev,
+		       t1.serv_lev,
+		       t3.aum_bal,
+		       t3.dps_bal,
+		       t3.loan_bal,
+		       t3.fin_bal,
+		       t5.report_sum
+		  <!-- from ACRM_F_CI_CUST_ADMIT_ALL t1 -->
+		  from ACRM_F_CI_CUST_ALL t1
+		  <!-- from (select cust_id,CUST_NAME,'2' as cust_type,cust_status,serv_lev,value_lev,CERT_TYPE,CERT_NO,BELONG_BRCH,BELONG_MGR from ACRM_F_CI_ORG_CUST_INFO where is_admit_enter='1'
+       union all select cust_id,CUST_NAME,'1' as cust_type,cust_status,serv_lev,value_lev,CERT_TYPE,CERT_NO,BELONG_BRCH,BELONG_MGR from ACRM_F_CI_PER_ADMIT_INFO where is_admit_enter='1') t1 -->
+		 <if test="condition.custType=='1'.toString()">
+			left join ACRM_A_CI_PER_BUSI_SUM_D t3 on t1.cust_id = t3.cust_id  
+ 		</if>
+		 <if test="condition.custType=='2'.toString()">
+		 	left join ACRM_A_CI_ORG_BUSI_SUM_D t3 on t1.cust_id = t3.cust_id 
+		 </if>
+		  inner join OCRM_F_CI_ADMIT_BELONG t4 on t1.cust_id = t4.cust_id
+		  <!-- left join ACRM_A_CI_PER_BUSI_SUM_M t5 on t1.cust_id = t5.cust_id and to_char(TO_DATE(t5.DATA_DATE,'yyyyMMdd'),'yyyyMM') = to_char(add_months(trunc(sysdate),-1),'yyyyMM') -->
+		  <if test="condition.custType=='1'.toString()">
+			left join ACRM_A_CI_PER_BUSI_SUM_M t5 on t1.cust_id = t5.cust_id  
+ 		</if>
+		 <if test="condition.custType=='2'.toString()">
+		 	left join ACRM_A_CI_ORG_BUSI_SUM_M t5 on t1.cust_id = t5.cust_id
+		 </if>
+		  and t5.DATA_DATE = to_char(last_day(add_months(sysdate, -1)), 'yyyyMMDD')
+		<where>
+		t1.IS_ADMIT_ENTER='1'
+			<if  test="condition.custId != null and condition.custId != ''">
+	       		AND t1.cust_id = #{condition.custId,jdbcType=VARCHAR}
+		    </if>
+		    <if  test="condition.mgrId != null and condition.mgrId != ''">
+	       		AND t4.mgr_id = #{condition.mgrId,jdbcType=VARCHAR}
+		    </if>
+		    <if  test="condition.custName != null and condition.custName != ''">
+	       		AND t1.cust_name like CONCAT(CONCAT('%', #{condition.custName,jdbcType=VARCHAR}),'%')
+		    </if>
+		    <if  test="condition.certType != null and condition.certType != ''">
+	       		AND t1.cert_type = #{condition.certType,jdbcType=VARCHAR}
+		    </if>
+		    <if  test="condition.certNo != null and condition.certNo != ''">
+	       		AND t1.cert_no = #{condition.certNo,jdbcType=VARCHAR}
+		    </if>
+		    <if  test="condition.custType != null and condition.custType != ''">
+	       		AND t1.cust_type = #{condition.custType,jdbcType=VARCHAR}
+		    </if>
+		    <if  test="condition.custStatus != null and condition.custStatus != ''">
+	       		AND t1.cust_status = #{condition.custStatus,jdbcType=VARCHAR}
+		    </if>
+		    <if  test="condition.mgrType != null and condition.mgrType != ''">
+	       		AND t4.mgr_type = #{condition.mgrType,jdbcType=VARCHAR}
+		    </if>
+		    <if  test="condition.valueLev != null and condition.valueLev != ''">
+	       		AND t1.value_lev = #{condition.valueLev,jdbcType=VARCHAR}
+		    </if>
+		    <if  test="condition.servLev != null and condition.servLev != ''">
+	       		AND t1.serv_lev = #{condition.servLev,jdbcType=VARCHAR}
+		    </if>
+		</where>
+	</select>
+    
+</mapper>

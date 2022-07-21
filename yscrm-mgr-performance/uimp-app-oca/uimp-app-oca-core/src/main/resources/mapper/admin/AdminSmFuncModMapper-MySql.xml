@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.admin.repository.mapper.AdminSmFuncModMapper">
+	<!--查询模块信息 -->
+	<select id="getModInfo" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+		resultType="java.util.HashMap" databaseId="mysql">
+		select
+		m.mod_id,m.mod_name,m.mod_desc,m.is_outer,m.is_app,m.user_name,m.password,
+		m.user_key,m.pwd_key,substr(m.last_chg_dt,1,10) as
+		last_chg_dt,u.user_name as last_chg_name
+		from admin_sm_func_mod m left join admin_sm_user u
+		on u.user_id = m.last_chg_usr
+		<where>
+			<if test="condition.modName != null and condition.modName !=''">
+				and m.mod_name like #{condition.modName,jdbcType=VARCHAR}
+			</if>
+		</where>
+		order by m.last_chg_dt desc
+	</select>
+
+
+</mapper>

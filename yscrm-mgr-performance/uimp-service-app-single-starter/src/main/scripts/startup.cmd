@@ -1,0 +1,1 @@
+java -jar -Dfile.encoding=UTF-8 ../yusp-app-single-V1.0.0.RELEASE.jar

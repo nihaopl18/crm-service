@@ -1,0 +1,37 @@
+# ===================================================================
+# Eureka properties.
+# ===================================================================
+jhipster:
+    registry:
+        password: admin
+
+spring:
+    application:
+        name: yscrm-mgr-cust-flex-client
+    profiles:
+        active: dev
+    cloud:
+        config:
+            fail-fast: true
+            uri: http://admin:${jhipster.registry.password}@localhost:8761/config
+            # name of the config server's property source (file.yml) that we want to use
+            name: ${spring.application.name}
+            profile: dev # profile(s) of the property source
+            label: master # toggle to switch to a different version of the configuration as stored in git
+            # it can be set to any label, branch or commit of the config source git repository
+# ===================================================================
+# Spring properties.
+# ===================================================================
+server:
+    port: 7084
+
+info:
+    project:
+        version: #project.version#
+
+logging:
+    file: ${logfile.path}/${spring.application.name}_${server.port}.log
+logfile:
+    path: ../log
+logback:
+    loglevel: INFO

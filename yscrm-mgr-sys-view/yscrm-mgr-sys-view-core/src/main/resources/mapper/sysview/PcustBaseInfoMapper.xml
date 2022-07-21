@@ -1,0 +1,428 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.sysview.repository.mapper.PcustBaseInfoMapper">
+    <select id="getCertInfo" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+            resultType="cn.com.yusys.yscrm.sysview.domain.CertInfo">
+        SELECT II.CERT_TYPE,II.CERT_NO,II.ISS_COUNTRY,II.EXPIRED_DATE,LI.LOOKUP_ITEM_NAME AS CERT_NAME from ACRM_F_CI_CUST_IDENT_INFO II
+        LEFT JOIN ADMIN_SM_LOOKUP_ITEM LI on LI.LOOKUP_CODE='CD0348' and LI.LOOKUP_ITEM_CODE=II.CERT_TYPE
+        where II.CUST_ID=#{condition.custId, jdbcType=VARCHAR}
+    </select>
+
+    <select id="getBaseInfo" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+            resultType="cn.com.yusys.yscrm.sysview.domain.BaseInfo">
+        SELECT AI.CUST_NAME,AI.CUST_ID,AI.ENGLISH_NAME,AI.ECIF_CUST_ID,AI.TITLE_CD,AI.NDS_CUST_ID,AI.SEX,AI.TWO_PLACES_CUST_FLAG,AI.AGE,
+        AI.USA_CUST_FLAG,AI.BIRTH_DT,AI.PHONE_NO,AI.CONSTELLATION,AI.HLT_STAT,AI.POL_STAT,AI.COUNTRY_CD,AI.NATION,CI.CONT_METH, CI2.CONT_METH AS
+        TEL_PHONE_NO,AI1.FULL_ADDR AS FULL_ADDR,AI2.FULL_ADDR AS STREET_NAME,AI3.FULL_ADDR AS TOWN_NAME,AI4.FULL_ADDR AS UNIT_ADDR FROM ACRM_F_CI_PER_ADMIT_INFO AI
+		LEFT JOIN ACRM_F_CI_ADDR_INFO AI1 on(AI1.ADDR_TYPE_CD='11' AND AI1.CUST_ID=#{condition.custId, jdbcType=VARCHAR})
+		LEFT JOIN ACRM_F_CI_ADDR_INFO AI2 on(AI2.ADDR_TYPE_CD='12' AND AI2.CUST_ID=#{condition.custId, jdbcType=VARCHAR})
+		LEFT JOIN ACRM_F_CI_ADDR_INFO AI3 on(AI3.ADDR_TYPE_CD='01' AND AI3.CUST_ID=#{condition.custId, jdbcType=VARCHAR})
+		LEFT JOIN ACRM_F_CI_ADDR_INFO AI4 on(AI4.ADDR_TYPE_CD='02' AND AI4.CUST_ID=#{condition.custId, jdbcType=VARCHAR})
+        LEFT JOIN ACRM_F_CI_CONTACT_INFO CI on CI.CUST_ID=#{condition.custId, jdbcType=VARCHAR} and  CI.CONT_TYPE='500' and CI.LAST_CHG_DT=(SELECT MAX(LAST_CHG_DT) as LAST_CHG_DT FROM ACRM_F_CI_CONTACT_INFO WHERE CUST_ID=#{condition.custId, jdbcType=VARCHAR} and  CONT_TYPE='500' GROUP BY CONT_TYPE )
+        LEFT JOIN ACRM_F_CI_CONTACT_INFO CI2 on CI2.CUST_ID=#{condition.custId, jdbcType=VARCHAR} and  CI2.CONT_TYPE='204' and CI2.LAST_CHG_DT=(SELECT MAX(LAST_CHG_DT) as LAST_CHG_DT FROM ACRM_F_CI_CONTACT_INFO WHERE CUST_ID=#{condition.custId, jdbcType=VARCHAR} and  CONT_TYPE='204' GROUP BY CONT_TYPE )
+        WHERE AI.CUST_ID=#{condition.custId, jdbcType=VARCHAR}
+    </select>
+
+    <select id="getEduInfo" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+            resultType="cn.com.yusys.yscrm.sysview.domain.EduInfo">
+        SELECT RI.COM_SCH,RI.SCH_MAJOR,RI.END_DATE,AI.HIG_EDU_DGR FROM ACRM_F_CI_PER_ADMIT_INFO AI
+        LEFT JOIN ACRM_F_CI_PER_RESUME_INFO RI ON AI.CUST_ID=RI.CUST_ID
+        WHERE AI.CUST_ID=#{condition.custId, jdbcType=VARCHAR}
+    </select>
+
+    <select id="getOccInfo" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+            resultType="cn.com.yusys.yscrm.sysview.domain.OccInfo">
+    SELECT ENG_IN_PRO,CUR_WORK_UNIT,UNIT_NAT,IND_OWN_UNIT FROM OCRM_F_CI_PER_WORK_INFO WHERE CUST_ID=#{condition.custId, jdbcType=VARCHAR}
+
+    </select>
+
+    <select id="getHouseInfo" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+            resultType="cn.com.yusys.yscrm.sysview.domain.HouseInfo">
+    SELECT FI.HOUSE_INFO,FI.HOUSE_COUNT,TO_CHAR(FI.PUR_DT, 'yyyy-MM-dd') AS PUR_DT,PUR_PRC,II.INCOME_SRC,II.INCOME_Y,II.SAL_ACCT_BANK,PII.UNV_CYC,PFI.CAR_FLG,PRI.INV_CD FROM OCRM_F_CI_PER_FINANCE_INFO FI
+    FULL JOIN OCRM_F_CI_PER_INCOME_INFO II on II.CUST_ID=#{condition.custId, jdbcType=VARCHAR}
+    FULL JOIN OCRM_F_CI_PER_INV_INFO PII on PII.CUST_ID=#{condition.custId, jdbcType=VARCHAR}
+    FULL JOIN ACRM_F_CI_PER_FAMILY_INFO PFI on PFI.CUST_ID=#{condition.custId, jdbcType=VARCHAR}
+	FULL JOIN ACRM_F_CI_PER_PREFER_INFO PRI on PRI.CUST_ID=#{condition.custId, jdbcType=VARCHAR}
+    WHERE FI.CUST_ID=#{condition.custId, jdbcType=VARCHAR}
+    </select>
+
+    <select id="getBelongInfo" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+                         resultType="cn.com.yusys.yscrm.sysview.domain.BelongInfo">
+	SELECT AB.MGR_NAME,AB.ORG_NAME,ORG.ORG_NAME AS custManagerOrg,to_char(AB.LAST_UPDATE_TM,'yyyy-mm-dd') as joinDate, MK.MKT_TEAM_NAME FROM OCRM_F_CI_ADMIT_BELONG AB
+		LEFT JOIN OCRM_F_CM_TEAM_CUST_MANAGER CM ON CM.USER_ID=AB.MGR_ID
+		LEFT JOIN OCRM_F_CM_MKT_TEAM MK on (CM.MKT_TEAM_ID=MK.MKT_TEAM_ID)
+		LEFT JOIN ACRM_F_CI_PER_ADMIT_INFO PAI ON PAI.CUST_ID = AB.CUST_ID
+		LEFT JOIN ADMIN_SM_ORG ORG ON PAI.OPEN_ORG = ORG.ORG_CODE
+		WHERE AB.CUST_ID=#{condition.custId, jdbcType=VARCHAR} AND  AB.MGR_TYPE='1'
+    </select>
+
+
+    <select id="getFamInfo" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+            resultType="cn.com.yusys.yscrm.sysview.domain.FamInfo">
+        SELECT FAMILY_MEMBERS,MARRI_STAT
+        FROM ACRM_F_CI_PER_ADMIT_INFO
+        WHERE CUST_ID=#{condition.custId, jdbcType=VARCHAR}
+    </select>
+
+    <select id="getcustIdName" parameterType="String" resultType="String">
+        SELECT CUST_NAME FROM ACRM_F_CI_PER_ADMIT_INFO WHERE CUST_ID=#{custId} and rownum=1
+    </select>
+
+    <insert id="insertCount" parameterType="cn.com.yusys.yscrm.custpub.domain.AcrmCustCount">
+        insert into OCRM_F_CG_CUST_COUNT
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null and id !=''">
+                ID,
+            </if>
+            <if test="custId != null and custId !=''">
+                CUST_ID,
+            </if>
+            <if test="custName != null and custName !=''">
+                CUST_NAME,
+            </if>
+            <if test="orgId != null and orgId !=''">
+                ORG_ID,
+            </if>
+            <if test="samId != null and samId !=''">
+                SAM_ID,
+            </if>
+            <if test="dataDate != null and dataDate !='' ">
+                DATA_DATE
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null and id !=''">
+                #{id,jdbcType=VARCHAR},
+            </if>
+            <if test="custId != null and custId !='' ">
+                #{custId,jdbcType=VARCHAR},
+            </if>
+            <if test="custName != null and custName !=''">
+                #{custName,jdbcType=VARCHAR},
+            </if>
+            <if test="orgId != null and orgId !='' ">
+                #{orgId,jdbcType=VARCHAR},
+            </if>
+            <if test="samId != null and samId !='' ">
+                #{samId,jdbcType=VARCHAR},
+            </if>
+            <if test="dataDate != null and dataDate !=''">
+                #{dataDate,jdbcType=VARCHAR}
+            </if>
+        </trim>
+    </insert>
+    <select id="checkUpNameId" parameterType="java.util.Map" resultType="int">
+        select  count(b.SEQNO) SEQNO from OCRM_F_CI_USER_INFORMATION b
+        where 1=1
+        <if test="seqno != null and seqno !=''">
+            and b.SEQNO = #{seqno,jdbcType=VARCHAR}
+        </if>
+    </select>
+    <select id="checkId" parameterType="java.util.Map" resultType="int">
+        select  count(b.SEQNO) SEQNO from OCRM_F_CI_USER_ASSETS b
+        where 1=1
+        <if test="seqno != null and seqno !=''">
+            and b.SEQNO = #{seqno,jdbcType=VARCHAR}
+        </if>
+        and b.status in ('01','03','05')
+    </select>
+    <delete id="checkdelete" parameterType="java.util.Map">
+        DELETE FROM OCRM_F_CI_USER_ASSETS WHERE SEQNO = #{seqno,jdbcType=VARCHAR}
+    </delete>
+    <insert id="insertassets" parameterType="cn.com.yusys.yscrm.sysview.domain.CrmFCiUserAssets">
+        insert into OCRM_F_CI_USER_ASSETS
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="seqno != null and seqno !=''">
+                SEQNO,
+            </if>
+            <if test="custId != null and custId !=''">
+                CUST_ID,
+            </if>
+            <if test="houseInfo != null and houseInfo !=''">
+                HOUSE_INFO,
+            </if>
+            <if test="purDt != null and purDt !=''">
+                PUR_DT,
+            </if>
+            <if test="purPrc != null and purPrc !=''">
+                PUR_PRC,
+            </if>
+            <if test="incomeSrc != null and incomeSrc !='' ">
+                INCOME_SRC,
+            </if>
+            <if test="carFlg != null and carFlg !=''">
+                CAR_FLG,
+            </if>
+            <if test="isFlag != null and isFlag !=''">
+                IS_FLAG,
+            </if>
+            <if test="createDate != null ">
+                CREATE_DATE,
+            </if>
+            <if test="createUser != null and createUser !=''">
+                CREATE_USER,
+           </if>
+            <if test="status != null and status !=''">
+                STATUS
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="seqno != null and seqno !=''">
+                #{seqno,jdbcType=VARCHAR},
+            </if>
+            <if test="custId != null and custId !='' ">
+                #{custId,jdbcType=VARCHAR},
+            </if>
+            <if test="houseInfo != null and houseInfo !=''">
+                #{houseInfo,jdbcType=VARCHAR},
+        </if>
+            <if test="purDt != null and purDt !='' ">
+                TO_DATE(substr(#{purDt,jdbcType=VARCHAR},1,10),'YYYY-MM-DD'),
+            </if>
+            <if test="purPrc != null and purPrc !='' ">
+                #{purPrc,jdbcType=VARCHAR},
+            </if>
+            <if test="incomeSrc != null and incomeSrc !='' ">
+                #{incomeSrc,jdbcType=VARCHAR},
+            </if>
+            <if test="carFlg != null and carFlg !='' ">
+                #{carFlg,jdbcType=VARCHAR},
+            </if>
+            <if test="isFlag != null and isFlag !='' ">
+                #{isFlag,jdbcType=VARCHAR},
+            </if>
+            <if test="createDate != null ">
+                #{createDate,jdbcType=DATE},
+            </if>
+            <if test="createUser != null and createUser !='' ">
+                #{createUser,jdbcType=VARCHAR},
+            </if>
+            <if test="status != null and status !='' ">
+                #{status,jdbcType=VARCHAR}
+            </if>
+        </trim>
+    </insert>
+    <update id="updateassets" parameterType="cn.com.yusys.yscrm.sysview.domain.CrmFCiUserAssets">
+        UPDATE OCRM_F_CI_USER_ASSETS b SET
+        b.SEQNO=#{seqno,jdbcType=VARCHAR}
+        <if test="houseInfo !=null and houseInfo !=''">
+            ,b.HOUSE_INFO =#{houseInfo,jdbcType=VARCHAR}
+        </if>
+        <if test="purDt !=null and purDt !=''">
+            ,b.PUR_DT = TO_DATE(substr(#{purDt,jdbcType=VARCHAR},1,10),'YYYY-MM-DD')
+        </if>
+        <if test="purPrc !=null and purPrc !=''">
+            ,b.PUR_PRC =#{purPrc,jdbcType=VARCHAR}
+        </if>
+        <if test="incomeSrc !=null and incomeSrc !=''">
+            ,b.INCOME_SRC =#{incomeSrc,jdbcType=VARCHAR}
+        </if>
+        <if test="carFlg !=null and carFlg !=''">
+            ,b.CAR_FLG =#{carFlg,jdbcType=VARCHAR}
+        </if>
+        <if test="isFlag !=null and isFlag !=''">
+            ,b.IS_FLAG =#{isFlag,jdbcType=VARCHAR}
+        </if>
+        <if test="createDate != null ">
+             ,b.CREATE_DATE =#{createDate,jdbcType=DATE}
+        </if>
+        <if test="createUser != null and createUser !='' ">
+             ,b.CREATE_USER =#{createUser,jdbcType=VARCHAR}
+        </if>
+        <if test="status != null and status !='' ">
+            ,b.STATUS =#{status,jdbcType=VARCHAR}
+        </if>
+        WHERE  b.SEQNO=#{seqno,jdbcType=VARCHAR}
+    </update>
+    <insert id="insertinformation" parameterType="cn.com.yusys.yscrm.sysview.domain.CrmFCiUserInformation">
+        insert into OCRM_F_CI_USER_INFORMATION
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="seqno != null and seqno !=''">
+                SEQNO,
+            </if>
+            <if test="custId != null and custId !=''">
+                CUST_ID,
+            </if>
+            <if test="wechat != null and wechat !=''">
+                WECHAT,
+            </if>
+            <if test="politicalOutlook != null and politicalOutlook !=''">
+                POLITICAL_OUTLOOK,
+            </if>
+            <if test="physicalState != null and physicalState !=''">
+                PHYSICAL_STATE,
+            </if>
+            <if test="comSch != null and comSch !='' ">
+                COM_SCH,
+            </if>
+            <if test="schMajor != null and schMajor !=''">
+                SCH_MAJOR,
+            </if>
+            <if test="endDate != null">
+                END_DATE,
+            </if>
+            <if test="createDate != null ">
+                CREATE_DATE,
+            </if>
+            <if test="createUser != null and createUser !=''">
+                CREATE_USER,
+            </if>
+            <if test="status != null and status !=''">
+                STATUS
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="seqno != null and seqno !=''">
+                #{seqno,jdbcType=VARCHAR},
+            </if>
+            <if test="custId != null and custId !='' ">
+                #{custId,jdbcType=VARCHAR},
+            </if>
+            <if test="wechat != null and wechat !=''">
+                #{wechat,jdbcType=VARCHAR},
+            </if>
+            <if test="politicalOutlook != null and politicalOutlook !='' ">
+                #{politicalOutlook,jdbcType=VARCHAR},
+            </if>
+            <if test="physicalState != null and physicalState !='' ">
+                #{physicalState,jdbcType=VARCHAR},
+            </if>
+            <if test="comSch != null and comSch !='' ">
+                #{comSch,jdbcType=VARCHAR},
+            </if>
+            <if test="schMajor != null and schMajor !='' ">
+                #{schMajor,jdbcType=VARCHAR},
+            </if>
+            <if test="endDate != null">
+                #{endDate,jdbcType=DATE},
+            </if>
+            <if test="createDate != null ">
+                #{createDate,jdbcType=DATE},
+            </if>
+            <if test="createUser != null and createUser !='' ">
+                #{createUser,jdbcType=VARCHAR},
+            </if>
+            <if test="status != null and status !='' ">
+                #{status,jdbcType=VARCHAR}
+            </if>
+        </trim>
+    </insert>
+    <update id="updateformation" parameterType="cn.com.yusys.yscrm.sysview.domain.CrmFCiUserInformation">
+        UPDATE OCRM_F_CI_USER_INFORMATION b SET
+        b.SEQNO=#{seqno,jdbcType=VARCHAR}
+        <if test="wechat !=null and wechat !=''">
+            ,b.WECHAT =#{wechat,jdbcType=VARCHAR}
+        </if>
+        <if test="politicalOutlook !=null and politicalOutlook !=''">
+            ,b.POLITICAL_OUTLOOK =#{politicalOutlook,jdbcType=VARCHAR}
+        </if>
+        <if test="physicalState !=null and physicalState !=''">
+            ,b.PHYSICAL_STATE =#{physicalState,jdbcType=VARCHAR}
+        </if>
+        <if test="comSch !=null and comSch !=''">
+            ,b.COM_SCH =#{comSch,jdbcType=VARCHAR}
+        </if>
+        <if test="schMajor !=null and schMajor !=''">
+            ,b.SCH_MAJOR =#{schMajor,jdbcType=VARCHAR}
+        </if>
+        <if test="status !=null and status !=''">
+            ,b.STATUS =#{status,jdbcType=VARCHAR}
+        </if>
+        WHERE b.SEQNO=#{seqno,jdbcType=VARCHAR}
+    </update>
+    <select id="selectuserInfo" parameterType="java.util.Map" resultType="cn.com.yusys.yscrm.sysview.domain.CrmFCiUserInformation">
+        SELECT SEQNO, CUST_ID,
+        WECHAT,
+        POLITICAL_OUTLOOK polStat,
+        PHYSICAL_STATE hltStat,
+        COM_SCH,
+        SCH_MAJOR,
+        END_DATE,
+        CREATE_DATE,
+        STATUS,
+        INSTANCE_ID instanceid,
+        CREATE_USER FROM OCRM_F_CI_USER_INFORMATION WHERE
+        1=1
+        <choose>
+            <when test="seqno != null and seqno !='null'">
+                AND SEQNO=#{seqno,jdbcType=VARCHAR}
+            </when>
+            <otherwise>
+                AND  CUST_ID=#{custId,jdbcType=VARCHAR}
+            </otherwise>
+        </choose>
+        AND CREATE_DATE in (
+        SELECT CREATE_DATE FROM(
+        SELECT CREATE_DATE,
+        row_number() over(partition by CUST_ID order by CREATE_DATE desc) as rn
+        FROM OCRM_F_CI_USER_INFORMATION
+        WHERE 1=1
+        <choose>
+            <when test="seqno != null and seqno !='null'">
+                AND SEQNO=#{seqno,jdbcType=VARCHAR}
+            </when>
+            <otherwise>
+                AND  CUST_ID=#{custId,jdbcType=VARCHAR}
+            </otherwise>
+        </choose>
+        )CC WHERE CC.rn=1)
+        <choose>
+            <when test="type != null and type =='01'">
+                AND STATUS='04'
+            </when>
+            <otherwise>
+            </otherwise>
+        </choose>
+        AND rownum=1
+    </select>
+    <select id="selectassets" parameterType="String" resultType="cn.com.yusys.yscrm.sysview.domain.CrmFCiUserAssets">
+        SELECT SEQNO,CUST_ID,
+        HOUSE_COUNT,
+        HOUSE_INFO,
+        CASE WHEN PUR_DT is not null then substr(to_char(PUR_DT,'yyyy-mm-dd'),1,10) else '' end PUR_DT,
+        PUR_PRC,
+        INCOME_SRC,
+        INCOME_Y,
+        SAL_ACCT_BANK,
+        UNV_CYC,
+        CAR_FLG,
+        INV_CD,
+        IS_FLAG,
+        STATUS,
+        INSTANCE_ID,
+        CREATE_DATE,
+        CREATE_USER FROM OCRM_F_CI_USER_ASSETS WHERE
+        1=1
+        <choose>
+            <when test="seqno != null and seqno !='null'">
+                AND SEQNO=#{seqno,jdbcType=VARCHAR}
+            </when>
+            <otherwise>
+                AND  CUST_ID=#{custId,jdbcType=VARCHAR}
+            </otherwise>
+        </choose>
+            AND CREATE_DATE in (
+        SELECT CREATE_DATE FROM(
+        SELECT CREATE_DATE,
+        row_number() over(partition by CUST_ID order by CREATE_DATE desc) as rn
+        FROM OCRM_F_CI_USER_ASSETS
+        WHERE 1=1
+        <choose>
+            <when test="seqno != null and seqno !='null'">
+                AND SEQNO=#{seqno,jdbcType=VARCHAR}
+            </when>
+            <otherwise>
+                AND  CUST_ID=#{custId,jdbcType=VARCHAR}
+            </otherwise>
+        </choose>
+        )CC WHERE CC.rn=1)
+        <choose>
+            <when test="type != null and type =='01'">
+                AND STATUS='04'
+            </when>
+            <otherwise>
+            </otherwise>
+        </choose>
+        and IS_FLAG='01'
+    </select>
+
+</mapper>

@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper
+	namespace="cn.com.yusys.yscrm.infocalculator.repository.mapper.AcrmFpdInterestRateMapper">
+
+	<sql id="Base_Column_List">
+		CORP_ORG_CODE,DATA_DT,INT_RATE_NO,SUB_SYS_CD,CCY_CD,INT_RATE_TERM_TYPE_CD,INT_RATE_TERM,EFF_DT,INT_RATE_VAL,INT_RATE_TYPE_CD,UP_LMT,DOWN_LMT,UP_PER_LMT,DOWN_PER_LMT,INT_RATE_DESC
+	</sql>
+
+	<select id="querylistdep" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+		resultType="java.util.HashMap">
+	select
+	T.DATA_DT,T.INT_RATE_DESC,T.CCY_CD,T.INT_RATE_VAL,
+	T.INT_RATE_TERM || ' ' ||
+	CASE WHEN T. INT_RATE_TERM_TYPE_CD ='Y' THEN '年'
+	WHEN T. INT_RATE_TERM_TYPE_CD ='M' THEN '月'
+	WHEN T. INT_RATE_TERM_TYPE_CD ='D' THEN '日' END AS INT_RATE_TYPE_CD
+	from
+	ACRM_F_PD_INTEREST_RATE T
+
+		<where>
+            T.INT_RATE_NO='DPS'
+			<if test="condition.dataDt != null and condition.dataDt != ''">
+				AND T.DATA_DT= to_date(#{condition.dataDt,jdbcType=VARCHAR},'yyyy-MM-dd')
+			</if>
+			<if test="condition.ccyCd != null and condition.ccyCd != ''">
+				AND T.CCY_CD= #{condition.ccyCd,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.intRateDesc != null and condition.intRateDesc != ''"> <!-- 使用 模糊 查询  -->
+				AND T.INT_RATE_DESC LIKE concat(concat('%',#{condition.intRateDesc}),'%')
+			</if>
+
+		</where>
+            order by T.DATA_DT
+	</select>
+
+	<select id="querylistloan" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+		resultType="java.util.HashMap">
+	select
+	T.DATA_DT,T.INT_RATE_DESC,T.CCY_CD,T.INT_RATE_VAL,
+	T.INT_RATE_TERM || ' ' ||
+	CASE WHEN T. INT_RATE_TERM_TYPE_CD ='Y' THEN '年'
+	WHEN T.
+	INT_RATE_TERM_TYPE_CD ='M' THEN '月'
+	WHEN T. INT_RATE_TERM_TYPE_CD ='D'
+	THEN '日' END AS INT_RATE_TYPE_CD
+	FROM
+	ACRM_F_PD_INTEREST_RATE T
+
+		<where>
+            T.INT_RATE_NO='LNS'
+			<if test="condition.dataDt != null and condition.dataDt != ''">
+				AND T.DATA_DT= to_date(#{condition.dataDt,jdbcType=VARCHAR},'yyyy-MM-dd')
+			</if>
+			<if test="condition.ccyCd != null and condition.ccyCd != ''">
+				AND T.CCY_CD= #{condition.ccyCd,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.intRateDesc != null and condition.intRateDesc != ''"> <!-- 使用 模糊 查询  -->
+				AND T.INT_RATE_DESC LIKE concat(concat('%',#{condition.intRateDesc}),'%')
+			</if>
+
+		</where>
+            order by T.DATA_DT
+
+	</select>
+</mapper>

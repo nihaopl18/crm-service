@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.info.remind.repository.mapper.OcrmFciCustAdmitTargetMapper">
+    
+    <!-- 列表查询 -->
+    <select id="queryList" resultType="java.util.HashMap">
+	     SELECT CONCAT(CUST_TYPE,TARGET_ID) AS TARGET_ID,TARGET_VALUE from OCRM_F_CI_CUST_ADMIT_TARGET 
+	    <where>
+	    	TARGET_STATUS='1'
+	    </where>
+    </select>
+    
+    <update id="update" parameterType="cn.com.yusys.yscrm.info.remind.domain.OcrmFciCustAdmitTarget">
+    	update OCRM_F_CI_CUST_ADMIT_TARGET set TARGET_VALUE=#{targetValue,jdbcType=DOUBLE},TARGET_STATUS=#{targetStatus,jdbcType=VARCHAR},
+    	LAST_CHG_DATE=#{lastChgDate,jdbcType=DATE},LAST_CHG_USER_ID=#{lastChgUserId,jdbcType=VARCHAR},LAST_CHG_USER_NAME=#{lastChgUserName,jdbcType=VARCHAR}
+    	where CUST_TYPE=#{custType,jdbcType=VARCHAR} AND TARGET_ID=#{targetId,jdbcType=VARCHAR}
+    </update>
+</mapper>

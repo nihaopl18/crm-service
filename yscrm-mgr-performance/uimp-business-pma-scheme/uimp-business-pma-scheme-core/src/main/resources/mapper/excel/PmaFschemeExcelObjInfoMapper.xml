@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.uimp.excel.repository.mapper.PmaFschemeExcelObjInfoMapper">
+    <resultMap id="BaseResultMap" type="cn.com.yusys.yusp.uimp.excel.domain.PmaFschemeExcelObjInfo">
+		<id column="SEQ" jdbcType="VARCHAR" property="seq" />
+		<result column="CELL_NO" jdbcType="VARCHAR" property="cellNo" />
+		<result column="TEMPLATE_ID" jdbcType="VARCHAR" property="templateId" />
+		<result column="EVL_OBJ_ID" jdbcType="VARCHAR" property="evlObjId" />
+		<result column="EVL_OBJ_NAME" jdbcType="VARCHAR" property="evlObjName" />
+    </resultMap>
+    <sql id="Base_Column_List">
+	    SEQ,CELL_NO,TEMPLATE_ID,EVL_OBJ_ID,EVL_OBJ_NAME
+    </sql>
+    
+    <delete id="deleteByTemplateId" parameterType="java.lang.String">
+    	delete from PMA_F_SCHEME_EXCELOBJ_INF where TEMPLATE_ID = #{templateId, jdbcType=VARCHAR}
+    </delete>
+    
+    <insert id="batchInsert" parameterType="cn.com.yusys.yusp.uimp.excel.domain.PmaFschemeExcelObjInfo">
+    	insert all 
+    	<foreach collection="dataList" item="item" separator=" ">
+    		into PMA_F_SCHEME_EXCELOBJ_INF
+    		(
+	    	    SEQ,
+	    	    CELL_NO,
+	    	    TEMPLATE_ID,
+	    	    EVL_OBJ_ID,
+	    	    EVL_OBJ_NAME
+			)
+			values 
+			(
+				#{item.seq, jdbcType=VARCHAR},
+				#{item.cellNo, jdbcType=VARCHAR},
+				#{item.templateId, jdbcType=VARCHAR},
+				#{item.evlObjId, jdbcType=VARCHAR},
+				#{item.evlObjName, jdbcType=VARCHAR}
+			)
+    	</foreach>
+    	select 1 from dual
+    </insert>
+    
+    <select id="getCellInfoByTemplateId" parameterType="java.lang.String" resultType="java.util.Map">
+    	select
+    		 cell.*, obj.EVL_OBJ_ID, obj.EVL_OBJ_NAME
+    	from PMA_F_SCHEME_EXCELOBJ_INF obj 
+    		inner join PMA_F_SCHEME_EXCELCELL_INF cell on obj.SEQ = cell.SEQ and obj.TEMPLATE_ID = cell.TEMPLATE_ID
+    	where obj.TEMPLATE_ID = #{templateId, jdbcType=VARCHAR}
+    </select>
+    
+	<delete id="deleteBackupTableDataByTemplateIdAndEtlDate" parameterType="java.lang.String">
+    	delete from PMA_F_SCHEME_EXCELOBJ_BAK where TEMPLATE_ID = #{templateId, jdbcType=VARCHAR} and ETL_DATE = #{etlDate, jdbcType=VARCHAR}
+    </delete>
+    
+    <insert id="batchInsertBackupTableData" parameterType="java.util.Map">
+    	insert all 
+    	<foreach collection="dataList" item="item" separator=" ">
+    		into PMA_F_SCHEME_EXCELOBJ_BAK
+    		(
+	    	    SEQ,
+	    	    CELL_NO,
+	    	    TEMPLATE_ID,
+	    	    EVL_OBJ_ID,
+	    	    EVL_OBJ_NAME,
+	    	    ETL_DATE
+			)
+			values 
+			(
+				#{item.seq, jdbcType=VARCHAR},
+				#{item.cellNo, jdbcType=VARCHAR},
+				#{item.templateId, jdbcType=VARCHAR},
+				#{item.evlObjId, jdbcType=VARCHAR},
+				#{item.evlObjName, jdbcType=VARCHAR},
+				#{etlDate, jdbcType=VARCHAR}
+			)
+    	</foreach>
+    	select 1 from dual
+    </insert>
+    
+    <select id="getCellInfoFromBackupTableByTemplateIdAndEtlDate" parameterType="java.lang.String" resultType="java.util.Map">
+    	select DISTINCT
+    		 cell.*, obj.EVL_OBJ_ID, obj.EVL_OBJ_NAME
+    	from PMA_F_SCHEME_EXCELOBJ_BAK obj 
+    		inner join PMA_F_SCHEME_EXCELCELL_BAK cell on obj.SEQ = cell.SEQ and obj.ETL_DATE = cell.ETL_DATE and obj.TEMPLATE_ID = cell.TEMPLATE_ID
+    	where obj.TEMPLATE_ID = #{templateId, jdbcType=VARCHAR} and obj.ETL_DATE = #{etlDate, jdbcType=VARCHAR}
+    </select>
+    
+    <select id="getMySchemeCellInfoFromBackupTable" parameterType="java.lang.String" resultType="java.util.Map">
+    	select DISTINCT
+    		 cell.*, obj.EVL_OBJ_ID, obj.EVL_OBJ_NAME
+    	from PMA_F_SCHEME_EXCELOBJ_BAK obj 
+    		inner join PMA_F_SCHEME_EXCELCELL_BAK cell on obj.SEQ = cell.SEQ and obj.ETL_DATE = cell.ETL_DATE and obj.TEMPLATE_ID = cell.TEMPLATE_ID
+    	where obj.TEMPLATE_ID = #{templateId, jdbcType=VARCHAR} and obj.ETL_DATE = #{etlDate, jdbcType=VARCHAR}
+			<!-- 横/纵类型方案，机构考核对象，查询本机构及下辖数据 -->
+    		<if test="(templateType == '04' or templateType == '05') and (evlObjType == '02' or evlObjType == '03')">
+    			and obj.EVL_OBJ_ID in (
+    				SELECT sub_org.ORG_ID FROM ADMIN_SM_ORG sub_org START WITH sub_org.ORG_ID = #{evlObjId, jdbcType=VARCHAR}
+			 			CONNECT BY PRIOR sub_org.ORG_ID = sub_org.UP_ORG_ID
+    			)
+    		</if>
+    		<!-- 横/纵类型方案，员工考核对象，查询本人数据 -->
+    		<if test="(templateType == '04' or templateType == '05') and evlObjType == '01'">	
+    			and obj.EVL_OBJ_ID = #{evlObjId, jdbcType=VARCHAR}
+    		</if>
+    		<!-- 单元格类型方案，机构考核对象，查询本机构数据 -->
+    		<if test="templateType == '02' and (evlObjType == '02' or evlObjType == '03')">
+    			and obj.EVL_OBJ_ID = #{evlObjId, jdbcType=VARCHAR}
+    		</if>
+    		<!-- 单元格类型方案，员工考核对象，查询本人数据 -->
+    		<if test="templateType == '02' and evlObjType == '01'">
+    			and obj.EVL_OBJ_ID = #{evlObjId, jdbcType=VARCHAR}
+    		</if>
+    		<!-- 排除隐藏的行/列数据 -->
+    		<if test="hideRows != null">
+				and cell.ROW_ID not in 
+				<foreach collection="hideRows" item="item" open="(" separator="," close=")">
+					#{item, jdbcType=NUMERIC} - 1
+				</foreach>
+			</if>
+			<if test="hideCols != null">
+				and cell.COL_ID not in
+				<foreach collection="hideCols" item="item" open="(" separator="," close=")">
+					#{item, jdbcType=NUMERIC}
+				</foreach>
+			</if>
+    </select>
+    
+    <select id="getOrgStaffSchemeCellInfoFromBackupTable" parameterType="java.lang.String" resultType="java.util.Map">
+    	select DISTINCT
+    		 cell.*, obj.EVL_OBJ_ID, obj.EVL_OBJ_NAME
+    	from PMA_F_SCHEME_EXCELOBJ_BAK obj 
+    		inner join PMA_F_SCHEME_EXCELCELL_BAK cell on obj.SEQ = cell.SEQ and obj.ETL_DATE = cell.ETL_DATE and obj.TEMPLATE_ID = cell.TEMPLATE_ID
+    	where obj.TEMPLATE_ID = #{templateId, jdbcType=VARCHAR} and obj.ETL_DATE = #{etlDate, jdbcType=VARCHAR}
+    		<!-- 横/纵类型方案，员工考核对象，查询考核对象归属于本机构辖内的数据 -->
+    		<if test="(templateType == '04' or templateType == '05') and evlObjType == '01'">	
+    			and obj.EVL_OBJ_ID in (
+	   				select sub_u.LOGIN_CODE from ADMIN_SM_USER sub_u where sub_u.ORG_ID in (
+	   					SELECT sub_org.ORG_ID FROM ADMIN_SM_ORG sub_org START WITH sub_org.ORG_ID = #{curOrgId, jdbcType=VARCHAR} 
+				 		CONNECT BY PRIOR sub_org.ORG_ID = sub_org.UP_ORG_ID
+	   				)
+	   			)
+    		</if>
+    		<!-- 单元格类型方案，员工考核对象，查询选择的员工数据 -->
+    		<if test="templateType == '02' and evlObjType == '01'">
+    			and obj.EVL_OBJ_ID = #{evlObjId, jdbcType=VARCHAR}
+    		</if>
+    		<!-- 排除隐藏的行/列数据 -->
+    		<if test="hideRows != null">
+				and cell.ROW_ID not in 
+				<foreach collection="hideRows" item="item" open="(" separator="," close=")">
+					#{item, jdbcType=NUMERIC} - 1
+				</foreach>
+			</if>
+			<if test="hideCols != null">
+				and cell.COL_ID not in
+				<foreach collection="hideCols" item="item" open="(" separator="," close=")">
+					#{item, jdbcType=NUMERIC}
+				</foreach>
+			</if>
+    </select>
+    
+    <insert id="copySchemeInf" parameterType="java.lang.String">
+    	insert into PMA_F_SCHEME_EXCELOBJ_INF(SEQ, CELL_NO, TEMPLATE_ID, EVL_OBJ_ID, EVL_OBJ_NAME)
+    	select SEQ, CELL_NO, #{newTemplateId}, EVL_OBJ_ID, EVL_OBJ_NAME
+    	from PMA_F_SCHEME_EXCELOBJ_INF where TEMPLATE_ID = #{templateId}
+    </insert>
+</mapper>

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.custpub.repository.mapper.AcrmFciContactInfoMapper">
+    <!-- 根据客户id查询数据 -->
+	<select id="queryContactList" parameterType="java.util.Map"
+		resultType="java.util.Map">
+	    select  t.ID,t.DATA_DT,t.CRAT_DT,t.CRAT_ORG_ID,t.CRAT_USR,t.LAST_CHG_SYS,t.LAST_CHG_USR,to_char(t.LAST_CHG_DT,'yyyy-mm-dd') as LAST_CHG_DT
+	    ,t.CORP_ORG_CODE,t.CUST_ID,t.CUST_TYPE,t.CONT_TYPE,t.CONT_NAME,t.CONT_METH,t.MAIN_CONT_FLG,t.FLG_SET_SYS
+	     ,cust.USER_NAME
+         from ACRM_F_CI_CONTACT_INFO t
+          left join ADMIN_SM_USER cust on cust.LOGIN_CODE= t.CRAT_USR
+		    <if  test="custId != null and custId != ''">
+		       		where t.CUST_ID =#{custId,jdbcType=VARCHAR} 
+		    </if>
+		   
+	</select>
+ 	<update id="removeById" parameterType="java.util.Map">
+		DELETE FROM ACRM_F_CI_CONTACT_INFO  WHERE  ID =#{id,jdbcType=VARCHAR} 
+	</update>
+    	<!--主联系标识 -->
+  <update id="updateMainConFlag" parameterType="java.util.Map">
+			UPDATE ACRM_F_CI_CONTACT_INFO t SET 
+			
+			t.MAIN_CONT_FLG=#{mainContFlg,jdbcType=VARCHAR}
+		
+			WHERE t.CUST_ID = #{custId,jdbcType=VARCHAR}
+	</update>
+	<!--潜在客户修改地址信息 -->
+	<update id="updatePoten" parameterType="cn.com.yusys.yscrm.custpub.domain.AcrmFciContactInfo">
+			UPDATE ACRM_F_CI_ADDR_INFO t SET  t.CONT_NAME=#{contName,jdbcType=VARCHAR}
+			WHERE t.CUST_ID = #{custId,jdbcType=VARCHAR} AND t.MAIN_CONT_FLG='1'
+	</update>
+</mapper>

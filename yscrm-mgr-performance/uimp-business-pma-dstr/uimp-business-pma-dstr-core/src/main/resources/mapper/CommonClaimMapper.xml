@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.uimp.distribution.repository.mapper.CommonClaimMapper">
+    <select id="queryList" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.Map">
+    	:{sqlStr}
+    </select>
+	<insert id="executeInsertSql" parameterType="java.lang.String">
+    	:{sqlStr}
+    </insert>
+     <select id="executeQuerySql" parameterType="java.lang.String" resultType="java.util.Map">
+    	:{sqlStr}
+    </select>
+</mapper>

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.uimp.business.pma.scheme.schememain.repository.mapper.PmaFSchemeSperuleRelMapper">
+    <resultMap id="BaseResultMap" type="cn.com.yusys.yusp.uimp.business.pma.scheme.schememain.domain.PmaFSchemeSperuleRel">
+		<id column="ID" jdbcType="VARCHAR" property="id" />
+		<result column="SCHEME_ID" jdbcType="VARCHAR" property="schemeId" />
+		<result column="EVL_OBJ_ID" jdbcType="VARCHAR" property="evlObjId" />
+		<result column="EVL_OBJ_TYPE" jdbcType="VARCHAR" property="evlObjType" />
+    </resultMap>
+    <sql id="Base_Column_List">
+	    ID,SCHEME_ID,EVL_OBJ_ID,EVL_OBJ_TYPE
+    </sql>
+    <select id="querySperule" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+    	select A.ID,A.SCHEME_ID,A.EVL_OBJ_ID as param_id,A.EVL_OBJ_TYPE,B.SPE_RULE_TYPE,USE.USER_NAME AS PARAM_NAME
+    	FROM PMA_F_SCHEME_SPERULE_REL A 
+    	LEFT JOIN PMA_F_SCHEME B on A.SCHEME_ID = B.SCHEME_ID
+    	LEFT JOIN ADMIN_SM_USER USE ON USE.Login_code = A.EVL_OBJ_ID
+       <where>
+			<!-- 考核方案编号 -->
+			<if test="condition.schemeId != null and condition.schemeId  != ''">
+	      		AND A.SCHEME_ID = #{condition.schemeId,jdbcType=VARCHAR}
+		    </if>
+	    </where>
+    </select>
+    
+    <insert id="copySchemeInf" parameterType="java.lang.String">
+    	insert into PMA_F_SCHEME_SPERULE_REL(ID, SCHEME_ID, EVL_OBJ_ID, EVL_OBJ_TYPE)
+    	select sys_guid(), #{newSchemeId}, EVL_OBJ_ID, EVL_OBJ_TYPE from PMA_F_SCHEME_SPERULE_REL where SCHEME_ID = #{schemeId}
+    </insert>
+</mapper>

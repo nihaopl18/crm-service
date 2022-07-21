@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.cust.person.repository.mapper.AcrmFciPerFamilyMemberMapper">
+   <!-- 根据客户id查询数据 -->
+	<select id="queryFamMemList" parameterType="java.util.Map"
+		resultType="java.util.Map">
+	     select t.ID,t.DATA_DATE,t.CRAT_DT,t.CRAT_ORG_ID,t.CRAT_USR,t.LAST_CHG_SYS,t.LAST_CHG_USR,t.LAST_CHG_DT,t.CORP_ORG_CODE
+	     ,t.CUST_ID,t.FAM_CUST_ID,t.FAM_MEM_REL,t.FAM_CUST_STATUS,t.MEM_NAME,t.MEM_CERT_TYPE,t.MEM_CERT_NO,t.MEM_OCC,t.MEM_COM_SCH
+	     ,t.TEL_NO,t.MOBI_NO,t.FAM_PROP_FLG,t.HIG_EDU_DGR,t.REMARK
+         from ACRM_F_CI_PER_FAMILY_MEMBER t
+       
+		    <if  test="custId != null and custId != ''">
+		       		where t.CUST_ID =#{custId,jdbcType=VARCHAR} 
+		    </if>
+		   
+	</select>
+	<!-- 根据三要素查询新增家庭是否为我行客户 -->
+    <select id="queryIsBankList" parameterType="java.util.Map"
+		resultType="java.util.Map">
+	   select t.CUST_ID,t.CUST_NAME,t.CUST_STATUS
+	   from ACRM_F_CI_PER_ADMIT_INFO t
+       where 1=1
+		    <if  test="memName != null and memName != ''">
+		       		and t.CUST_NAME =#{memName,jdbcType=VARCHAR} 
+		    </if>
+		    <if  test="memCertType != null and memCertType != ''">
+		       		and t.CERT_TYPE =#{memCertType,jdbcType=VARCHAR} 
+		    </if>
+		    <if  test="memCertNo != null and memCertNo != ''">
+		       		and t.CERT_NO =#{memCertNo,jdbcType=VARCHAR} 
+		    </if>
+		   
+	</select>
+</mapper>

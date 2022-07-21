@@ -1,0 +1,223 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper
+	namespace="cn.com.yusys.yusp.dycrm.todowork.repository.mapper.OcrmFwpTodoWorkSonMapper">
+	<!-- 条件列表查询 -->
+	<select id="queryByToDoWorkId" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+		resultType="java.util.HashMap">
+		select
+		TODO_WORK_ID,
+		NOTICE_ID,
+		TODO_WORK_TITLE,
+		TODO_WORK_TYPE,
+		TODO_WORK_CONTENT,
+		CREATOR_ID,
+		CREATOR_NAME,
+		CREATOR_ORG_ID,
+		CREATOR_ORG_NAME,
+		CREATE_DATE,
+		TODO_WORK_STATE,
+		FINISHER,
+		IS_DELETE,
+		START_DATE,
+		LAST_CHG_USR_ID,
+		LAST_CHG_USR_NAME,
+		LAST_CHG_USR_ORG_ID,
+		LAST_CHG_USR_ORG_NAME,
+		LAST_CHG_DATE,
+		CONTACT_TYPE,
+		CONTACT_GOAL,
+		RELATION_CUST
+		from
+		OCRM_F_WP_TODO_WORK_SON
+		<where>
+			IS_DELETE = 'N'
+			AND NOTICE_ID =
+			#{condition.todoWorkId,jdbcType=VARCHAR}
+		</where>
+		ORDER BY
+		TODO_WORK_STATE,
+		START_DATE
+	</select>
+
+	<select id="queryStartDate" parameterType="java.lang.String"
+		resultType="java.util.HashMap">
+		select
+		TODO_WORK_ID,
+		START_DATE,
+		TODO_WORK_STATE
+		from
+		OCRM_F_WP_TODO_WORK_SON
+		<where>
+			IS_DELETE = 'N'
+			<!-- AND TODO_WORK_STATE = '1' -->
+			AND NOTICE_ID =
+			#{noticeId,jdbcType=VARCHAR}
+		</where>
+	</select>
+
+	<select id="queryNoticeId" parameterType="java.util.ArrayList" resultType="java.lang.String">
+		select DISTINCT NOTICE_ID
+		from OCRM_F_WP_TODO_WORK_SON
+		<where>
+		    TODO_WORK_ID in
+				<foreach collection="todoWorkIds" item="todoWorkId" index="index" open="(" close=")" separator=",">
+					#{todoWorkId}
+				</foreach>
+		</where>
+	</select>
+
+	<select id="queryNotice" parameterType="java.lang.String" resultType="java.lang.Integer">
+		select count(TODO_WORK_ID)
+		from OCRM_F_WP_TODO_WORK_SON
+		<where>
+			NOTICE_ID = #{noticeId,jdbcType=VARCHAR} AND IS_DELETE = 'N'
+		</where>
+	</select>
+
+	<select id="querySon" parameterType="java.lang.String" resultType="java.lang.Integer">
+		select COUNT(TODO_WORK_ID)
+		from OCRM_F_WP_TODO_WORK_SON
+		<where>
+			NOTICE_ID = #{noticeId,jdbcType=VARCHAR}
+			AND IS_DELETE = 'N'
+			AND TODO_WORK_STATE = '1'
+		</where>
+	</select>
+
+	<select id="queryState" parameterType="java.util.ArrayList"
+		resultType="cn.com.yusys.yusp.dycrm.todowork.domain.OcrmFwpTodoWorkSon">
+		select DISTINCT NOTICE_ID, TODO_WORK_STATE
+		from OCRM_F_WP_TODO_WORK_SON
+		<where>
+			IS_DELETE = 'N'
+			AND TODO_WORK_STATE = '2'
+			AND NOTICE_ID in
+				<foreach collection="noticeIds" item="noticeId" index="index" open="(" close=")" separator=",">
+					#{noticeId}
+				</foreach>
+		</where>
+	</select>
+
+	<select id="listConTactByTodoWorkIds" parameterType="java.util.HashMap" resultType="cn.com.yusys.yusp.dycrm.todowork.domain.OcrmFwpTodoWorkSon">
+		select TODO_WORK_ID,NOTICE_ID,TODO_WORK_TITLE,TODO_WORK_TYPE,TODO_WORK_CONTENT,CREATOR_ID,CREATOR_NAME,CREATOR_ORG_ID,CREATOR_ORG_NAME,CREATE_DATE,
+		       TODO_WORK_STATE,FINISHER,IS_DELETE,START_DATE,LAST_CHG_USR_ID,LAST_CHG_USR_NAME,LAST_CHG_USR_ORG_ID,LAST_CHG_USR_ORG_NAME,LAST_CHG_DATE,
+		       CONTACT_TYPE,CONTACT_GOAL,RELATION_CUST
+		from OCRM_F_WP_TODO_WORK_SON
+		where TODO_WORK_ID in
+			<foreach collection="todoWorkIds" item="todoWorkId" separator="," index="index" open="(" close=")">
+				#{todoWorkId}
+			</foreach>
+			and IS_DELETE = 'N' and TODO_WORK_TYPE = '5' and TODO_WORK_STATE = '2'
+	</select>
+
+	<update id="updateByTodoWorkId" parameterType="cn.com.yusys.yusp.dycrm.todowork.domain.OcrmFwpTodoWorkSon">
+		update OCRM_F_WP_TODO_WORK_SON set
+		IS_DELETE = 'N',
+		LAST_CHG_USR_ID =
+		#{lastChgUsrId,jdbcType=VARCHAR},
+		LAST_CHG_USR_NAME =
+		#{lastChgUsrName,jdbcType=VARCHAR},
+		LAST_CHG_USR_ORG_ID =
+		#{lastChgUsrOrgId,jdbcType=VARCHAR},
+		LAST_CHG_USR_ORG_NAME =
+		#{lastChgUsrOrgName,jdbcType=VARCHAR},
+		LAST_CHG_DATE =
+		#{lastChgDate,jdbcType=VARCHAR}
+		where TODO_WORK_ID =
+		#{todoWorkId,jdbcType=VARCHAR}
+	</update>
+
+	<update id="deleteByNoticeId" parameterType="java.util.HashMap">
+		update OCRM_F_WP_TODO_WORK_SON set
+		IS_DELETE = 'Y',
+		LAST_CHG_USR_ID = #{lastChgUsrId,jdbcType=VARCHAR},
+		LAST_CHG_USR_NAME = #{lastChgUsrName,jdbcType=VARCHAR},
+		LAST_CHG_USR_ORG_ID = #{lastChgUsrOrgId,jdbcType=VARCHAR},
+		LAST_CHG_USR_ORG_NAME = #{lastChgUsrOrgName,jdbcType=VARCHAR},
+		LAST_CHG_DATE = to_date(#{lastChgDate,jdbcType=VARCHAR},'yyyy-MM-dd hh24:mi:ss')
+		where IS_DELETE = 'N' AND TODO_WORK_STATE = '1'
+			AND NOTICE_ID in
+			<foreach collection="noticeIds" item="noticeId" index="index" open="(" close=")" separator=",">
+				#{noticeId}
+			</foreach>
+	</update>
+
+	<update id="deleteByTodoWorkId" parameterType="java.util.HashMap">
+		update OCRM_F_WP_TODO_WORK_SON set
+		IS_DELETE = 'Y',
+		LAST_CHG_USR_ID = #{lastChgUsrId,jdbcType=VARCHAR},
+		LAST_CHG_USR_NAME = #{lastChgUsrName,jdbcType=VARCHAR},
+		LAST_CHG_USR_ORG_ID = #{lastChgUsrOrgId,jdbcType=VARCHAR},
+		LAST_CHG_USR_ORG_NAME = #{lastChgUsrOrgName,jdbcType=VARCHAR},
+		LAST_CHG_DATE = to_date(#{lastChgDate,jdbcType=VARCHAR},'yyyy-MM-dd hh24:mi:ss')
+		where IS_DELETE = 'N' AND TODO_WORK_STATE = '1'
+			AND TODO_WORK_ID in
+				<foreach collection="todoWorkIds" item="todoWorkId" index="index" open="(" close=")" separator=",">
+					#{todoWorkId}
+				</foreach>
+	</update>
+
+	<update id="updateToDoWorkState" parameterType="java.util.HashMap">
+		update OCRM_F_WP_TODO_WORK_SON set
+		TODO_WORK_STATE='2',
+		LAST_CHG_USR_ID = #{lastChgUsrId,jdbcType=VARCHAR},
+		LAST_CHG_USR_NAME = #{lastChgUsrName,jdbcType=VARCHAR},
+		LAST_CHG_USR_ORG_ID = #{lastChgUsrOrgId,jdbcType=VARCHAR},
+		LAST_CHG_USR_ORG_NAME = #{lastChgUsrOrgName,jdbcType=VARCHAR},
+		LAST_CHG_DATE = to_date(#{lastChgDate,jdbcType=VARCHAR},'yyyy-MM-dd hh24:mi:ss')
+		where IS_DELETE = 'N' AND TODO_WORK_STATE = '1'
+			AND TODO_WORK_ID in
+				<foreach collection="todoWorkIds" item="todoWorkId" index="index" open="(" close=")" separator=",">
+					#{todoWorkId}
+				</foreach>
+	</update>
+
+	<update id="updateSon" parameterType="cn.com.yusys.yusp.dycrm.todowork.domain.OcrmFwpTodoWorkSon">
+		update OCRM_F_WP_TODO_WORK_SON set
+		TODO_WORK_CONTENT =
+		#{todoWorkContent,jdbcType=VARCHAR},
+		RELATION_CUST =
+		#{relationCust,jdbcType=VARCHAR},
+		LAST_CHG_USR_ID =
+		#{lastChgUsrId,jdbcType=VARCHAR},
+		LAST_CHG_USR_NAME =
+		#{lastChgUsrName,jdbcType=VARCHAR},
+		LAST_CHG_USR_ORG_ID =
+		#{lastChgUsrOrgId,jdbcType=VARCHAR},
+		LAST_CHG_USR_ORG_NAME =
+		#{lastChgUsrOrgName,jdbcType=VARCHAR},
+		LAST_CHG_DATE =
+		#{lastChgDate,jdbcType=VARCHAR}
+		where TODO_WORK_ID =
+		#{todoWorkId,jdbcType=VARCHAR}
+	</update>
+
+	<update id="updateSons" parameterType="cn.com.yusys.yusp.dycrm.todowork.domain.OcrmFwpTodoWorkSon">
+		update OCRM_F_WP_TODO_WORK_SON set
+		TODO_WORK_CONTENT =
+		#{todoWorkContent,jdbcType=VARCHAR},
+		RELATION_CUST =
+		#{relationCust,jdbcType=VARCHAR},
+		LAST_CHG_USR_ID =
+		#{lastChgUsrId,jdbcType=VARCHAR},
+		LAST_CHG_USR_NAME =
+		#{lastChgUsrName,jdbcType=VARCHAR},
+		LAST_CHG_USR_ORG_ID =
+		#{lastChgUsrOrgId,jdbcType=VARCHAR},
+		LAST_CHG_USR_ORG_NAME =
+		#{lastChgUsrOrgName,jdbcType=VARCHAR},
+		LAST_CHG_DATE =
+		#{lastChgDate,jdbcType=VARCHAR}
+		where IS_DELETE = 'N'
+		AND
+		TODO_WORK_STATE = '1'
+		AND NOTICE_ID =
+		(select NOTICE_ID from
+		OCRM_F_WP_TODO_WORK_SON where TODO_WORK_ID =
+		#{todoWorkId,jdbcType=VARCHAR})
+		<![CDATA[
+		AND START_DATE >= #{startDate,jdbcType=VARCHAR}
+		]]>
+	</update>
+</mapper>

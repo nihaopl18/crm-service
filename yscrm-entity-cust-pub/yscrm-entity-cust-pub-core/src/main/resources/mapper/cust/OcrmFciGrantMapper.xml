@@ -1,0 +1,248 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.custpub.repository.mapper.OcrmFciGrantMapper">
+	<!-- 客户授权历史查询 -->
+	<select id="grantList" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+		SELECT T.APPLY_ID,T.CORP_ORG_CODE,T.MGR_ID,T.MGR_NAME,T.GRANT_MGR_ID,T.GRANT_MGR_NAME,
+        T.SET_USER_ID,T.SET_USER_NAME,T.GRANT_REASON,T.GRANT_STAT,T.GRANT_VIEW_TYPE,T.GRANT_VIEW_ITEM,
+        TO_CHAR(T.DEAD_LINE,'YYYY-MM-DD') AS DEAD_LINE,TO_CHAR(T.SET_DATE,'YYYY-MM-DD') AS SET_DATE,
+        COUNT(R.CUST_ID) AS CUST_NUM FROM OCRM_F_CI_GRANT_APPLY T
+        LEFT JOIN OCRM_F_CI_GRANT_LIST R ON T.APPLY_ID = R.APPLY_NO
+        LEFT JOIN ACRM_F_CI_CUST_ALL Y ON Y.CUST_ID = R.CUST_ID 
+        <where>
+        	<if test="condition.grantStat != '' and condition.grantStat !=null">
+        		T.GRANT_STAT = #{condition.grantStat,jdbcType=VARCHAR}
+        	</if>
+        	<if test="condition.custId != '' and condition.custId !=null">
+        		R.CUST_ID LIKE CONCAT('%',CONCAT(#{condition.custId,jdbcType=VARCHAR},'%'))
+        	</if>
+        	<if test="condition.custName != '' and condition.custName !=null">
+        		R.CUST_NAME LIKE CONCAT('%',CONCAT(#{condition.custName,jdbcType=VARCHAR},'%'))
+        	</if>
+        	<if test="condition.custType !='' and condition.custType != null">
+        		Y.CUST_TYPE = #{condition.custType,jdbcType=VARCHAR}
+        	</if>
+        	<if test="condition.mgrId !='' and condition.mgrId != null">
+        		Y.MGR_ID = #{condition.mgrId,jdbcType=VARCHAR}
+        	</if>
+        	<if test="condition.grantMgrId !='' and condition.grantMgrId != null">
+        		Y.GRANT_MGR_ID = #{condition.grantMgrId,jdbcType=VARCHAR}
+        	</if>
+        </where>
+        GROUP BY T.APPLY_ID,T.CORP_ORG_CODE,T.DEAD_LINE,T.MGR_ID,T.MGR_NAME,T.GRANT_MGR_ID,
+        T.GRANT_MGR_NAME,T.SET_USER_ID,T.SET_USER_NAME,T.SET_DATE,T.GRANT_REASON,T.GRANT_STAT,
+        T.GRANT_VIEW_TYPE,T.GRANT_VIEW_ITEM
+        ORDER BY T.APPLY_ID DESC
+	</select>
+	<!-- 所辖客户查询 -->
+	<select id="myCustListByModel" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"  resultType="java.util.HashMap">
+	SELECT P.*,B.ORG_TYPE,B.ORG_ID,B.ORG_NAME,B.MGR_TYPE,B.MGR_ID,B.MGR_NAME  
+	 <if test="condition.custType == 1">
+				,'1' as cust_type  FROM ACRM_F_CI_PER_ADMIT_INFO P
+	LEFT JOIN  OCRM_F_CI_ADMIT_BELONG B 
+    ON B.CUST_ID = P.CUST_ID 
+    WHERE 1 = 1 and P.IS_ADMIT_ENTER = '1' and B.IS_ADMIT_ENTER='1'
+		</if>
+		 <if test="condition.custType == 2">
+			,'2' as cust_type	  FROM ACRM_F_CI_ORG_CUST_INFO P 
+	LEFT JOIN OCRM_F_CI_ADMIT_BELONG B 
+    ON B.CUST_ID = P.CUST_ID
+    WHERE P.IS_ADMIT_ENTER = '1'  and B.IS_ADMIT_ENTER='1'
+		</if>
+		<if test="condition.grantStutas == 1">
+				AND P.CUST_ID NOT IN (select L.CUST_ID from OCRM_F_CI_GRANT_APPLY A LEFT JOIN OCRM_F_CI_GRANT_LIST L ON A.APPLY_ID = L.APPLY_NO WHERE A.MGR_ID = #{condition.userId, jdbcType=VARCHAR} AND A.GRANT_STAT = '1' AND L.CUST_ID IS NOT NULL)
+		</if>
+		<if test="condition.grantStutas == 2">
+				AND P.CUST_ID IN (select L.CUST_ID from OCRM_F_CI_GRANT_APPLY A LEFT JOIN OCRM_F_CI_GRANT_LIST L ON A.APPLY_ID = L.APPLY_NO WHERE A.MGR_ID = #{condition.userId, jdbcType=VARCHAR} AND A.GRANT_STAT = '1' AND L.CUST_ID IS NOT NULL)
+		</if>
+    AND B.MGR_ID =  #{condition.userId, jdbcType=VARCHAR} and P.CUST_STATUS ='1'
+		<!-- <if test="condition.custStatus != null and condition.custStatus !=''">
+				  and P.CUST_STATUS = #{condition.custStatus, jdbcType=VARCHAR}
+		</if> -->
+		<if test="condition.custId != null and condition.custId !=''">
+				  and P.CUST_ID LIKE CONCAT(CONCAT('%', #{condition.custId, jdbcType=VARCHAR}),'%')
+		</if>
+		<if test="condition.custName != null and condition.custName !=''">
+				  and P.CUST_NAME LIKE CONCAT(CONCAT('%', #{condition.custName, jdbcType=VARCHAR}),'%')
+		</if>
+		<if test="condition.certType != null and condition.certType !=''">
+				  and P.CERT_TYPE = #{condition.certType, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.certNo != null and condition.certNo !=''">
+				  and P.CERT_NO LIKE CONCAT(CONCAT('%', #{condition.certNo, jdbcType=VARCHAR}),'%')
+		</if>
+		<if test="condition.belongBrch != null and condition.belongBrch !=''">
+				  and P.BELONG_BRCH = #{condition.belongBrch, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.belongMgr != null and condition.belongMgr !=''">
+				  and P.BELONG_MGR = #{condition.belongMgr, jdbcType=VARCHAR}
+		</if>
+		ORDER BY P.CUST_STATUS
+	</select>
+	<!-- 客户授权回收 -->
+	<update id="grantRecover" parameterType="cn.com.yusys.yscrm.custpub.domain.OcrmFciGrantApply">
+		UPDATE OCRM_F_CI_GRANT_APPLY SET GRANT_STAT = '3' WHERE APPLY_ID = #{applyId,jdbcType=INTEGER} AND GRANT_STAT <![CDATA[!= ]]> '2' 
+	</update>
+	<!-- 获取记录编号 -->
+	<select id="getId" resultType="java.math.BigDecimal">
+		SELECT decode(MAX(APPLY_ID + 1),null,1,MAX(APPLY_ID + 1)) FROM OCRM_F_CI_GRANT_APPLY
+	</select>
+	<!-- 获取记录编号 -->
+	<select id="getListId" resultType="java.math.BigDecimal">
+		SELECT decode(MAX(LIST_ID + 1),null,1,MAX(LIST_ID + 1)) FROM OCRM_F_CI_GRANT_LIST
+	</select>
+	<!-- 新增授权清单客户 -->
+	<insert id="insertCustList" parameterType="cn.com.yusys.yscrm.custpub.domain.OcrmFciGrantList">
+		INSERT INTO OCRM_F_CI_GRANT_LIST VALUES(
+		#{listId,jdbcType=INTEGER},
+		#{applyNo,jdbcType=INTEGER},
+		#{custId,jdbcType=VARCHAR},
+		#{custName,jdbcType=VARCHAR})
+	</insert>
+	<!-- 客户授权清单列表 -->
+	<select id="custGrantList" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+		SELECT T.*,R.CUST_TYPE,R.CUST_STATUS,Y.GRADE_LEVEL,Y.SERVICE_LEVEL,R.CERT_TYPE,R.CERT_NO
+		FROM OCRM_F_CI_GRANT_LIST T 
+        LEFT JOIN ACRM_F_CI_CUST_ALL R ON R.CUST_ID = T.CUST_ID
+        LEFT JOIN OCRM_F_CG_CPN_GRADE Y ON Y.CUST_ID = T.CUST_ID
+        WHERE T.APPLY_NO = #{condition.applyNo,jdbcType=INTEGER}
+	</select>
+	<select id="getRoleCode" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+		select role_code from admin_sm_role where role_id in(select role_id from admin_sm_user_role_rel where user_id=#{condition.userId,jdbcType=VARCHAR})
+	</select>
+	<!-- 客户经理放大镜 -->
+	<select id="getCM" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+		SELECT distinct t.login_code, s.DPT_NAME, t.user_name, t.dpt_id, t.org_id,t.user_id, i.CUST_MANAGER_NAME,o.ORG_NAME,o.org_level
+        FROM ADMIN_SM_USER t 
+        LEFT JOIN ADMIN_SM_DPT s ON s.DPT_ID = t.DPT_ID 
+        left join ADMIN_SM_USER_ROLE_REL sr on t.user_id = sr.user_id 
+        left join ADMIN_SM_ROLE ad on ad.role_id = sr.role_id
+        left join ACRM_F_CM_CUST_MGR_INFO i ON t.user_id = i.USER_ID LEFT JOIN ADMIN_SM_ORG o ON t.org_id = o.ORG_CODE
+        <where>
+        	1=1 and t.USER_STS='A'
+        	<!-- <if test="condition.userId !='' and condition.userId != null">
+        		and t.user_id <![CDATA[!= ]]> #{condition.userId,jdbcType=VARCHAR}
+        	</if> -->
+        	<if test="condition.trustOrg != '' and condition.trustOrg != null">
+        		and t.ORG_ID = #{condition.trustOrg,jdbcType=VARCHAR}
+        	</if>
+        	<if test="condition.loginCode != '' and condition.loginCode != null">
+        		and t.LOGIN_CODE like concat('%',concat(#{condition.loginCode,jdbcType=VARCHAR},'%')) 
+        	</if>
+        	<if test="condition.userName != '' and condition.userName != null">
+        		and t.USER_NAME like concat('%',concat(#{condition.userName,jdbcType=VARCHAR},'%'))
+        	</if>
+        	<if test="condition.dptId != '' and condition.dptId != null">
+        		and t.dpt_id = #{condition.dptId,jdbcType=VARCHAR}
+        	</if>
+        </where>
+        <if test="condition.orgCode != '' and condition.orgCode != null and condition.orgCode!='500'">
+        	start with o.org_code = #{condition.orgCode,jdbcType=VARCHAR} connect by nocycle prior o.org_code = o.up_org_id
+        </if>
+	</select>
+	
+	<select id="getCM1" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+		SELECT distinct t.login_code, s.DPT_NAME, t.user_name, t.dpt_id, t.org_id,t.user_id, i.CUST_MANAGER_NAME,o.ORG_NAME,o.org_level
+        FROM ADMIN_SM_USER t 
+        LEFT JOIN ADMIN_SM_DPT s ON s.DPT_ID = t.DPT_ID 
+        left join ADMIN_SM_USER_ROLE_REL sr on t.user_id = sr.user_id 
+        left join ADMIN_SM_ROLE ad on ad.role_id = sr.role_id
+        left join ACRM_F_CM_CUST_MGR_INFO i ON t.user_id = i.USER_ID LEFT JOIN ADMIN_SM_ORG o ON t.org_id = o.ORG_CODE
+        <where>
+        	<!-- <if test="condition.userId !='' and condition.userId != null">
+        		and t.user_id = #{condition.userId,jdbcType=VARCHAR}
+        	</if> -->
+        	<if test="condition.loginCode != '' and condition.loginCode != null">
+        		and t.LOGIN_CODE like concat('%',concat(#{condition.loginCode,jdbcType=VARCHAR},'%')) 
+        	</if>
+        	<if test="condition.userName != '' and condition.userName != null">
+        		and t.USER_NAME like concat('%',concat(#{condition.userName,jdbcType=VARCHAR},'%'))
+        	</if>
+        </where>
+	</select>
+	<!-- 返回用户id -->
+	<select id="getUserId" parameterType="String" resultType="String">
+		SELECT USER_ID FROM ADMIN_SM_USER WHERE LOGIN_CODE = #{loginCode,jdbcType=VARCHAR}
+	</select>
+	<!-- 判断客户是否已经托管 -->
+	<select id="checkIs" parameterType="java.util.HashMap" resultType="int">
+		select count(*) from OCRM_F_CI_GRANT_APPLY A LEFT JOIN OCRM_F_CI_GRANT_LIST L ON A.APPLY_ID = L.APPLY_NO 
+		WHERE A.MGR_ID = #{userId, jdbcType=VARCHAR} AND L.CUST_ID = #{custId, jdbcType=VARCHAR} AND A.GRANT_STAT = '1' 
+	</select>
+	<!-- 获取托管中列表 -->
+	<select id="getGrantList" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+		SELECT DISTINCT A.*,(SELECT COUNT(*) FROM OCRM_F_CI_GRANT_LIST L WHERE A.APPLY_ID = L.APPLY_NO) AS CUST_NUM 
+		FROM OCRM_F_CI_GRANT_APPLY A 
+		LEFT JOIN OCRM_F_CI_GRANT_LIST L
+            ON A.APPLY_ID = L.APPLY_NO
+            LEFT JOIN ACRM_F_CI_CUST_ALL C
+          <!-- LEFT JOIN ACRM_F_CI_CUST_ADMIT_ALL C -->
+            ON L.CUST_ID = C.CUST_ID
+            WHERE A.MGR_ID = #{condition.userId, jdbcType=VARCHAR}
+		AND A.GRANT_STAT = '1' and C.IS_ADMIT_ENTER='1'
+		 <if test="condition.trustMgrId != null and condition.trustMgrId !=''">
+				  and A.TRUST_MGR_ID = #{condition.trustMgrId, jdbcType=VARCHAR}
+		</if>
+        <if test="condition.custStatus != null and condition.custStatus !=''">
+				  and C.CUST_STATUS = #{condition.custStatus, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.custType != null and condition.custType !=''">
+				  and C.CUST_TYPE = #{condition.custType, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.custId != null and condition.custId !=''">
+				  and C.CUST_ID LIKE CONCAT(CONCAT('%', #{condition.custId, jdbcType=VARCHAR}),'%')
+		</if>
+		<if test="condition.custName != null and condition.custName !=''">
+				  and C.CUST_NAME LIKE CONCAT(CONCAT('%', #{condition.custName, jdbcType=VARCHAR}),'%')
+		</if>
+		<if test="condition.certType != null and condition.certType !=''">
+				  and C.CERT_TYPE = #{condition.certType, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.certNo != null and condition.certNo !=''">
+				  and C.CERT_NO LIKE CONCAT(CONCAT('%', #{condition.certNo, jdbcType=VARCHAR}),'%')
+		</if>
+		ORDER BY A.SET_DATE DESC
+	</select>
+	<!-- 获取托管中的客户 -->
+	<select id="getGrantCust" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+		SELECT A.*,
+               L.LIST_ID,
+               L.CUST_ID,
+               L.CUST_NAME,
+               C.CERT_TYPE,
+               C.CERT_NO,
+               C.CUST_TYPE,
+               C.CUST_STATUS
+          FROM OCRM_F_CI_GRANT_APPLY A
+          LEFT JOIN OCRM_F_CI_GRANT_LIST L
+            ON A.APPLY_ID = L.APPLY_NO
+            LEFT JOIN ACRM_F_CI_CUST_ALL C
+          <!-- LEFT JOIN ACRM_F_CI_CUST_ADMIT_ALL C -->
+            ON L.CUST_ID = C.CUST_ID
+            WHERE C.IS_ADMIT_ENTER='1' and  A.APPLY_ID =  #{condition.applyId, jdbcType=VARCHAR}
+         <if test="condition.custStatus != null and condition.custStatus !=''">
+				  and C.CUST_STATUS = #{condition.custStatus, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.custType != null and condition.custType !=''">
+				  and C.CUST_TYPE = #{condition.custType, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.custId != null and condition.custId !=''">
+				  and C.CUST_ID LIKE CONCAT(CONCAT('%', #{condition.custId, jdbcType=VARCHAR}),'%')
+		</if>
+		<if test="condition.custName != null and condition.custName !=''">
+				  and C.CUST_NAME LIKE CONCAT(CONCAT('%', #{condition.custName, jdbcType=VARCHAR}),'%')
+		</if>
+		<if test="condition.certType != null and condition.certType !=''">
+				  and C.CERT_TYPE = #{condition.certType, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.certNo != null and condition.certNo !=''">
+				  and C.CERT_NO LIKE CONCAT(CONCAT('%', #{condition.certNo, jdbcType=VARCHAR}),'%')
+		</if>
+		<if test="condition.belongBrch != null and condition.belongBrch !=''">
+				  and C.BELONG_BRCH = #{condition.belongBrch, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.belongMgr != null and condition.belongMgr !=''">
+				  and C.BELONG_MGR = #{condition.belongMgr, jdbcType=VARCHAR}
+		</if>
+	</select>
+</mapper>

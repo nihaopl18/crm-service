@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.climp.acty.repository.mapper.LoyRlTableEcNameMapper">
+	<resultMap id="BaseResultMap" type="cn.com.yusys.climp.acty.domain.LoyRlTableEcName">
+		<result column="TABLE_ID" jdbcType="VARCHAR" property="tableId" />
+		<result column="TABLE_E_NAME" jdbcType="VARCHAR" property="tableEname" />
+		<result column="TABLE_C_NAME" jdbcType="VARCHAR" property="tableCname" />
+		<result column="TYPE_ID" jdbcType="VARCHAR" property="typeId" />
+		<result column="OBJECT_TYPE" jdbcType="VARCHAR" property="objectType" />
+		<result column="REMARK" jdbcType="VARCHAR" property="remark" />
+		<result column="DELETE_SIGN" jdbcType="VARCHAR" property="deleteSign" />
+		<result column="TRANSACTION_CODE" jdbcType="VARCHAR" property="transactionCode" />
+		<result column="CREATE_USER" jdbcType="VARCHAR" property="createUser" />
+		<result column="CREATE_DATE" jdbcType="DATE" property="createDate" />
+		<result column="CREATE_ORG" jdbcType="VARCHAR" property="createOrg" />
+		<result column="UPDATE_USER" jdbcType="VARCHAR" property="updateUser" />
+		<result column="UPDATE_DATE" jdbcType="DATE" property="updateDate" />
+		<result column="UPDATE_ORG" jdbcType="VARCHAR" property="updateOrg" />
+	</resultMap>
+	<sql id="Base_Column_List">
+		TABLE_ID,TABLE_E_NAME,TABLE_C_NAME,TYPE_ID,OBJECT_TYPE,REMARK,DELETE_SIGN,TRANSACTION_CODE,CREATE_USER,CREATE_DATE,CREATE_ORG,UPDATE_USER,UPDATE_DATE,UPDATE_ORG
+	</sql>
+	<!-- 根据表类型id查询表Id -->
+	<select id="queryTableId" parameterType="String"
+			resultType="cn.com.yusys.climp.acty.domain.LoyRlTableEcName">
+		select T.TABLE_ID from LOY_RL_TABLE_EC_NAME T
+		where T.TYPE_ID = #{typeId, jdbcType=VARCHAR}
+	</select>
+	<!-- 根据交易类型查询积分活动 -->
+	<select id="getRuleByTrans" parameterType="String"
+			resultType="cn.com.yusys.climp.acty.domain.LoyRlActivity">
+		SELECT t.*
+		FROM LOY_RL_ACTIVITY t
+		where (t.DELETE_SIGN is null or t.DELETE_SIGN != '1')
+		  and T.TRANSACTION_CODE  in (#{transCode, jdbcType=VARCHAR})
+	</select>
+
+	<!-- 删除表-->
+	<update id="updataTabState" parameterType="java.util.Map">
+		UPDATE LOY_RL_TABLE_EC_NAME
+		SET
+			DELETE_SIGN = '1',
+			UPDATE_USER	= #{userCode,javaType=java.lang.String},
+			UPDATE_DATE	= sysdate,
+			UPDATE_ORG	= #{orgCode,javaType=java.lang.String}
+		WHERE TABLE_ID = #{tableId,javaType=java.lang.String}
+	</update>
+
+	<!-- 根据表类型查询表-->
+	<select id="getTableByTypeId" parameterType="String"
+			resultType="java.util.Map">
+		SELECT T.*,t1.type_name,T2.TRANSACTION_NAME
+		FROM LOY_RL_TABLE_EC_NAME T
+		LEFT JOIN LOY_RL_TABLE_TYPE t1
+		ON t1.TYPE_ID = t.type_id
+		LEFT JOIN LOY_ENG_TRANSACTION_CATEGORY T2
+		ON T2.TRANSACTION_CODE = T.TRANSACTION_CODE
+		where (t.DELETE_SIGN is null or t.DELETE_SIGN != '1' )
+		<if test="typeId != null and typeId !='' and typeId !='P000' ">
+			and T.TYPE_ID  =#{typeId, jdbcType=VARCHAR}
+		</if>
+	</select>
+</mapper>

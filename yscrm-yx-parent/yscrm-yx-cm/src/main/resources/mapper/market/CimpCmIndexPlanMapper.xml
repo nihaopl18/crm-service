@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.cm.indexplan.repository.mapper.CimpCmIndexPlanMapper">
+
+	<!-- 查询产品 -->
+	<select id="getProductList" parameterType="String"
+		resultType="java.util.Map">
+		select T.Product_Id,T.Prod_Name from CM_F_RC_PROD_INFO T 
+		where T.product_id in (${proId})
+		<where>
+		</where>
+	</select>
+	<!-- 通过节点Id查询产品信息 -->
+	<select id="proIndexList" parameterType="String"
+		resultType="java.util.Map">
+		select s.form_out_val
+  		from CIMP_CM_NODES_DISPLAY_OUTPUT s
+ 			where s.form_id in
+		       (select t.form_id
+		          from CIMP_CM_NODES_DISPLAY t
+		         where t.node_id in
+		               (select s.node_id
+		                  from CIMP_CM_NODEINFO s
+		                 where s.temp_id =
+		                       (select t.temp_id
+		                          from CIMP_CM_NODEINFO t
+		                         where t.node_id = #{nodId})
+		                   and assembly_id in (select d.assembly_id
+		                                         from CIMP_CM_ASSEMINFO d
+		                                        where class_id = '3')))
+	</select>
+	<!-- 查询指标列表 -->
+	<select id="getIndexList" resultType="java.util.Map"  parameterType="String">
+		select s.Product_Id,s.Target_Id,a.Target_Name from CM_F_RC_PROD_TARGET s 
+		left join CM_F_RC_MARKET_TARGET a on s.Target_Id = a.Target_Id  where s.Product_Id in (${proId})
+	</select>	
+	<!-- 查询指标列表 -->
+<!--	<select id="targetQuery" parameterType="String" resultType="java.util.Map">-->
+<!--		${sql}-->
+<!--	</select>-->
+	<select id="targetQuery" parameterType="String" resultType="cn.com.yusys.yusp.cm.indexplan.domain.CimpCmAssemblyAnalysis">
+		select * from CIMP_CM_ASSEMBLY_ANALYSIS where NOD_ID=#{nodeId}
+	</select>
+	<!-- 新增获取id -->
+	<select id="getSeq" resultType="String">
+		select ysc_sequence.nextval from dual
+	</select>	
+	<!-- 成效分析组件保存清除重复数据 -->
+	<select id="deleteAssembly" parameterType="String" >
+		delete from CIMP_CM_ASSEMBLY_ANALYSIS where NOD_ID = #{nodId}
+	</select>
+	<!-- 成效分析客户查询 -->
+	<select id="getAssembly" resultType="java.util.Map" parameterType="String">
+		select  b.cust_id,d.cust_name,d.cust_type,d.cust_stat,d.ident_type,d.ident_no,d.belong_org,d.belong_mgr
+  			from CIMP_C_CUSTGROUP_CUST b
+  			left join ACIM_F_CI_CUSTOMER d
+  		  	on d.cust_id = b.cust_id
+ 			where b.cust_group_id in 
+       		(select a.form_out_val
+          		from CIMP_CM_NODES_DISPLAY_OUTPUT a
+         			where a.form_id in 
+               			(select s.form_id
+                  			from CIMP_CM_NODES_DISPLAY s where s.node_id in (select s.node_id from CIMP_CM_NODEINFO s 
+                  			where s.temp_id = #{flowId} and assembly_id in (
+                  					select d.assembly_id from CIMP_CM_ASSEMINFO d where class_id='2'))
+		))
+	</select>
+	<!-- 成效分析产品ID查询 -->
+	<select id="proQuery" resultType="String" parameterType="String">	
+	select s.form_out_val
+  		from CIMP_CM_NODES_DISPLAY_OUTPUT s
+ 			where s.form_id in
+		       (select t.form_id
+		          from CIMP_CM_NODES_DISPLAY t
+		         where t.node_id in
+		               (select s.node_id
+		                  from CIMP_CM_NODEINFO s
+		                 where s.temp_id = #{flowId}
+		                   and assembly_id in (select d.assembly_id
+		                                         from CIMP_CM_ASSEMINFO d
+		                                        where class_id = '3')))
+
+	</select>
+	<!-- 查询流程中产品 -->
+	<select id="getProduct" resultType="java.util.Map" parameterType="String">
+		select b.product_id,
+	       b.prod_name,
+	       b.catl_code,
+	       b.money,
+	       to_char(b.prod_start_date,'YYYY-MM-DD') as prod_start_date,
+       	   to_char(b.prod_end_date,'YYYY-MM-DD') as prod_end_date,
+	       b.rate,
+	       b.cost_rate,
+	       b.limit_time,
+	       b.prod_charact,
+	       b.obj_cust_disc,
+	       b.danger_disc,
+	       b.assure_disc,
+	       b.other_info,
+	       c.catl_name,
+	       b.prod_desc
+	  from CM_F_RC_PROD_INFO b
+	  left join CM_F_RC_PROD_CATL c
+    	on b.catl_code = c.catl_code where b.product_id in (${productId})
+	</select>
+	<!-- 查询流程中渠道 -->
+<!--	<select id="chaQuery" resultType="java.util.Map" parameterType="String">-->
+<!--		select *-->
+<!--		  from CIMP_CM_NODEINFO s-->
+<!--		 where s.temp_id = #{flowId}-->
+<!--			   and assembly_id in-->
+<!--		       (select d.assembly_id from CIMP_CM_ASSEMINFO d where class_id = '4')-->
+<!--	</select>-->
+	<select id="chaQuery" resultType="java.util.Map" parameterType="String">
+		select d.assembly_id,d.assembly_name from CIMP_CM_ASSEMINFO d where class_id = '4'
+	</select>
+	
+	<!-- 查询机构信息 -->
+	<select id="orgQuery" resultType="java.util.Map" >
+		select t.org_code,t.org_name from admin_sm_org t
+	</select>
+	
+	<!-- 查询客户经理信息 -->
+	<select id="customerquery" resultType="java.util.Map" >
+		select b.login_code, b.user_name
+		  from admin_sm_user b
+		 where b.user_id in
+		       (select a.user_id
+		          from admin_sm_user_role_rel a
+		         where a.role_id = (select s.role_id
+		                              from admin_sm_role s
+		                             where s.role_code = 'CM'))
+
+	</select>
+	<select id="customerByLoginCode" resultType="java.util.Map" parameterType="String">
+		select s.user_name from admin_sm_user s where s.login_code= #{customerLogCode}
+	</select>
+	
+</mapper>

@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper
+	namespace="cn.com.yusys.climp.score.repository.mapper.LoySrScoreAccuteSumMapper">
+	<!-- 分页查询客积分贡献度信息 -->
+	<select id="queryCustContriByPage" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+		resultType="java.util.Map">
+		select
+		t.CUST_ID,t.last_sr_accute,t.this_sum_score,t.curr_sr_accute,t.this_sum_ratio,t.etl_dt,t.remark,
+		substr(to_char(t.BUSN_DATE,'yyyy-MM-dd'), 0, 7) as
+		BUSN_DATE,t1.ident_no,t1.cust_name from LOY_SR_SCORE_ACCUTE_SUM t
+		left join loy_cm_cust_info t1 on t1.cust_id=t.cust_id
+		<where>
+			<if test="condition.custId != null and condition.custId != ''">
+				and t.cust_id LIKE CONCAT(CONCAT('%', #{condition.custId,
+				jdbcType=VARCHAR}),'%')
+			</if>
+			<if test="condition.custName != null and condition.custName != ''">
+				and t1.cust_name LIKE CONCAT(CONCAT('%',
+				#{condition.custName, jdbcType=VARCHAR}),'%')
+			</if>
+			<if
+				test="condition.busnDateStart != null and condition.busnDateStart != '' and (condition.busnDateEnd == null or condition.busnDateEnd == '')">
+				and etl_dt =
+				to_char(last_day(trunc(to_date(#{condition.busnDateStart,jdbcType=DATE},'YYYY-MM'),'MONTH')),'YYYYMMDD')
+			</if>
+			<if
+				test="condition.busnDateEnd != null and condition.busnDateEnd != '' and(condition.busnDateStart == null or condition.busnDateStart == '')">
+				and etl_dt =
+				to_char(last_day(trunc(to_date(#{condition.busnDateEnd,jdbcType=DATE},'YYYY-MM'),'MONTH')),'YYYYMMDD')
+			</if>
+			<if
+				test="condition.busnDateEnd != null and condition.busnDateEnd != '' and condition.busnDateStart != null and condition.busnDateStart != ''">
+				and etl_dt in (select
+				to_char(last_day(add_months(to_date(#{condition.busnDateStart,jdbcType=DATE},'YYYY-MM'),rownum-1)),'YYYYMMDD')
+				from dual connect by rownum &lt;=
+				months_between(to_date(#{condition.busnDateEnd,jdbcType=DATE},'YYYY-MM'),to_date(#{condition.busnDateStart,jdbcType=DATE},'YYYY-MM'))+1)
+			</if>
+			<if
+				test="(condition.busnDateEnd == null or condition.busnDateEnd == '') and (condition.busnDateStart == null or condition.busnDateStart == '')">
+				and etl_dt = (select
+				to_char(last_day(trunc(sysdate,'MONTH')),'YYYYMMdd') from dual)
+			</if>
+			<if test="condition.identNo != null and condition.identNo != ''">
+				and t1.ident_no = #{condition.identNo, jdbcType=VARCHAR}
+			</if>
+		</where>
+		<if test="sort != null">
+			order by t.${sort}
+		</if>
+	</select>
+	<insert id="insertData" parameterType="java.lang.String">
+		insert into LOY_SR_SCORE_ACCUTE_SUM (
+		    SCD_ID, CUST_NO,SCORE_DEAL_TYPE,THIS_SUM_SCORE,BUSN_DATE,LAST_SR_ACCUTE,CURR_SR_ACCUTE
+		)
+		select T4.SCD_ID,T.CUST_NO,'10',T.ORI_SCORE,to_date(sysdate,'yyyy-MM-dd hh24:mi:ss'),nvl(T2.NEXT_SCORE,0) - T.ORI_SCORE, nvl(T2.NEXT_SCORE)
+		from T_CUST_POINT_SUB_ACCT_INF_TMP T
+		left join (
+			select T2.CUST_NO,sum(T2.NEXT_SCORE) as NEXT_SCORE
+			from (
+			    select T2.CUST_NO,T2.CURR_SR_ACCUTE as next_score,
+						 row_number() over(partition by T2.CUST_NO,T2.ACCOUNT_CODE order by T2.BUSN_DATE desc) as rn
+				  from LOY_SR_SCORE_COLLECT T2
+			    ) T2
+		    where T2.rn = 1
+		    group by T2.CUST_NO
+			) T2 on T.CUST_NO = T2.CUST_NO
+		left join LOY_SR_SCORE_COLLECT T4 on T.CUST_NO = T4.CUST_NO and T4.ACCOUNT_CODE = T.SDA_ID
+		where exists (
+		    select 1 from LOY_SR_SCORE_GAME_FT T5
+		    where T.CUST_NO = T5.CUST_NO and T5.IMPORT_CODE = #{importCode}
+				  )
+	</insert>
+</mapper>

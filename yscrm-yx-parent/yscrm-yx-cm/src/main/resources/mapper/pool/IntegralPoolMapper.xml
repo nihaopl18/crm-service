@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.climp.pool.repository.mapper.IntegralPoolMapper">
+	<select id="getList" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+		resultType="java.util.Map">
+		select t.pool_id,t7.pool_score_surplus as surplus_Score,
+		t.pool_no,t.pool_name,t.pool_score_initial,t.pool_score_used,round(t.pool_score_surplus/t.pool_score_initial*100,2)
+		as pool_score_surplus_percent,
+		round(t.pool_score_surplus / decode(t.reference_cost,0,1,t.reference_cost), 2) as score_price,
+		t.pool_score_surplus,t.reference_cost,t.warn_threshold,t.upper_limit,t.remark,t.warn_phone_no,
+		t.delete_sign,t.wf_appr_sts,t5.user_name as
+		create_user,to_char(t.create_date,'YYYY-mm-dd') as
+		create_date,t3.org_name as create_org,t5.user_name as update_user,
+		to_char(t.update_date,'YYYY-mm-dd') as update_date,t4.org_name as
+		update_org,t.pool_type ,t.POOL_PARENT_ID,t7.pool_name as
+		POOL_PARENT_NAME
+		from LOY_AC_SCORE_POOL t
+		left join admin_sm_org t3 on t.create_org = t3.org_id
+		left join admin_sm_org t4 on t.update_org = t4.org_id
+		left join admin_sm_user t5 on t.create_user = t5.login_code
+		left join admin_sm_user t6 on t.update_user = t6.login_code
+		left join LOY_AC_SCORE_POOL t7 on t.pool_parent_id=t7.pool_id
+		where t.delete_sign = '0'
+		<if test="condition.poolNo != null and condition.poolNo !=''">
+			and t.pool_No like '%'||#{condition.poolNo}||'%'
+		</if>
+		<if test="condition.poolName != null and condition.poolName !=''">
+			and t.pool_Name like '%'||#{condition.poolName}||'%'
+		</if>
+		<if test="condition.wfApprSts != null and condition.wfApprSts !=''">
+			and t.wf_Appr_Sts = #{condition.wfApprSts}
+		</if>
+		<if test="condition.poolParentId != null and condition.poolParentId !=''">
+			and t.POOL_PARENT_ID = #{condition.poolParentId}
+		</if>
+		order by t.pool_no desc
+	</select>
+
+	<select id="getPoolList" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+		resultType="java.util.Map">
+		select
+		t.POOL_NO,t.POOL_NAME,t.POOL_SCORE_INITIAL,t.POOL_SCORE_USED,t.POOL_SCORE_SURPLUS,t.CREATE_USER,
+		t.WARN_PHONE_NO,to_char(t.CREATE_DATE,'YYYY-mm-dd')
+		from LOY_AC_SCORE_POOL t
+		where t.POOL_ID = #{condition.bizSeqNo, jdbcType=VARCHAR}
+	</select>
+
+	<select id="delPool" parameterType="string" resultType="java.util.Map">
+		update LOY_AC_SCORE_POOL t set t.delete_sign = '1' where t.pool_id in
+		(#{id})
+	</select>
+
+	<!-- 新增获取账户编号 -->
+	<select id="getSeq" resultType="java.lang.Integer">
+		select SEQ_POOL_NO.nextval from
+		dual
+	</select>
+
+	<!-- 新增获取账户编号 -->
+	<select id="activityPool" resultType="java.util.Map">
+		select t.pool_no as key,
+		t.pool_name as value
+		from LOY_AC_SCORE_POOL t where t.POOL_SCORE_SURPLUS &lt;&gt; 0 and
+		t.wf_appr_sts ='997' and delete_sign = '0'
+	</select>
+
+	<!-- 查询父积分池 -->
+	<select id="poolParentId" resultType="java.util.Map">
+		select t.POOL_ID as
+		key,t.pool_name as value from LOY_AC_SCORE_POOL t
+		where t.wf_appr_sts ='997' and delete_sign = '0' and t.POOL_PARENT_ID is
+		null
+	</select>
+
+	<!-- 当子积分池无上限时 -->
+	<select id="unlimit" parameterType="string" resultType="java.util.Map">
+		select
+		count(*) as num from LOY_AC_SCORE_POOL t
+		where t.wf_appr_sts ='997' and delete_sign = '0' and t.upper_limit ='1' and
+		t.pool_id = #{parentId}
+	</select>
+
+	<!-- 当子积分池有上限时 -->
+	<select id="limit" parameterType="java.util.Map" resultType="java.util.Map">
+		select count(*) as num from LOY_AC_SCORE_POOL t
+		where t.wf_appr_sts ='997' and delete_sign = '0' and ( t.upper_limit ='1'
+		or t.upper_limit ='0' ) and
+		t.pool_score_surplus >= ((select nvl(sum(t.pool_score_initial),0) +
+		#{poolScoreInitial,jdbcType=VARCHAR}
+		from LOY_AC_SCORE_POOL t
+		where t.pool_parent_id = #{parentId,jdbcType=VARCHAR} and t.delete_sign =
+		'0'
+		<if test="poolId != null and poolId !=''">
+			and t.pool_id != #{poolId,jdbcType=VARCHAR}
+		</if>
+		) - (select nvl(sum(s.pool_score_initial),0) from LOY_AC_SCORE_POOL s
+		where
+		s.pool_parent_id = #{parentId,jdbcType=VARCHAR}
+		)
+		)
+		and t.pool_id=#{parentId,jdbcType=VARCHAR}
+	</select>
+
+	<!-- 新增/修改积分池时更新父积分池可用积分 -->
+	<select id="updateParentPool" parameterType="java.util.Map"
+		resultType="java.util.Map">
+		update LOY_AC_SCORE_POOL
+		set pool_score_surplus =
+		(select t.pool_score_surplus - #{updateScore}
+		from LOY_AC_SCORE_POOL t
+		where t.pool_id = #{parentId, jdbcType=VARCHAR}) ,
+		pool_score_used = (select t.pool_score_used + #{updateScore} from LOY_AC_SCORE_POOL t
+		where t.pool_id = #{parentId, jdbcType=VARCHAR})
+		where pool_id = #{parentId, jdbcType=VARCHAR}
+	</select>
+
+	<!-- 修改积分池时恢复修改前父积分池可用积分 -->
+	<select id="recoveryParentPool" parameterType="java.util.Map"
+		resultType="java.util.Map">
+		update LOY_AC_SCORE_POOL
+		set pool_score_surplus =
+		(select t.pool_score_surplus + #{updateScore}
+		from LOY_AC_SCORE_POOL t
+		where t.pool_id = #{parentId, jdbcType=VARCHAR}) ,
+		pool_score_used = (select t.pool_score_used - #{updateScore} from LOY_AC_SCORE_POOL t
+		where t.pool_id = #{parentId, jdbcType=VARCHAR})
+		where pool_id = #{parentId, jdbcType=VARCHAR}
+	</select>
+
+	<!-- 修改积分池时查询初始额度 -->
+	<select id="getPoolScoreInitial" parameterType="java.util.Map"
+		resultType="java.util.Map">
+		select * from LOY_AC_SCORE_POOL t where t.pool_Id
+		=#{poolId}
+	</select>
+
+	<!-- 子积分池修改时更新父积分池可用积分 -->
+	<select id="changeParentPool" parameterType="java.util.Map"
+		resultType="java.util.Map">
+		update LOY_AC_SCORE_POOL
+		set pool_score_surplus =
+		(select t.pool_score_surplus - #{relScoreInitial}
+		from LOY_AC_SCORE_POOL t
+		where t.pool_id = #{parentId, jdbcType=VARCHAR}) ,
+		pool_score_used = (select t.pool_score_used + #{relScoreInitial} from
+		LOY_AC_SCORE_POOL t
+		where t.pool_id = #{parentId, jdbcType=VARCHAR})
+		where pool_id = #{parentId, jdbcType=VARCHAR}
+	</select>
+
+	<!-- 删除子积分池为父积分池恢复额度 -->
+	<select id="returnQuota" parameterType="java.util.Map"
+		resultType="java.util.Map">
+		update LOY_AC_SCORE_POOL set POOL_SCORE_USED =
+		#{poolScoreUsed} - #{poolScoreInitial} ,
+		POOL_SCORE_SURPLUS = #{poolScoreSurplus} + #{poolScoreInitial} where POOL_ID =
+		#{poolParentId}
+	</select>
+
+	<!-- 校验积分池是否被引用 -->
+	<select id="delCheck" parameterType="string" resultType="java.util.Map">
+		select count(*) as num from LOY_RL_ACTIVITY t where t.pool_no = #{poolId}
+	</select>
+
+	<!-- 返回父积分池可用额度和是否上限 -->
+	<select id="getLimitScore" parameterType="string" resultType="java.util.Map">
+		select t.pool_id,t.pool_score_surplus as surplusScore,t.upper_limit
+		from LOY_AC_SCORE_POOL t where t.pool_id = #{poolId}
+	</select>
+
+	<!-- 校验积分池名字是否重复 -->
+	<select id="checkPoolName" parameterType="java.util.Map"
+		resultType="java.util.Map">
+		select count(*) as num from LOY_AC_SCORE_POOL t where t.pool_name =
+		#{poolName} and t.delete_sign = '0'
+		<if test="poolId != null and poolId !=''">
+			and t.pool_id != #{poolId,jdbcType=VARCHAR}
+		</if>
+	</select>
+
+</mapper>

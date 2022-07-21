@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.custpub.repository.mapper.OcrmFciEventInfoMapper">
+   <select id="queryEventList" parameterType="java.util.Map"  resultType="java.util.HashMap">
+	  select      
+				 t.DATA_DATE                ,        
+				 t.CRAT_DT                  ,        
+				 t.CRAT_ORG_ID              ,        
+				 t.CRAT_USR                 ,        
+				 t.LAST_CHG_SYS             ,        
+				 t.LAST_CHG_USR             ,        
+				 t.LAST_CHG_DT              ,        
+				 t.CORP_ORG_CODE            ,        
+				 t.CUST_ID                  ,        
+				 t.CUST_TYPE                ,        
+				 t.EVENT_ID                 ,        
+				 t.EVENT_NAME               ,        
+				 t.EVENT_TYPE               ,        
+				 t.EVENT_DESC               ,        
+				 t.EVENT_STAT               ,        
+				 t.EVENT_AFFECT_DEGREE      ,        
+				 t.EVENT_SORT               ,        
+				
+				  to_char(t.EVENT_DATE,'yyyy-mm-dd') as EVENT_DATE,             
+				 t.WARN_FLG                 ,        
+				 t.REMIND_RULE_TYPE         ,        
+				 t.REMIND_OBJ               ,        
+				 t.REMIND_MGR_ID            ,        
+				 t.REMIND_TIME              ,        
+				 t.REMIND_INFO           ,        
+				 t.MAINT_MAN                ,        
+				 to_char(t.MAINT_DATE,'yyyy-mm-dd') as MAINT_DATE,       
+				 t.SRC_SYS_CD               ,        
+	             cust.USER_NAME                ,
+	             org.ORG_NAME
+	  from  OCRM_F_CI_EVENT_INFO t
+	
+	  left join admin_sm_user cust on cust.LOGIN_CODE=t.MAINT_MAN 
+	  left join admin_sm_org org on org.ORG_ID=cust.ORG_ID 
+	  where 1=1
+	   <if  test="custId != null and custId != ''">
+		       and 		 t.CUST_ID =#{custId,jdbcType=VARCHAR} 
+	   </if>
+	   <if  test="topfive == 'yes' ">
+		       and 		 ROWNUM &lt;=5
+	   </if>
+	</select>
+     <select id="queryRemindDec"  resultType="java.util.HashMap">
+	 select   REMIND_MODEL   from   OCRM_F_WP_REMIND_RULE  where TYPE_ID='R017'
+	</select>
+    
+    <select id="selectNotice" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"  resultType="java.util.HashMap"> 
+           select *
+  from (select info.NOTICE_ID,
+               info.NOTICE_TITLE,
+               info.NOTICE_LEVEL,
+               info.ACTIVE_DATE,
+               info.IS_TOP,
+               info.TOP_ACTIVE_DATE,
+               info.NOTICE_CONTENT,
+               info.PUB_STS,
+               info.PUB_TIME,
+               info.PUB_USER_ID,
+               info.PUB_USER_NAME,
+               info.PUB_ORG_ID,
+               info.PUB_ORG_NAME,
+               info.CREATOR_ID,
+               info.CREATOR_NAME,
+               info.CREATOR_TIME,
+               case
+                 when rea.READ_ID is null then
+                  '未阅'
+                 else
+                  '已阅'
+               end as READ_STS
+          from ADMIN_SM_NOTICE info
+          left join (select * from ADMIN_SM_NOTICE_READ where user_id = #{condition.userId, jdbcType=VARCHAR}) rea
+            on info.NOTICE_ID = rea.NOTICE_ID,
+         (select *
+                  from ADMIN_SM_NOTICE_RECIVE
+                 where RECIVE_TYPE = 'ORG'
+                   and (RECIVE_OGJ_ID = #{condition.reciveOgjId,jdbcType=VARCHAR} OR RECIVE_OGJ_ID = 'NA')
+                union all
+                select *
+                  from ADMIN_SM_NOTICE_RECIVE
+                 where RECIVE_TYPE = 'ROLE'
+                   and (RECIVE_OGJ_ID in 
+                <foreach collection="condition.ids" item="id" index="index" open="(" close=")" separator=",">
+        			#{id}
+        		</foreach> 
+        	OR RECIVE_OGJ_ID = 'NA')) rec
+         WHERE info.NOTICE_ID = rec.NOTICE_ID
+           and PUB_STS = 'O'
+        union
+        select info.NOTICE_ID,
+               info.NOTICE_TITLE,
+               info.NOTICE_LEVEL,
+               info.ACTIVE_DATE,
+               info.IS_TOP,
+               info.TOP_ACTIVE_DATE,
+               info.NOTICE_CONTENT,
+               info.PUB_STS,
+               info.PUB_TIME,
+               info.PUB_USER_ID,
+               info.PUB_USER_NAME,
+               info.PUB_ORG_ID,
+               info.PUB_ORG_NAME,
+               info.CREATOR_ID,
+               info.CREATOR_NAME,
+               info.CREATOR_TIME,
+               case
+                 when rea.READ_ID is null then
+                  '未阅'
+                 else
+                  '已阅'
+               end as READ_STS
+          from ADMIN_SM_NOTICE info
+          left join (select * from ADMIN_SM_NOTICE_READ where user_id = #{condition.userId, jdbcType=VARCHAR}) rea
+            on info.NOTICE_ID = rea.NOTICE_ID
+         WHERE (info.CREATOR_ID = #{condition.userId, jdbcType=VARCHAR} OR info.PUB_USER_ID = #{condition.userId, jdbcType=VARCHAR})) i  where read_sts='未阅'
+ order by i.PUB_STS,
+          i.is_top,
+          i.top_active_date,
+          i.READ_STS,
+          i.pub_time,
+          i.creator_time desc
+    </select>
+    
+    <select id="queryDate" resultType="String">
+    	select max(to_char(to_date(DATA_DATE,'YYYY-MM-dd'),'YYYY-MM-dd')) from ACRM_A_CI_ORG_BUSI_SUM_D
+    </select>
+</mapper>

@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.sysview.repository.mapper.CimFMmFTagGroupMapper">
+	<select id="getGroupTree" resultType="cn.com.yusys.yscrm.sysview.domain.CimFMmFTagGroup" >
+-- 		SELECT TG.*,GR.COUNT FROM CIM_F_MM_TAG_GROUP TG
+-- 		LEFT JOIN (SELECT COUNT(*) AS COUNT,START_NO FROM(
+-- 		SELECT connect_by_root(GROUP_NO) START_NO,GROUP_NO
+-- 		FROM CIM_F_MM_TAG_GROUP START WITH GROUP_NO in(SELECT GROUP_NO FROM CIM_F_MM_TAG_GROUP)  CONNECT BY PRIOR GROUP_NO = PARENT_NO
+-- 		) WHERE START_NO !=GROUP_NO GROUP BY START_NO) GR ON TG.GROUP_NO=GR.START_NO
+-- 		ORDER BY TG.GROUP_NO
+		SELECT TG.*,RE.COUNT,TC.TAG_COUNT FROM CIM_F_MM_TAG_GROUP TG
+		LEFT JOIN (
+		    SELECT COUNT(*) AS COUNT,PARENT_NO FROM CIM_F_MM_TAG_GROUP
+		    WHERE PARENT_NO IN ('00','1') OR (PARENT_NO = '1023' AND CREATE_USER = #{loginCode})
+		    GROUP BY PARENT_NO) RE ON TG.GROUP_NO=RE.PARENT_NO
+		LEFT JOIN(
+		    SELECT GR.GROUP_NO,COUNT(*) AS TAG_COUNT
+		    FROM CIM_F_MM_TAG_GROUP GR
+		    RIGHT JOIN CIM_F_MM_TAG_TAGS TAG ON GR.GROUP_NO=TAG.GROUP_NO
+		    WHERE GR.GROUP_NO NOT IN('1','0','1023') AND GR.PARENT_NO IN ('00','1') OR (GR.PARENT_NO = '1023' AND TAG.CREATE_USER = #{loginCode})
+		    GROUP BY GR.GROUP_NO ) TC ON TG.GROUP_NO=TC.GROUP_NO
+		WHERE TG.PARENT_NO IN ('00','1') OR (TG.PARENT_NO = '1023' AND TG.CREATE_USER = #{loginCode})
+		ORDER BY TG.GROUP_NO
+	</select>
+
+	<select id="getSystemTree" resultType="cn.com.yusys.yscrm.sysview.domain.CimFMmFTagGroup" >
+-- 		SELECT TG.*,GR.COUNT FROM
+-- 		(SELECT * FROM CIM_F_MM_TAG_GROUP WHERE GROUP_NO='0'
+-- 		UNION ALL
+-- 		SELECT * FROM CIM_F_MM_TAG_GROUP START WITH GROUP_NO in('2') CONNECT BY PRIOR GROUP_NO = PARENT_NO) TG
+-- 		LEFT JOIN (SELECT COUNT(*) AS COUNT,START_NO FROM(
+-- 		SELECT connect_by_root(GROUP_NO) START_NO,GROUP_NO
+-- 		FROM CIM_F_MM_TAG_GROUP
+-- 		WHERE GROUP_NO NOT IN(SELECT GROUP_NO FROM CIM_F_MM_TAG_GROUP START WITH GROUP_NO='3' CONNECT BY PRIOR GROUP_NO = PARENT_NO)
+-- 		START WITH GROUP_NO in(SELECT GROUP_NO FROM CIM_F_MM_TAG_GROUP)  CONNECT BY PRIOR GROUP_NO = PARENT_NO
+-- 		) WHERE START_NO !=GROUP_NO GROUP BY START_NO) GR ON TG.GROUP_NO=GR.START_NO
+-- 		ORDER BY TG.GROUP_NO
+		SELECT TG.*,GR.COUNT,TC.TAG_COUNT FROM CIM_F_MM_TAG_GROUP TG
+		LEFT JOIN (SELECT COUNT(*) AS COUNT,PARENT_NO FROM CIM_F_MM_TAG_GROUP GROUP BY PARENT_NO) GR ON TG.GROUP_NO=GR.PARENT_NO
+		LEFT JOIN(
+		SELECT GR.GROUP_NO,COUNT(*) AS TAG_COUNT
+		FROM CIM_F_MM_TAG_GROUP GR
+		RIGHT JOIN CIM_F_MM_TAG_TAGS TAG ON GR.GROUP_NO=TAG.GROUP_NO
+		WHERE GR.GROUP_NO NOT IN('1','0','1023')
+		GROUP BY GR.GROUP_NO
+		) TC ON TG.GROUP_NO=TC.GROUP_NO
+		WHERE TG.GROUP_NO NOT in(SELECT GROUP_NO FROM CIM_F_MM_TAG_GROUP START WITH GROUP_NO IN ('1023','0') CONNECT BY PRIOR GROUP_NO = PARENT_NO)
+	</select>
+
+	<select id="getSeq" resultType="string">
+		select ysc_sequence.nextval from dual
+	</select>
+	
+	<delete id="deleteTagGroup" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" >
+		delete from CIM_F_MM_TAG_GROUP where GROUP_NO = #{condition.groupNo, jdbcType=VARCHAR}
+	</delete>
+	
+	<update id="modifyTagGroup" parameterType="cn.com.yusys.yscrm.sysview.domain.CimFMmFTagGroup">
+		UPDATE	CIM_F_MM_TAG_GROUP g SET g.GROUP_NAME = #{groupName,jdbcType=VARCHAR},
+		g.PARENT_NO = #{parentNo,jdbcType=VARCHAR},g.GROUP_DESC = #{groupDesc,jdbcType=VARCHAR},
+		g.MODIFY_USER = #{modifyUser,jdbcType=VARCHAR},
+		g.MODIFY_TIME = #{modifyTime,jdbcType=VARCHAR} where g.GROUP_NO = #{groupNo,jdbcType=VARCHAR}
+	</update>
+	
+	<select id="getByParentNo" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="cn.com.yusys.yscrm.sysview.domain.CimFMmFTagGroup">
+		Select * from CIM_F_MM_TAG_GROUP
+		where 1=1
+		<if test="condition.parentNo != null and condition.parentNo != ''">
+			AND PARENT_NO = #{condition.parentNo, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.loginCode != null and condition.loginCode != ''">
+			AND CREATE_USER = #{condition.loginCode, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.groupName != null and condition.groupName != ''">
+			AND GROUP_NAME = #{condition.groupName, jdbcType=VARCHAR}
+		</if>
+		       AND CREATE_USER = #{condition.loginCode, jdbcType=VARCHAR}
+	</select>
+	
+	<select id="getChild" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+		SELECT * FROM CIM_F_MM_TAG_GROUP START WITH GROUP_NAME = #{condition.groupName,jdbcType=VARCHAR} CONNECT BY PRIOR GROUP_NO = PARENT_NO
+	</select>
+
+	<select id="getChildByNo" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="cn.com.yusys.yscrm.sysview.domain.CimFMmFTagGroup">
+		SELECT *
+		FROM CIM_F_MM_TAG_GROUP
+		WHERE CREATE_USER = #{condition.loginCode, jdbcType=VARCHAR}
+		START WITH GROUP_NO = #{condition.groupNo,jdbcType=VARCHAR} CONNECT BY PRIOR GROUP_NO = PARENT_NO
+	</select>
+
+	<select id="getTagsTree" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="cn.com.yusys.yscrm.sysview.domain.TagTree">
+		SELECT TT.TAG_NO, TT.GROUP_NO, TT.TAG_NAME, TT.AVAILABLE_DATE, TT.DISABLE_DATE
+		FROM CIM_F_MM_TAG_TAGS TT
+		INNER JOIN CIM_F_MM_TAG_GROUP TG
+		    ON TG.GROUP_NO = TT.GROUP_NO AND TG.PARENT_NO = #{condition.groupNo,jdbcType=VARCHAR} AND TG.CREATE_USER = #{condition.loginCode, jdbcType=VARCHAR}
+		WHERE TT.CREATE_USER = #{condition.loginCode, jdbcType=VARCHAR}
+		  AND TAG_STATUS = '1'
+		  AND TAG_NO NOT IN (
+		      SELECT TAG_NO FROM CIM_F_TAG_CUST_TAGS_SELF WHERE CUST_ID = #{condition.custId,jdbcType=VARCHAR})
+		UNION
+		SELECT GROUP_NO TAG_NO,PARENT_NO GROUP_NO, GROUP_NAME TAG_NAME, NULL AVAILABLE_DATE, NULL DISABLE_DATE
+		FROM CIM_F_MM_TAG_GROUP
+		WHERE CREATE_USER = #{condition.loginCode, jdbcType=VARCHAR}
+		START WITH GROUP_NO = #{condition.groupNo,jdbcType=VARCHAR} CONNECT BY PRIOR GROUP_NO = PARENT_NO
+	</select>
+
+	<select id="getGroupName" resultType="java.lang.String" parameterType="java.lang.String">
+		select GROUP_NAME from CIM_F_MM_TAG_GROUP where GROUP_NO = #{groupNo,jdbcType=VARCHAR}
+	</select>
+
+</mapper>

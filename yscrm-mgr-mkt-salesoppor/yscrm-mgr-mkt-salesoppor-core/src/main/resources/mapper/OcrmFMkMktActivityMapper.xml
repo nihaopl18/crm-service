@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.salesoppor.repository.mapper.OcrmFMkMktActivityMapper">
+	<!-- 销售活动查询 -->
+	<select id="activiListQuery" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+		SELECT T.ACTIVITY_NO,T.ACTIVITY_NAME,T.ACTIVITY_STAGE,T.ACTIVITY_EXECUTE_TYPE,T.ACTIVITY_EXECUTE_USER,T.ACTIVITY_EXECUTE_ORG,
+        T.NEXT_EXECUTE_TYPE,T.ACTIVITY_CONTENT,T.NEXT_ACTIVITY_CONTENT,T.REMARK,T.CREATE_USER,T.CREATE_ORG,T.UPDATA_USER,
+        T.UPDATA_ORG,T.BUSINESS_NO,
+        TO_CHAR(T.ACTIVITY_EXECUTE_DATE,'YYYY-MM-DD') AS ACTIVITY_EXECUTE_DATE,
+        TO_CHAR(T.NEXT_CONTACT_DATE,'YYYY-MM-DD') AS NEXT_CONTACT_DATE,
+        TO_CHAR(T.CREATE_DATE,'YYYY-MM-DD') AS CREATE_DATE,
+        TO_CHAR(T.UPDATA_DATE,'YYYY-MM-DD') AS UPDATA_DATE
+        FROM OCRM_F_MK_MKT_ACTIVITY T
+        <where>
+        	<if test="condition.marketActivityId != null and condition.marketActivityId != ''">
+        	INSTR(#{condition.marketActivityId,jdbcType=VARCHAR},T.ACTIVITY_NO) > 0
+        	</if>
+        </where>
+	</select>
+	<!-- 销售活动名称验重 -->
+	<select id="activiSame" parameterType="cn.com.yusys.yscrm.salesoppor.domain.OcrmFMkMktActivityInfo" resultType="int">
+		SELECT COUNT(1) FROM OCRM_F_MK_MKT_ACTIVITY WHERE ACTIVITY_NAME = #{activityName,jdbcType=VARCHAR} AND ACTIVITY_NO <![CDATA[!= ]]> #{activityNo,jdbcType=VARCHAR}
+	</select>
+	<!-- 销售活动删除 -->
+	<delete id="activiDel" parameterType="String">
+		DELETE FROM OCRM_F_MK_MKT_ACTIVITY WHERE ACTIVITY_NO = #{activityNo,jdbcType=VARCHAR}
+	</delete>
+	<!-- 设置商机阶段 -->
+	<update id="setBusinessStage">
+		UPDATE OCRM_F_MK_MKT_SALESOPPOR SET BUSINESS_STAGE = #{actiStage} WHERE BUSINESS_NO = #{businessNo}
+	</update>
+</mapper>

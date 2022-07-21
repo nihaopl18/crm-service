@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.custmgrgroup.repository.mapper.CustMgrGroupBusiSumMapper">
+    <select id="getXaxisArray" resultType="java.lang.String">
+    	SELECT TO_CHAR(TO_DATE(T.DATA_DATE,'yyyy-MM-dd'),'yyyy-MM') AS DATA_DT FROM ACRM_A_CM_BUSI_SUM T
+		<where>
+			AND T.TARGET_TYPE = '2' AND TO_CHAR((select last_day(add_months(sysdate,-1))  date1 from dual),'yyyy-MM-dd')
+			>= TO_CHAR(TO_DATE(T.DATA_DATE,'yyyy-MM-dd'),'yyyy-MM-dd') 
+			<if  test="mgrId != null and mgrId != ''">
+	       		AND T.TARGET_ID = #{mgrId,jdbcType=VARCHAR}
+		    </if>
+		</where>
+		GROUP BY DATA_DATE ORDER BY T.DATA_DATE ASC
+	</select>
+	<select id="getCustAumBal" resultType="java.util.Map">
+    	SELECT T.AUM_M_AVG_BAL ,TO_CHAR(TO_DATE(T.DATA_DATE,'yyyy-MM-dd'),'yyyy-MM') AS DATA_DT
+  		FROM ACRM_A_CM_BUSI_SUM T
+		<where>
+			AND T.TARGET_TYPE = '2' AND TO_CHAR((select last_day(add_months(sysdate,-1))  date1 from dual),'yyyy-MM-dd')
+			>= TO_CHAR(TO_DATE(T.DATA_DATE,'yyyy-MM-dd'),'yyyy-MM-dd') 
+			<if  test="mgrId != null and mgrId != ''">
+	       		AND T.TARGET_ID = #{mgrId,jdbcType=VARCHAR}
+		    </if>
+		</where>
+		ORDER BY T.DATA_DATE ASC
+	</select>
+	<select id="getCustLoanBal" resultType="java.util.Map">
+    	SELECT T.LOAN_M_AVG_BAL,TO_CHAR(TO_DATE(T.DATA_DATE,'yyyy-MM-dd'),'yyyy-MM') AS DATA_DT
+  		FROM ACRM_A_CM_BUSI_SUM T
+		<where>
+			AND T.TARGET_TYPE = '2' AND TO_CHAR((select last_day(add_months(sysdate,-1))  date1 from dual),'yyyy-MM-dd')
+			>= TO_CHAR(TO_DATE(T.DATA_DATE,'yyyy-MM-dd'),'yyyy-MM-dd') 
+			<if  test="mgrId != null and mgrId != ''">
+	       		AND T.TARGET_ID = #{mgrId,jdbcType=VARCHAR}
+		    </if>
+		</where>
+		ORDER BY T.DATA_DATE ASC
+	</select>
+	<select id="queryInfo" resultType="java.util.Map">
+    	SELECT T.*, T1.MKT_TEAM_NAME,T1.ORG_NAME
+		  FROM OCRM_F_CM_MKT_TEAM T1
+		 LEFT JOIN  (select * from ACRM_A_CM_BUSI_SUM  where DATA_DATE = (select Max(data_date) from ACRM_A_CM_BUSI_SUM 
+		    	where TARGET_TYPE = '2' AND TARGET_ID =#{mktTeamId,jdbcType=VARCHAR})) T ON T.TARGET_ID = T1.MKT_TEAM_ID 
+		<where>
+			<if  test="mktTeamId != null and mktTeamId != ''">
+	       		AND T1.MKT_TEAM_ID = #{mktTeamId,jdbcType=VARCHAR}
+		    </if>
+		</where>
+	</select>
+</mapper>

@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.cim.model.repository.mapper.LoyAcEquAccountMapper">
+<!-- 查询权益账户列表 -->
+     <select id="getListByModel" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+		resultType="java.util.Map">
+		select t.*,i.instu_name,
+		u.user_name  as create_user_name,
+       o.org_name   as create_org_name,
+       uu.user_name as update_user_name,
+       uo.org_name  as update_org_name,
+       oo.org_name as org_name
+	  from LOY_AC_SCORE_ACCOUNT t
+	  left join admin_sm_user u
+	    on u.user_id = t.create_user
+	  left join admin_sm_org o
+	    on o.org_code = t.create_org
+	  left join admin_sm_user uu
+	    on uu.user_id = t.update_user
+	  left join admin_sm_org uo
+	    on uo.org_code = t.update_org
+	  left join admin_sm_org oo
+	    on oo.org_code = t.org_code
+      left join admin_sm_instu i on i.INSTU_CDE = t.finance_org_code
+		<where>
+		t.is_del = '1'
+		<if test="condition.subType!=null and condition.subType!= ''">
+			and t.sub_type in (select c.catalog_id from loy_ac_equ_catalog c start with c.catalog_id = #{condition.subType,jdbcType=VARCHAR} connect by prior c.catalog_id = c.sup_catalog_id) 
+		</if>
+		<if test="condition.bizSeqNo!=null and condition.bizSeqNo!= ''">
+			and t.account_no =#{condition.bizSeqNo,jdbcType=VARCHAR}
+		</if>
+		<if test="condition.accountId!=null and condition.accountId!= ''">
+			and t.account_no 
+			LIKE CONCAT(CONCAT('%', #{condition.accountId,jdbcType=VARCHAR}),'%')
+		</if>
+		<if test="condition.acctType!=null and condition.acctType!= ''">
+			and t.acct_type_id =#{condition.acctType,jdbcType=VARCHAR}
+		</if>
+		<if test="condition.accountName!=null and condition.accountName!= ''">
+			and t.account_name 
+			LIKE CONCAT(CONCAT('%', #{condition.accountName,jdbcType=VARCHAR}),'%')
+		</if>
+		<if test="condition.acctStat!=null and condition.acctStat!= ''">
+			and t.acct_stat =#{condition.acctStat,jdbcType=VARCHAR}
+		</if>
+		<if test="condition.apprStat!=null and condition.apprStat!= ''">
+			and t.appr_stat =#{condition.apprStat,jdbcType=VARCHAR}
+		</if>
+		<if test="condition.financeOrgCode!=null and condition.financeOrgCode!= ''">
+			and t.finance_org_code =#{condition.financeOrgCode,jdbcType=VARCHAR}
+		</if>
+		<if test="condition.orgCode!=null and condition.orgCode!= ''">
+			and t.org_code =#{condition.orgCode,jdbcType=VARCHAR}
+		</if>
+		</where>
+		order by t.update_date desc
+	</select>
+	<!-- 查询权益账户通过账户编号 -->
+	<select id="getInfoById" parameterType="String"
+		resultType="cn.com.yusys.yusp.cim.model.domain.LoyAcEquAccount">
+		select t.*,t.account_no as account_id, t.acct_type_id as acct_type from  LOY_AC_SCORE_ACCOUNT t where t.ACCOUNT_NO = #{accountId,jdbcType=VARCHAR}
+	</select>
+	<!-- 查询金融机构 -->
+	<select id="getFinanceOrg" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+		resultType="java.util.Map">
+		select * from admin_sm_instu
+	</select>
+	<!-- 获取账户编号 -->
+	<select id="getAccountSeq" resultType="String">
+		SELECT  SEQ_ACCOUNT_NO.nextval FROM dual
+	</select>
+	<!-- 获取机构通过金融机构编号 -->
+	<select id="getOrgTreeByInstu" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+		resultType="java.util.Map">
+		select * from admin_sm_org where instu_id = #{condition.instuId,jdbcType=VARCHAR} order by org_level
+	</select>
+</mapper>

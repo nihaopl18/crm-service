@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.cm.cust.repository.mapper.CimpFFqGroupMapper">
+	<insert id="insertfgroup" parameterType="cn.com.yusys.yusp.cm.cust.domain.CimpFFqGroup" >
+		INSERT INTO CIMP_F_FQ_GROUP (ID, OBJ_ID, GROUP_NAME, PARENT_ID) VALUES (
+		  #{id,jdbcType=INTEGER},
+          #{objId,jdbcType=INTEGER},
+          #{groupName,jdbcType=VARCHAR},
+          #{parentId,jdbcType=INTEGER}
+		)
+	</insert>
+	<select id="getGroup" parameterType="String"  resultType="cn.com.yusys.yusp.cm.cust.domain.CimpFFqGroup">
+		select *from CIMP_F_FQ_GROUP where 1=1
+		<if test="_parameter != null and _parameter !=''">
+					and OBJ_ID=#{_parameter, jdbcType=INTEGER}
+		</if> 
+	</select>
+	
+</mapper>

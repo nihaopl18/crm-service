@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.uimp.displan.repository.mapper.PmaFDisPlanInfoMapper">
+    <resultMap id="BaseResultMap" type="cn.com.yusys.yusp.uimp.displan.domain.PmaFDisPlanInfo">
+		<id column="ID" jdbcType="VARCHAR" property="id" />
+		<result column="BUSS_TYPE" jdbcType="VARCHAR" property="bussType" />
+		<result column="ORG_NO" jdbcType="VARCHAR" property="orgNo" />
+		<result column="ORG_NAME" jdbcType="VARCHAR" property="orgName" />
+		<result column="MANAGER_TYPE" jdbcType="VARCHAR" property="managerType" />
+		<result column="DISTR_RATE" jdbcType="NUMERIC" property="distrRate" />
+		<result column="EFFECT_DATE" jdbcType="VARCHAR" property="effectDate" />
+		<result column="EXPIRATE_DATE" jdbcType="VARCHAR" property="expirateDate" />
+    </resultMap>
+    <sql id="Base_Column_List">
+	    ID,BUSS_TYPE,ORG_NO,ORG_NAME,MANAGER_TYPE,DISTR_RATE,EFFECT_DATE,EXPIRATE_DATE
+    </sql>
+    <!-- 查询接口 -->
+    <select id="listByModel" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+    	SELECT ID,BUSS_TYPE ,ORG_NO,ORG_NAME,EFFECT_DATE,EXPIRATE_DATE   FROM PMA_F_DIS_PLAN_INFO T
+    	<where>
+			<if test="condition.orgNo != null and condition.orgNo != ''">
+			AND T.ORG_NO = #{condition.orgNo}
+			</if>
+			<if test="condition.bussType != null and condition.bussType != ''">
+			AND T.BUSS_TYPE = #{condition.bussType}
+			</if>
+		</where>
+    </select>
+</mapper>

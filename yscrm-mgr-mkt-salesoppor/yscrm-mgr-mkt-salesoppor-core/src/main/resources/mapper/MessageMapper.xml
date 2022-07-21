@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper
+	namespace="cn.com.yusys.yscrm.salesoppor.repository.mapper.MessageMapper">
+	<select id="queryProp" parameterType="String" resultType="String">
+		select PROP_VALUE from ADMIN_SM_PROP
+		<where>
+			<if test="value !=null and value != ''">
+				prop_id=#{value}
+			</if>
+		</where>
+	</select>
+</mapper>

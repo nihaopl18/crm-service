@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>crm-service</artifactId>
+        <groupId>cn.com.yusys.yscrm</groupId>
+        <version>2.0.0-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+    <artifactId>yscrm-yx-parent</artifactId>
+    <packaging>pom</packaging>
+
+    <modules>
+        <module>yscrm-yx-cm</module>
+        <module>yscrm-yx-need</module>
+        <module>yscrm-yx-operation</module>
+        <module>yscrm-yx-qypool</module>
+        <module>yscrm-yx-cim</module>
+        <module>yscrm-yx-engine</module>
+        <module>yscrm-yx-html</module>
+        <module>yscrm-yx-concurrency</module>
+    </modules>
+
+</project>

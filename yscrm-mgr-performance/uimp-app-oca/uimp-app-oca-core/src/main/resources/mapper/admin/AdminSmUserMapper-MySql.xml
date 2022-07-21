@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.admin.repository.mapper.AdminSmUserMapper">
+	<!-- 分页查询用户信息 -->
+	<select id="queryUserByPage" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+		resultType="java.util.Map" databaseId="mysql">
+        SELECT
+        v.ORG_ID,
+        s.user_id,s.login_code,s.user_name,s.cert_type,s.cert_no,s.user_code,s.deadline,
+        s.dpt_id,s.user_password,s.user_sex,s.user_birthday,s.user_email,s.user_mobilephone,s.user_officetel,s.user_education,
+        s.user_certificate,s.entrants_date,s.position_time,s.financial_job_time,s.position_degree,
+        s.user_avatar,s.offen_ip,s.user_sts,s.last_chg_usr,substr(s.LAST_CHG_DT, 0, 10) as LAST_CHG_DT,
+        d.DPT_NAME,
+        l.user_name AS last_chg_name
+        FROM
+        (SELECT ORG_ID FROM sys_org_view WHERE  org_seq LIKE (CONCAT(CONCAT('%', CONCAT(CONCAT(',',#{condition.orgId, jdbcType=VARCHAR}),',')),'%')) ) v
+        INNER JOIN admin_sm_user s ON s.ORG_ID = v.ORG_ID
+        LEFT JOIN admin_sm_dpt d ON s.DPT_ID = d.DPT_ID
+        LEFT JOIN admin_sm_user l ON s.LAST_CHG_USR = l.USER_ID
+        <where>
+            <if test="condition.userInfo != null and condition.userInfo != ''">
+                and (s.LOGIN_CODE  LIKE CONCAT(CONCAT('%', #{condition.userInfo, jdbcType=VARCHAR}),'%')
+                or (s.USER_NAME  LIKE CONCAT(CONCAT('%', #{condition.userInfo, jdbcType=VARCHAR}),'%') )
+                or (s.USER_CODE  LIKE CONCAT(CONCAT('%', #{condition.userInfo, jdbcType=VARCHAR}),'%') ))
+            </if>
+
+            <if test="condition.userSts != null and condition.userSts != ''">
+                and s.USER_STS = #{condition.userSts , jdbcType=VARCHAR}
+            </if>
+            <if test="condition.deadline != null and condition.deadline != ''">
+                and s.deadline = #{condition.deadline , jdbcType=VARCHAR}
+            </if>
+        </where>
+        ORDER BY S.LAST_CHG_DT DESC
+	</select>
+
+    <!-- 根据用户id查询用户角色关系数据 -->
+    <select id="getUserRole" parameterType="java.util.Map"
+            resultType="java.util.Map" databaseId="mysql">
+        select t.user_role_rel_id,t.user_id,t.role_id,t.rel_sts,substr(t.LAST_CHG_DT, 1, 10) as LAST_CHG_DT,
+        u.user_name as last_chg_name,r.role_code from ADMIN_SM_USER_ROLE_REL t
+        left join admin_sm_user u on u.user_id=t.last_chg_usr
+        left join admin_sm_role r on r.role_id=t.role_id
+        <if  test="userId != null and userId != ''">
+            where t.USER_ID =#{userId,jdbcType=VARCHAR}
+        </if>
+    </select>
+</mapper>

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.uimp.business.pma.scheme.postParam.repository.mapper.PmaFPostParamPerInfoMapper">
+    <resultMap id="BaseResultMap" type="cn.com.yusys.yusp.uimp.business.pma.scheme.postParam.domain.PmaFPostParamPerInfo">
+		<id column="ID" jdbcType="VARCHAR" property="id" />
+		<result column="PARAM_ID" jdbcType="VARCHAR" property="paramId" />
+		<result column="ORG_ID" jdbcType="VARCHAR" property="orgId" />
+		<result column="CREATOR_ID" jdbcType="VARCHAR" property="creatorId" />
+		<result column="CREATE_DATE" jdbcType="VARCHAR" property="createDate" />
+		<result column="MODIFY_USER_ID" jdbcType="VARCHAR" property="modifyUserId" />
+		<result column="MODIFY_DATE" jdbcType="VARCHAR" property="modifyDate" />
+		<result column="PARAM_VALUE" jdbcType="NUMERIC" property="paramValue" />
+		<result column="EFFECT_POST" jdbcType="VARCHAR" property="effectPost" />
+		<result column="EFFECT_POST_NAME" jdbcType="VARCHAR" property="effectPostName" />
+		<result column="USER_ID" jdbcType="VARCHAR" property="userId" />
+    </resultMap>
+    <sql id="Base_Column_List">
+	    ID,PARAM_ID,ORG_ID,CREATOR_ID,CREATE_DATE,MODIFY_USER_ID,MODIFY_DATE,PARAM_VALUE,EFFECT_POST,EFFECT_POST_NAME,USER_ID
+    </sql>
+       <!-- 查询人员岗位参数明细info数据 -->
+	<select id="querylist"   resultType="java.util.HashMap">
+		SELECT T.ID,T.PARAM_ID,T.ORG_ID,T.CREATOR_ID,T.CREATE_DATE,T.MODIFY_USER_ID,T.MODIFY_DATE
+		,T.PARAM_VALUE,T.EFFECT_POST,T.EFFECT_POST_NAME,T.USER_ID,INFO.PARAM_NAME,INFO.MIN_LIMIT,INFO.MAX_LIMIT
+		,u.USER_NAME
+		 FROM PMA_F_POST_PARAM_PER_INFO T	
+		left join PMA_F_PERSONPOST_PARAM_INFO INFO ON INFO.PARAM_ID=T.PARAM_ID
+		left join admin_sm_user u on u.LOGIN_CODE=T.USER_ID
+		where T.PARAM_ID=#{paramId,jdbcType=VARCHAR}  and T.EFFECT_POST=#{effectPost,jdbcType=VARCHAR}
+	</select>
+	 <!-- 根据参数号删除明细数据 -->
+    <delete id="deldetail"  >
+	   delete from   PMA_F_POST_PARAM_PER_INFO  
+	   where PARAM_ID=#{paramId,jdbcType=VARCHAR}  and EFFECT_POST=#{effectPost,jdbcType=VARCHAR}
+	</delete>
+</mapper>

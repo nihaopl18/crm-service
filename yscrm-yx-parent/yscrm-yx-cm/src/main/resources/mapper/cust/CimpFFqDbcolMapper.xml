@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.cm.cust.repository.mapper.CimpFFqDbcolMapper">
+	<select id="getSeq" resultType="String">
+		select ysc_sequence.nextval from dual
+	</select>
+	
+	<select id="getSeqId" resultType="long">
+		select ysc_sequence.nextval from dual
+	</select>
+	
+	<select id="qryCollist" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="cn.com.yusys.yusp.cm.cust.domain.CimpFFqDbcol">
+		select t1.* from CIMP_F_FQ_DBCOL t1 where GROUP_ID  &lt;&gt;'0'
+		<if test="condition.groupId != null and condition.groupId !=''">
+					and GROUP_ID=#{condition.groupId, jdbcType=INTEGER}
+		</if>
+	</select>
+	<select id="qrysetdata" resultType="cn.com.yusys.yusp.cm.cust.domain.CimpFFqDbcol">
+		select t1.* from  CIMP_F_FQ_DBCOL t1
+		where t1.DBTABLE_ID=#{condition.id, jdbcType=VARCHAR}
+	</select>
+	
+	<select id="loadData" parameterType="string" resultType="java.util.HashMap">
+		select * from  CIMP_F_FQ_DBCOL t1 where t1.DBTABLE_ID=#{id}
+	</select>
+	<select id="isExist" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+		select t1.* from CIMP_F_FQ_DBCOL t1 where t1.GROUP_ID=#{condition.groupId, jdbcType=INTEGER}
+		and t1.dbtable_name=#{condition.dbtableName, jdbcType=VARCHAR} 
+	</select>
+	
+	<select id="qryallsetdata" parameterType="string" resultType="java.util.HashMap">
+		${value} 
+	</select>
+	
+	<delete id="deleteData" parameterType="cn.com.yusys.yusp.cm.cust.domain.CimpFFqDbcol" >
+		delete from CIMP_F_FQ_DBCOL where GROUP_ID=#{groupId, jdbcType=INTEGER} and dbtable_name=#{dbtableName, jdbcType=VARCHAR} 
+	</delete>
+	
+	<select id="prepare" parameterType="string" resultType="java.util.HashMap">
+		${value} 
+	</select>
+	
+	<select id="queryResult" parameterType="string" resultType="java.util.HashMap">
+		${value} 
+	</select>
+	
+	<select id="getResultList" parameterType="string" resultType="cn.com.yusys.yusp.cm.cust.domain.CimpFFqDbcol">
+		${value} 
+	</select>
+	<select id="queryColumns" parameterType="string" resultType="cn.com.yusys.yusp.cm.cust.domain.CimpFFqDbcol">
+		${value} 
+	</select>
+	
+	<select id="queryJoinColumms" parameterType="string" resultType="cn.com.yusys.yusp.cm.cust.domain.CimpFFqDbcol">
+		${value} 
+	</select>
+	
+	<select id="getSingleResult" parameterType="string" resultType="string">
+		${value} 
+	</select>
+	<select id="getSingleResults" parameterType="string" resultType="cn.com.yusys.yusp.cm.cust.domain.CimpFFqDbcol">
+		${value} 
+	</select>
+	
+	<select id="insertDbcol" parameterType="java.util.List">
+	     insert into CIMP_F_FQ_DBCOL(ID, APP_ID, COL_NAME_E, COL_NAME_C, COL_SIZE, COL_TYPE, IS_NULL, PRIMARY_KEY_FLAG, 
+		  NOTES,IS_ENABLE,	DBTABLE_NAME,GROUP_ID,FIELD_TYPE, F_NAME,ALIAS)
+        select  ysc_sequence.nextval ,A.* FROM(
+        <foreach item="item" index="index" collection="list" separator=" union all"  >
+        SELECT  #{item.appId,jdbcType=VARCHAR},
+          #{item.colNameE,jdbcType=VARCHAR},
+          #{item.colNameC,jdbcType=VARCHAR},
+          #{item.colSize,jdbcType=INTEGER},
+          #{item.colType,jdbcType=VARCHAR},
+          #{item.isNull,jdbcType=VARCHAR},#{item.primaryKeyFlag,jdbcType=VARCHAR},#{item.notes,jdbcType=VARCHAR},
+          #{item.isEnable,jdbcType=VARCHAR},#{item.dbtableName,jdbcType=VARCHAR},
+          #{item.groupId,jdbcType=INTEGER},#{item.fieldType,jdbcType=VARCHAR},#{item.fName,jdbcType=VARCHAR},#{item.alias,jdbcType=VARCHAR} FROM dual 
+    	</foreach>
+    	)  A
+	</select>
+	<select id="showcoltype" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+	SELECT * FROM CIMP_F_FQ_DBCOL where id =#{condition.id}
+	</select>
+	
+	<select id="qryLookupcode"  resultType="java.util.HashMap">
+	SELECT * FROM ADMIN_SM_LOOKUP 
+	</select>
+	<select id="getcodeitem"  resultType="java.util.HashMap">
+	select *from ADMIN_SM_LOOKUP_ITEM where LOOKUP_CODE=#{lookupCode}
+	</select>
+	<select id="getDataSetSolution" resultType="java.util.HashMap">
+		select rownum AS key,tb AS value from(select TABLE_NAME AS tb from user_tables  union select VIEW_NAME as tb from user_views  )
+	</select>
+	
+	<delete id="deleteByid" parameterType="String">
+		delete from CIMP_F_FQ_DBCOL where ID =#{id,jdbcType=INTEGER}
+	</delete>
+	
+	<select id="qryCustinfo" parameterType="string" resultType="java.util.HashMap">
+		${value} 
+	</select>
+</mapper>

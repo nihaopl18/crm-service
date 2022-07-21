@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">  
+    
+  <parent> 
+    <artifactId>crm-service</artifactId>  
+    <groupId>cn.com.yusys.yscrm</groupId>  
+    <version>2.0.0-SNAPSHOT</version> 
+  </parent>  
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>cn.com.yusys.yscrm.mgr</groupId>  
+  <artifactId>yscrm-mgr-sys-pdplan</artifactId>  
+  <packaging>pom</packaging>  
+  <name>yscrm-mgr-sys-pdplan</name>  
+  <description>产品方案服务相关逻辑实现</description>    
+  <modules> 
+    <module>yscrm-mgr-sys-pdplan-core</module>  
+    <module>yscrm-mgr-sys-pdplan-client</module>
+  </modules> 
+</project>

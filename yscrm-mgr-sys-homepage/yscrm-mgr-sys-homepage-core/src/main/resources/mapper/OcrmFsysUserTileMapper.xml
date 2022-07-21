@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.homepage.repository.mapper.OcrmFsysUserTileMapper">
+   <!-- 获取首页展示图表信息 --> 
+   <select id="getGraphList" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"  resultType="java.util.HashMap">
+	 SELECT * FROM OCRM_A_CI_FQ_GRAPH WHERE GRAPH_ID IN (SELECT GRAPH_ID FROM OCRM_A_CI_FQ_GRAPH_AUTH WHERE ROLE_CODE IN 
+	 (select role_id from ADMIN_SM_USER_ROLE_REL  WHERE USER_ID = #{condition.userId,jdbcType=VARCHAR})) 
+	</select>   
+	<!-- 获取首页样式信息 --> 
+    <select id="getStyleList" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"  resultType="java.util.HashMap">
+	 select * from OCRM_F_SYS_USER_TILE t left join OCRM_A_CI_FQ_GRAPH  g on t.chart_id = g.graph_id 
+	</select>
+	
+	<!-- 通过SQL获取图表信息 --> 
+	<select id="getListBySql" parameterType="String" resultType="java.util.HashMap">
+		${sql}
+	</select>
+	<delete id="delByUserId" parameterType="String">
+	delete OCRM_F_SYS_USER_TILE where user_id = #{userid,jdbcType=VARCHAR}
+	</delete>
+	<!-- 获取登录用户信息 -->
+	<select id="getUserData" parameterType="String" resultType="java.util.Map">
+		SELECT t.login_code,t.user_name,SUBSTR(t.offen_ip,0,13) AS OFFEN_IP,t.org_id,r.org_name 
+		FROM ADMIN_SM_USER t 
+		left join admin_sm_org r on t.org_id = r.org_id 
+		WHERE LOGIN_CODE = #{loginCode,jdbcType=VARCHAR}
+	</select>
+	<!-- 一次获取用户登录信息 -->
+	<select id="getAllUserData" parameterType="java.util.List" resultType="java.util.HashMap">
+		SELECT t.login_code,t.user_name,SUBSTR(t.offen_ip,0,13) AS OFFEN_IP,t.org_id,r.org_name 
+		FROM ADMIN_SM_USER t 
+		left join admin_sm_org r on t.org_id = r.org_id
+		<where>
+		LOGIN_CODE IN
+			<foreach item="item" index="id" open="(" separator="," close=")" collection="list">
+			#{item}
+			</foreach>
+		</where>
+	</select>
+	<!-- 获取登录用户查询信息 -->
+	<select id="getUserModel" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.Map">
+		SELECT t.login_code,t.user_name,SUBSTR(t.offen_ip,0,13) AS OFFEN_IP,t.org_id,r.org_name 
+		FROM ADMIN_SM_USER t 
+		left join admin_sm_org r on t.org_id = r.org_id
+		<where>
+			<if test="condition.userName != null and condition.userName != ''">
+			T.LOGIN_CODE = #{condition.userName,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.orgName != null and condition.orgName != ''">
+			R.ORG_NAME = #{condition.orgName,jdbcType=VARCHAR}
+			</if>
+			and rownum=1
+		</where>
+	</select>
+</mapper>

@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscimc.assemble.repository.mapper.CmicAppAssembleCustsMapper">
+    <resultMap id="BaseResultMap" type="cn.com.yusys.yscimc.assemble.domain.CmicAppAssembleCusts">
+		<id column="ID" jdbcType="VARCHAR" property="id" />
+		<result column="ACTY_ID" jdbcType="VARCHAR" property="actyId" />
+		<result column="ASSEMBLE_ID" jdbcType="VARCHAR" property="assembleId" />
+		<result column="RECOMMENDER_ID" jdbcType="VARCHAR" property="recommenderId" />
+		<result column="RECOMMENDER" jdbcType="VARCHAR" property="recommender" />
+		<result column="CUST_ID" jdbcType="VARCHAR" property="custId" />
+		<result column="PRO_ID" jdbcType="VARCHAR" property="proId" />
+		<result column="CHANNEL" jdbcType="VARCHAR" property="channel" />
+		<result column="HURDLES" jdbcType="VARCHAR" property="hurdles" />
+		<result column="BUY_NUM" jdbcType="VARCHAR" property="buyNum" />
+		<result column="ASSEMBLE_PIRCE" jdbcType="VARCHAR" property="assemblePirce" />
+    </resultMap>
+    <sql id="Base_Column_List">
+	    ID,ACTY_ID,ASSEMBLE_ID,RECOMMENDER_ID,RECOMMENDER,CUST_ID,PRO_ID,CHANNEL,HURDLES,BUY_NUM,ASSEMBLE_PIRCE
+    </sql>
+    <!-- 获取未满团的团id[acty_id(活动id),assemble_num(成团数)]-->
+    <select id="getAssembleNum" parameterType="java.util.Map" resultType="java.util.Map">
+	    SELECT T1.ASSEMBLE_ID,T1.CUST_ID,A.CUST_NAME,T1.ASSEMBLE_TYPE
+	     	FROM CMIC_APP_ASSEMBLE_CUSTS T1
+	     	LEFT JOIN ACIM_F_CI_CUSTOMER A ON T1.CUST_ID = A.CUST_ID
+	     	WHERE T1.ACTY_ID=#{actyId}
+	     	AND T1.IS_REG_COM = '1'
+    </select>
+
+	<select id="getCustNumByAssembleId" parameterType="String" resultType="int">
+		select count(*) from CMIC_APP_ASSEMBLE_CUSTS where ASSEMBLE_ID=#{assembleId}
+	</select>
+
+    <!-- 根据活动id查询参与拼团客户信息 -->
+    <select id="getCustByActyid" parameterType="String" resultType="java.util.Map">
+    	SELECT C.* 
+    	FROM ACIM_F_CI_CUSTOMER C
+       		WHERE C.CUST_ID IN 
+       			(SELECT A.CUST_ID 
+       				FROM CMIC_APP_ASSEMBLE_CUSTS A
+      				WHERE A.ACTY_ID = #{actyId} 
+      				GROUP BY A.CUST_ID
+      			)
+    </select>
+    
+    <!-- 查询虚拟票券库存信息 -->
+    <select id="getVirtStock" resultType="java.util.Map">
+    	SELECT T.TICKET_NO,T.VIRT_NO,T.VIRT_PWD 
+    		FROM LOY_QY_VIRT_STOCK T 
+    			WHERE T.USED_STS = '0'
+    </select>
+    
+    <!-- 新增虚拟票券发货信息 -->
+    <insert id="insertVirtOut" parameterType="java.util.Map">
+    	INSERT INTO 
+    		LOY_AC_ORDER_OUT_LIST
+    		(ORDER_NUMBER,TICKET_NO,VIRT_NO,CREATE_DATE,VIRT_PWD) 
+    		VALUES (#{ordernNumber},#{ticketNo},#{virtNo},SYSDATE,#{virtPwd})
+    </insert>
+    
+    <!-- 修改虚拟票券库存信息 -->
+    <update id="updateVirtStock" parameterType="java.util.Map">
+    	UPDATE LOY_QY_VIRT_STOCK 
+    		SET USED_STS ='1' 
+    		WHERE VIRT_NO=#{virtNo}
+    		AND VIRT_PWD=#{virtPwd}
+    </update>
+
+	<!-- 根据团号查团信息 -->
+	<select id="getAssembleInfoByAssId" parameterType="String" resultType="java.util.Map">
+		select * from CMIC_APP_ASSEMBLE_CUSTS where ASSEMBLE_ID=#{assembleId}
+	</select>
+
+	<!-- 加入团 -->
+	<insert id="joinAssemble" parameterType="cn.com.yusys.yscimc.assemble.domain.CmicAppAssembleCusts">
+		insert into CMIC_APP_ASSEMBLE_CUSTS (ID, ACTY_ID, ASSEMBLE_ID, RECOMMENDER_ID, RECOMMENDER, CUST_ID, PRO_ID,
+		CHANNEL, HURDLES, BUY_NUM, ASSEMBLE_PIRCE, ASSEMBLE_TIME, MODEL_ID, IS_REG_COM)
+		VALUES(#{id},#{actyId},#{assembleId},#{recommenderId},#{recommender},#{custId},#{proId},#{channel},#{hurdles},
+		#{buyNum},#{assemblePirce},#{assembleTime},#{modelId},#{isRegCom})
+	</insert>
+
+	<!-- 根据用户id获取拼团信息 -->
+	<select id="getAssembleByCustId" parameterType="string" resultType="cn.com.yusys.yscimc.assemble.domain.CmicAppAssembleCusts">
+		select * from CMIC_APP_ASSEMBLE_CUSTS where CUST_ID = #{custId} AND ACTY_ID = #{actyId}
+	</select>
+
+	<!-- 团满时修改订单状态 -->
+	<update id="updateOrderState" parameterType="String">
+		update LOY_AC_ORDER_LIST set ORDER_STATE = #{orderState} where ORDER_CUST_ID = #{custId} and ACTIVITY_ID = #{actyId}
+	</update>
+</mapper>

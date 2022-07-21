@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.uimp.business.pma.app.repository.mapper.OcrmFappDeviceMapper">
+    
+      <select id="getUuidNext"  resultType="java.lang.String">
+  		select sys_guid() from dual
+    </select>
+	
+	    <insert id="addAppVersion" parameterType="cn.com.yusys.yusp.uimp.business.pma.app.model.APPVersion">
+    INSERT INTO OCRM_F_APP_VERSION
+	  (ID, VERSION_ID, IS_MAST, VERSION_BELONG, DOWNLOAD_URL,CONTENT,UPDATE_USER,UPDATE_DATE,UPDATE_ORG,IS_DEL)
+	VALUES
+	  (#{id}, #{versionId}, #{isMast}, #{versionBelong}, #{downLoadUrl}, #{content}, #{updateUser}, #{updateDate}, #{updateOrg}, #{isDel})
+    </insert>
+	
+	    <delete id="deleteAppVersion" parameterType="cn.com.yusys.yusp.uimp.business.pma.app.model.APPVersion">
+    <!-- DELETE ocrm_f_app_version a
+	 WHERE a.version_belong = #{versionBelong} -->
+	 UPDATE ocrm_f_app_version a set a.is_del = 'I'
+	 WHERE a.version_belong = #{versionBelong}
+    </delete>
+	
+	    <select id="checkVersion" parameterType="java.lang.String" resultType="java.util.HashMap">
+    	SELECT * FROM OCRM_F_APP_VERSION a
+    	<where> A.IS_DEL = 'A'
+	    	<if test="versionBelong != null and versionBelong != ''">
+	    	and a.version_belong = #{versionBelong}
+	    	</if>
+    	</where>
+    </select>
+	
+	    <update id="updateAppVersion" parameterType="cn.com.yusys.yusp.uimp.business.pma.app.model.APPVersion">
+    UPDATE ocrm_f_app_version a
+	   set a.version_id     = #{versionId},
+	       a.IS_MAST        = #{isMast},
+	       a.version_belong = #{versionBelong},
+	       a.download_url   = #{downLoadUrl},
+	       a.content        = #{content}
+	 WHERE a.version_belong = #{versionBelong}
+    </update>
+	
+	    <select id="queryAppVersion"  parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+    	SELECT A.ID,
+	       A.VERSION_ID,
+	       A.IS_MAST,
+	       A.VERSION_BELONG,
+	       A.DOWNLOAD_URL,
+	       A.CONTENT,
+	       A.UPDATE_USER,
+	       TO_CHAR(A.UPDATE_DATE,'yyyy-mm-dd') AS UPDATE_DATE,
+	       A.UPDATE_ORG,
+	       A.IS_DEL,
+	       B.ORG_NAME,
+	       C.USER_NAME
+	  FROM OCRM_F_APP_VERSION A
+	  LEFT JOIN ADMIN_SM_ORG B ON B.ORG_ID = A.UPDATE_ORG
+	  LEFT JOIN ADMIN_SM_USER C ON C.USER_ID = A.UPDATE_USER
+		ORDER BY  A.IS_DEL ASC,A.UPDATE_DATE DESC
+    </select>
+    
+        <select id="queryVersion" parameterType="String" resultType="String">
+    SELECT A.VERSION_ID
+	  FROM OCRM_F_APP_VERSION A
+	 WHERE A.IS_DEL = 'A'
+	   AND A.VERSION_BELONG = #{downloadBelong,jdbcType=VARCHAR}
+    </select>
+    
+        <select id="addRecordDownload" parameterType="String">
+    INSERT INTO OCRM_F_APP_DOWNLOAD
+  	(
+  		ID
+  	<if test="downloadVersion != null">
+  		, DOWNLOAD_VERSION
+  	</if>
+  		, DOWNLOAD_DATE
+  	<if test="downloadBelong != null">
+  		, DOWNLOAD_BELONG
+  	</if>
+  	)
+  	VALUES 
+  	(
+  		SYS_GUID()
+  	<if test="downloadVersion != null">
+  		,#{downloadVersion,jdbcType=VARCHAR}
+  	</if>
+  		, (SELECT to_char(sysdate,'YYYY-MM-DD HH24:MI:SS') FROM dual)
+  	<if test="downloadBelong != null">
+  		, #{downloadBelong,jdbcType=VARCHAR}
+  	</if>
+  	)
+    </select>
+</mapper>

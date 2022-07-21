@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.uimp.base.repository.mapper.AdminBaseMetaFunColumnCfgMapper">
+    <resultMap id="BaseResultMap" type="cn.com.yusys.yusp.uimp.base.domain.AdminBaseMetaFunColumnCfg">
+		<id column="ID" jdbcType="VARCHAR" property="id" />
+		<result column="CONFIG_NAME" jdbcType="VARCHAR" property="configName" />
+		<result column="CONFIG_VALUE" jdbcType="VARCHAR" property="configValue" />
+		<result column="COLUMN_CODE" jdbcType="VARCHAR" property="columnCode" />
+    </resultMap>
+    <sql id="Base_Column_List">
+	    ID,CONFIG_NAME,CONFIG_VALUE,COLUMN_CODE
+    </sql>
+    
+    <delete id="delFunColumnCfgByTableCode">
+		DELETE FROM ADMIN_BASE_META_FUN_COLUMN_CFG WHERE
+		COLUMN_CODE LIKE concat(#{tableCode,jdbcType=VARCHAR},'%')
+	</delete>
+	
+	<select id="querylist" resultType="java.util.HashMap">
+		select t.*, t.rowid from admin_base_meta_fun_column_cfg t where t.column_code = #{columnCode}
+	</select>
+	
+	<select id="queryFunColumnCfg" resultType="java.util.HashMap">
+		select t.*, t.rowid from admin_base_meta_fun_column_cfg t where t.column_code LIKE concat(#{tableCode,jdbcType=VARCHAR},'%')
+	</select>
+    
+</mapper>

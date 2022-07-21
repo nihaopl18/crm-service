@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.entity.cust.org.group.repository.mapper.OcrmFciGroupRelaMemberMapper">
+    <delete id="delByGroupNo" parameterType="String">
+    DELETE OCRM_F_CI_GROUP_RELA_MEMBER where GROUP_NO = #{groupNO,jdbcType=VARCHAR}
+    </delete>
+    
+    <!--查询关系图中的节点信息  -->
+    <select id="getRelaMemberByGroupNo" parameterType="java.lang.String"  resultType="java.util.HashMap">
+	 	SELECT * FROM OCRM_F_CI_GROUP_RELA_MEMBER  WHERE GROUP_NO = #{groupNo, jdbcType=VARCHAR}
+	</select>
+	<!--查询集团的成员信息  -->
+	<select id="getMembersByGroupNo" parameterType="java.util.HashMap"  resultType="java.util.HashMap">
+	 select * FROM OCRM_F_CI_GROUP_MEMBER  
+	 <where>
+		 <if test="groupNo != null and groupNo !=''">
+		 	CUST_ID not in(select CUST_ID from OCRM_F_CI_GROUP_RELA_MEMBER where 
+		 		GROUP_NO=#{groupNo, jdbcType=VARCHAR})
+		 	and GROUP_NO = #{groupNo, jdbcType=VARCHAR} 
+		 </if>
+	 	 <if test="custName != null and custName !=''">
+		 	 and cust_name LIKE CONCAT(CONCAT('%', #{custName, jdbcType=VARCHAR}),'%')
+		 </if>
+	 </where>
+	</select>
+</mapper>

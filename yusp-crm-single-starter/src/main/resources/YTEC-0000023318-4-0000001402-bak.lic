@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<license build-time="Mon Aug 02 18:12:57 CST 2021" validate-code="4CCD660485C164E1C3108142226ADA85">
+  <element name="contract_code">YTEC-2021-1317-A</element>
+  <element name="customer_name">微众银行卡券及营销平台项目</element>
+  <element name="license_code">0000023318</element>
+  <element name="product_code">0000001402</element>
+  <element name="product_name_zh-cn">宇信科技客户关系管理系统[简称：YSCRM客户关系管理系统]V6.0</element>
+  <element name="product_name_en-us">YSCRM</element>
+  <element name="version_major">6</element>
+  <element name="version_sub">0</element>
+  <element name="version_publish">1</element>
+  <element name="complie_date">2019-04-16</element>
+  <element name="license_type">内部试用许可证</element>
+  <element name="license_start_time">2021-08-02</element>
+  <element name="license_end_time">2022-01-20</element>
+</license>

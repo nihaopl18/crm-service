@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper
+	namespace="cn.com.yusys.yusp.uimp.business.pma.app.repository.mapper.PmaAppNewsMapper">
+	<resultMap id="BaseResultMap"
+		type="cn.com.yusys.yusp.uimp.business.pma.app.domain.PmaAppNews">
+		<id column="ID" jdbcType="VARCHAR" property="id" />
+		<result column="NAME" jdbcType="VARCHAR" property="name" />
+		<result column="ADDRESS" jdbcType="VARCHAR" property="address" />
+		<result column="STATE" jdbcType="VARCHAR" property="state" />
+		<result column="CRAT_USE" jdbcType="VARCHAR" property="cratUse" />
+		<result column="CRAT_ORG" jdbcType="VARCHAR" property="cratOrg" />
+		<result column="CRAT_DT" jdbcType="TIMESTAMP" property="cratDt" />
+		<result column="LAST_CHG_DT" jdbcType="TIMESTAMP" property="lastChgDt" />
+		<result column="LAST_CHG_USE" jdbcType="VARCHAR" property="lastChgUse" />
+		<result column="LAST_CHG_ORG" jdbcType="VARCHAR" property="lastChgOrg" />
+		<result column="IS_DEL" jdbcType="VARCHAR" property="isDel" />
+	</resultMap>
+	<sql id="Base_Column_List">
+		ID,NAME,ADDRESS,STATE,CRAT_USE,CRAT_ORG,CRAT_DT,LAST_CHG_DT,LAST_CHG_USE,LAST_CHG_ORG,IS_DEL
+	</sql>
+
+	<select id="querylist" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+		select T.ID,
+		       T.NAME,
+		       T.FILE_PATH,
+		       T.URL,
+		       T.STATE,
+		       T.CRAT_USE,
+		       T.CRAT_ORG,
+		       to_char(T.CRAT_DT,'yyyy-MM-dd HH24:mi:ss') CRAT_DT,
+		       to_char(T.LAST_CHG_DT,'yyyy-MM-dd HH24:mi:ss') LAST_CHG_DT,
+		       T.LAST_CHG_USE,
+		       T.LAST_CHG_ORG,
+		       T.IS_DEL,
+		       D.USER_NAME AS CRAT_USE_NAME,
+		       E.USER_NAME AS LAST_USE_NAME
+		  from PMA_APP_NEWS T
+		  LEFT JOIN ADMIN_SM_USER E ON T.LAST_CHG_USE = E.LOGIN_CODE 
+		  LEFT JOIN ADMIN_SM_USER D ON T.CRAT_USE = D.LOGIN_CODE
+		 WHERE T.IS_DEL = '0'
+		<if test="condition.name != null and condition.name != ''">
+			AND T.NAME LIKE concat(concat('%',#{condition.name}),'%')
+		</if>
+		ORDER BY T.CRAT_DT DESC
+	</select>
+</mapper>

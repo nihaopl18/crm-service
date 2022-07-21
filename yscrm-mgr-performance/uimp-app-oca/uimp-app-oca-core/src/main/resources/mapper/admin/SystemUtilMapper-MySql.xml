@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.admin.repository.mapper.SystemUtilMapper">
+
+	<!--获取机构信息 只能查询当前用户机构以下 -->
+	<select id="getOrgByParam" parameterType="java.util.Map"
+		resultType="java.util.HashMap" databaseId="mysql">
+		SELECT T.* FROM SYS_ORG_VIEW T
+		<where>
+			T.ORG_STS = 'A'
+			AND (T.ORG_SEQ LIKE CONCAT(CONCAT('%,',#{orgCode}),',%') OR T.ORG_CODE=#{orgCode})
+			<if test="needManage">
+				OR (T.ORG_SEQ LIKE CONCAT(CONCAT('%,',(SELECT ORG_ID FROM ADMIN_SM_USER_MGR_ORG WHERE USER_ID=#{userId})),',%')
+				OR T.ORG_ID IN (SELECT ORG_ID FROM ADMIN_SM_USER_MGR_ORG WHERE USER_ID=#{userId})
+			</if>
+		</where>
+	</select>
+
+	<!--获取机构树 只能查询当前用户机构以下 -->
+	<select id="getOrgtreeByParam" parameterType="java.util.Map" resultType="java.util.HashMap" databaseId="mysql">
+		SELECT T_ORG.ORG_ID,T_ORG.ORG_NAME, T_ORG.UP_ORG_ID FROM SYS_ORG_VIEW T_ORG
+		<where>
+			T_ORG.ORG_STS = 'A'
+			AND (T_ORG.ORG_SEQ LIKE CONCAT(CONCAT('%,',#{orgCode}),',%') OR T_ORG.ORG_CODE=#{orgCode})
+			<if test="orgLevel!=null and orgLevel!='' and orgLevel!=0">
+				AND T_ORG.ORG_LEVEL &lt;=#{orgLevel}
+			</if>
+			<if test="needManage">
+				OR (T_ORG.ORG_SEQ LIKE CONCAT(CONCAT('%,',(SELECT ORG_ID FROM ADMIN_SM_USER_MGR_ORG WHERE USER_ID=#{userId})),',%')
+				OR T_ORG.ORG_ID IN (SELECT ORG_ID FROM ADMIN_SM_USER_MGR_ORG WHERE USER_ID=#{userId})
+			</if>
+		</where>
+		<if test="needDpt">
+			UNION ALL
+			SELECT T_DPT.DPT_ID AS ORG_ID,T_DPT.DPT_NAME AS ORG_NAME ,T_DPT.UP_DPT_ID AS UP_ORG_ID FROM ADMIN_SM_DPT T_DPT
+			WHERE T_DPT.BELONG_ORG_ID =#{orgCode}
+		</if>
+		<if test="needFin">
+			UNION ALL
+			SELECT T_FIN.INSTU_ID AS ORG_ID,T_FIN.INSTU_NAME AS ORG_NAME,' ' AS UP_ORG_ID FROM ADMIN_SM_INSTU T_FIN
+			WHERE T_FIN.INSTU_ID=(SELECT INSTU_ID FROM ADMIN_SM_ORG WHERE ORG_CODE=#{orgCode})
+		</if>
+	</select>
+
+	<!--获取用户信息分为所辖与当前默认为当前 -->
+	<select id="getUserByParam" parameterType="java.util.Map" resultType="java.util.HashMap" databaseId="mysql">
+		SELECT T_USER.*,T_DPT.DPT_NAME FROM ADMIN_SM_USER T_USER
+			LEFT JOIN ADMIN_SM_DPT T_DPT ON T_DPT.DPT_ID=T_USER.DPT_ID
+		<where>
+			T_USER.USER_STS='A'
+			<if test="orgCode!=null and orgCode!=''">
+				<choose>
+					<when test="'ALL_ORG'==searchType">
+						AND T_USER.ORG_ID IN (SELECT ORG_ID FROM SYS_ORG_VIEW WHERE ORG_SEQ LIKE
+						CONCAT(CONCAT('%,',#{orgCode}),',%') OR ORG_CODE=#{orgCode})
+					</when>
+					<otherwise>
+						AND T_USER.ORG_ID =#{orgCode}
+					</otherwise>
+				</choose>
+			</if>
+			<if test="loginCode!=null and loginCode!=''">
+				AND T_USER.LOGIN_CODE LIKE CONCAT(CONCAT('%',#{loginCode}),'%')
+			</if>
+			<if test="userName!=null and userName!=''">
+				AND T_USER.USER_NAME LIKE CONCAT(CONCAT('%',#{userName}),'%')
+			</if>
+			<if test="dutyId!=null and dutyId!=''">
+				AND T_USER.USER_ID IN( SELECT T3.USER_ID FROM ADMIN_SM_USER_DUTY_REL T3
+				WHERE T3.DUTY_ID=#{dutyId} AND T3.REL_STS='A')
+			</if>
+			<if test="roleId!=null and roleId!=''">
+				AND USER_ID IN (SELECT T2.USER_ID FROM ADMIN_SM_USER_ROLE_REL T2
+				WHERE T2.ROLE_ID=#{roleId} AND T2.REL_STS='A')
+			</if>
+		</where>
+	</select>
+
+	<!--根据参数获取对应角色信息 -->
+	<select id="getRoleByParam" parameterType="java.util.Map" resultType="java.util.HashMap" databaseId="mysql">
+		SELECT T_ROLE.ROLE_CODE,T_ROLE.ROLE_NAME,T_ROLE.ORG_ID,T_ROLE.ROLE_LEVEL,T_ROLE.ROLE_STS FROM ADMIN_SM_ROLE T_ROLE
+		<where>
+			AND T_ROLE.ROLE_STS='A'
+			<if test="orgCode!=null and orgCode!=''">
+				<choose>
+					<when test="'ALL_ORG'==searchType">
+						AND T_ROLE.ORG_ID IN (SELECT ORG_ID FROM SYS_ORG_VIEW WHERE ORG_SEQ LIKE
+						CONCAT(CONCAT('%,',#{orgCode}),',%') OR ORG_CODE=#{orgCode})
+					</when>
+					<otherwise>
+						AND T_ROLE.ORG_ID =#{orgCode}
+					</otherwise>
+				</choose>
+			</if>
+			<if test="roleCode!=null and roleCode!=''">
+				AND T_ROLE.ROLE_CODE LIKE CONCAT(CONCAT('%',#{roleCode}),'%')
+			</if>
+			<if test="roleName!=null and roleName!=''">
+				AND T_ROLE.ROLE_NAME LIKE CONCAT(CONCAT('%',#{roleName}),'%')
+			</if>
+			<if test="roleLevel!=null and roleLevel!=''">
+				AND T_ROLE.ROLE_LEVEL=#{roleLevel}
+			</if>
+		</where>
+	</select>
+
+	<!-- 根据参数获取当前岗位信息 -->
+	<select id="getDutyByParam" parameterType="java.util.Map"
+		resultType="java.util.HashMap" databaseId="mysql">
+		SELECT T_DUTY.DUTY_CDE,T_DUTY.DUTY_NAME,T_DUTY.DUTY_STS,T_DUTY.BELONG_ORG_ID FROM ADMIN_SM_DUTY T_DUTY
+		<where>
+			AND T_DUTY.DUTY_STS='A'
+			<if test="orgCode!=null and orgCode!=''">
+				<choose>
+					<when test="'ALL_ORG'==searchType">
+						AND T_DUTY.BELONG_ORG_ID IN (SELECT ORG_ID FROM SYS_ORG_VIEW WHERE ORG_SEQ LIKE
+						CONCAT(CONCAT('%,',#{orgCode}),',%') OR ORG_CODE=#{orgCode})
+					</when>
+					<otherwise>
+						AND T_DUTY.BELONG_ORG_ID =#{orgCode}
+					</otherwise>
+				</choose>
+			</if>
+			<if test="dutyCode!=null and dutyCode!=''">
+				AND T_DUTY.DUTY_CDE LIKE CONCAT(CONCAT('%',#{dutyCode}),'%')
+			</if>
+			<if test="dutyName!=null">
+				AND T_DUTY.DUTY_NAME LIKE CONCAT(CONCAT('%',#{dutyName}),'%')
+			</if>
+		</where>
+	</select>
+
+</mapper>

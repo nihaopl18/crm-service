@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.climp.acty.repository.mapper.LoyRlFieldEcNameMapper">
+	<resultMap id="BaseResultMap" type="cn.com.yusys.climp.acty.domain.LoyRlFieldEcName">
+		<result column="FIELD_ID" jdbcType="VARCHAR" property="fieldId" />
+		<result column="TABLE_ID" jdbcType="VARCHAR" property="tableId" />
+		<result column="FIELD_E_NAME" jdbcType="VARCHAR" property="fieldEname" />
+		<result column="FIELD_C_NAME" jdbcType="VARCHAR" property="fieldCname" />
+		<result column="FIELD_TYPE" jdbcType="VARCHAR" property="fieldType" />
+		<result column="FIELD_LENGTH" jdbcType="NUMERIC" property="fieldLength" />
+		<result column="IS_DISPLAY" jdbcType="VARCHAR" property="isDisplay" />
+		<result column="F_NAME" jdbcType="VARCHAR" property="fname" />
+		<result column="MAGNIFIER" jdbcType="VARCHAR" property="magnifier" />
+		<result column="DELETE_SIGN" jdbcType="VARCHAR" property="deleteSign" />
+		<result column="REMARK" jdbcType="VARCHAR" property="remark" />
+		<result column="CREATE_USER" jdbcType="VARCHAR" property="createUser" />
+		<result column="CREATE_DATE" jdbcType="DATE" property="createDate" />
+		<result column="CREATE_ORG" jdbcType="VARCHAR" property="createOrg" />
+		<result column="UPDATE_USER" jdbcType="VARCHAR" property="updateUser" />
+		<result column="UPDATE_DATE" jdbcType="DATE" property="updateDate" />
+		<result column="UPDATE_ORG" jdbcType="VARCHAR" property="updateOrg" />
+	</resultMap>
+	<sql id="Base_Column_List">
+		FIELD_ID,TABLE_ID,FIELD_E_NAME,FIELD_C_NAME,FIELD_TYPE,FIELD_LENGTH,IS_DISPLAY,F_NAME,MAGNIFIER,DELETE_SIGN,REMARK,CREATE_USER,CREATE_DATE,CREATE_ORG,UPDATE_USER,UPDATE_DATE,UPDATE_ORG
+	</sql>
+	<!-- 根据表id查询表字段-->
+	<select id="getFieldByTableId" parameterType="String"
+			resultType="java.util.Map">
+		SELECT T.*
+		FROM LOY_RL_FIELD_EC_NAME T  where 1=1
+		<if test="tableId != null and tableId !=''">
+			and T.TABLE_ID  =#{tableId, jdbcType=VARCHAR}
+		</if>
+		order by t.field_id
+	</select>
+	<!-- 删除字段 -->
+	<update id="updateFieldState" parameterType="java.util.Map">
+		UPDATE LOY_RL_FIELD_EC_NAME
+		SET
+			DELETE_SIGN = '1',
+			UPDATE_USER	= #{userCode,javaType=java.lang.String},
+			UPDATE_DATE	= sysdate,
+			UPDATE_ORG	= #{orgCode,javaType=java.lang.String}
+		WHERE TABLE_ID = #{tableId,javaType=java.lang.String}
+	</update>
+
+	<!-- 根据表名查询字段 -->
+	<select id="searchFieldByTabName" parameterType="String"
+			resultType="cn.com.yusys.climp.acty.domain.LoyRlFieldEcName">
+		select #{tabId, jdbcType=VARCHAR} as table_id,t.column_name as field_e_name, t.comments as field_c_name,1 as field_type,1 as is_display
+		from user_col_comments t where t.table_name = #{tabName, jdbcType=VARCHAR}
+	</select>
+
+	<select id="selectByTransactionCode" resultType="cn.com.yusys.climp.acty.domain.LoyRlTableEcName">
+		SELECT t.* from
+			( SELECT * FROM LOY_RL_TABLE_EC_NAME where TRANSACTION_CODE = #{transactionCode, jdbcType=VARCHAR} ) t WHERE rownum = 1
+	</select>
+</mapper>

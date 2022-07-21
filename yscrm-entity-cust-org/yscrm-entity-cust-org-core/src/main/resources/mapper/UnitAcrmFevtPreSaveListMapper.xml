@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.cust.org.repository.mapper.UnitAcrmFevtPreSaveListMapper">
+    <sql id="Base_Column_List">
+	    EVENT_NO,ETL_DT,DATA_DATE,SUBACCT_NO,ACCT_NO,CARD_NO,CLS_NO,CCY_CD,TRAN_AMT,BAL,TRANS_DT,EFT_DT,RCDTYPE_CD,CD_IND,CT_IND,INT_AMT,INT_RATE,VOU_KIND_CD,VOU_NO,TOACCT_NO,FTF_ACC_NAME,OPPCLS_NO,PTXN_SEQ_NO,CTXN_SEQ_NO,PTXN_CODE_NO,CTXN_CODE_CD,ORG_NO,TLR_NO,REVTLR_NO,AUTHTLR_NO,CHANNEL_CODE,CHANNEL_CD,AGENT_NAME,REF_IND,REF_SEQ_NO,BRIEFCODE_NO,TRAN_BRIEF,INT_DAY,INT_ACCUM1,INT_ACCUM2,PAGE_NO,ORD_SEQ,PRT_IND,TRANS_TM
+    </sql>
+    
+    <select id="querySaveListByCustId" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"  resultType="java.util.HashMap">
+		select t.EVENT_NO,
+           t.DATA_DATE as DATA_DT,
+           t.SUBACCT_NO,
+           t.ACCT_NO,
+           t.CARD_NO,
+           t.CLS_NO,
+           t.CCY_CD,
+           t.TRAN_AMT,
+           t.BAL,
+           t.TRANS_DT,
+           to_char(t.EFT_DT,'yyyy-mm-dd') as EFT_DT,
+           t.RCDTYPE_CD,
+           t.CD_IND,
+           t.CT_IND,
+           t.INT_AMT,
+           t.INT_RATE,
+           t.VOU_KIND_CD,
+           t.VOU_NO,
+           t.TOACCT_NO,
+           t.TOACCT_NM AS FTF_ACC_NAME,
+           t.OPPCLS_NO,
+           t.PTXN_SEQ_NO AS PTXN_SEQ_NO,
+           t.SUBSERSEQ_NO AS CTXN_SEQ_NO,
+           t.PTXNCODE_CD AS PTXN_CODE_NO,
+           t.CTXNCODE_CD AS CTXN_CODE_CD,
+           t.ORG_NO,
+            nvl(org.ORG_NAME,'未知') AS ORG_NAME,
+           t.TLR_NO,
+           nvl(smU.USER_NAME,'未知') AS USER_NAME,
+           t.REVTLR_NO,
+           t.AUTHTLR_NO,
+           t.CHANNEL_CODE AS CHANNEL,
+           t.CHANNEL_CD,
+           t.AGENT_NAME,
+           t.REF_IND,
+           t.REFSEQ_NO AS REF_SEQ_NO,
+           t.BRIEFCODE_CD AS BRIEFCODE_NO ,
+           t.TRAN_BRIEF,
+           t.INT_DAY,
+           t.INT_ACCUM1,
+           t.INT_ACCUM2,
+           t.PAGE_NO,
+           t.ORD_SEQ,
+           t.PRT_IND,
+           t.TRAN_TIME as TRANS_TM
+      from ACRM_F_EVT_UNIT_SAVE_LIST t
+      left join admin_sm_org org
+      on org.ORG_ID=t.ORG_NO
+      left join admin_sm_user smU
+      on smU.USER_ID=t.TLR_NO
+      where 1=1
+	  <if  test="condition.acctId != null and condition.acctId != ''">
+       		and t.SUBACCT_NO =#{condition.acctId,jdbcType=VARCHAR} 
+	  </if>
+	  <if  test="condition.othsideAcct != null and condition.othsideAcct != ''">
+       		and t.TOACCT_NO =#{condition.othsideAcct,jdbcType=VARCHAR} 
+	  </if>
+	  <if  test="condition.channel != null and condition.channel!= ''">
+       		and t.CHANNEL_CODE =#{condition.channel,jdbcType=VARCHAR} 
+	  </if>
+	  <if  test="condition.startTM != null and condition.startTM != ''">
+       		and  to_char(to_date(t.DATA_DATE,'yyyyMMdd'),'yyyy-MM-dd') &gt;= #{condition.startTM,jdbcType=VARCHAR} 
+	  </if>
+	  <if  test="condition.endTM != null and condition.endTM != ''">
+       		and  to_char(to_date(t.DATA_DATE,'yyyyMMdd'),'yyyy-MM-dd') &lt;= #{condition.endTM,jdbcType=VARCHAR} 
+	  </if>
+	  <if  test="condition.startAmt != null and condition.startAmt != ''">
+       		and t.TRAN_AMT &gt;=#{condition.startAmt,jdbcType=VARCHAR} 
+	  </if>
+	  <if  test="condition.endAmt != null and condition.endAmt != ''">
+       		and t.TRAN_AMT &lt;= #{condition.endAmt,jdbcType=VARCHAR} 
+	  </if>
+	  ORDER BY t.TRANS_DT DESC,TRANS_TM DESC
+	</select>
+		<resultMap id="BaseResultMap" type="cn.com.yusys.yscrm.cust.org.domain.OcrmAciReportApply">
+		<id column="BIZSEQNO" jdbcType="VARCHAR" property="bizseqno" />
+		
+		<result column="PARAMS" jdbcType="CLOB" property="params" />
+    </resultMap>
+    <sql id="Bases_Column_List">
+	    BIZSEQNO,PARAMS
+    </sql>
+    <select id="getParams" parameterType="string" resultMap="BaseResultMap" >
+		select  <include refid="Bases_Column_List"/>  from ocrm_a_ci_report_apply where bizseqno=#{bizseqno, jdbcType=VARCHAR}
+	</select>
+</mapper>

@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.admin.repository.mapper.AdminSmRoleMapper">
+	
+	<!-- 根据角色id移除角色 -->
+	<update id="deleteRole" parameterType="String">
+		DELETE FROM ADMIN_SM_ROLE WHERE ROLE_ID=#{did}
+	</update>
+	
+	<!-- 根据角色id启用角色 -->
+	<update id="updateSts" parameterType="String">
+		update admin_sm_role set ROLE_STS=#{sts},LAST_CHG_USR =#{userId},LAST_CHG_DT=#{date} where ROLE_ID=#{id}
+	</update>
+	
+	<!-- 新增检查角色编号是否重复-->
+	<select id="createCheckrolecode" parameterType="String" resultType="integer">
+		SELECT count(t.ROLE_CODE) from ADMIN_SM_ROLE t where t.ROLE_CODE = #{roleCode}
+	</select>
+	
+	<!-- 修改检查角色编号是否重复-->
+	<select id="editCheckrolecode" parameterType="String" resultType="integer">
+		SELECT count(t.ROLE_CODE) from ADMIN_SM_ROLE t where t.ROLE_CODE = #{roleCode} and t.role_id != #{roleId}
+	</select>
+	
+	<!-- 通过机构Id查询层级-->
+	<select id="queryRoleLevel" parameterType="String" resultType="integer">
+		select t.ORG_LEVEL from admin_sm_org t where t.org_id = #{orgId}
+	</select>
+
+	<!--根据记录编号修改数据权限模板id -->	
+	<update id="updateRoleAuth" >
+		update ADMIN_SM_DATA_AUTH set AUTH_TMPL_ID=#{authTmplId,jdbcType=VARCHAR} 
+				,LAST_CHG_USR=#{lastChgUsr, jdbcType=VARCHAR},
+		 		LAST_CHG_DT=#{lastChgDt, jdbcType=VARCHAR} 
+		where AUTH_ID=#{authId,jdbcType=VARCHAR}
+	</update>
+	<!--根据记录编号修改资源对象授权记录 -->
+	<update id="updateAuthReco" >
+		update ADMIN_SM_AUTH_RECO set LAST_CHG_USR=#{lastChgUsr, jdbcType=VARCHAR},
+		 		LAST_CHG_DT=#{lastChgDt, jdbcType=VARCHAR} 
+		where AUTHRES_ID=#{authId,jdbcType=VARCHAR}
+	</update>
+	<!-- 清除角色默认权限 -->
+	<delete id="cleanRoleAuth" parameterType="String">
+		 DELETE FROM ADMIN_SM_AUTH_RECO WHERE AUTHRES_ID = #{authId}
+	</delete>
+	<!--查询默认权限 end  add by chenlin -->	
+	
+	
+
+
+    <!--角色删除前查询是否被用户关联-->
+    <select id="getUserByRoleId" parameterType="String" resultType="java.lang.Integer">
+       select count(*) from ADMIN_SM_USER_ROLE_REL where ROLE_ID = #{roleId,jdbcType=VARCHAR}
+    </select>
+	
+	
+</mapper>

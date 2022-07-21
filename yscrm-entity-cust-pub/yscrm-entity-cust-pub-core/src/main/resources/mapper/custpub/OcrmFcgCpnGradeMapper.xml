@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.custpub.repository.mapper.OcrmFcgCpnGradeMapper">
+   <select id="queryGradeList" parameterType="java.util.Map"  resultType="java.util.HashMap">
+	  select    t.LAST_CHG_SYS                ,               
+				t.LAST_CHG_USR                ,               
+				t.LAST_CHG_DT                 ,               
+				t.CORP_ORG_CODE               ,               
+				t.CUST_ID                     ,               
+				t.GRADE_LEVEL                 ,               
+				t.PRE_MINUS_LEVEL             ,               
+				t.GRADE_MINUS_CONTENT         ,               
+				t.SERVICE_LEVEL               ,               
+				t.EVALUATE_TYPE               ,               
+				t.SYS_SERVICE_LEVEL           ,               
+				t.HAND_SERVICE_LEVEL          ,               
+				t.EVALUATE_DATE               ,               
+				decode(t.EVALUATE_TYPE,'1',to_char(t.Evaluate_DATE, 'yyyy-mm-dd'),'2',to_char(t.HAND_EVALUATE_DATE, 'yyyy-mm-dd')) as HAND_EVALUATE_DATE,                  
+				t.HAND_EFFECTIVE_DATE         ,               
+				t.HAND_EXPIRED_DATE           ,                
+	            a.RAT_VAL      ,
+	            a.APP_REA
+	  from  OCRM_F_CG_CPN_GRADE t
+	  left join  OCRM_F_CI_PRE_GRADE_APPLY_INFO a on a.CUST_ID=t.CUST_ID
+	  where 1=1
+	   <if  test="custId != null and custId != ''">
+		       and 		 t.CUST_ID =#{custId,jdbcType=VARCHAR} 
+	   </if>
+	order by t.HAND_EVALUATE_DATE  desc
+	</select>
+    
+</mapper>

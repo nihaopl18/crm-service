@@ -1,0 +1,228 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper
+	namespace="cn.com.yusys.yusp.dycrm.transferInfo.repository.mapper.AcrmFlaTranDetailMapper">
+	<select id="queryMonth" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+		resultType="java.util.HashMap">
+		select
+		DATA_DATE,
+		TRANS_SERIAL_NO,
+		ECIF_CUST_NO,
+		SRC_CUST_NO,
+		CUST_TYPE,
+		CONTRACT_NO,
+		LOAN_BILL_NO,
+		PROD_CODE,
+		SRC_PROD_CODE,
+		BUSINESS_CCY,
+		LOAN_AMT,
+		TO_CHAR(PUBLISH_DATE,'yyyy-MM-dd HH24:mi:ss') PUBLISH_DATE,
+		TO_CHAR(PRINCIPAL_EXPIRY_DATE,'yyyy-MM-dd HH24:mi:ss') PRINCIPAL_EXPIRY_DATE,
+		TO_CHAR(INT_EXPIRY_DATE,'yyyy-MM-dd HH24:mi:ss') INT_EXPIRY_DATE,
+		TO_CHAR(DEAL_DATE,'yyyy-MM-dd HH24:mi:ss') DEAL_DATE,
+		ENTRY_ORG,
+		INTER_BANK_FLAG,
+		DEAL_ORG,
+		DEAL_USER,
+		REGISTER_ORG,
+		REGISTRANT,
+		LOAN_ACCT_OPEN_ORG,
+		LOAN_ACCT,
+		PAY_SYSTEM,
+		ONLINE_TRANSFER_FLAG,
+		PAYEE_ADDR,
+		PAYEE_ACCT_OPEN_ORG,
+		PAYEE_ACCT_CCY,
+		PAYEE_ACCT_NO,
+		PAYEE_ACCT_FLAG,
+		REPAY_ACCT_OPEN_ORG,
+		REPAY_ACCT,
+		SRC_SYSTEM_NO
+		from
+		ACRM_F_LA_TRAN_DETAIL
+		<where>
+			ECIF_CUST_NO =
+			#{condition.custNo,jdbcType=VARCHAR}
+			and LOAN_BILL_NO =
+			#{condition.acctId,jdbcType=VARCHAR}
+			<if
+				test="condition.startDate != null and condition.startDate != '' and condition.endDate != null and condition.endDate != ''">
+                <![CDATA[
+	                AND PUBLISH_DATE >= to_date(#{condition.startDate,jdbcType=VARCHAR},'yyyy-MM-dd')
+	                AND PUBLISH_DATE <= to_date(#{condition.endDate,jdbcType=VARCHAR},'yyyy-MM-dd')
+	            ]]>
+			</if>
+		</where>
+	</select>
+
+	<select id="queryAll" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+		resultType="java.util.HashMap">
+		select
+		DATA_DATE,
+		TRANS_SERIAL_NO,
+		ECIF_CUST_NO,
+		SRC_CUST_NO,
+		CUST_TYPE,
+		CONTRACT_NO,
+		LOAN_BILL_NO,
+		PROD_CODE,
+		SRC_PROD_CODE,
+		BUSINESS_CCY,
+		LOAN_AMT,
+		TO_CHAR(PUBLISH_DATE,'yyyy-MM-dd HH24:mi:ss') PUBLISH_DATE,
+		TO_CHAR(PRINCIPAL_EXPIRY_DATE,'yyyy-MM-dd HH24:mi:ss') PRINCIPAL_EXPIRY_DATE,
+		TO_CHAR(INT_EXPIRY_DATE,'yyyy-MM-dd HH24:mi:ss') INT_EXPIRY_DATE,
+		TO_CHAR(DEAL_DATE,'yyyy-MM-dd HH24:mi:ss') DEAL_DATE,
+		ENTRY_ORG,
+		INTER_BANK_FLAG,
+		DEAL_ORG,
+		DEAL_USER,
+		REGISTER_ORG,
+		REGISTRANT,
+		LOAN_ACCT_OPEN_ORG,
+		LOAN_ACCT,
+		PAY_SYSTEM,
+		ONLINE_TRANSFER_FLAG,
+		PAYEE_ADDR,
+		PAYEE_ACCT_OPEN_ORG,
+		PAYEE_ACCT_CCY,
+		PAYEE_ACCT_NO,
+		PAYEE_ACCT_FLAG,
+		REPAY_ACCT_OPEN_ORG,
+		REPAY_ACCT,
+		SRC_SYSTEM_NO
+		from
+		ACRM_F_LA_TRAN_DETAIL_ALL
+		<where>
+			ECIF_CUST_NO =
+			#{condition.custNo,jdbcType=VARCHAR}
+			and LOAN_BILL_NO =
+			#{condition.acctId,jdbcType=VARCHAR}
+			<if
+				test="condition.startDate != null and condition.startDate != '' and condition.endDate != null and condition.endDate != ''">
+                <![CDATA[
+	                AND PUBLISH_DATE >= to_date(#{condition.startDate,jdbcType=VARCHAR},'yyyy-MM-dd')
+	                AND PUBLISH_DATE <= to_date(#{condition.endDate,jdbcType=VARCHAR},'yyyy-MM-dd')
+	            ]]>
+			</if>
+		</where>
+	</select>
+
+	<select id="excelMonth" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+			resultType="cn.com.yusys.yusp.dycrm.transferInfo.domain.TransferInfoLA">
+		SELECT
+		DATA_DATE,
+		TRANS_SERIAL_NO,
+		ECIF_CUST_NO,
+		SRC_CUST_NO,
+		PAI.CUST_NAME
+		CUST_TYPE,
+		CONTRACT_NO,
+		LOAN_BILL_NO,
+		PROD_CODE,
+		SRC_PROD_CODE,
+		LI1.LOOKUP_ITEM_NAME BUSINESS_CCY,
+		LOAN_AMT,
+		PUBLISH_DATE,
+		TO_CHAR(PRINCIPAL_EXPIRY_DATE,'yyyy-MM-dd') PRINCIPAL_EXPIRY_DATE,
+		TO_CHAR(PRINCIPAL_EXPIRY_DATE,'yyyy-MM-dd') INT_EXPIRY_DATE,
+		ENTRY_ORG,
+		LI2.LOOKUP_ITEM_NAME INTER_BANK_FLAG,
+		DEAL_ORG,
+		DEAL_USER,
+		TO_CHAR(DEAL_DATE,'yyyy-MM-dd') DEAL_DATE,
+		REGISTER_ORG,
+		REGISTRANT,
+		LOAN_ACCT_OPEN_ORG,
+		LOAN_ACCT,
+		PAY_SYSTEM,
+		ONLINE_TRANSFER_FLAG,
+		PAYEE_ADDR,
+		PAYEE_ACCT_OPEN_ORG,
+		LI3.LOOKUP_ITEM_NAME PAYEE_ACCT_CCY,
+		PAYEE_ACCT_NO,
+		LI4.LOOKUP_ITEM_NAME PAYEE_ACCT_FLAG,
+		REPAY_ACCT_OPEN_ORG,
+		REPAY_ACCT,
+		SRC_SYSTEM_NO
+		FROM
+		ACRM_F_LA_TRAN_DETAIL LA
+		LEFT JOIN ACRM_F_CI_PER_ADMIT_INFO PAI ON LA.ECIF_CUST_NO = PAI.CUST_ID
+		LEFT JOIN ADMIN_SM_LOOKUP_ITEM LI1 ON LI1.LOOKUP_ITEM_CODE = FA.BUSINESS_CCY AND LI1.LOOKUP_CODE = 'CD0433'
+		LEFT JOIN ADMIN_SM_LOOKUP_ITEM LI2 ON LI2.LOOKUP_ITEM_CODE = FA.INTER_BANK_FLAG AND LI2.LOOKUP_CODE = 'INTER_FLAG'
+		LEFT JOIN ADMIN_SM_LOOKUP_ITEM LI3 ON LI3.LOOKUP_ITEM_CODE = FA.PAYEE_ACCT_CCY AND LI3.LOOKUP_CODE = 'CD0433'
+		LEFT JOIN ADMIN_SM_LOOKUP_ITEM LI4 ON LI4.LOOKUP_ITEM_CODE = FA.PAYEE_ACCT_FLAG AND LI4.LOOKUP_CODE = 'ACCT_FLAG'
+		<where>
+			ECIF_CUST_NO =
+			#{condition.custNo,jdbcType=VARCHAR}
+			and LOAN_BILL_NO =
+			#{condition.acctId,jdbcType=VARCHAR}
+			<if
+					test="condition.startDate != null and condition.startDate != '' and condition.endDate != null and condition.endDate != ''">
+				<![CDATA[
+	                AND PUBLISH_DATE >= to_date(#{condition.startDate,jdbcType=VARCHAR},'yyyy-MM-dd')
+	                AND PUBLISH_DATE <= to_date(#{condition.endDate,jdbcType=VARCHAR},'yyyy-MM-dd')
+	            ]]>
+			</if>
+		</where>
+	</select>
+
+	<select id="excelAll" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+			resultType="cn.com.yusys.yusp.dycrm.transferInfo.domain.TransferInfoLA">
+		SELECT
+		DATA_DATE,
+		TRANS_SERIAL_NO,
+		ECIF_CUST_NO,
+		SRC_CUST_NO,
+		PAI.CUST_NAME
+		CUST_TYPE,
+		CONTRACT_NO,
+		LOAN_BILL_NO,
+		PROD_CODE,
+		SRC_PROD_CODE,
+		LI1.LOOKUP_ITEM_NAME BUSINESS_CCY,
+		LOAN_AMT,
+		PUBLISH_DATE,
+		TO_CHAR(PRINCIPAL_EXPIRY_DATE,'yyyy-MM-dd') PRINCIPAL_EXPIRY_DATE,
+		TO_CHAR(PRINCIPAL_EXPIRY_DATE,'yyyy-MM-dd') INT_EXPIRY_DATE,
+		ENTRY_ORG,
+		LI2.LOOKUP_ITEM_NAME INTER_BANK_FLAG,
+		DEAL_ORG,
+		DEAL_USER,
+		TO_CHAR(DEAL_DATE,'yyyy-MM-dd') DEAL_DATE,
+		REGISTER_ORG,
+		REGISTRANT,
+		LOAN_ACCT_OPEN_ORG,
+		LOAN_ACCT,
+		PAY_SYSTEM,
+		ONLINE_TRANSFER_FLAG,
+		PAYEE_ADDR,
+		PAYEE_ACCT_OPEN_ORG,
+		LI3.LOOKUP_ITEM_NAME PAYEE_ACCT_CCY,
+		PAYEE_ACCT_NO,
+		LI4.LOOKUP_ITEM_NAME PAYEE_ACCT_FLAG,
+		REPAY_ACCT_OPEN_ORG,
+		REPAY_ACCT,
+		SRC_SYSTEM_NO
+		FROM
+		ACRM_F_LA_TRAN_DETAIL_ALL LA
+		LEFT JOIN ACRM_F_CI_PER_ADMIT_INFO PAI ON LA.ECIF_CUST_NO = PAI.CUST_ID
+		LEFT JOIN ADMIN_SM_LOOKUP_ITEM LI1 ON LI1.LOOKUP_ITEM_CODE = FA.BUSINESS_CCY AND LI1.LOOKUP_CODE = 'CD0433'
+		LEFT JOIN ADMIN_SM_LOOKUP_ITEM LI2 ON LI2.LOOKUP_ITEM_CODE = FA.INTER_BANK_FLAG AND LI2.LOOKUP_CODE = 'INTER_FLAG'
+		LEFT JOIN ADMIN_SM_LOOKUP_ITEM LI3 ON LI3.LOOKUP_ITEM_CODE = FA.PAYEE_ACCT_CCY AND LI3.LOOKUP_CODE = 'CD0433'
+		LEFT JOIN ADMIN_SM_LOOKUP_ITEM LI4 ON LI4.LOOKUP_ITEM_CODE = FA.PAYEE_ACCT_FLAG AND LI4.LOOKUP_CODE = 'ACCT_FLAG'
+		<where>
+			ECIF_CUST_NO =
+			#{condition.custNo,jdbcType=VARCHAR}
+			and LOAN_BILL_NO =
+			#{condition.acctId,jdbcType=VARCHAR}
+			<if
+					test="condition.startDate != null and condition.startDate != '' and condition.endDate != null and condition.endDate != ''">
+				<![CDATA[
+	                AND PUBLISH_DATE >= to_date(#{condition.startDate,jdbcType=VARCHAR},'yyyy-MM-dd')
+	                AND PUBLISH_DATE <= to_date(#{condition.endDate,jdbcType=VARCHAR},'yyyy-MM-dd')
+	            ]]>
+			</if>
+		</where>
+	</select>
+</mapper>

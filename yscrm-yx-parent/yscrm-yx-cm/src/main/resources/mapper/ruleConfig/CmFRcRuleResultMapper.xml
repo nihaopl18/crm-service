@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.cm.ruleConfig.repository.mapper.CmFRcRuleResultMapper">
+	<!-- 查询事件信息 -->
+	<select id="getEventResult" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+		resultType="java.util.Map">
+		SELECT t.* FROM CM_F_RC_RULE_RESULT t
+        where 1=1
+      <if test="condition.actionType != null and condition.actionType !=''">
+		and T.ACTION_TYPE = #{condition.actionType, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.eventId != null and condition.eventId !=''">
+		and T.EVENT_ID = #{condition.eventId, jdbcType=VARCHAR}
+		</if>
+	</select>
+	
+	<select id="getResult" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+		resultType="java.util.Map">
+		SELECT t.*,c.CONTACT_NUMBER FROM CM_F_RC_RULE_RESULT t
+		left join acim_f_ci_customer c on t.cust_id = c.cust_id
+	        where 1=1
+	      <if test="condition.actionType != null and condition.actionType !=''">
+			and T.ACTION_TYPE = #{condition.actionType, jdbcType=VARCHAR}
+			</if>
+			<if test="condition.nodeId != null and condition.nodeId !=''">
+			and T.EVENT_ID = #{condition.nodeId, jdbcType=VARCHAR}
+			</if>
+	</select>
+	
+	<select id="getMegIn" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+		resultType="java.util.Map">
+		<if test="condition.actionType =='PRODUCT'">
+			SELECT distinct p.*,a.CATL_NAME as prod_Type_name,<!-- t.cust_id,t.ACTION_OBJ_NAME,t.cust_name,c.CONTACT_NUMBER, -->
+			Y.MODEL_INFO as model_Name FROM CM_F_RC_RULE_RESULT t
+			 <!-- left join acim_f_ci_customer c on t.cust_id = c.cust_id -->
+			left join CM_F_RC_PROD_INFO p on t.action_obj_id = p.product_id
+			LEFT JOIN CM_F_RC_SYS_TYPE Y ON p.product_id = Y.APPLY_OBJECT and Y.APPLY_TYPE='PRODUCT'
+		    LEFT JOIN CM_F_RC_PROD_CATL A  ON A.CATL_CODE = P.CATL_CODE
+	        where 1=1
+	      <if test="condition.actionType != null and condition.actionType !=''">
+			and T.ACTION_TYPE = #{condition.actionType, jdbcType=VARCHAR}
+			</if>
+			<if test="condition.nodeId != null and condition.nodeId !=''">
+			 and t.event_id in ( select n.node_id from cimp_cm_nodeinfo n where n.temp_id =
+	 		(select f.temp_id from cimp_cm_nodeinfo f where f.node_id = #{condition.nodeId, jdbcType=VARCHAR}))
+			</if>
+		</if>
+		<if test="condition.actionType =='CARE'">
+			 select t2.model_info,t2.model_name as catl_Name from cm_f_rc_care_action t1
+	        left join  CM_F_RC_SYS_TYPE t2 ON t2.id=t1.care_id
+	        where t1.action_id in (select t.id from cm_f_rc_rule_action t 
+	        where t.event_id in (select n.node_id from cimp_cm_nodeinfo n where n.temp_id =
+	 		(select f.temp_id from cimp_cm_nodeinfo f where f.node_id = #{condition.nodeId, jdbcType=VARCHAR})) and t.action_type='CARE')
+		</if>
+		<if test="condition.actionType =='RISK'">
+			select t2.model_info,t2.model_name as catl_Name from cm_f_rc_risk_action t1
+	        left join  CM_F_RC_SYS_TYPE t2 ON t2.id=t1.RISK_ID
+	        where t1.action_id in (select t.id from cm_f_rc_rule_action t 
+	        where t.event_id in (select n.node_id from cimp_cm_nodeinfo n where n.temp_id =
+	 		(select f.temp_id from cimp_cm_nodeinfo f where f.node_id = #{condition.nodeId, jdbcType=VARCHAR})) and t.action_type='RISK')
+		</if>
+		
+	</select>
+	
+	<select id="getMegOut" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+		resultType="java.util.Map">
+		<if test="condition.runConnectType =='FILE'">
+			select distinct '未发送' as IF_SUCCESS,t.cust_id,t.cust_name, c.cust_type ,c.CONTACT_NUMBER as PHONE_NUM,p.product_id,p.prod_name as PRODUCT_NAME,
+				       A.CATL_NAME,T.ACTION_OBJ_NAME,t.temp_content as message
+				 from CM_F_RC_RULE_RESULT t
+				 left join acim_f_ci_customer c on t.cust_id = c.cust_id
+				 left join CM_F_RC_PROD_INFO p on t.action_obj_id = p.product_id
+				 LEFT JOIN CM_F_RC_PROD_CATL A  ON A.CATL_CODE = P.CATL_CODE
+	        where 1=1
+	      	<if test="condition.actionType != null and condition.actionType !=''">
+			and T.ACTION_TYPE = #{condition.actionType, jdbcType=VARCHAR}
+			</if>
+			<if test="condition.nodeId != null and condition.nodeId !=''">
+			 and t.event_id in ( select n.node_id from cimp_cm_nodeinfo n where n.temp_id =
+ 				(select f.temp_id from cimp_cm_nodeinfo f where f.node_id = #{condition.nodeId, jdbcType=VARCHAR}))
+			</if>
+		</if>
+		<if test="condition.runConnectType =='DEAL'">
+			select '已发送' as IF_SUCCESS,t.cust_id,t.cust_name,c.ident_type, c.cust_type ,c.CONTACT_NUMBER as PHONE_NUM,p.product_id,p.prod_name as PRODUCT_NAME,
+				       A.CATL_NAME,T.ACTION_OBJ_NAME,t.temp_content as message
+				 from CM_F_RC_RULE_RESULT t
+				 left join acim_f_ci_customer c on t.cust_id = c.cust_id
+				 left join CM_F_RC_PROD_INFO p on t.action_obj_id = p.product_id
+				 LEFT JOIN CM_F_RC_PROD_CATL A  ON A.CATL_CODE = P.CATL_CODE
+	        where 1=1
+	      	<if test="condition.actionType != null and condition.actionType !=''">
+			and T.ACTION_TYPE = #{condition.actionType, jdbcType=VARCHAR}
+			</if>
+			<if test="condition.nodeId != null and condition.nodeId !=''">
+			 and t.event_id in ( select n.node_id from cimp_cm_nodeinfo n where n.temp_id =
+ 				(select f.temp_id from cimp_cm_nodeinfo f where f.node_id = #{condition.nodeId, jdbcType=VARCHAR}))
+			</if>
+		</if>
+	</select>
+</mapper>

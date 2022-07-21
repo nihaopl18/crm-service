@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscimc.operation.repository.mapper.OcrmAciFqGraphMapper">
+    <resultMap id="BaseResultMap" type="cn.com.yusys.yscimc.operation.domain.OcrmAciFqGraph">
+		<id column="GRAPH_ID" jdbcType="VARCHAR" property="graphId" />
+		<result column="GRAPH_NAME" jdbcType="VARCHAR" property="graphName" />
+		<result column="GRAPH_SQL" jdbcType="VARCHAR" property="graphSql" />
+		<result column="GRAPH_SIZE" jdbcType="VARCHAR" property="graphSize" />
+		<result column="GRAPH_TYPE" jdbcType="VARCHAR" property="graphType" />
+		<result column="GRAPH_INFO" jdbcType="VARCHAR" property="graphInfo" />
+		<result column="LOOKUP_INFO" jdbcType="VARCHAR" property="lookupInfo" />
+		<result column="CREATE_USER" jdbcType="VARCHAR" property="createUser" />
+		<result column="CREATE_ORG" jdbcType="VARCHAR" property="createOrg" />
+		<result column="CREATE_DATE" jdbcType="DATE" property="createDate" />
+    </resultMap>
+    <sql id="Base_Column_List">
+	    GRAPH_ID,GRAPH_NAME,GRAPH_SQL,GRAPH_SIZE,GRAPH_TYPE,GRAPH_INFO,LOOKUP_INFO,CREATE_USER,CREATE_ORG,CREATE_DATE
+    </sql>
+    
+</mapper>

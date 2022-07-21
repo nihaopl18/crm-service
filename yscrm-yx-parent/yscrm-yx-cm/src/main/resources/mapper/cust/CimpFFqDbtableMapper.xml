@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.cm.cust.repository.mapper.CimpFFqDbtableMapper">
+	<select id="getindex" resultType="java.util.HashMap" >
+		select * from CIMP_F_FQ_DBTABLE where PARENT_ID='0'
+	</select>
+	
+	<select id="getListByModel" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+		 SELECT  *FROM CIMP_F_FQ_DBTABLE where PARENT_ID &lt;&gt;'0'
+			<if test="condition.name != null and condition.name !=''">
+					and NAME  LIKE CONCAT(CONCAT('%', #{condition.name, jdbcType=VARCHAR}),'%') 
+			</if>
+			<if test="condition.id != null and condition.id !=''">
+					and PARENT_ID =#{condition.id, jdbcType=VARCHAR}
+			</if>
+	</select>
+	
+	<select id="getSeq" resultType="String">
+		select ysc_sequence.nextval from dual
+	</select>
+	<select id="getDataSetSolution" resultType="java.util.HashMap">
+		select rownum AS key,tb AS value from(select TABLE_NAME AS tb from user_tables  union select VIEW_NAME as tb from user_views  )
+	</select>
+	
+	<select id="selectByid" parameterType="String" resultType="cn.com.yusys.yusp.cm.cust.domain.CimpFFqDbtable">
+		select * from cimp_f_fq_dbtable where id=#{dbtableId,jdbcType=VARCHAR}
+	</select>
+</mapper>

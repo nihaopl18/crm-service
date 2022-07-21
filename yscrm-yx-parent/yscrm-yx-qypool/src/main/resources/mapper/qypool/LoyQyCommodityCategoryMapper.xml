@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper
+	namespace="cn.com.yusys.climp.qypool.repository.mapper.LoyQyCommodityCategoryMapper">
+	<resultMap id="BaseResultMap" type="cn.com.yusys.climp.qypool.domain.LoyQyCommodityCategory">
+		<result column="ID" jdbcType="VARCHAR" property="id" />
+		<result column="CATEGORY_CODE" jdbcType="VARCHAR" property="categoryCode" />
+		<result column="CATEGORY_NAME" jdbcType="VARCHAR" property="categoryName" />
+		<result column="CATEGORY_SEQ" jdbcType="VARCHAR" property="categorySeq" />
+		<result column="CATEGORY_LEVEL" jdbcType="VARCHAR" property="categoryLevel" />
+		<result column="CATEGORY_TYPE" jdbcType="VARCHAR" property="categoryType" />
+		<result column="INSTU_CDE" jdbcType="VARCHAR" property="instuCde" />
+		<result column="PARENT_CATEGORY_CODE" jdbcType="VARCHAR" property="parentCategoryCode" />
+		<result column="PARENT_CATEGORY_NAME" jdbcType="VARCHAR" property="parentCategoryName" />
+		<result column="CATEGORY_STATUS" jdbcType="VARCHAR" property="categoryStatus" />
+		<result column="CREATE_USER" jdbcType="VARCHAR" property="createUser" />
+		<result column="CREATE_DATE" jdbcType="VARCHAR" property="createDate" />
+		<result column="CREATE_ORG" jdbcType="VARCHAR" property="createOrg" />
+		<result column="UPDATE_USER" jdbcType="VARCHAR" property="updateUser" />
+		<result column="UPDATE_DATE" jdbcType="VARCHAR" property="updateDate" />
+		<result column="UPDATE_ORG" jdbcType="VARCHAR" property="updateOrg" />
+	</resultMap>
+	<sql id="Base_Column_List">
+		ID,CATEGORY_CODE,CATEGORY_NAME,CATEGORY_SEQ,CATEGORY_LEVEL,CATEGORY_TYPE,INSTU_CDE,PARENT_CATEGORY_CODE,PARENT_CATEGORY_NAME,CATEGORY_STATUS,CREATE_USER,CREATE_DATE,CREATE_ORG,UPDATE_USER,UPDATE_DATE,UPDATE_ORG
+	</sql>
+	<!-- 查询商品类别树 -->
+	<select id="getCategoryTree" resultType="java.util.HashMap">
+		SELECT T.*,I.INSTU_NAME AS INSTU_CDE_NAME FROM LOY_QY_COMMODITY_CATEGORY T LEFT JOIN ADMIN_SM_INSTU I ON T.INSTU_CDE = I.INSTU_CDE
+		ORDER BY T.CATEGORY_SEQ
+	</select>
+	<!-- 分页查询商品类别 -->
+	<select id="getCategory" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+		resultType="java.util.HashMap">
+		SELECT T.*,I.INSTU_NAME AS INSTU_CDE_NAME,U.USER_NAME AS CREATE_USER_NAME
+		FROM LOY_QY_COMMODITY_CATEGORY T
+		LEFT JOIN ADMIN_SM_INSTU I ON T.INSTU_CDE=T.INSTU_CDE
+		LEFT JOIN ADMIN_SM_USER U ON T.CREATE_USER=U.LOGIN_CODE 
+		where T.CATEGORY_CODE != '0000'
+		<if test="condition.categoryCode != null and condition.categoryCode !='' and condition.categoryCode !='0000' ">
+			AND T.CATEGORY_CODE in (select CATEGORY_CODE from
+			LOY_QY_COMMODITY_CATEGORY
+			WHERE PARENT_CATEGORY_CODE = #{condition.categoryCode, jdbcType=VARCHAR} or
+			CATEGORY_CODE = #{condition.categoryCode, jdbcType=VARCHAR})
+		</if>
+		<if test="condition.categoryName != null and condition.categoryName !=''">
+			AND T.CATEGORY_NAME LIKE
+			CONCAT(CONCAT('%',#{condition.categoryName}),'%')
+		</if>
+<!--		<if test="condition.instuCde != null and condition.instuCde !=''">-->
+<!--			AND T.INSTU_CDE = #{condition.instuCde, jdbcType=VARCHAR}-->
+<!--		</if>-->
+<!--		<if test="condition.orgCode != null and condition.orgCode !=''">-->
+<!--			AND T.INSTU_CDE = #{condition.orgCode, jdbcType=VARCHAR}-->
+<!--		</if>-->
+		ORDER BY T.CREATE_DATE DESC
+	</select>
+	<!-- 根据类目编号修改子类别的信息 -->
+	<update id="updateCategory" parameterType="java.util.Map">
+		UPDATE LOY_QY_COMMODITY_CATEGORY  
+            SET 
+            PARENT_CATEGORY_NAME = #{categoryName,jdbcType=VARCHAR},
+			UPDATE_USER	= #{userCode,jdbcType=VARCHAR},
+			UPDATE_DATE	= #{updateDate,jdbcType=VARCHAR},
+			UPDATE_ORG	= #{orgCode,jdbcType=VARCHAR}
+            WHERE PARENT_CATEGORY_CODE = #{categoryCode, jdbcType=VARCHAR}
+	</update>
+	<!-- 获取同一类别下类别code数 -->
+	<select id="getSequenceNo" parameterType="String" resultType="java.lang.Integer">
+		select count(*) as NODE_NUM from LOY_QY_COMMODITY_CATEGORY where PARENT_CATEGORY_CODE=#{sequence,jdbcType=VARCHAR}
+	</select>
+	<!-- 根据类目编号删除该类目及类目下所有类目 -->
+	<delete id="delCategory" parameterType="String">
+		DELETE FROM loy_qy_commodity_category 
+		WHERE CATEGORY_CODE IN (select CATEGORY_CODE from
+			LOY_QY_COMMODITY_CATEGORY
+			WHERE PARENT_CATEGORY_CODE = #{condition.categoryCode, jdbcType=VARCHAR} or
+			CATEGORY_CODE = #{condition.categoryCode, jdbcType=VARCHAR})
+	</delete>
+	<!-- 法人机构展示 -->
+	<select id="getInstus" resultType="java.util.HashMap">
+		SELECT INSTU_CDE as key,INSTU_NAME as value FROM ADMIN_SM_INSTU WHERE INSTU_STS = 'A'
+	</select>
+	<!-- 查询节点及其子节点下的商品 -->
+	<select id="getNodeCommodity" parameterType="String" resultType="int">
+		SELECT COUNT(1) FROM LOY_QY_COMMODITY_INFO T 
+		LEFT JOIN LOY_QY_COMMODITY_CATEGORY R ON R.CATEGORY_CODE = T.CATEGORY_CODE 
+		WHERE T.DEL_FLAG = '0' 
+		AND (T.CATEGORY_CODE = #{categoryCode,jdbcType=VARCHAR} OR R.PARENT_CATEGORY_CODE = #{categoryCode,jdbcType=VARCHAR})
+	</select>
+</mapper>

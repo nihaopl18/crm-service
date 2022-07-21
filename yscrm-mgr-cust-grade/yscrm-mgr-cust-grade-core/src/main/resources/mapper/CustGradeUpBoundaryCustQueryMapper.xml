@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper
+	namespace="cn.com.yusys.yscrm.custgrade.repository.mapper.CustGradeUpBoundaryCustQueryMapper">
+	<select id="querylist" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+		resultType="java.util.HashMap">
+		SELECT T.* FROM
+		ACRM_F_CI_CRITICAL_CUST T
+		LEFT JOIN 
+		<if test="condition.custType != null and condition.cusType != '' and condition.custType == '1'.toString()">
+		ACRM_F_CI_PER_ADMIT_INFO B ON T.CUST_ID = B.CUST_ID 
+		</if>
+		<if test="condition.custType != null and condition.cusType != '' and condition.custType == '2'.toString()">
+		ACRM_F_CI_ORG_CUST_INFO B ON T.CUST_ID = B.CUST_ID 
+		</if>
+		<where>
+
+		 B.IS_ADMIT_ENTER='1' 
+	
+			<if test="condition.custName != null and condition.custName != ''">
+				AND T.CUST_NAME= #{condition.custName,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.custId != null and condition.custId != ''">
+				AND T.CUST_ID= #{condition.custId,jdbcType=VARCHAR}
+			</if>
+
+			<if test="condition.mgrType != null and condition.mgrType != ''">
+				AND B.MGR_TYPE= #{condition.mgrType,jdbcType=VARCHAR}
+			</if>
+			<!-- <if test="condition.dataDate != null and condition.dataDate != ''"> 
+				AND to_char(to_date(T.DATA_DATE,'yyyy-MM-dd'),'yyyy-mm-dd')= #{condition.dataDate,jdbcType=VARCHAR} 
+				</if> -->
+			<if test="condition.orgId != null and condition.orgId != ''">
+				AND B.ORG_ID= #{condition.orgId,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.orgName != null and condition.orgName != ''">
+				AND B.ORG_ID= #{condition.orgName,jdbcType=VARCHAR}
+			</if>
+
+			<if test="condition.mgrId != null and condition.mgrId != ''">
+				AND B.MGR_ID= #{condition.mgrId,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.mgrName != null and condition.mgrName != ''">
+				AND B.MGR_ID= #{condition.mgrName,jdbcType=VARCHAR}
+			</if>
+			${condition.busiTypeAuth}   <!-- 业务条线字段 混合权限字段使用 -->
+			${dataAuth}	    <!-- 数据权限字段使用 -->
+		</where>
+		ORDER BY T.CUST_ID
+	</select>
+
+	<select id="queryDetailList" parameterType="String" resultType="java.util.HashMap">
+		SELECT T.*,A.CUST_NAME FROM ACRM_F_CI_CRITICAL_CUST_DTL T
+		LEFT JOIN
+		<!-- ACRM_F_CI_CUST_ADMIT_ALL A -->
+		ACRM_F_CI_CUST_ALL A
+		ON T.CUST_ID = A.CUST_ID
+		WHERE A.IS_ADMIT_ENTER='1' and T.CUST_ID =
+		#{CUSTID, jdbcType=VARCHAR}
+	</select>
+</mapper>

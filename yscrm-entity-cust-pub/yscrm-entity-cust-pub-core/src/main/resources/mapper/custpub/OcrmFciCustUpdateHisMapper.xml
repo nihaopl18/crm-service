@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.custpub.repository.mapper.OcrmFciCustUpdateHisMapper">
+    <!-- 根据客户id查询数据 -->
+	<select id="queryHistory" parameterType="java.util.Map"
+		resultType="java.util.Map">
+	    select  t.ID,t.CUST_ID,t.CHG_ORG_ID,t.CHG_USR,to_char(t.CHG_DT,'yyyy-mm-dd') as CHG_DT,t.CHG_MOD,t.CHG_TYPE,t.CHG_ENG_NAME
+	    ,t.CHG_CHI_NAME,t.CHG_BEF_KEY_VALUE,t.CHG_BEF_VALUE_VALUE,t.CHG_AFT_KEY_VALUE,t.CHG_AFT_VALUE_VALUE
+	    ,cust.USER_NAME  ,org.ORG_NAME
+         from OCRM_F_CI_CUST_UPDATE_HIS  t  
+        left join admin_sm_user cust on cust.LOGIN_CODE=t.CHG_USR
+        left join ADMIN_SM_ORG org on org.ORG_ID=t.CHG_ORG_ID
+        where 1=1
+		    <if  test="condition.custId != null and condition.custId != ''">
+		       	and	 t.CUST_ID =#{condition.custId,jdbcType=VARCHAR} 
+		    </if>
+		    <if  test="condition.chgMod != null and condition.chgMod != ''">
+		       		and t.CHG_MOD =#{condition.chgMod,jdbcType=VARCHAR} 
+		    </if>
+		   
+	</select>
+ 	
+    
+</mapper>

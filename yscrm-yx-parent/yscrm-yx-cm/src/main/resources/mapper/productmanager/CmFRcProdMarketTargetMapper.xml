@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.cm.productmanager.repository.mapper.CmFRcProdMarketTargetMapper">
+	<!-- 查询营销成效指标 -->
+	<select id="getList" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+		SELECT T.ID,T.TARGET_ID,T.TARGET_NAME,T.TARGET_DESC,T.CHECK_FREQ,O.ORG_NAME,
+        T.TARGET_STATE,T.LAST_UPDATA_USER,T.LAST_UPDATE_USER_NAME,T.LAST_UPDATA_ORG,
+        TO_CHAR(T.START_DATE,'yyyy-MM-dd') AS START_DATE, 
+        TO_CHAR(T.END_DATE,'yyyy-MM-dd') AS END_DATE,
+        TO_CHAR(T.LAST_UPDATA_DATE,'yyyy-MM-dd') AS LAST_UPDATA_DATE
+        FROM CM_F_RC_MARKET_TARGET T 
+        LEFT JOIN CM_F_RC_PROD_TARGET R ON R.TARGET_ID = T.TARGET_ID
+		LEFT JOIN ADMIN_SM_ORG O ON T.LAST_UPDATA_ORG = O.ORG_ID
+		WHERE R.PRODUCT_ID = #{condition.productId}
+		ORDER BY T.TARGET_ID DESC
+    </select>
+    <select id="getListAll" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.Map">
+        SELECT T.ID,T.TARGET_ID,T.TARGET_NAME,T.TARGET_DESC,T.CHECK_FREQ,O.ORG_NAME,
+        R.PRODUCT_ID,T.TARGET_STATE,T.LAST_UPDATA_USER,T.LAST_UPDATE_USER_NAME,T.LAST_UPDATA_ORG,
+        TO_CHAR(T.START_DATE,'yyyy-MM-dd') AS START_DATE,
+        TO_CHAR(T.END_DATE,'yyyy-MM-dd') AS END_DATE,
+        TO_CHAR(T.LAST_UPDATA_DATE,'yyyy-MM-dd') AS LAST_UPDATA_DATE
+        FROM cm_f_rc_market_target T
+        LEFT JOIN CM_F_RC_PROD_TARGET R ON R.TARGET_ID = T.TARGET_ID
+        LEFT JOIN ADMIN_SM_ORG O ON T.LAST_UPDATA_ORG = O.ORG_ID
+        <where>
+            <if test="condition.targetId != null and condition.targetId !=''">
+                AND T.TARGET_ID LIKE CONCAT('%', CONCAT(#{condition.targetId, jdbcType=VARCHAR}, '%'))
+            </if>
+            <if test="condition.targetName != null and condition.targetName !=''">
+                AND T.TARGET_NAME LIKE CONCAT('%', CONCAT(#{condition.targetName, jdbcType=VARCHAR}, '%'))
+            </if>
+        </where>
+        ORDER BY T.TARGET_STATE DESC,LAST_UPDATA_DATE DESC
+    </select>
+    <select id="getListByTargetId" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.Map">
+         SELECT T.ID,T.TARGET_ID,T.TARGET_NAME,T.TARGET_DESC,T.CHECK_FREQ,O.ORG_NAME,
+        R.PRODUCT_ID,T.TARGET_STATE,T.LAST_UPDATA_USER,T.LAST_UPDATE_USER_NAME,T.LAST_UPDATA_ORG,
+        TO_CHAR(T.START_DATE,'yyyy-MM-dd') AS START_DATE,
+        TO_CHAR(T.END_DATE,'yyyy-MM-dd') AS END_DATE,
+        TO_CHAR(T.LAST_UPDATA_DATE,'yyyy-MM-dd') AS LAST_UPDATA_DATE
+        FROM cm_f_rc_market_target T
+        LEFT JOIN CM_F_RC_PROD_TARGET R ON R.TARGET_ID = T.TARGET_ID
+        LEFT JOIN ADMIN_SM_ORG O ON T.LAST_UPDATA_ORG = O.ORG_ID
+        where T.TARGET_ID = #{condition.targetId, jdbcType=VARCHAR}
+    </select>
+    <select id="queryByTargetName" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.Map">
+         SELECT T.ID,T.TARGET_ID,T.TARGET_NAME,T.TARGET_DESC,T.CHECK_FREQ,O.ORG_NAME,
+        R.PRODUCT_ID,T.TARGET_STATE,T.LAST_UPDATA_USER,T.LAST_UPDATE_USER_NAME,T.LAST_UPDATA_ORG,
+        TO_CHAR(T.START_DATE,'yyyy-MM-dd') AS START_DATE,
+        TO_CHAR(T.END_DATE,'yyyy-MM-dd') AS END_DATE,
+        TO_CHAR(T.LAST_UPDATA_DATE,'yyyy-MM-dd') AS LAST_UPDATA_DATE
+        FROM cm_f_rc_market_target T
+        LEFT JOIN CM_F_RC_PROD_TARGET R ON R.TARGET_ID = T.TARGET_ID
+        LEFT JOIN ADMIN_SM_ORG O ON T.LAST_UPDATA_ORG = O.ORG_ID
+        where T.TARGET_NAME = #{condition.targetName, jdbcType=VARCHAR}
+    </select>
+    <select id="getListByTargetName" parameterType="java.util.List" resultType="java.util.Map">
+         SELECT T.ID,T.TARGET_ID,T.TARGET_NAME,T.TARGET_DESC,T.CHECK_FREQ,O.ORG_NAME,
+        R.PRODUCT_ID,T.TARGET_STATE,T.LAST_UPDATA_USER,T.LAST_UPDATE_USER_NAME,T.LAST_UPDATA_ORG,
+        TO_CHAR(T.START_DATE,'yyyy-MM-dd') AS START_DATE,
+        TO_CHAR(T.END_DATE,'yyyy-MM-dd') AS END_DATE,
+        TO_CHAR(T.LAST_UPDATA_DATE,'yyyy-MM-dd') AS LAST_UPDATA_DATE
+        FROM cm_f_rc_market_target T
+        LEFT JOIN CM_F_RC_PROD_TARGET R ON R.TARGET_ID = T.TARGET_ID
+        LEFT JOIN ADMIN_SM_ORG O ON T.LAST_UPDATA_ORG = O.ORG_ID
+        <if test="list != null and list.size > 0">
+            where T.TARGET_NAME in
+            <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+    </select>
+    <!-- 删除营销成效指标 -->
+    <delete id="deleteList" parameterType="cn.com.yusys.yusp.cm.productmanager.domain.CmFRcProdMarketTargetInfo">
+		DELETE FROM CM_F_RC_MARKET_TARGET WHERE TARGET_ID = #{targetId}
+    </delete>
+    <!-- 删除营销指标归属表信息 -->
+    <delete id="delTargetProd" parameterType="String">
+    	DELETE FROM CM_F_RC_PROD_TARGET WHERE TARGET_ID = #{targetId}
+    </delete>
+    <!-- 营销成效指标检验重复id -->
+    <select id="getSameId" parameterType="cn.com.yusys.yusp.cm.productmanager.domain.CmFRcProdCatlInfo" resultType="String">
+    	SELECT COUNT(TARGET_ID) FROM CM_F_RC_MARKET_TARGET WHERE TARGET_ID = #{targetId}
+    </select>	
+    <!-- 营销成效指标检验重复名称 -->
+    <select id="getSameName" parameterType="cn.com.yusys.yusp.cm.productmanager.domain.CmFRcProdCatlInfo" resultType="String">
+    	SELECT COUNT(TARGET_NAME) FROM CM_F_RC_MARKET_TARGET WHERE TARGET_NAME = #{targetName} AND TARGET_ID <![CDATA[!= ]]> #{targetId}
+    </select>
+    <!-- 营销成效指标启用 -->
+    <update id="upList" parameterType="cn.com.yusys.yusp.cm.productmanager.domain.CmFRcProdCatlInfo" >
+    	UPDATE CM_F_RC_MARKET_TARGET SET TARGET_STATE = '1' WHERE TARGET_ID = #{targetId}
+    </update>
+    <!-- 营销成效指标停用 -->
+    <update id="downList" parameterType="cn.com.yusys.yusp.cm.productmanager.domain.CmFRcProdCatlInfo" >
+    	UPDATE CM_F_RC_MARKET_TARGET SET TARGET_STATE = '0' WHERE TARGET_ID = #{targetId}
+    </update>
+    <!-- 新增指标归属 -->
+    <insert id="addTargetProd" parameterType="cn.com.yusys.yusp.cm.productmanager.domain.CmFRcProdCatlInfo">
+    	INSERT INTO CM_F_RC_PROD_TARGET (ID,PRODUCT_ID,TARGET_ID) VALUES (SYS_GUID(),#{productId},#{targetId})
+    </insert>
+<!--    <delete id="deleteargetProd" parameterType="cn.com.yusys.yusp.cm.productmanager.domain.CmFRcProdCatlInfo">-->
+<!--        -->
+<!--    </delete>-->
+</mapper>

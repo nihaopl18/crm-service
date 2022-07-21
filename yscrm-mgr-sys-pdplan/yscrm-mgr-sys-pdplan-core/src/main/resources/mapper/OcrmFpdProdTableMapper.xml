@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.mgr.sys.pdplan.repository.mapper.OcrmFpdProdTableMapper">
+    
+    <!-- 获取数据库所有表名称 -->
+    <select id="getTableName"  resultType="java.util.HashMap">
+	 select table_name from user_tables
+	</select>
+	
+	<!-- 获取产品展示表定义列表 -->
+    <select id="getListByModel" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"  resultType="java.util.HashMap">
+	 select * FROM OCRM_F_PD_PROD_TABLE a
+	 <where>
+		<if test="condition.tableChName != null and condition.tableChName !=''">
+				  and a.TABLE_CH_NAME   LIKE CONCAT(CONCAT('%', #{condition.tableChName, jdbcType=VARCHAR}),'%')
+		</if>
+		</where>
+	</select>
+	
+	<!-- 检查表名是否存在 -->
+    <select id="checkTableName" parameterType="String"  resultType="int">
+	 select count(*) FROM OCRM_F_PD_PROD_TABLE WHERE TABLE_NAME = #{tableName, jdbcType=VARCHAR}
+	</select>  
+	
+	<!-- 检查表别名是否存在 -->
+    <select id="checkTableOthName" parameterType="String"  resultType="int">
+	 select count(*) FROM OCRM_F_PD_PROD_TABLE WHERE TABLE_OTH_NAME = #{tableOthName, jdbcType=VARCHAR}
+	</select>     
+	
+	<!-- 获取产品展示表属性定义信息（已存在OCRM_F_PD_PROD_COLUMN表中） -->
+	<select id="getTableInfoByTable" parameterType="String"  resultType="java.util.HashMap">
+	 select * FROM OCRM_F_PD_PROD_COLUMN WHERE TABLE_NAME = #{tableName, jdbcType=VARCHAR}
+	 </select>
+	 
+	 <!-- 获取产品展示表属性定义信息（未保存在OCRM_F_PD_PROD_COLUMN表中） -->
+	<select id="getTableInfo" parameterType="String"  resultType="java.util.HashMap">
+	select a.DATA_TYPE,t.table_name,t.Column_Name,
+                   decode(a.DATA_TYPE,'NUMBER','2','1')as ALIGN_TYPE,'100'as SHOW_WIDTH,'' as DIC_NAME,
+                   t.comments as COLUMN_OTH_NAME
+       from user_tab_columns a
+       left join (select s.table_name, s.column_name, s.comments
+                    from user_col_comments s
+                   where s.table_name = #{tableName, jdbcType=VARCHAR}) t
+         on a.column_name = t.column_name
+      where a.table_name = #{tableName, jdbcType=VARCHAR}
+	</select>
+	
+	<delete id="delById" parameterType="String">
+	delete OCRM_F_PD_PROD_TABLE where TABLE_ID = #{tableId,jdbcType=VARCHAR}
+	</delete>
+</mapper>

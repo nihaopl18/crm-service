@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.cm.cust.repository.mapper.AcimFCiCustomerMapper">
+
+ 
+	<select id="getListByModel" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+		resultType="java.util.HashMap">
+		select  c.*,u.user_name,o.org_name
+		from ACIM_F_CI_CUSTOMER c left join ADMIN_SM_USER u on c.belong_mgr = u.user_id 
+left join ADMIN_SM_ORG o on c.belong_org = o.org_id
+		<!--  ,CIM_F_MM_VERSION_INFO a  -->
+		  <!-- WHERE r.MODEL_ID =a.MODEL_ID  -->
+		 <where>
+		 <if test="1==1">
+		 1=1
+		 </if>	
+		<if test="condition.custType != null and condition.custType !=''">
+				  and c.CUST_TYPE = #{condition.custType, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.custStat != null and condition.custStat !=''">
+				  and c.CUST_STAT = #{condition.custStat, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.custId != null and condition.custId !=''">
+				  and c.CUST_ID LIKE CONCAT(CONCAT('%', #{condition.custId, jdbcType=VARCHAR}),'%')
+		</if>
+		<if test="condition.custName != null and condition.custName !=''">
+				  and c.CUST_NAME LIKE CONCAT(CONCAT('%', #{condition.custName, jdbcType=VARCHAR}),'%')
+		</if>
+		<if test="condition.identType != null and condition.identType !=''">
+				  and c.IDENT_TYPE = #{condition.identType, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.identNo != null and condition.identNo !=''">
+				  and c.IDENT_NO LIKE CONCAT(CONCAT('%', #{condition.identNo, jdbcType=VARCHAR}),'%')
+		</if>
+		<if test="condition.belongOrg != null and condition.belongOrg !=''">
+				  and c.BELONG_ORG = #{condition.belongOrg, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.belongMgr != null and condition.belongMgr !=''">
+				  and c.BELONG_MGR = #{condition.belongMgr, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.riskLevel != null and condition.riskLevel !=''">
+				  and c.RISK_LEVEL = #{condition.riskLevel, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.worthLevel != null and condition.worthLevel !=''">
+				  and c.WORTH_LEVEL = #{condition.worthLevel, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.serviceLevel != null and condition.serviceLevel !=''">
+				  and c.SERVICE_LEVEL = #{condition.serviceLevel, jdbcType=VARCHAR}
+		</if>
+		and c.POTENTIAL_FLAG = '0'
+		order by c.CREATE_DATE desc
+	</where>
+	</select>
+	<select id="getSeq" resultType="String">
+		SELECT  P_CUST_SEQ.nextval FROM dual
+	</select>
+	<select id="getCustByid" parameterType="String"
+		resultType="cn.com.yusys.yusp.cm.cust.domain.AcimFCiCustomer">
+		select  *
+		from ACIM_F_CI_CUSTOMER c where  c.CUST_ID = #{custName, jdbcType=VARCHAR} 
+	</select>
+	<select id="getIdByIdentNo" parameterType="cn.com.yusys.yusp.cm.cust.domain.AcimFCiCustomer"
+		resultType="cn.com.yusys.yusp.cm.cust.domain.AcimFCiCustomer">
+		select  *
+		from ACIM_F_CI_CUSTOMER c where  c.CUST_NAME = #{custName, jdbcType=VARCHAR} AND c.IDENT_TYPE = #{identType, jdbcType=VARCHAR}
+		AND c.IDENT_NO = #{identNo, jdbcType=VARCHAR}
+	</select>
+	<insert id="addPotentialCust" parameterType="cn.com.yusys.yusp.cm.cust.domain.AcimFCiCustomer">
+	insert into ACIM_F_CI_CUSTOMER(CUST_ID, IDENT_TYPE,IDENT_NO, CUST_NAME, CUST_TYPE, POTENTIAL_FLAG, CONTACT_NUMBER) 
+	values(#{custId, jdbcType=VARCHAR}, #{identType, jdbcType=VARCHAR}, #{identNo, jdbcType=VARCHAR},
+	#{custName, jdbcType=VARCHAR},#{custType, jdbcType=VARCHAR},#{potentialFlag, jdbcType=VARCHAR},#{contactNumber, jdbcType=VARCHAR})
+	</insert>
+
+	<select id="getCmpList" parameterType="java.util.List" resultType="cn.com.yusys.yusp.cm.cust.domain.AcimFCiCustomer">
+		select DISTINCT a.* from acim_f_ci_customer a left join  cimp_c_custgroup_cust c on c.cust_id = a.cust_id
+	<if test="list != null and list.size > 0">
+    where c.cust_group_id in
+    <foreach item="item" index="index" collection="list" open="(" separator="," close=")">  
+			    #{item}  
+			</foreach> 
+	</if>
+	</select>
+
+	<select id="getcustBycustId" parameterType="java.util.List" resultType="cn.com.yusys.yusp.cm.cust.domain.AcimFCiCustomer">
+		select DISTINCT a.* from acim_f_ci_customer a 
+	<if test="list != null and list.size > 0">
+    where a.cust_id in
+    <foreach item="item" index="index" collection="list" open="(" separator="," close=")">  
+			    #{item}  
+			</foreach> 
+	</if>
+	</select>
+	<select id="getCustTypeByid" parameterType="String"
+		resultType="cn.com.yusys.yusp.cm.cust.domain.AcimFCiCustomer">
+		select  *
+		from ACIM_F_CI_CUSTOMER c where  c.CUST_ID = #{custId, jdbcType=VARCHAR} 
+	</select>
+
+	<delete id="deleteByIdLike" parameterType="java.lang.String">
+		delete from ACIM_F_CI_CUSTOMER c where c.CUST_ID like #{id}
+	</delete>
+
+	<select id="insertAll" parameterType="java.lang.String">
+		${sql}
+	</select>
+
+</mapper>

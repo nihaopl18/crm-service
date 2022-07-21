@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.uimp.base.app.uaa.repository.mapper.PmaFappDeviceMapper">
+    
+    <!-- 根据 设备标识码 查询 用户信息数据 -->
+    <select id="queryByDevice" parameterType="java.lang.String" resultType="java.util.HashMap">
+    	select u.USER_ID, u.LOGIN_CODE, u.USER_NAME, u.USER_CODE
+		  from PMA_F_APP_DEVICE_INFO d left join ADMIN_SM_USER u 
+		    on d.USER_ID = u.USER_ID
+    	<where>
+    	  <if test="deviceCode != null and deviceCode != ''">
+    	    and d.DEVICE_CODE = #{deviceCode,jdbcType=VARCHAR}
+    	  </if>
+    	  <if test="userId != null and userId != ''">
+    	    and u.USER_ID = #{userId,jdbcType=VARCHAR}
+    	  </if>
+    	</where>
+    </select>
+    
+    <!-- 根据 用户编号 查询 用户信息数据 -->
+    <select id="queryByUserId" parameterType="java.lang.String" resultType="java.util.HashMap">
+    	select u.USER_ID, u.LOGIN_CODE, u.USER_NAME, u.USER_CODE
+		  from ADMIN_SM_USER u 
+    	<where>
+    	  <if test="userId != null and userId != ''">
+    	    and u.USER_ID = #{userId,jdbcType=VARCHAR}
+    	  </if>
+    	</where>
+    </select>
+    
+    <!-- 根据 身份信息，查询对应用户编号 -->
+    <select id="queryByUserInfo" parameterType="java.lang.String" resultType="java.lang.String">
+    	select DISTINCT u.USER_ID from ADMIN_SM_USER u 
+    	  left join ADMIN_SM_USER_CERT_INFO c on u.USER_ID = c.USER_ID
+    	<where>
+    	  <if test="userInfo != null and userInfo != ''">
+    	    and (
+    	      (c.CERT_TYPE = '1' and c.CERT_NO = #{userInfo,jdbcType=VARCHAR}) or
+    	      (c.CERT_TYPE = '2' and c.CERT_NO = #{userInfo,jdbcType=VARCHAR}) or
+    	      (u.USER_CODE = #{userInfo,jdbcType=VARCHAR}) or 
+    	      (u.USER_MOBILEPHONE = #{userInfo,jdbcType=VARCHAR})
+    	    )
+    	  </if>
+    	</where>
+    </select>
+    
+    <!-- 根据 用户编号、设备标识码 查询启用的数据数量 -->
+    <select id="selectByUserDeviceCode" parameterType="java.lang.String" resultType="int">
+    	select count(*) from PMA_F_APP_DEVICE_INFO
+    	<where>
+    	  <if test="enableFlag != null and enableFlag != ''">
+    	    and ENABLE_FLAG = #{enableFlag,jdbcType=VARCHAR}
+    	  </if>
+    	  <if test="userId != null and userId != ''">
+    	    and USER_ID = #{userId,jdbcType=VARCHAR}
+    	  </if>
+    	  <if test="deviceCode != null and deviceCode != ''">
+    	    and DEVICE_CODE = #{deviceCode,jdbcType=VARCHAR}
+    	  </if>
+    	</where>
+    </select>
+    
+    <!-- 根据 用户编号、设备标识码 查询 APP设备信息数据 -->
+    <select id="queryByUserIdDeviceCode" parameterType="java.lang.String" resultType="java.util.HashMap">
+     	select * from PMA_F_APP_DEVICE_INFO
+    	<where>
+    	  ENABLE_FLAG = '1'
+    	  <if test="userId != null and userId != ''">
+    	    and USER_ID = #{userId,jdbcType=VARCHAR}
+    	  </if>
+    	  <if test="deviceCode != null and deviceCode != ''">
+    	    and DEVICE_CODE = #{deviceCode,jdbcType=VARCHAR}
+    	  </if>
+    	</where>
+   	</select>
+   	
+   	<!-- 删除对应用户对应设备的数据 -->
+    <delete id="deleteByUserIdDeviceCode" parameterType="String">
+		 DELETE FROM PMA_F_APP_DEVICE_INFO WHERE USER_ID = #{userId,jdbcType=VARCHAR} and DEVICE_CODE = #{deviceCode,jdbcType=VARCHAR}
+	</delete>
+    
+    <!-- 根据 身份信息及登录密码，查询对应用户编号 -->
+    <select id="selectByUserInfo" parameterType="java.lang.String" resultType="java.lang.String">
+    	select DISTINCT u.USER_ID from ADMIN_SM_USER u 
+    	  left join ADMIN_SM_USER_CERT_INFO c on u.USER_ID = c.USER_ID
+    	  left join PMA_F_APP_PASSWORD p on u.USER_ID = p.USER_ID
+    	<where>
+    	  <if test="userInfo != null and userInfo != ''">
+    	    and (
+    	      (c.CERT_TYPE = '1' and c.CERT_NO = #{userInfo,jdbcType=VARCHAR}) or
+    	      (c.CERT_TYPE = '2' and c.CERT_NO = #{userInfo,jdbcType=VARCHAR}) or
+    	      (u.USER_CODE = #{userInfo,jdbcType=VARCHAR}) or 
+    	      (u.USER_MOBILEPHONE = #{userInfo,jdbcType=VARCHAR})
+    	    )
+    	  </if>
+    	  <if test="password != null and password != ''">
+    	    and p.PASSWORD = #{password,jdbcType=VARCHAR}
+    	  </if>
+    	</where>
+    </select>
+    
+    <!-- 更新启用状态  - 根据 用户编号、设备号查询 -->
+    <update id="updateFlag" parameterType="String">
+        update PMA_F_APP_DEVICE_INFO set ENABLE_FLAG = #{enableFlag,jdbcType=VARCHAR}
+        <where>
+        	<if test="userId != null and userId != ''">
+                AND USER_ID = #{userId,jdbcType=VARCHAR}
+            </if>
+            <if test="deviceCode != null and deviceCode != ''">
+                AND DEVICE_CODE = #{deviceCode,jdbcType=VARCHAR}
+            </if>
+        </where>
+    </update>
+    
+    <!-- 根据 用户编号 查询是否设置登录密码  by wangcq -->
+    <select id="selectPwdByUserId" parameterType="java.lang.String" resultType="java.lang.String">
+    	select * from PMA_F_APP_PASSWORD a
+    	<where>
+    	  <if test="userId != null and userId != ''">
+    	    and a.USER_ID = #{userId,jdbcType=VARCHAR}
+    	  </if>
+    	</where>
+    </select>
+    
+	<!-- 根据 用户编号 查询设备号 -->
+    <select id="selectDeviceCodeByUserId" parameterType="java.lang.String" resultType="java.lang.String">
+    	select a.DEVICE_CODE from PMA_F_APP_DEVICE_INFO a
+    	<where>
+    	  <if test="userId != null and userId != ''">
+    	    and a.USER_ID = #{userId,jdbcType=VARCHAR}
+    	  </if>
+    	</where>
+    </select>
+    
+    <resultMap id="APPUserModelMap" type="cn.com.yusys.yusp.uimp.base.app.uaa.domain.APPUserModel">
+		<result column="USER_ID" jdbcType="VARCHAR" property="userId" />
+		<result column="USER_NAME" jdbcType="VARCHAR" property="userName" />
+		<result column="LOGIN_CODE" jdbcType="VARCHAR" property="loginCode" />
+		<result column="USER_AVATAR" jdbcType="VARCHAR" property="userAvatar" />
+		<result column="ORG_ID" jdbcType="VARCHAR" property="orgId" />
+		<result column="ORG_NAME" jdbcType="VARCHAR" property="orgName" />
+		<result column="UP_ORG_ID" jdbcType="VARCHAR" property="upOrgId" />
+		<result column="UP_ORG_NAME" jdbcType="VARCHAR" property="upOrgName" />
+    </resultMap>
+    <!-- 根据 用户编号 查询用户信息 -->
+    <select id="queryAPPUserModel" parameterType="java.lang.String" resultMap="APPUserModelMap">
+    	select a.USER_ID, a.USER_NAME, a.LOGIN_CODE, a.USER_AVATAR, a.ORG_ID, o.ORG_NAME, o.UP_ORG_ID, 
+			(select ORG_NAME from ADMIN_SM_ORG uporg where o.UP_ORG_ID = uporg.ORG_ID) UP_ORG_NAME
+		from ADMIN_SM_USER a 
+			left join ADMIN_SM_ORG o on a.ORG_ID = o.ORG_ID
+		where a.user_id = #{userId,jdbcType=VARCHAR}
+    </select>
+    
+    <!-- 根据 用户编号 查询用户角色信息 -->
+    <select id="queryUserRoleList" parameterType="java.lang.String" resultType="java.util.HashMap">
+    	select DISTINCT urr.ROLE_ID, r.ROLE_CODE, r.ROLE_NAME
+		from ADMIN_SM_USER a 
+			left join ADMIN_SM_USER_ROLE_REL urr on a.USER_ID = urr.USER_ID
+			left join ADMIN_SM_ROLE r on urr.ROLE_ID = r.ROLE_ID
+		where a.USER_ID = #{userId,jdbcType=VARCHAR}
+    </select>
+</mapper>

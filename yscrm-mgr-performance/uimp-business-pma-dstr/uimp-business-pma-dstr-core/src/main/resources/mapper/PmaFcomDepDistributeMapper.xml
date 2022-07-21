@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.uimp.distribution.repository.mapper.PmaFcomDepDistributeMapper">
+
+    <select id="queryList" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+        select t.id,
+        t.period_id,
+        t.allot_type,
+        t.manager_id,
+        t.distr_rate,
+        t.start_amt,
+        t.end_amt,
+        t.manager_name,
+        t.creator ,
+        t.create_date,
+        t.create_org ,
+        t.updater_id ,
+        t.update_date,
+        t.update_org,
+        t.apply_sts
+        from PMA_F_COM_DEP_DISTRIBUTE t left join PMA_F_COM_DEP_PERIOD b
+        on t.period_id = b.id
+
+        <where>
+            <if test="condition.id != null and condition.id != ''">
+                AND t.id = #{condition.id,jdbcType=VARCHAR}
+            </if>
+            <if test="condition.periodId != null and condition.periodId != ''">
+                AND t.period_id = #{condition.periodId,jdbcType=VARCHAR}
+            </if>
+            <if test="condition.allotType != null and condition.allotType != ''">
+                AND t.allot_type = #{condition.allotType,jdbcType=VARCHAR}
+            </if>
+            <if test="condition.managerId != null and condition.managerId != ''">
+                AND t.manager_id = #{condition.managerId,jdbcType=VARCHAR}
+            </if>
+            <if test="condition.distrRate != null and condition.distrRate != ''">
+                AND t.distr_rate = #{condition.distrRate,jdbcType=VARCHAR}
+            </if>
+            <if test="condition.startAmt != null and condition.startAmt != ''">
+                AND t.start_amt = #{condition.startAmt,jdbcType=VARCHAR}
+            </if>
+            <if test="condition.endAmt != null and condition.endAmt != ''">
+                AND t.end_amt = #{condition.endAmt,jdbcType=VARCHAR}
+            </if>
+
+            <if test="condition.effectDate != null and condition.effectDate != ''">
+                <![CDATA[
+	                AND TO_DATE(b.effect_date, 'yyyy-MM-dd hh24:mi:ss') >= TO_DATE(#{condition.effectDate,jdbcType=VARCHAR}, 'yyyy-MM-dd')
+	            ]]>
+            </if>
+            <if test="condition.expirateDate != null and condition.expirateDate != ''">
+                <![CDATA[
+	                AND TO_DATE(b.expirate_date, 'yyyy-MM-dd hh24:mi:ss') <= TO_DATE(#{condition.expirateDate,jdbcType=VARCHAR}, 'yyyy-MM-dd')
+	            ]]>
+            </if>
+
+        </where>
+        order by t.start_amt,t.end_amt,t.distr_rate
+    </select>
+
+
+    <delete id="delDistribute" parameterType="String">
+		delete from PMA_F_COM_DEP_DISTRIBUTE where period_id
+		in (select id from PMA_F_COM_DEP_PERIOD where acct_info_no = #{id,jdbcType=VARCHAR}
+		and (apply_sts is null or apply_sts = '3') )
+	</delete>
+
+    <delete id="delDistributeFail">
+		delete from PMA_F_COM_DEP_DISTRIBUTE where period_id in (
+			select id from PMA_F_COM_DEP_PERIOD where acct_info_no = #{id,jdbcType=VARCHAR}
+	 			and (APPLY_STS = '1' or APPLY_STS = '4' or APPLY_STS is null)
+	)
+	</delete>
+
+    <insert id="batchInsertDistribute" parameterType="List">
+        INSERT INTO PMA_F_COM_DEP_DISTRIBUTE (id,
+        period_id,
+        allot_type,
+        manager_id,
+        manager_name,
+        distr_rate,
+        start_amt,
+        end_amt,
+        creator ,
+        create_date,
+        create_org ,
+        updater_id ,
+        update_date,
+        update_org,
+        apply_sts)
+        <foreach collection="list" item="param" index="index" separator="union all">
+            select #{param.id,jdbcType=VARCHAR},
+            #{param.periodId,jdbcType=VARCHAR},
+            #{param.allotType,jdbcType=VARCHAR},
+            #{param.managerId,jdbcType=VARCHAR},
+            #{param.managerName,jdbcType=VARCHAR},
+            #{param.distrRate,jdbcType=VARCHAR},
+            #{param.startAmt,jdbcType=VARCHAR},
+            #{param.endAmt,jdbcType=VARCHAR},
+            #{param.creator,jdbcType=VARCHAR},
+            #{param.createDate,jdbcType=VARCHAR},
+            #{param.createOrg,jdbcType=VARCHAR},
+            #{param.updaterId,jdbcType=VARCHAR},
+            #{param.updateDate,jdbcType=VARCHAR},
+            #{param.updateOrg,jdbcType=VARCHAR},
+            #{param.applySts,jdbcType=VARCHAR}
+            from dual
+        </foreach>
+    </insert>
+
+    <update id="batchUpdateDistribute" parameterType="List">
+        <foreach collection="list" item="param" index="index" open="begin" close=";end;" separator=";">
+            update PMA_F_COM_DEP_DISTRIBUTE
+            <set>
+                <if test="param.allotType != null and param.allotType != ''">
+                    allot_type = #{param.allotType},
+                </if>
+                <if test="param.managerId != null and param.managerId != ''">
+                    manager_id = #{param.managerId},
+                </if>
+                <if test="param.managerName != null and param.managerName != ''">
+                    manager_name = #{param.managerName},
+                </if>
+                <if test="param.distrRate != null and param.distrRate != ''">
+                    distr_rate = #{param.distrRate},
+                </if>
+                <if test="param.startAmt != null and param.startAmt != ''">
+                    start_amt = #{param.startAmt},
+                </if>
+                <if test="param.endAmt != null and param.endAmt != ''">
+                    end_amt = #{param.endAmt},
+                </if>
+                <if test="param.updaterId != null and param.updaterId != ''">
+                    updater_id = #{param.updaterId},
+                </if>
+                <if test="param.updateDate != null and param.updateDate != ''">
+                    update_date = #{param.updateDate},
+                </if>
+                <if test="param.updateOrg != null and param.updateOrg != ''">
+                    update_org = #{param.updateOrg},
+                </if>
+            </set>
+            where id = #{param.id}
+        </foreach>
+    </update>
+
+    <update id="updateDistributeByAcctInfoNo" parameterType="java.util.Map">
+		update PMA_F_COM_DEP_DISTRIBUTE set apply_Sts = #{applySts,jdbcType=VARCHAR}
+		 where period_id in (
+		  select id from PMA_F_COM_DEP_PERIOD where  acct_info_no = #{acctInfoNo,jdbcType=VARCHAR}
+		 and (APPLY_STS is null or APPLY_STS = '3' or APPLY_STS = '1')
+		 )
+	</update>
+</mapper>

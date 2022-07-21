@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper
+	namespace="cn.com.yusys.yscrm.info.remind.repository.mapper.AcrmFwpRemindMapper">
+	<!-- 列表查询 -->
+	<select id="queryList" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+		resultType="java.util.HashMap">
+		SELECT R.INFO_ID, R.RULE_ID, R.RULE_NAME, R.TYPE_ID, R.TYPE_NAME, R.CUST_ID, R.CUST_NAME, R.RECE_USER,
+		       R.REMIND_CREATE_DATE, R.REMIND_EXPIRE_DATE, R.OTHER_CONTENT,R.LAST_CHG_USR, R.LAST_CHG_DT, R.STATE, R.ORG_ID,
+		       CASE WHEN R.IMPORT_DATE IS NULL OR R.IMPORT_DATE = '' THEN '-' ELSE to_char(R.IMPORT_DATE, 'yyyy-MM-dd') END AS IMPORT_DATE,
+		       decode(AMT, NULL, '-', AMT) AS AMT, R.OPERATION
+		FROM ACRM_F_WP_REMIND R
+		LEFT JOIN V_APP_CUST_GRADE_INFO CG ON CG.ECIF_CUST_NO = R.CUST_ID
+		LEFT JOIN OCRM_F_CI_ADMIT_BELONG CI ON R.CUST_ID = CI.CUST_ID
+		<where>
+			<if test="condition.receUser != null and condition.receUser != ''">
+				AND CI.MGR_ID = #{condition.receUser,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.typeId != null and condition.typeId != ''">
+				AND R.TYPE_ID = #{condition.typeId,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.startDate != null and condition.startDate != '' and condition.endDate != null and condition.endDate != '' ">
+				<![CDATA[
+	                AND TO_CHAR(R.REMIND_CREATE_DATE,'yyyy-MM-dd hh24:mi:ss') >= #{condition.startDate,jdbcType=VARCHAR}
+	                AND TO_CHAR(R.REMIND_CREATE_DATE,'yyyy-MM-dd hh24:mi:ss') <= #{condition.endDate,jdbcType=VARCHAR}
+	            ]]>
+			</if>
+			<if test="condition.state != null and condition.state != ''">
+				AND R.STATE = #{condition.state,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.custGrade != null and condition.custGrade != ''">
+				AND CG.aum_grade = #{condition.custGrade,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.isIndexPage != null and condition.isIndexPage != ''">
+				AND (R.STATE = '2'
+		        OR (R.STATE = '0' AND to_char(LAST_CHG_DT,'yyyy-MM-dd') = #{condition.currentDate}))
+			</if>
+		</where>
+		ORDER BY STATE DESC, REMIND_CREATE_DATE DESC, AMT DESC
+	</select>
+	<select id="queryMList" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+			resultType="java.util.HashMap">
+		SELECT R.INFO_ID, R.RULE_ID, R.RULE_NAME, R.TYPE_ID, R.TYPE_NAME, R.CUST_ID, R.CUST_NAME, R.RECE_USER,
+		R.REMIND_CREATE_DATE, R.REMIND_EXPIRE_DATE, R.OTHER_CONTENT,R.LAST_CHG_USR, R.LAST_CHG_DT, R.STATE, R.ORG_ID,
+		CASE WHEN R.IMPORT_DATE IS NULL OR R.IMPORT_DATE = '' THEN '-' ELSE to_char(R.IMPORT_DATE, 'yyyy-MM-dd') END AS IMPORT_DATE,
+		decode(AMT, NULL, '-', AMT) AS AMT, R.OPERATION
+		FROM ACRM_F_WP_REMIND R
+		LEFT JOIN OCRM_F_CG_CUST_GRADE_INFO CG ON CG.ECIF_CUST_NO = R.CUST_ID AND #{condition.currentDate} >= CG.EFFECT_DATE  AND CG.EXPIRED_DATE >= #{condition.currentDate}
+		<where>
+			<if test="condition.receUser != null and condition.receUser != ''">
+				AND R.RECE_USER = #{condition.receUser,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.typeId != null and condition.typeId != ''">
+				AND R.TYPE_ID = #{condition.typeId,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.startDate != null and condition.startDate != '' and condition.endDate != null and condition.endDate != '' ">
+				<![CDATA[
+	                AND TO_CHAR(R.REMIND_CREATE_DATE,'yyyy-MM-dd hh24:mi:ss') >= #{condition.startDate,jdbcType=VARCHAR}
+	                AND TO_CHAR(R.REMIND_CREATE_DATE,'yyyy-MM-dd hh24:mi:ss') <= #{condition.endDate,jdbcType=VARCHAR}
+	            ]]>
+			</if>
+			<if test="condition.state != null and condition.state != ''">
+				AND R.STATE = #{condition.state,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.custGrade != null and condition.custGrade != ''">
+				AND CG.AUM_GRADE = #{condition.custGrade,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.isIndexPage != null and condition.isIndexPage != ''">
+				AND (R.STATE = '2'
+				OR (R.STATE = '0' AND to_char(LAST_CHG_DT,'yyyy-MM-dd') = #{condition.currentDate}))
+			</if>
+		</where>
+		ORDER BY STATE DESC, REMIND_CREATE_DATE DESC, AMT DESC
+	</select>
+
+	<select id="export" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="cn.com.yusys.yscrm.info.remind.domain.RemindExcle">
+		select R.*, ROWNUM INFO_ID from (SELECT
+			R.RECE_USER,
+			U.USER_NAME,
+			R.RULE_NAME,
+			R.TYPE_NAME,
+			R.AMT,
+			TO_CHAR(R.IMPORT_DATE,'yyyy-MM-dd') IMPORT_DATE,
+			R.OTHER_CONTENT,
+			TO_CHAR(R.REMIND_CREATE_DATE,'yyyy-MM-dd') REMIND_CREATE_DATE,
+			R.CUST_NAME,
+			R.CUST_ID,
+		    case
+		        when R.OPERATION = '1' then '无需跟进'
+		        when R.OPERATION = '2' then '已跟进'
+		    end OPERATION,
+			LI.LOOKUP_ITEM_NAME STATE
+		FROM
+			ACRM_F_WP_REMIND R
+				LEFT JOIN ADMIN_SM_USER U
+						  ON R.RECE_USER = U.USER_ID
+				LEFT JOIN ADMIN_SM_LOOKUP_ITEM LI
+						  ON R.STATE = LI.LOOKUP_ITEM_CODE
+							  AND LI.LOOKUP_CODE = 'DY0007'
+		WHERE
+			R.INFO_ID IN
+		<foreach collection="condition.infoIds" item="infoId"
+				 index="index" open="(" close=")" separator=",">
+			#{infoId}
+		</foreach>
+		ORDER BY STATE DESC, REMIND_CREATE_DATE DESC, AMT DESC) R
+	</select>
+	<!-- 更新 异动提醒状态 -->
+	<update id="updateStat" parameterType="cn.com.yusys.yscrm.info.remind.domain.AcrmFwpRemind">
+		update ACRM_F_WP_REMIND
+		set
+		STATE = '0',
+		LAST_CHG_USR = #{lastChgUsr,jdbcType=VARCHAR},
+		LAST_CHG_DT = #{lastChgDt,jdbcType=VARCHAR},
+		OPERATION = #{operation}
+		where INFO_ID =
+		#{infoId,jdbcType=VARCHAR}
+	</update>
+</mapper>

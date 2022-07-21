@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.uimp.business.pma.scheme.baseIndex.repository.mapper.PmaFBaseIndexTypeMapper">
+    <resultMap id="BaseResultMap" type="cn.com.yusys.yusp.uimp.business.pma.scheme.baseIndex.domain.PmaFBaseIndexType">
+		<id column="ID" jdbcType="VARCHAR" property="id" />
+		<result column="TYPE_NAME" jdbcType="VARCHAR" property="typeName" />
+		<result column="PARENT_ID" jdbcType="NUMERIC" property="parentId" />
+		<result column="LEAF_FLAG" jdbcType="VARCHAR" property="leafFlag" />
+		<result column="LEVEL0" jdbcType="NUMERIC" property="level0" />
+		<result column="DIR_TYPE" jdbcType="VARCHAR" property="dirType" />
+		<result column="BUSS_SYS_NO" jdbcType="VARCHAR" property="bussSysNo" />
+		<result column="ORG_ID" jdbcType="VARCHAR" property="orgId" />
+		<result column="CREATOR" jdbcType="VARCHAR" property="creator" />
+		<result column="CREATE_DATE" jdbcType="VARCHAR" property="createDate" />
+		<result column="UPDATER_ID" jdbcType="VARCHAR" property="updaterId" />
+		<result column="UPDATE_DATE" jdbcType="VARCHAR" property="updateDate" />
+		<result column="CREATE_ORG" jdbcType="VARCHAR" property="createOrg" />
+		<result column="UPDATE_ORG" jdbcType="VARCHAR" property="updateOrg" />
+    </resultMap>
+    <sql id="Base_Column_List">
+	    ID,TYPE_NAME,PARENT_ID,LEAF_FLAG,LEVEL0,DIR_TYPE,BUSS_SYS_NO,ORG_ID,CREATOR,CREATE_DATE,UPDATER_ID,UPDATE_DATE,CREATE_ORG,UPDATE_ORG
+    </sql>
+     <!-- 查询基础目录数据 -->
+	<select id="querymenulist"  resultType="java.util.HashMap">
+		SELECT T.ID,T.TYPE_NAME,T.PARENT_ID,T.LEAF_FLAG,T.LEVEL0,T.DIR_TYPE,T.BUSS_SYS_NO,T.ORG_ID
+		,T.CREATOR,T.CREATE_DATE,T.UPDATER_ID,T.UPDATE_DATE,M.TYPE_NAME as PARENT_NAME
+		 FROM PMA_F_BASE_INDEX_TYPE T	
+		 left join PMA_F_BASE_INDEX_TYPE M ON  M.ID=T.PARENT_ID
+		 <where>
+				 <if test="sql != null and sql != ''">
+				     :{sql}
+				 </if>
+		 </where>
+		 
+	</select>
+	  <!-- 查询基础目录数据 -->
+	<select id="delval" parameterType="String" resultType="java.util.HashMap">
+		
+		 select count(*)  as countnum from  (
+				 select id from PMA_F_BASE_INDEX_INFO t
+				 where t.INDEX_CATALOG_ID = #{dirId,jdbcType=VARCHAR}
+				 union 
+				 select   id from   PMA_F_BASE_INDEX_TYPE p 
+				 where p.parent_id=#{dirId,jdbcType=VARCHAR})
+	</select>
+    <select id="checkSameName" resultType="java.util.Map">
+		SELECT *
+		FROM PMA_F_BASE_INDEX_TYPE
+		WHERE type_name = #{typeName}
+		<if test="id != null and id != ''">
+			AND id != #{id}
+		</if>
+	</select>
+</mapper>

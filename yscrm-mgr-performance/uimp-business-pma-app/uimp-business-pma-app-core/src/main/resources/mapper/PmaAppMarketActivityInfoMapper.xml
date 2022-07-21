@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.uimp.business.pma.app.repository.mapper.PmaAppMarketActivityInfoMapper">
+    <resultMap id="BaseResultMap" type="cn.com.yusys.yusp.uimp.business.pma.app.domain.PmaAppMarketActivityInfo">
+		<id column="INFO_ID" jdbcType="VARCHAR" property="infoId" />
+		<result column="MARKET_NAME" jdbcType="VARCHAR" property="marketName" />
+		<result column="FILE_PATH" jdbcType="VARCHAR" property="filePath" />
+		<result column="STATE" jdbcType="VARCHAR" property="state" />
+		<result column="CRAT_USE" jdbcType="VARCHAR" property="cratUse" />
+		<result column="CRAT_ORG" jdbcType="VARCHAR" property="cratOrg" />
+		<result column="CRAT_DT" jdbcType="TIMESTAMP" property="cratDt" />
+		<result column="LAST_CHG_DT" jdbcType="TIMESTAMP" property="lastChgDt" />
+		<result column="LAST_CHG_USE" jdbcType="VARCHAR" property="lastChgUse" />
+		<result column="LAST_CHG_ORG" jdbcType="VARCHAR" property="lastChgOrg" />
+		<result column="IS_DEL" jdbcType="VARCHAR" property="isDel" />
+		<result column="MARKET_DETAIL" jdbcType="VARCHAR" property="marketDetail" />
+		<result column="SCHEME_ID" jdbcType="VARCHAR" property="schemeId" />
+    </resultMap>
+    <sql id="Base_Column_List">
+	    INFO_ID,MARKET_NAME,FILE_PATH,STATE,CRAT_USE,CRAT_ORG,CRAT_DT,LAST_CHG_DT,LAST_CHG_USE,LAST_CHG_ORG,IS_DEL,MARKET_DETAIL,SCHEME_ID
+    </sql>
+    
+    
+    <select id="querylist" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+		select T.INFO_ID,
+		       T.MARKET_NAME,
+		       T.FILE_PATH,
+		       T.MARKET_DETAIL,
+		       T.SCHEME_ID,
+		       T.STATE,
+		       T.CRAT_USE,
+		       T.CRAT_ORG,
+		       to_char(T.CRAT_DT,'yyyy-MM-dd HH24:mi:ss') CRAT_DT,
+		       to_char(T.LAST_CHG_DT,'yyyy-MM-dd HH24:mi:ss') LAST_CHG_DT,
+		       T.LAST_CHG_USE,
+		       T.LAST_CHG_ORG,
+		       T.IS_DEL,
+		       D.USER_NAME AS CRAT_USE_NAME,
+		       E.USER_NAME AS LAST_USE_NAME
+		  from PMA_APP_MARKET_ACTIVITY_INFO T
+		  LEFT JOIN ADMIN_SM_USER E ON T.LAST_CHG_USE = E.LOGIN_CODE 
+		  LEFT JOIN ADMIN_SM_USER D ON T.CRAT_USE = D.LOGIN_CODE
+		 WHERE T.IS_DEL = '0'
+		<if test="condition.marketName != null and condition.marketName != ''">
+			AND T.MARKET_NAME LIKE concat(concat('%',#{condition.marketName}),'%')
+		</if>
+		<if test="condition.state != null and condition.state != ''">
+			AND T.STATE = #{condition.state}
+		</if>
+		<if test="condition.specialInfoId != null and condition.specialInfoId != ''">
+			AND T.INFO_ID != #{condition.specialInfoId}
+		</if>
+		ORDER BY T.CRAT_DT DESC
+	</select>
+</mapper>

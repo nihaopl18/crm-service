@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.cm.market.repository.mapper.DmpTaskNodeMapper">
+	
+	<select id="getTaskNode" parameterType="long"
+		resultType="cn.com.yusys.yusp.cm.market.domain.DmpTaskNode">
+		select T.* from dmp_task_node T
+		where T.ID = #{tempId, jdbcType=BIGINT}
+	</select>
+	
+	<!-- 查找下级节点 -->
+	<select id="getSonNode" parameterType="cn.com.yusys.yusp.cm.market.domain.CimpCmNodeinfo" resultType="java.util.HashMap">
+		SELECT G.NODE_NAME,G.TEMP_ID,A.ASSEMBLY_ID,A.DATA_TYPE,A.CLASS_ID,T.SOURCE_TABLE,T.TARGET_TABLE,T.SOURCE_COLUMNS,T.TARGET_COLUMNS,
+		MAX(T.TASK_CONDITION_VAL) AS TASK_CONDITION_VAL,MAX(T.TASK_CONDITION_FILED) AS TASK_CONDITION_FILED,T.OUT_VAL
+		FROM CIMP_CM_NODEINFO N 
+      	LEFT JOIN CIMP_CM_CONNINFO C ON N.NODE_ID = C.SOURCE_ID
+      	LEFT JOIN CIMP_CM_NODEINFO G ON G.NODE_ID = C.TARGET_ID
+      	LEFT JOIN CIMP_CM_ASSEMINFO A ON G.ASSEMBLY_ID = A.ASSEMBLY_ID
+      	LEFT JOIN  (SELECT T1.NODE_ID AS NODE_ID,T2.FORM_IN_TABLE AS SOURCE_TABLE,T3.FORM_OUT_TABLE AS TARGET_TABLE,
+      	T2.FORM_IN_FILED AS SOURCE_COLUMNS,T3.FORM_OUT_FILED AS TARGET_COLUMNS,
+      	T3.FORM_OUT_VAL AS OUT_VAL,
+      	T4.FORM_OPERATION_FILED AS TASK_CONDITION_FILED,
+      	T4.FORM_OPERATION_VAL AS TASK_CONDITION_VAL 
+      	FROM CIMP_CM_NODES_DISPLAY T1
+      	LEFT JOIN CIMP_CM_NODES_DISPLAY_INPUT T2 ON T1.FORM_ID = T2.FORM_ID
+      	LEFT JOIN CIMP_CM_NODES_DISPLAY_OUTPUT T3 ON T1.FORM_ID = T3.FORM_ID
+      	LEFT JOIN CIMP_CM_NODES_PRESENTATION T4 ON T1.FORM_ID = T4.FORM_ID) T ON G.NODE_ID = T.NODE_ID
+      	WHERE N.TEMP_ID = #{tempId, jdbcType=VARCHAR} AND N.NODE_NAME = #{nodeName, jdbcType=VARCHAR}
+      	GROUP BY G.NODE_NAME,G.TEMP_ID,A.DATA_TYPE,A.CLASS_ID,A.ASSEMBLY_ID,T.SOURCE_TABLE,T.TARGET_TABLE,T.SOURCE_COLUMNS,T.OUT_VAL,T.TARGET_COLUMNS
+	</select>
+	<!-- 新增节点 -->
+	<insert id="insertNode" parameterType="cn.com.yusys.yusp.cm.market.domain.DmpTaskNode">
+		INSERT INTO DMP_TASK_NODE(ID,NODE_STEP,SERIAL_NUMBER,NODE_TYPE,SOURCE_TABLE,TARGET_TABLE,TARGET_EXISTS,TARGET_TRUNCATE,SOURCE_COLUMNS,TARGET_COLUMNS,TASK_CONDITION)
+      	VALUES(#{id, jdbcType=BIGINT},
+      	#{nodeStep, jdbcType=BIGINT},
+      	#{serialNumber, jdbcType=BIGINT},
+      	#{nodeType, jdbcType=VARCHAR},
+      	#{sourceTable, jdbcType=VARCHAR},
+      	#{targetTable, jdbcType=VARCHAR},
+      	#{targetExists, jdbcType=VARCHAR},
+      	#{targetTruncate, jdbcType=VARCHAR},
+      	#{sourceColumns, jdbcType=VARCHAR},
+      	#{targetColumns, jdbcType=VARCHAR},
+      	#{taskCondition, jdbcType=VARCHAR})
+	</insert>
+	<!-- 删除节点 -->
+	<delete id="delNodes" parameterType="long">
+		DELETE FROM DMP_TASK_NODE WHERE ID = #{tempId}
+	</delete>
+	<!-- 查目标表是否存在 -->
+	<select id="getTarTable" parameterType="String" resultType="int">
+		SELECT count(TARGET_TABLE) FROM DMP_TASK_NODE WHERE TARGET_TABLE = #{targetTable, jdbcType=VARCHAR}
+	</select>
+</mapper>

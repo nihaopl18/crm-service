@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.cm.sysKeyWord.repository.mapper.CmFRcChannelMgrMapper">
+	<!-- 查询渠道管理表 -->
+	<select id="getList" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.Map">
+		SELECT T.CHANNEL_ID,T.CHANNEL_NAME,T.CREAT_USER,T.UPDATA_USER,T.CONNECT_TYPE,T.DEAL_PATH,
+       	TO_CHAR(T.CREAT_DATE,'yyyy-MM-dd') AS CREAT_DATE,
+       	TO_CHAR(T.UPDATA_DATE,'yyyy-MM-dd') AS UPDATA_DATE,
+       	T.FILE_SERVER_PATH,T.FILE_SERVER_NAME,T.FILE_SERVER_LOGIN,T.FILE_SERVER_PSWD,T.MESSAGE_TYPE,
+       	T.DEAL_MESSGAE,T.RUN_CONNECT_TYPE,T.CREAT_USER_NAME,T.UPDATA_USER_NAME,T.IS_SET,T.CHANNEL_ITEM_ID 
+       	FROM CM_F_RC_CHANNEL_MGR T
+		<where>
+			<if test="condition.channelName !='' and condition.channelName != null">
+				T.CHANNEL_NAME LIKE CONCAT('%',CONCAT(#{condition.channelName, jdbcType=VARCHAR},'%'))
+			</if>
+		</where>
+		ORDER BY CHANNEL_ID DESC
+	</select>
+	<!-- 渠道名称验重 -->
+	<select id="getSameName" parameterType="cn.com.yusys.yusp.cm.sysKeyWord.domain.CmFRcChannelMgr" resultType="int">
+		SELECT COUNT(1) FROM CM_F_RC_CHANNEL_MGR WHERE CHANNEL_NAME = #{channelName} AND CHANNEL_ID <![CDATA[!= ]]> #{channelId}
+	</select>
+	<!-- 根据id返回渠道名称 -->
+	<select id="getChannelNameById" parameterType="String" resultType="String">
+		SELECT CHANNEL_NAME FROM CM_F_RC_CHANNEL_MGR WHERE CHANNEL_ID = #{channelId}
+	</select>
+	<!-- 返回使用中的渠道 -->
+	<select id="getApplyChannel" parameterType="String" resultType="int">
+		SELECT COUNT(1) FROM CM_F_RC_SYS_TYPE T WHERE instr(T.APPLY_CHANNEL_NAME,#{channelName, jdbcType=VARCHAR}) > 0
+	</select>
+	<!-- 删除渠道管理表数据 -->
+	<delete id="deleteList" parameterType="String">
+		DELETE FROM CM_F_RC_CHANNEL_MGR WHERE CHANNEL_ID = #{channelId, jdbcType=VARCHAR}
+	</delete>
+	<!-- 服务器密码加密 -->
+	<select id="encrypt" parameterType="String" resultType="String">
+	SELECT encrypt_des(#{pswd},'TEST!channel') FROM DUAL
+	</select>
+	<!-- 服务器密码解密 -->
+	<select id="decrypt" parameterType="String" resultType="String">
+	SELECT decrypt_des(#{pswd},'TEST!channel') FROM DUAL
+	</select>
+	<!-- 获取渠道名称 -->
+	<select id="getChannelName" resultType="java.util.HashMap">
+		SELECT CHANNEL_ID,CHANNEL_NAME FROM CM_F_RC_CHANNEL_MGR
+	</select>
+</mapper>

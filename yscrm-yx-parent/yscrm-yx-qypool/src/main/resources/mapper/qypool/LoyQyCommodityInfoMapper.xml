@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.climp.qypool.repository.mapper.LoyQyCommodityInfoMapper">
+    <resultMap id="BaseResultMap" type="cn.com.yusys.climp.qypool.domain.LoyQyCommodityInfo">
+		<result column="ID" jdbcType="VARCHAR" property="id" />
+		<result column="COMMODITY_CODE" jdbcType="VARCHAR" property="commodityCode" />
+		<result column="COMMODITY_NAME" jdbcType="VARCHAR" property="commodityName" />
+		<result column="CATEGORY_CODE" jdbcType="VARCHAR" property="categoryCode" />
+		<result column="SUIT_OBJ_TYPE" jdbcType="VARCHAR" property="suitObjType" />
+		<result column="COMMODITY_TYPE" jdbcType="VARCHAR" property="commodityType" />
+		<result column="COMMODITY_LINK" jdbcType="VARCHAR" property="commodityLink" />
+		<result column="INSTU_CDE" jdbcType="VARCHAR" property="instuCde" />
+		<result column="UP_DOWN_STATE" jdbcType="VARCHAR" property="upDownState" />
+		<result column="ON_SHELF_BEGIN" jdbcType="VARCHAR" property="onShelfBegin" />
+		<result column="ON_SHELF_END" jdbcType="VARCHAR" property="onShelfEnd" />
+		<result column="COMMODITY_STG_NUM" jdbcType="VARCHAR" property="commodityStgNum" />
+		<result column="COMMODITY_SAL_NUM" jdbcType="VARCHAR" property="commoditySalNum" />
+		<result column="STG_ALARM" jdbcType="VARCHAR" property="stgAlarm" />
+		<result column="COMMODITY_M_VALUE" jdbcType="NUMERIC" property="commodityMvalue" />
+		<result column="COMMODITY_L_VALUE" jdbcType="NUMERIC" property="commodityLvalue" />
+		<result column="WF_APPR_STS" jdbcType="VARCHAR" property="wfApprSts" />
+		<result column="COMMODITY_V_FLAG" jdbcType="VARCHAR" property="commodityVflag" />
+		<result column="COMMODITY_DESC" jdbcType="VARCHAR" property="commodityDesc" />
+		<result column="CREATE_USER" jdbcType="VARCHAR" property="createUser" />
+		<result column="CREATE_DATE" jdbcType="VARCHAR" property="createDate" />
+		<result column="CREATE_ORG" jdbcType="VARCHAR" property="createOrg" />
+		<result column="UPDATE_USER" jdbcType="VARCHAR" property="updateUser" />
+		<result column="UPDATE_DATE" jdbcType="VARCHAR" property="updateDate" />
+		<result column="UPDATE_ORG" jdbcType="VARCHAR" property="updateOrg" />
+		<result column="DEL_FLAG" jdbcType="VARCHAR" property="delFlag" />
+    </resultMap>
+    <sql id="Base_Column_List">
+	    ID,COMMODITY_CODE,COMMODITY_NAME,CATEGORY_CODE,SUIT_OBJ_TYPE,COMMODITY_TYPE,COMMODITY_LINK,INSTU_CDE,UP_DOWN_STATE,ON_SHELF_BEGIN,ON_SHELF_END,COMMODITY_STG_NUM,COMMODITY_SAL_NUM,STG_ALARM,COMMODITY_M_VALUE,COMMODITY_L_VALUE,WF_APPR_STS,COMMODITY_V_FLAG,COMMODITY_DESC,CREATE_USER,CREATE_DATE,CREATE_ORG,UPDATE_USER,UPDATE_DATE,UPDATE_ORG
+    </sql>
+    <!-- 分页查询商品信息 -->
+	<select id="getCommodity" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+		resultType="java.util.HashMap">
+		SELECT T.*,O.ORG_NAME AS INSTU_CDE_NAME,U.USER_NAME AS CREATE_USER_NAME,R.MERCHANT_NAME,
+			U1.USER_NAME AS UPDATE_USER_NAME,NVL(s1.m_count,0) m_count,s2.PICTURE_PATH
+-- 		       NVL(s2.p_count,0) p_count,NVL(s1.m_count,0) m_count
+		FROM LOY_QY_COMMODITY_INFO T
+		LEFT JOIN ADMIN_SM_ORG O ON O.ORG_CODE=T.INSTU_CDE
+		LEFT JOIN ADMIN_SM_USER U ON T.CREATE_USER=U.LOGIN_CODE 
+		LEFT JOIN ADMIN_SM_USER U1 ON T.UPDATE_USER=U1.LOGIN_CODE 
+		LEFT JOIN LOY_QY_MERCHANT_INFO R ON T.BELONG_MERCHANT = R.MERCHANT_ID
+		LEFT JOIN ( SELECT  t8.comm_id,t8.PICTURE_PATH
+			FROM  LOY_QY_COMM_PICTURE t8
+			WHERE  t8.PICTURE_TYPE = '10') s2
+			ON  t.id = s2.comm_id
+		LEFT JOIN (select t7.COMM_ID, count(t7.id) as m_count
+         	FROM loy_qy_comm_model t7
+         	WHERE (t7.DELETE_STS is null or t7.DELETE_STS != '1') GROUP BY t7.COMM_ID) s1
+         	ON t.id = s1.comm_id
+		where t.DEL_FLAG <![CDATA[!=]]> '1'
+		<if test="condition.categoryCode != null and condition.categoryCode !=''.toString() and condition.categoryCode !='0'.toString ">
+			AND T.CATEGORY_CODE in (select CATEGORY_CODE from
+			LOY_QY_COMMODITY_CATEGORY
+			WHERE PARENT_CATEGORY_CODE = #{condition.categoryCode, jdbcType=VARCHAR} or
+			CATEGORY_CODE = #{condition.categoryCode, jdbcType=VARCHAR})
+		</if>
+		<if test="condition.commodityCode != null and condition.commodityCode !=''">
+			AND T.COMMODITY_CODE = #{condition.commodityCode, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.commodityName != null and condition.commodityName !=''">
+			AND T.COMMODITY_NAME LIKE CONCAT(CONCAT('%',#{condition.commodityName}),'%')
+		</if>
+		<if test="condition.suitObjType != null and condition.suitObjType !=''">
+			AND T.SUIT_OBJ_TYPE = #{condition.suitObjType, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.suitOrgId != null and condition.suitOrgId !=''">
+			AND T.SUIT_ORG_ID = #{condition.suitOrgId, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.belongMerchant != null and condition.belongMerchant !=''">
+			AND T.BELONG_MERCHANT = #{condition.belongMerchant, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.commodityType != null and condition.commodityType !=''">
+			AND T.COMMODITY_TYPE = #{condition.commodityType, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.instuCde != null and condition.instuCde !=''">
+			AND T.INSTU_CDE = #{condition.instuCde, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.upDownState != null and condition.upDownState !=''">
+			AND T.UP_DOWN_STATE = #{condition.upDownState, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.commodityStgNumBegin != null and condition.commodityStgNumBegin !=''">
+			AND T.COMMODITY_STG_NUM &gt;= #{condition.commodityStgNumBegin, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.commodityStgNumEnd != null and condition.commodityStgNumEnd !=''">
+			AND T.COMMODITY_STG_NUM &lt;= #{condition.commodityStgNumEnd, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.commodityMValueBegin != null and condition.commodityMValueBegin !=''">
+			AND T.COMMODITY_M_VALUE &gt;= #{condition.commodityMValueBegin, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.commodityMValueEnd != null and condition.commodityMValueEnd !=''">
+			AND T.COMMODITY_M_VALUE &lt;= #{condition.commodityMValueEnd, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.commodityLValueBegin != null and condition.commodityLValueBegin !=''">
+			AND T.COMMODITY_L_VALUE &gt;= #{condition.commodityLValueBegin, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.commodityLValueEnd != null and condition.commodityLValueEnd !=''">
+			AND T.COMMODITY_L_VALUE &lt;= #{condition.commodityLValueEnd, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.merchantId != '' and condition.merchantId != null">
+			AND T.BELONG_MERCHANT = #{condition.merchantId, jdbcType=VARCHAR}
+		</if>
+		ORDER BY T.CREATE_DATE DESC
+	</select>
+	<!-- 根据编号查询商品信息 -->
+	<select id="getCommodityById" parameterType="java.util.Map" resultType="cn.com.yusys.climp.qypool.domain.LoyQyCommodityInfo">
+		SELECT T.* FROM LOY_QY_COMMODITY_INFO T
+		where 1=1 and T.DEL_FLAG != 1
+			<if test="ids != null">
+        		 AND t.COMMODITY_CODE in 
+                <foreach item="item" index="index" collection="ids" open="(" separator="," close=")">  
+                  #{item,jdbcType=VARCHAR}  
+                </foreach>
+        	</if>
+	</select>
+	<select id="getOneCommodityById" parameterType="java.lang.String" resultType="cn.com.yusys.climp.qypool.domain.LoyQyCommodityInfo">
+		SELECT T.* FROM LOY_QY_COMMODITY_INFO T
+		where t.id = #{commodityId,jdbcType=VARCHAR} and T.DEL_FLAG != 1
+	</select>
+	<!-- 根据类别编号查询商品信息 -->
+	<select id="getCommByCategoryCode" parameterType="String" resultType="java.util.HashMap">
+		SELECT T.* FROM LOY_QY_COMMODITY_INFO T
+		where 1=1 and T.DEL_FLAG != 1
+			AND T.CATEGORY_CODE in (select CATEGORY_CODE from
+			LOY_QY_COMMODITY_CATEGORY
+			WHERE PARENT_CATEGORY_CODE = #{categoryCode, jdbcType=VARCHAR} or
+			CATEGORY_CODE = #{categoryCode, jdbcType=VARCHAR})
+		ORDER BY T.CREATE_DATE DESC
+	</select>
+	<!-- 根据公共参数名查询公共参数 -->
+	<select id="getPropByName" parameterType="String" resultType="java.util.HashMap">
+		SELECT PROP_VALUE FROM ADMIN_SM_PROP WHERE PROP_NAME = #{propName, jdbcType=VARCHAR}
+	</select>
+	
+	<!-- 根据商品编号修改商品的上下架状态、审批状态 -->
+	<update id="updateCommStatus" parameterType="String">
+		update loy_qy_commodity_info
+		set WF_APPR_STS = '000',
+		UP_DOWN_STATE = 'D'
+		where COMMODITY_CODE = #{commodityCode, jdbcType=VARCHAR}
+	</update>
+	<!-- 逻辑删除商品 -->
+	<update id="delFlagEdit" parameterType="String">
+		update loy_qy_commodity_info set del_flag = '1' 
+		where id = #{id, jdbcType=VARCHAR}
+	</update>
+	<!-- 查询金融机构下的机构树 -->
+	<select id="getOrgByInstuValue" parameterType="java.lang.String" resultType="java.util.HashMap">
+		SELECT T.* FROM ADMIN_SM_ORG T
+		LEFT JOIN ADMIN_SM_INSTU R ON R.INSTU_ID = T.INSTU_ID 
+		WHERE R.INSTU_CDE = #{instuValue,jdbcType=VARCHAR} 
+	</select>
+	<!-- 更新礼品审批状态 -->
+	<update id="editGiftWorkflow" parameterType="java.util.Map">
+		UPDATE loy_qy_commodity_info T SET T.WF_APPR_STS = #{sts,jdbcType=VARCHAR}
+		WHERE T.ID = #{id,jdbcType=VARCHAR}
+	</update>
+	<select id="getPic" parameterType="java.lang.String" resultType="java.util.Map">
+		select COMM_ID, PICTURE_NAME, PICTURE_PATH, PICTURE_TYPE, PICTURE_ORDER
+		from LOY_QY_COMM_PICTURE
+		where COMM_ID = #{id,jdbcType=VARCHAR}
+	</select>
+	<select id="getAttr" parameterType="java.lang.String" resultType="java.util.Map">
+		select EX.*
+		from LOY_QY_COMM_RL_ATTR RL
+		left join LOY_QY_COMM_EX_ATTR EX on RL.ATTR_ID = EX.ATTR_ID
+		where RL.COMM_ID = #{id,jdbcType=VARCHAR}
+	</select>
+	<select id="getExAttr" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.Map">
+		select *
+		from LOY_QY_COMM_EX_ATTR
+		where 1=1
+		<if test="condition.attrName != null and condition.attrName != ''">
+			and ATTR_NAME like '%' || #{condition.attrName,jdbcType=VARCHAR} || '%'
+		</if>
+		<if test="condition.attrType != null and condition.attrType != ''">
+			and ATTR_TYPE = #{condition.attrType,jdbcType=VARCHAR}
+		</if>
+	</select>
+	<!-- 新增商品扩展属性-->
+	<insert id="addCommAttr" parameterType="java.util.List" useGeneratedKeys="false">
+		INSERT ALL
+		<foreach item="item" index="index" collection="list">
+			INTO LOY_QY_COMM_RL_ATTR
+			(
+			SER_ID,
+			COMM_ID,
+			ATTR_ID
+			) VALUES
+			(
+			#{item.serId, jdbcType=NUMERIC},
+			#{item.commodityId, jdbcType=VARCHAR},
+			#{item.attrId, jdbcType=VARCHAR}
+			)
+		</foreach>
+		SELECT 1 FROM DUAL
+	</insert>
+	<delete id="deleteExAttr" parameterType="java.lang.String">
+		delete
+		from LOY_QY_COMM_RL_ATTR
+		where COMM_ID = #{commodityId, jdbcType=VARCHAR}
+	</delete>
+</mapper>

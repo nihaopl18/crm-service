@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.custpub.repository.mapper.AcrmFciCustAllMapper">
+    <!-- 通过custId获取客户全量表信息 -->
+    <select id="getCustTypeByCustId" parameterType="String" resultType="java.util.Map">
+    select * from ACRM_F_CI_CUST_ALL where cust_id = #{custId,jdbcType=VARCHAR}
+	</select>
+	
+	<select id="getCustByCustId" parameterType="String" resultType="String">
+    select cust_status from ACRM_F_CI_CUST_ALL where cust_id = #{custId,jdbcType=VARCHAR}
+	</select>
+	
+	<update id ="updateBelong" parameterType="java.util.HashMap">
+   	UPDATE ACRM_F_CI_CUST_ALL SET CUST_STATUS = #{custStatus, jdbcType=VARCHAR}
+   		<!-- UPDATE ACRM_F_CI_CUST_ADMIT_ALL SET CUST_STATUS = #{custStatus, jdbcType=VARCHAR} -->
+   	WHERE CUST_ID = #{custId, jdbcType=VARCHAR}
+   </update>
+</mapper>

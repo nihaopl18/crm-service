@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.climp.qypool.repository.mapper.LoyQyCommPictureMapper">
+    <resultMap id="BaseResultMap" type="cn.com.yusys.climp.qypool.domain.LoyQyCommPicture">
+		<result column="ID" jdbcType="VARCHAR" property="id" />
+		<result column="COMMODITY_CODE" jdbcType="VARCHAR" property="commodityCode" />
+		<result column="PICTURE_NAME" jdbcType="VARCHAR" property="pictureName" />
+		<result column="PICTURE_PATH" jdbcType="VARCHAR" property="picturePath" />
+		<result column="PICTURE_TYPE" jdbcType="VARCHAR" property="pictureType" />
+		<result column="PICTURE_ORDER" jdbcType="VARCHAR" property="pictureOrder" />
+		<result column="CREATE_USER" jdbcType="VARCHAR" property="createUser" />
+		<result column="CREATE_DATE" jdbcType="VARCHAR" property="createDate" />
+		<result column="CREATE_ORG" jdbcType="VARCHAR" property="createOrg" />
+		<result column="UPDATE_USER" jdbcType="VARCHAR" property="updateUser" />
+		<result column="UPDATE_DATE" jdbcType="VARCHAR" property="updateDate" />
+		<result column="UPDATE_ORG" jdbcType="VARCHAR" property="updateOrg" />
+    </resultMap>
+    <sql id="Base_Column_List">
+	    ID,COMMODITY_CODE,PICTURE_NAME,PICTURE_PATH,PICTURE_TYPE,PICTURE_ORDER,CREATE_USER,CREATE_DATE,CREATE_ORG,UPDATE_USER,UPDATE_DATE,UPDATE_ORG
+    </sql>
+    <!-- 根据类别编号查询商品信息 -->
+	<select id="getPicture" parameterType="String" resultType="java.util.HashMap">
+		SELECT T.* FROM LOY_QY_COMM_PICTURE T
+		where 1=1
+			AND T.COMM_ID = #{commodityCode, jdbcType=VARCHAR}
+		ORDER BY T.CREATE_DATE DESC
+	</select>
+	<!-- 根据商品id查询商品图片 -->
+	<select id="getCommPic" parameterType="String" resultType="java.util.HashMap">
+		SELECT  * from LOY_QY_COMM_PICTURE  where COMM_ID =#{commId, jdbcType=VARCHAR}
+	</select>
+	<!-- 根据商品id删除商品图片 -->
+	<delete id="delCommPic" parameterType="String">
+		DELETE FROM LOY_QY_COMM_PICTURE 
+		WHERE COMM_ID = #{commId, jdbcType=VARCHAR}
+	</delete>
+	
+	<!-- /**
+	 * 新增或者修改商品图片信息时，判断是否能够新增或者修改缩略图。
+	 * 判断逻辑：每个商品最多只能有一张缩略图，如果已存在一个缩略图，那么不能再新增，不能再修改其它记录为缩略图（修改的那条记录本身除外）
+	 * @param commodityCode 商品编号
+	 * @param pictureType 图片类型，01代表缩略图
+	 * @param id 商品图片信息表主键
+	 * @return 可以新增/修改缩略图图片，返回false，反之返回true
+	 */ -->
+	<select id="isRepeatThumbnail" parameterType="java.util.Map" resultType="java.util.HashMap">
+		SELECT  * from LOY_QY_COMM_PICTURE  
+			where PICTURE_TYPE = '10'
+			and COMM_ID = #{commodityCode, jdbcType=VARCHAR}
+		<if test="id != null and id !=''">
+			AND id != #{id, jdbcType=VARCHAR}
+		</if>
+	</select>
+</mapper>

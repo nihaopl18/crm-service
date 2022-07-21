@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.pcrm.common.remindInfo.repository.mapper.RemindInfoMapper">
+    <!-- 个人待办 -->
+    <select id="selectUserTodos" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="cn.com.yusys.yscrm.pcrm.common.remindInfo.domain.EchainJoinWorkTodoDTO">
+        SELECT W.INSTANCEID,
+        W.MAININSTANCEID,
+        W.WFID,
+        W.WFNAME,
+        W.WFSIGN,
+        W.WFJOBNAME,
+        W.CUSTID,
+        W.CUSTNAME,
+        W.WFSTARTTIME,
+        W.AUTHOR,
+        W.BIZSEQNO,
+        W.WFAPPID,
+        N.PRENODEID,
+        N.PRENODENAME,
+        N.NODEID,
+        N.NODESIGN,
+        N.NODENAME,
+        N.NODESTATUS,
+        N.NODESTARTTIME,
+        N.NODEACCEPTTIME,
+        N.NODEPLANENDTIME,
+        N.CURRENTNODEUSER,
+        N.ORIGINALUSERS,
+        N.ISPROCESSED,
+        N.USER_NAME
+        from (select NN.PRENODEID,
+        NN.PRENODENAME,
+        NN.NODEID,
+        NN.NODESIGN,
+        NN.NODENAME,
+        NN.NODESTATUS,
+        NN.NODESTARTTIME,
+        NN.NODEACCEPTTIME,
+        NN.NODEPLANENDTIME,
+        NN.CURRENTNODEUSER,
+        NN.ORIGINALUSERS,
+        NN.ISPROCESSED,
+        NN.INSTANCEID,
+        SS.USER_NAME
+        from WF_INSTANCE_NODE_PROPERTY NN
+        join WF_INSTANCE_NODE_USER U
+        on U.NODEID = NN.NODEID and U.INSTANCEID = NN.INSTANCEID
+        INNER JOIN ADMIN_SM_USER SS ON SS.USER_ID=REPLACE(NN.CURRENTNODEUSER, ';', '')
+        where U.CURRENTNODEUSER = #{condition.loginCode,jdbcType=VARCHAR}
+        union
+        select NN2.PRENODEID,
+        NN2.PRENODENAME,
+        NN2.NODEID,
+        NN2.NODESIGN,
+        NN2.NODENAME,
+        NN2.NODESTATUS,
+        NN2.NODESTARTTIME,
+        NN2.NODEACCEPTTIME,
+        NN2.NODEPLANENDTIME,
+        NN2.CURRENTNODEUSER,
+        NN2.ORIGINALUSERS,
+        NN2.ISPROCESSED,
+        NN2.INSTANCEID,
+        SSS.USER_NAME
+        from WF_INSTANCE_NODE_PROPERTY NN2
+        join WF_INSTANCE_NODE_USERS US
+        on US.NODEID = NN2.NODEID and US.INSTANCEID=NN2.INSTANCEID
+        INNER JOIN ADMIN_SM_USER SSS ON SSS.USER_ID=REPLACE(NN2.CURRENTNODEUSER, ';', '')
+        where US.CURRENTNODEUSERS = #{condition.loginCode,jdbcType=VARCHAR}
+        and NN2.NODESTATUS = '3') N
+        JOIN WF_INSTANCE_WHOLE_PROPERTY W
+        ON W.INSTANCEID = N.INSTANCEID
+        WHERE (W.BDRAFT = '0' OR ISPROCESSED = '1')
+        AND (W.WFSTATUS = '0' OR W.WFSTATUS = '5')
+
+        <if test="condition.bizSeqNo != null  and condition.bizSeqNo !=''">
+            AND W.BIZSEQNO LIKE #{condition.bizSeqNo,jdbcType=VARCHAR}
+        </if>
+        <if test="condition.custName != null and condition.custName !=''">
+            AND W.CUSTNAME LIKE CONCAT(CONCAT('%',#{condition.custName,jdbcType=VARCHAR}),'%')
+        </if>
+        <!-- 增加待办查询条件：流程标识和节点Id by wxming20190705-->
+        <if test="condition.wfSign != null and condition.wfSign !=''">
+            AND W.WFSIGN = #{condition.wfSign,jdbcType=VARCHAR}
+        </if>
+        <if test="condition.wfName != null and condition.wfName !=''">
+            AND W.WFNAME LIKE CONCAT(CONCAT('%',#{condition.wfName,jdbcType=VARCHAR}),'%')
+        </if>
+        <if test="condition.nodeId != null and condition.nodeId !=''">
+            AND N.NODEID = #{condition.nodeId,jdbcType=VARCHAR}
+        </if>
+        <if test="condition.nodeSign != null and condition.nodeSign !=''">
+            AND N.NODESIGN = #{condition.nodeSign,jdbcType=VARCHAR}
+        </if>
+        <!-- 增加待办查询条件：申请类型 by wxming20190705-->
+        <if test="condition.wfAppId != null and condition.wfAppId !=''">
+            AND W.WFAPPID = #{condition.wfAppId,jdbcType=VARCHAR}
+        </if>
+        ORDER BY N.NODESTARTTIME DESC
+    </select>
+
+    <!-- 个人已办 -->
+    <select id="selectUserDones" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="cn.com.yusys.yscrm.pcrm.common.remindInfo.domain.EchainJoinWorkTodoDTO">
+        SELECT W.INSTANCEID,
+        W.MAININSTANCEID,
+        W.WFID,
+        W.WFNAME,
+        W.WFSIGN,
+        W.WFJOBNAME,
+        W.CUSTID,
+        W.CUSTNAME,
+        W.WFSTARTTIME,
+        W.AUTHOR,
+        W.BIZSEQNO,
+        N.PRENODEID,
+        N.PRENODENAME,
+        N.NODEID,
+        N.NODENAME,
+        N.NODESTATUS,
+        N.NODESTARTTIME,
+        N.NODEACCEPTTIME,
+        N.NODEPLANENDTIME,
+        N.CURRENTNODEUSER,
+        SS.USER_NAME,
+        <!-- N.CURRENTNODEUSERS, -->
+        N.ORIGINALUSERS
+        FROM WF_INSTANCE_WHOLE_PROPERTY W JOIN WF_INSTANCE_NODE_PROPERTY N ON (W.INSTANCEID = N.INSTANCEID)
+        INNER JOIN ADMIN_SM_USER SS ON REPLACE(N.CURRENTNODEUSER, ';', '')=SS.USER_ID
+        WHERE (W.BDRAFT = '0' OR N.ISPROCESSED = '1')
+        AND (W.WFSTATUS = '0' OR W.WFSTATUS = '4' OR W.WFSTATUS = '5')
+        AND W.INSTANCEID in
+        (
+        select DISTINCT p.INSTANCEID
+        from wf_instance_processor p
+        left join WF_INSTANCE_NODE_USER u on p.instanceId = u.Instanceid
+        where p.PROCESSOR = #{condition.loginCode,jdbcType=VARCHAR} and u.CURRENTNODEUSER != #{condition.loginCode,jdbcType=VARCHAR}
+        )
+        <!-- AND N.ALLPROCESSOR LIKE #{condition.loginCode,jdbcType=VARCHAR} -->
+        <!-- AND N.CURRENTNODEUSER NOT LIKE #{condition.loginCode,jdbcType=VARCHAR} -->
+        <if test="condition.bizSeqNo != null  and condition.bizSeqNo !=''">
+            AND W.BIZSEQNO = #{condition.bizSeqNo,jdbcType=VARCHAR}
+        </if>
+        <if test="condition.wfName != null and condition.wfName !=''">
+            AND W.WFNAME LIKE CONCAT(CONCAT('%',#{condition.wfName,jdbcType=VARCHAR}),'%')
+        </if>
+        <if test="condition.custName != null and condition.custName !=''">
+            AND W.CUSTNAME LIKE CONCAT(CONCAT('%',#{condition.custName,jdbcType=VARCHAR}),'%')
+        </if>
+        ORDER BY N.NODESTARTTIME DESC
+    </select>
+
+    <!-- 个人办结 -->
+    <select id="selectUserEnds" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="cn.com.yusys.yscrm.pcrm.common.remindInfo.domain.EchainJoinWorkEndDTO">
+        SELECT WE.INSTANCEID,
+        WE.MAININSTANCEID,
+        WE.WFID,
+        WE.WFNAME,
+        WE.WFSIGN,
+        WE.WFJOBNAME,
+        WE.CUSTID,
+        WE.CUSTNAME,
+        WE.WFSTARTTIME,
+        WE.WFENDTIME,
+        WE.AUTHOR,
+        WE.SPSTATUS,
+        WE.LASTUSER,
+        WE.COSTTIMES,
+        WE.BIZSEQNO,
+        SS.USER_NAME
+        FROM WF_INSTANCE_END WE
+        INNER JOIN ADMIN_SM_USER SS ON SS.USER_ID=WE.LASTUSER
+        <!-- WHERE (WE.ALLREADERSLIST IS NULL OR WE.ALLREADERSLIST LIKE #{condition.loginCode,jdbcType=VARCHAR}) -->
+        WHERE
+        (
+        <!-- (select count(1) from WF_INSTANCE_END_READER r where r.INSTANCEID = WE.INSTANCEID) = 0
+        or  -->
+        (select count(1) from WF_INSTANCE_END_READER r where r.INSTANCEID = WE.INSTANCEID and r.reader = #{condition.loginCode,jdbcType=VARCHAR}) > 0
+        )
+        <!-- (WE.ALLREADERSLIST IS NULL OR WE.ALLREADERSLIST LIKE #{condition.loginCode,jdbcType=VARCHAR}) -->
+        <if test="condition.bizSeqNo != null and condition.bizSeqNo !=''">
+            AND WE.BIZSEQNO = #{condition.bizSeqNo,jdbcType=VARCHAR}
+        </if>
+        <if test="condition.wfName != null and condition.wfName !=''">
+            AND WE.WFNAME LIKE CONCAT(CONCAT('%',#{condition.wfName,jdbcType=VARCHAR}),'%')
+        </if>
+        <if test="condition.custName != null  and condition.custName !=''">
+            AND WE.CUSTNAME LIKE CONCAT(CONCAT('%',#{condition.custName,jdbcType=VARCHAR}),'%')
+        </if>
+        ORDER BY WE.WFENDTIME DESC
+    </select>
+</mapper>

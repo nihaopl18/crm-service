@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.climp.acty.repository.mapper.LoyEngRuleSetMapper">
+    <resultMap id="BaseResultMap" type="cn.com.yusys.climp.acty.domain.LoyEngRuleSet">
+		<result column="ID" jdbcType="NUMERIC" property="id" />
+		<result column="ACTIVITY_ID" jdbcType="VARCHAR" property="activityId" />
+		<result column="CATALOG_ID" jdbcType="NUMERIC" property="catalogId" />
+    </resultMap>
+    <sql id="Base_Column_List">
+	    ID,ACTIVITY_ID,CATALOG_ID
+    </sql>
+    <!-- 启用新增规则集信息 -->
+    <insert id="insertRuleSet" parameterType="String">
+		INSERT INTO LOY_ENG_RULE_SET(ID,ACTIVITY_ID) 
+		VALUES(#{id, jdbcType=VARCHAR},#{id, jdbcType=VARCHAR})
+	</insert>
+	<!-- 停用删除规则集信息 -->
+    <delete id="deleteRuleSet" parameterType="String">
+   		DELETE from LOY_ENG_RULE_SET T WHERE T.ID = #{id, jdbcType=VARCHAR}
+	</delete>
+</mapper>

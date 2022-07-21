@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.cust.person.repository.mapper.OcrmFciDiscountProMapper">
+    <sql id="Base_Column_List">
+	    DISCOUNT_PRO_ID,DISCOUNT_PRO_NAME,DISCOUNT_PRO_CONTENT
+    </sql>
+    
+     <select id="queryList" parameterType="java.util.Map"  resultType="java.util.HashMap">
+		  select t.preferent_id,
+       			 t.preferent_content,
+       			 g.grade_level,
+       			 g.preferent_str
+  		  from OCRM_CI_GRADE_PREFERENT t
+  		  left join OCRM_CI_GRADE_PREFE_LEVEL g
+  		  on g.preferent_id = t.preferent_id
+  		  where 1=1
+  		  and g.grade_level = (select tt.serv_lev from ACRM_F_CI_CUST_ALL tt where tt.IS_ADMIT_ENTER='1' and tt.cust_id = #{custId,jdbcType=VARCHAR})
+<!-- and g.grade_level = (select tt.serv_lev from ACRM_F_CI_CUST_ADMIT_ALL tt where tt.cust_id = #{custId,jdbcType=VARCHAR}) -->
+	</select>
+	
+</mapper>

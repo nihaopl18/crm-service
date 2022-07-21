@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>yscrm-yx-parent</artifactId>
+        <groupId>cn.com.yusys.yscrm</groupId>
+        <version>2.0.0-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>yscrm-yx-need</artifactId>
+
+    <dependencies>
+        <dependency>
+            <artifactId>yusp-app-crmOca-core</artifactId>
+            <groupId>cn.com.yusys.crm</groupId>
+            <version>2.0.0</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>cn.com.yusys.yusp</groupId>
+                    <artifactId>yusp-app-common-client</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>cn.com.yusys.yusp.uaa</groupId>
+                    <artifactId>yusp-uaa-client</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>2.8.5</version>
+        </dependency>
+        <dependency>
+            <groupId>net.sf.json-lib</groupId>
+            <artifactId>json-lib</artifactId>
+            <version>2.2.3</version>
+            <classifier>jdk15</classifier><!-- jdk版本 -->
+        </dependency>
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>fastjson</artifactId>
+            <version>1.2.31</version>
+        </dependency>
+        <dependency>
+            <groupId>cn.com.yusys.yusp</groupId>
+            <artifactId>yusp-app-common-core</artifactId>
+            <version>2.0.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>cn.com.yusys.yusp.uaa</groupId>
+            <artifactId>yusp-uaa-core</artifactId>
+            <version>2.0.0-SNAPSHOT</version>
+        </dependency>
+        <!--引擎-->
+        <dependency>
+            <groupId>cn.com.yusys.climp</groupId>
+            <artifactId>loy_trial</artifactId>
+            <version>2.0.1</version>
+        </dependency>
+        <!-- 文件 -->
+        <dependency>
+            <groupId>cn.com.yusys.yusp</groupId>
+            <artifactId>yusp-common-file</artifactId>
+            <version>V2.2.2.20190822.RELEASE</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>cn.com.yusys.yusp</groupId>
+                    <artifactId>yusp-license</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.mortbay.jetty</groupId>
+            <artifactId>jetty-util</artifactId>
+            <version>6.1.26</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.kafka</groupId>
+            <artifactId>kafka_2.11</artifactId>
+            <version>1.0.2</version>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.12</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>cn.com.yusys.yusp</groupId>
+            <artifactId>yusp-echain-server</artifactId>
+            <version>1.2.0.20190128.RELEASE</version>
+        </dependency>
+    </dependencies>
+
+</project>

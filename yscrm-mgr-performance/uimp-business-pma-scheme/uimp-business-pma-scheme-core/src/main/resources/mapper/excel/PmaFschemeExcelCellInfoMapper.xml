@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.uimp.excel.repository.mapper.PmaFschemeExcelCellInfoMapper">
+    <resultMap id="BaseResultMap" type="cn.com.yusys.yusp.uimp.excel.domain.PmaFschemeExcelCellInfo">
+		<id column="SEQ" jdbcType="VARCHAR" property="seq" />
+		<result column="CELL_NO" jdbcType="VARCHAR" property="cellNo" />
+		<result column="TEMPLATE_ID" jdbcType="VARCHAR" property="templateId" />
+		<result column="ROW_ID" jdbcType="NUMERIC" property="rowId" />
+		<result column="COL_ID" jdbcType="NUMERIC" property="colId" />
+		<result column="CELL_TYPE" jdbcType="VARCHAR" property="cellType" />
+		<result column="DEFAULT_VALUE" jdbcType="VARCHAR" property="defaultValue" />
+		<result column="IS_EXTEND" jdbcType="VARCHAR" property="isExtend" />
+		<result column="DISPLAY_DATA" jdbcType="VARCHAR" property="displayData" />
+		<result column="DISPLAY_FORMAT" jdbcType="VARCHAR" property="displayFormat" />
+		<result column="DATA_UNIT" jdbcType="VARCHAR" property="dataUnit" />
+		<result column="DISPLAY_PRECISION" jdbcType="NUMERIC" property="displayPrecision" />
+		<result column="IS_SHOW" jdbcType="VARCHAR" property="isShow" />
+    </resultMap>
+    <sql id="Base_Column_List">
+	    SEQ,CELL_NO,TEMPLATE_ID,ROW_ID,COL_ID,CELL_TYPE,DEFAULT_VALUE,IS_EXTEND,DISPLAY_DATA,DISPLAY_FORMAT,DATA_UNIT,DISPLAY_PRECISION,IS_SHOW
+    </sql>
+    
+    <delete id="deleteByTemplateId" parameterType="java.lang.String">
+    	delete from PMA_F_SCHEME_EXCELCELL_INF where TEMPLATE_ID = #{templateId, jdbcType=VARCHAR}
+    </delete>
+    
+    <insert id="batchInsert" parameterType="cn.com.yusys.yusp.uimp.excel.domain.PmaFschemeExcelCellInfo">
+    	insert all 
+    	<foreach collection="dataList" item="item" separator=" ">
+    		into PMA_F_SCHEME_EXCELCELL_INF
+    		(
+	    	    SEQ,
+	    	    CELL_NO,
+	    	    TEMPLATE_ID,
+	    	    ROW_ID,
+	    	    COL_ID,
+	    	    CELL_TYPE,
+	    	    DEFAULT_VALUE,
+	    	    IS_EXTEND,
+	    	    DISPLAY_DATA,
+	    	    DISPLAY_FORMAT,
+	    	    DATA_UNIT,
+	    	    DISPLAY_PRECISION,
+	    	    IS_SHOW
+			)
+			values 
+			(
+				#{item.seq, jdbcType=VARCHAR},
+				#{item.cellNo, jdbcType=VARCHAR},
+				#{item.templateId, jdbcType=VARCHAR},
+				#{item.rowId, jdbcType=NUMERIC},
+				#{item.colId, jdbcType=NUMERIC},
+				#{item.cellType, jdbcType=VARCHAR},
+				#{item.defaultValue, jdbcType=VARCHAR},
+				#{item.isExtend, jdbcType=VARCHAR},
+				#{item.displayData, jdbcType=VARCHAR},
+				#{item.displayFormat, jdbcType=VARCHAR},
+				#{item.dataUnit, jdbcType=VARCHAR},
+				#{item.displayPrecision, jdbcType=NUMERIC},
+				#{item.isShow, jdbcType=VARCHAR}
+			)
+    	</foreach>
+    	select 1 from dual
+    </insert>
+    
+    <select id="getCellInfoByTemplateIdAndCellType" parameterType="java.lang.String" resultType="cn.com.yusys.yusp.uimp.excel.domain.PmaFschemeExcelCellInfo">
+    	select * from PMA_F_SCHEME_EXCELCELL_INF where TEMPLATE_ID = #{templateId, jdbcType=VARCHAR} and CELL_TYPE = #{cellType, jdbcType=VARCHAR}
+    </select>
+    
+    <delete id="deleteBackupTableDataByTemplateIdAndEtlDate" parameterType="java.lang.String">
+    	delete from PMA_F_SCHEME_EXCELCELL_BAK where TEMPLATE_ID = #{templateId, jdbcType=VARCHAR} and ETL_DATE = #{etlDate, jdbcType=VARCHAR}
+    </delete>
+    
+    <insert id="batchInsertBackupTableCommonCellData" parameterType="cn.com.yusys.yusp.uimp.excel.domain.PmaFschemeExcelCellInfo">
+    	insert all 
+    	<foreach collection="dataList" item="item" separator=" ">
+    		into PMA_F_SCHEME_EXCELCELL_BAK
+    		(
+	    	    SEQ,
+	    	    CELL_NO,
+	    	    TEMPLATE_ID,
+	    	    ROW_ID,
+	    	    COL_ID,
+	    	    CELL_TYPE,
+	    	    DEFAULT_VALUE,
+	    	    IS_EXTEND,
+	    	    DISPLAY_DATA,
+	    	    DISPLAY_FORMAT,
+	    	    DATA_UNIT,
+	    	    DISPLAY_PRECISION,
+	    	    IS_SHOW,
+	    	    ETL_DATE
+			)
+			values 
+			(
+				#{item.seq, jdbcType=VARCHAR},
+				#{item.cellNo, jdbcType=VARCHAR},
+				#{item.templateId, jdbcType=VARCHAR},
+				#{item.rowId, jdbcType=NUMERIC},
+				#{item.colId, jdbcType=NUMERIC},
+				#{item.cellType, jdbcType=VARCHAR},
+				#{item.defaultValue, jdbcType=VARCHAR},
+				#{item.isExtend, jdbcType=VARCHAR},
+				#{item.displayData, jdbcType=VARCHAR},
+				#{item.displayFormat, jdbcType=VARCHAR},
+				#{item.dataUnit, jdbcType=VARCHAR},
+				#{item.displayPrecision, jdbcType=NUMERIC},
+				#{item.isShow, jdbcType=VARCHAR},
+				#{etlDate, jdbcType=VARCHAR}
+			)
+    	</foreach>
+    	select 1 from dual
+    </insert>
+    
+    <insert id="batchInsertBackupTableOtherCellData" parameterType="java.util.Map">
+    	insert all 
+    	<foreach collection="dataList" item="item" separator=" ">
+    		into PMA_F_SCHEME_EXCELCELL_BAK
+    		(
+	    	    SEQ,
+	    	    CELL_NO,
+	    	    TEMPLATE_ID,
+	    	    ROW_ID,
+	    	    COL_ID,
+	    	    CELL_TYPE,
+	    	    DEFAULT_VALUE,
+	    	    IS_EXTEND,
+	    	    DISPLAY_DATA,
+	    	    DISPLAY_FORMAT,
+	    	    DATA_UNIT,
+	    	    DISPLAY_PRECISION,
+	    	    IS_SHOW,
+	    	    ETL_DATE
+			)
+			values 
+			(
+				#{item.seq, jdbcType=VARCHAR},
+				#{item.cellNo, jdbcType=VARCHAR},
+				#{item.templateId, jdbcType=VARCHAR},
+				#{item.rowId, jdbcType=NUMERIC},
+				#{item.colId, jdbcType=NUMERIC},
+				#{item.cellType, jdbcType=VARCHAR},
+				#{item.defaultValue, jdbcType=VARCHAR},
+				#{item.isExtend, jdbcType=VARCHAR},
+				#{item.displayData, jdbcType=VARCHAR},
+				#{item.displayFormat, jdbcType=VARCHAR},
+				#{item.dataUnit, jdbcType=VARCHAR},
+				#{item.displayPrecision, jdbcType=NUMERIC},
+				#{item.isShow, jdbcType=VARCHAR},
+				#{etlDate, jdbcType=VARCHAR}
+			)
+    	</foreach>
+    	select 1 from dual
+    </insert>
+    
+	<select id="getCellInfoFromBackupTableByTemplateIdAndEtlDateAndCellType" parameterType="java.lang.String" resultType="cn.com.yusys.yusp.uimp.excel.domain.PmaFschemeExcelCellInfo">
+    	select * from PMA_F_SCHEME_EXCELCELL_BAK where TEMPLATE_ID = #{templateId, jdbcType=VARCHAR} and ETL_DATE = #{etlDate, jdbcType=VARCHAR}
+    		and CELL_TYPE = #{cellType, jdbcType=VARCHAR}
+    </select>
+    
+    <select id="getMySchemeCellInfoFromBackupTable" parameterType="java.lang.String" resultType="cn.com.yusys.yusp.uimp.excel.domain.PmaFschemeExcelCellInfo">
+    	select * from PMA_F_SCHEME_EXCELCELL_BAK where TEMPLATE_ID = #{templateId, jdbcType=VARCHAR} and ETL_DATE = #{etlDate, jdbcType=VARCHAR}
+    		and CELL_TYPE = #{cellType, jdbcType=VARCHAR}
+			<if test="hideRows != null">
+				and ROW_ID not in 
+				<foreach collection="hideRows" item="item" open="(" separator="," close=")">
+					#{item, jdbcType=NUMERIC} - 1
+				</foreach>
+			</if>
+			<if test="hideCols != null">
+				and COL_ID not in
+				<foreach collection="hideCols" item="item" open="(" separator="," close=")">
+					#{item, jdbcType=NUMERIC}
+				</foreach>
+			</if>
+    </select>
+    
+    <insert id="copySchemeInf" parameterType="java.lang.String">
+    	insert into PMA_F_SCHEME_EXCELCELL_INF(SEQ, CELL_NO, TEMPLATE_ID, ROW_ID, COL_ID, CELL_TYPE,
+			DEFAULT_VALUE, IS_EXTEND, DISPLAY_DATA, DISPLAY_FORMAT, DATA_UNIT, DISPLAY_PRECISION, IS_SHOW)
+    	select SEQ, CELL_NO, #{newTemplateId}, ROW_ID, COL_ID, CELL_TYPE,
+    		DEFAULT_VALUE, IS_EXTEND, DISPLAY_DATA, DISPLAY_FORMAT, DATA_UNIT, DISPLAY_PRECISION, IS_SHOW
+    	from PMA_F_SCHEME_EXCELCELL_INF where TEMPLATE_ID = #{templateId}
+    </insert>
+</mapper>

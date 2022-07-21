@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.mktactivity.repository.mapper.OcrmFMkActiProductMapper">
+	<!-- 自增序列 -->
+	<select id="getSeq" resultType="BigDecimal">
+		SELECT mkt_seq.nextval FROM dual
+	</select>
+	<!-- 删除上次关联的产品 -->
+	<delete id="lastProdDel" parameterType="BigDecimal">
+		DELETE FROM OCRM_F_MK_ACTI_PRODUCT WHERE ACTI_ID = #{actiId,jdbcType=DECIMAL}
+	</delete>
+		<!-- 查询活动的关联产品信息-->
+	<select id="getProdInfoByAct" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+		SELECT T.PRODUCT_ID ,T.PRODUCT_NAME FROM OCRM_F_MK_ACTI_PRODUCT T 
+        where 1=1 AND T.ACTI_ID= #{actiId,jdbcType=DECIMAL} 
+	</select>
+</mapper>

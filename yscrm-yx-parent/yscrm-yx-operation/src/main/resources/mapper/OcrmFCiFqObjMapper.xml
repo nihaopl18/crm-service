@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscimc.operation.repository.mapper.OcrmFCiFqObjMapper">
+    <select id="queryLeftTab" parameterType="string" resultType="cn.com.yusys.yscimc.operation.domain.OcrmFCiFqObj">
+        ${value}
+    </select>
+
+    <select id="getObj" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+            resultType="cn.com.yusys.yscimc.operation.domain.OcrmFCiFqObj">
+        select *
+        from CIMP_F_CI_FQ_OBJ
+    </select>
+
+    <select id="queryCols" parameterType="string" resultType="cn.com.yusys.yscimc.operation.domain.OcrmFCiFqDbcol">
+        ${value}
+    </select>
+    <delete id="deleteColsByObjId" parameterType="string">
+        delete
+        from CIMP_F_CI_FQ_DBCOL
+        where obj_id = #{objId, jdbcType=BIGINT}
+    </delete>
+    <select id="getSeq" resultType="String">
+        select ysc_sequence.nextval
+        from dual
+    </select>
+</mapper>

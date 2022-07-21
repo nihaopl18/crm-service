@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.cust.person.repository.mapper.AcrmFagChannelAnalysisMapper">
+    <sql id="Base_Column_List">
+	    CORP_ORG_CODE,DATA_DT,CUST_ID,CHANNEL_TYPE,LM_TRANS_NUM,LM_TRANS_BAL,LAST_6M_TRANS_NUM,LAST_6M_TRANS_BAL,LAST_12M_TRANS_NUM,LAST_12M_TRANS_BAL,TRANS_NUM_SUM,TRANS_BAL_SUM
+    </sql>
+    
+    <select id="queryChannelByCustId" parameterType="java.util.Map"  resultType="java.util.HashMap">
+		  select   t.CORP_ORG_CODE,
+		  		   t.DATA_DATE as DATA_DT,
+			       t.CUST_ID,
+			       t.CHANNEL_TYPE,
+			       t.LM_TRANS_NUM,
+			       t.LM_TRANS_BAL,
+			       t.LAST_SIX_TRANS_NUM,
+			       t.LAST_SIX_TRANS_BAL,
+			       t.LAST_TWELVE_TRANS_NUM,
+			       t.LAST_TWELVE_TRANS_BAL,
+			       t.TRANS_NUM_SUM,
+			       t.TRANS_BAL_SUM
+		  from ACRM_F_AG_CHANNEL_ANALYSIS t
+		  where 1=1
+
+		  <if  test="custId != null and custId != ''">
+	       		and t.CUST_ID =#{custId,jdbcType=VARCHAR} 
+		  </if>
+	</select>
+</mapper>

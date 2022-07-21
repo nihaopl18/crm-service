@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper
+	namespace="cn.com.yusys.yusp.admin.repository.mapper.AdminSmBusiFuncMapper">
+	<!--查询业务功能 -->
+	<select id="getFuncInfo" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+		resultType="java.util.HashMap" databaseId="oracle">
+		select
+		f.func_id,f.mod_id,f.func_name,f.func_desc,f.func_url,f.func_order,f.func_icon,
+		substr(f.last_chg_dt,0,10) as last_chg_dt,u.user_name as last_chg_name
+		from admin_sm_busi_func f left join admin_sm_user u
+		on u.user_id = f.last_chg_usr
+		<where>
+            <if test="condition.modId != null and condition.modId !=''">
+                and mod_Id = #{condition.modId,jdbcType=VARCHAR}
+            </if>
+            <if test="condition.funcName != null and condition.funcName !=''">
+                and f.func_name like #{condition.funcName,jdbcType=VARCHAR}
+            </if>
+            <if test="condition.funcUrl != null and condition.funcUrl !=''">
+                and f.func_url like #{condition.funcUrl,jdbcType=VARCHAR}
+            </if>
+        </where>
+		order by f.func_order asc
+	</select>
+
+</mapper>

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.custpub.repository.mapper.AcrmFciCreditInfoMapper">
+    <select id="queryCreditList" parameterType="java.util.Map"  resultType="java.util.HashMap">
+	  select      t.DATA_DT             ,         
+				  t.LAST_CHG_SYS          ,         
+				  t.LAST_CHG_USR          ,         
+				  t.LAST_CHG_DT           ,         
+				  t.CORP_ORG_CODE         ,         
+				  t.CUST_ID               ,         
+				  t.CREDIT_LEV            ,         
+				  t.CREDIT_EVAL_DATE      ,         
+				  t.CREDIT_DUE_DATE       ,         
+				  t.MANU_ADJ_LEV          ,         
+				  t.ADJ_EFFECT_DATE       ,         
+				  t.ADJ_BRCH_NO           ,         
+				  t.ID                              
+	  from  ACRM_F_CI_CREDIT_INFO t
+	
+	 
+	  where 1=1
+	   <if  test="custId != null and custId != ''">
+		       and 		 t.CUST_ID =#{custId,jdbcType=VARCHAR} 
+	   </if>
+	
+	</select>
+    
+</mapper>

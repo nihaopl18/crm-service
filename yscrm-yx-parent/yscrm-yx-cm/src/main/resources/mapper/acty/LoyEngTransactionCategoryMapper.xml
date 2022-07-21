@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.climp.acty.repository.mapper.LoyEngTransactionCategoryMapper">
+    <resultMap id="BaseResultMap" type="cn.com.yusys.climp.acty.domain.LoyEngTransactionCategory">
+		<result column="TRANSACTION_CODE" jdbcType="VARCHAR" property="transactionCode" />
+		<result column="TRANSACTION_NAME" jdbcType="VARCHAR" property="transactionName" />
+		<result column="TABLE_E_NAME" jdbcType="VARCHAR" property="tableEname" />
+		<result column="TRANSACTION_TYPE" jdbcType="VARCHAR" property="transactionType" />
+    </resultMap>
+    <sql id="Base_Column_List">
+	    TRANSACTION_CODE,TRANSACTION_NAME,TABLE_E_NAME,TRANSACTION_TYPE
+    </sql>
+    <!-- 查询交易码 -->
+	<select id="searchTransCode" parameterType="String"
+		resultType="java.util.HashMap">
+		select t.TRANSACTION_CODE as key,t.TRANSACTION_NAME as value,t.TABLE_E_NAME from LOY_ENG_TRANSACTION_CATEGORY t
+		<if test="transType != null and transType !=''">
+			where t.TRANSACTION_TYPE = #{transType, jdbcType=VARCHAR}
+		</if>
+	</select>
+	<!-- 查询所有码值 -->
+	<select id="searchLookupCode"  resultType="java.util.HashMap">
+		SELECT t.LOOKUP_CODE as key,t.LOOKUP_NAME as value FROM ADMIN_SM_LOOKUP t
+	</select>
+</mapper>

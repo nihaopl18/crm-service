@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.climp.qypool.repository.mapper.LoyQyMerchantInfoMapper">
+    	<!-- 分也查询商户信息 -->
+	<select id="queryInfoByPage" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+		SELECT T.*,U1.USER_NAME AS CREATE_USER_NAME,U2.USER_NAME AS UPDATE_USER_NAME,O1.ORG_NAME AS CREATE_ORG_NAME,O2.ORG_NAME AS UPDATE_ORG_NAME
+			,O3.ORG_NAME AS BELONG_ORG_NAME,O4.INSTU_NAME FROM LOY_QY_MERCHANT_INFO T
+			LEFT JOIN ADMIN_SM_ORG O1 ON O1.ORG_CODE=T.CREATE_ORG
+			LEFT JOIN ADMIN_SM_ORG O2 ON O2.ORG_CODE=T.UPDATE_ORG
+			LEFT JOIN ADMIN_SM_ORG O3 ON O3.ORG_CODE=T.BELONG_ORG
+			LEFT JOIN ADMIN_SM_INSTU O4 ON O4.INSTU_CDE=T.INSTU_CDE
+			LEFT JOIN ADMIN_SM_USER U1 ON T.CREATE_USER=U1.LOGIN_CODE 
+			LEFT JOIN ADMIN_SM_USER U2 ON T.UPDATE_USER=U2.LOGIN_CODE 
+        <where>
+        	<if test="condition.merchantId != null and condition.merchantId !=''">
+        		AND T.MERCHANT_ID LIKE CONCAT(CONCAT('%',#{condition.merchantId}),'%')
+        	</if>
+        	<if test="condition.merchantName != null and condition.merchantName !=''">
+        		AND T.MERCHANT_NAME LIKE CONCAT(CONCAT('%',#{condition.merchantName}),'%')
+        	</if>
+         	<if test="condition.merIacName != null and condition.merIacName !=''">
+        		AND T.MER_IAC_NAME LIKE CONCAT(CONCAT('%',#{condition.merIacName}),'%')
+        	</if>
+        	<if test="condition.merStroeName != null and condition.merStroeName !=''">
+        		AND T.MER_STROE_NAME LIKE CONCAT(CONCAT('%',#{condition.merStroeName}),'%')
+        	</if> 
+        	<if test="condition.legalPersonNm != null and condition.legalPersonNm !=''">
+        		AND T.LEGAL_PERSON_NM LIKE CONCAT(CONCAT('%',#{condition.legalPersonNm}),'%')
+        	</if>   
+        	<if test="condition.shopownerNm != null and condition.shopownerNm !=''">
+        		AND T.SHOPOWNER_NM LIKE CONCAT(CONCAT('%',#{condition.shopownerNm}),'%')
+        	</if>   
+<!--        	<if test="condition.belongOrg != null and condition.belongOrg !=''">-->
+<!--        		AND T.BELONG_ORG LIKE CONCAT(CONCAT('%',#{condition.belongOrg}),'%')-->
+<!--        	</if>           	        	       	       	-->
+        	<if test="condition.certType != null and condition.certType !=''">
+        		AND T.CERT_TYPE = #{condition.certType, jdbcType=VARCHAR}
+        	</if>
+        	<if test="condition.certNo!= null and condition.certNo !=''">
+        		AND T.CERT_NO LIKE CONCAT(CONCAT('%',#{condition.certNo}),'%')
+        	</if>
+        	<if test="condition.dataSts != null and condition.dataSts !=''">
+        		AND T.DATA_STS = #{condition.dataSts, jdbcType=VARCHAR}
+        	</if>
+        	<if test="condition.wfApprSts != null and condition.wfApprSts !=''">
+        		AND T.WF_APPR_STS = #{condition.wfApprSts, jdbcType=VARCHAR}
+        	</if>
+<!--        	<if test="condition.instuCde != null and condition.instuCde !=''">-->
+<!--        		AND T.INSTU_CDE = #{condition.instuCde, jdbcType=VARCHAR}-->
+<!--        	</if>-->
+        	<if test="condition.contactType != null and condition.contactType !=''">
+        		AND T.MERCHANT_ID in (select MERCHANT_ID from LOY_QY_MERCHANT_CONTACT where CONTACT_TYPE= #{condition.contactType, jdbcType=VARCHAR})
+        	</if>
+        </where>
+        ORDER BY T.CREATE_DATE DESC
+    </select>
+       	<!-- 商户组件分也查询商户信息 -->
+	<select id="getInfoByPage" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+		SELECT T.*,U1.USER_NAME AS CREATE_USER_NAME,U2.USER_NAME AS UPDATE_USER_NAME,O1.ORG_NAME AS CREATE_ORG_NAME,O2.ORG_NAME AS UPDATE_ORG_NAME
+				,O3.ORG_NAME AS BELONG_ORG_NAME FROM LOY_QY_MERCHANT_INFO T
+			LEFT JOIN ADMIN_SM_ORG O1 ON O1.ORG_CODE=T.CREATE_ORG
+			LEFT JOIN ADMIN_SM_ORG O2 ON O2.ORG_CODE=T.UPDATE_ORG
+			LEFT JOIN ADMIN_SM_ORG O3 ON O3.ORG_CODE=T.BELONG_ORG
+			LEFT JOIN ADMIN_SM_USER U1 ON T.CREATE_USER=U1.LOGIN_CODE 
+			LEFT JOIN ADMIN_SM_USER U2 ON T.UPDATE_USER=U2.LOGIN_CODE 
+        <where>
+        	AND T.DATA_STS = 'I' and T.WF_APPR_STS ='997'
+        	<if test="condition.merchantName != null and condition.merchantName !=''">
+        		AND T.MERCHANT_NAME LIKE CONCAT(CONCAT('%',#{condition.merchantName}),'%')
+        	</if>
+        	<if test="condition.certType != null and condition.certType !=''">
+        		AND T.CERT_TYPE = #{condition.certType, jdbcType=VARCHAR}
+        	</if>
+        	<if test="condition.certNo!= null and condition.certNo !=''">
+        		AND T.CERT_NO LIKE CONCAT(CONCAT('%',#{condition.certNo}),'%')
+        	</if>
+        </where>
+        ORDER BY T.CREATE_DATE DESC
+    </select>
+     <!-- 查询商户联系信息-->
+	<select id="getContactByMerId" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+		SELECT T.* ,U1.USER_NAME AS CREATE_USER_NAME,U2.USER_NAME AS UPDATE_USER_NAME
+		     FROM LOY_QY_MERCHANT_CONTACT T
+			 LEFT JOIN LOY_QY_MERCHANT_INFO T1 ON T.MERCHANT_ID = T1.MERCHANT_ID
+			LEFT JOIN ADMIN_SM_USER U1 ON T.CREATE_USER=U1.LOGIN_CODE 
+			LEFT JOIN ADMIN_SM_USER U2 ON T.UPDATE_USER=U2.LOGIN_CODE 
+        <where>
+        	<if test="condition.merchantId != null and condition.merchantId !=''">
+        		AND T1.MERCHANT_ID = #{condition.merchantId, jdbcType=VARCHAR}
+        	</if>
+        </where>
+        ORDER BY T.IF_FIRST DESC,T.CREATE_DATE DESC
+    </select>
+         <!-- 查询商户地址信息-->
+	<select id="getAddressByMerId" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+		SELECT T.* ,U1.USER_NAME AS CREATE_USER_NAME,U2.USER_NAME AS UPDATE_USER_NAME 
+			FROM LOY_QY_MERCHANT_ADDRESS T
+			 LEFT JOIN LOY_QY_MERCHANT_INFO T1 ON T.MERCHANT_ID = T1.MERCHANT_ID
+			LEFT JOIN ADMIN_SM_USER U1 ON T.CREATE_USER=U1.LOGIN_CODE 
+			LEFT JOIN ADMIN_SM_USER U2 ON T.UPDATE_USER=U2.LOGIN_CODE 
+        <where>
+        	<if test="condition.merchantId != null and condition.merchantId !=''">
+        		AND T1.MERCHANT_ID = #{condition.merchantId, jdbcType=VARCHAR}
+        	</if>
+        </where>
+        ORDER BY T.IF_FIRST DESC, T.CREATE_DATE DESC
+    </select>
+    <!-- 根据批次号更新商户状态 -->
+    <update id="updateStsByBatch" parameterType="cn.com.yusys.climp.qypool.domain.LoyQyMerchantInfo">
+    	UPDATE LOY_QY_MERCHANT_INFO SET DATA_STS=#{dataSts, jdbcType=VARCHAR},WF_APPR_STS=#{wfApprSts, jdbcType=VARCHAR},
+    	 UPDATE_USER= #{updateUser} ,UPDATE_DATE= #{updateDate},UPDATE_ORG=#{updateOrg} where BATCH_NO=#{batchNo, jdbcType=VARCHAR}
+    </update>
+    <!-- 修改联系信息中事首选项的数据变成非首选项 -->
+    <update id="updateContactIfFrist" parameterType="cn.com.yusys.climp.qypool.domain.LoyQyMerchantContact">
+    	UPDATE LOY_QY_MERCHANT_CONTACT SET IF_FIRST='0',UPDATE_USER= #{updateUser} ,UPDATE_DATE= #{updateDate}
+    	where IF_FIRST='1'
+    </update>
+    <!-- 把地址中的首选项数据改为不是首选项 -->
+    <update id="updatAddressIfFirst" parameterType="cn.com.yusys.climp.qypool.domain.LoyQyMerchantAddress">
+    	UPDATE LOY_QY_MERCHANT_ADDRESS SET IF_FIRST='0',UPDATE_USER= #{updateUser} ,UPDATE_DATE= #{updateDate}
+    	where IF_FIRST='1'
+    </update>
+       <!-- 根据主键ID查询商户信息 -->
+	<select id="getInfoById" parameterType="java.lang.String" resultType="java.util.HashMap">
+		SELECT T.*,U1.USER_NAME AS CREATE_USER_NAME,U2.USER_NAME AS UPDATE_USER_NAME,O1.ORG_NAME AS CREATE_ORG_NAME,O2.ORG_NAME AS UPDATE_ORG_NAME
+			,O3.ORG_NAME AS BELONG_ORG FROM LOY_QY_MERCHANT_INFO T
+			LEFT JOIN ADMIN_SM_ORG O1 ON O1.ORG_CODE=T.CREATE_ORG
+			LEFT JOIN ADMIN_SM_ORG O2 ON O2.ORG_CODE=T.UPDATE_ORG
+			LEFT JOIN ADMIN_SM_ORG O3 ON O3.ORG_CODE=T.BELONG_ORG
+			LEFT JOIN ADMIN_SM_USER U1 ON T.CREATE_USER=U1.LOGIN_CODE 
+			LEFT JOIN ADMIN_SM_USER U2 ON T.UPDATE_USER=U2.LOGIN_CODE 
+        <where>
+        	<if test="merchantId != null and merchantId !=''">
+        		AND T.MERCHANT_ID = #{merchantId, jdbcType=VARCHAR}
+        	</if>
+        </where>
+        
+    </select>
+           <!-- 根据主键IDs查询商户信息 -->
+	<select id="getInfoByIds" parameterType="java.util.ArrayList" resultType="java.util.HashMap">
+		SELECT T.*,U1.USER_NAME AS CREATE_USER_NAME,U2.USER_NAME AS UPDATE_USER_NAME,O1.ORG_NAME AS CREATE_ORG_NAME,O2.ORG_NAME AS UPDATE_ORG_NAME
+			,O3.ORG_NAME AS BELONG_ORG FROM LOY_QY_MERCHANT_INFO T
+			LEFT JOIN ADMIN_SM_ORG O1 ON O1.ORG_CODE=T.CREATE_ORG
+			LEFT JOIN ADMIN_SM_ORG O2 ON O2.ORG_CODE=T.UPDATE_ORG
+			LEFT JOIN ADMIN_SM_ORG O3 ON O3.ORG_CODE=T.BELONG_ORG
+			LEFT JOIN ADMIN_SM_USER U1 ON T.CREATE_USER=U1.LOGIN_CODE 
+			LEFT JOIN ADMIN_SM_USER U2 ON T.UPDATE_USER=U2.LOGIN_CODE 
+        <where>
+        	<if test="array != null and array !=''">
+        		AND T.MERCHANT_ID in
+        		<foreach collection="array" index="index" item="item" open="(" separator="," close=")">
+        		 #{item}
+    			</foreach>
+        	</if>
+        </where>
+    </select>
+    <!-- 汇总导入的条数 -->
+    <select id="getNum" resultType="java.util.Map" parameterType="java.lang.String" >
+		  select count(distinct t.merchant_name) as num 
+		    from LOY_QY_MERCHANT_INFO_TEMP t
+		    where CONCAT(CONCAT(t.cert_type,t.cert_no),t.merchant_name)  not in
+             (select CONCAT(CONCAT(s.cert_type,s.cert_no),s.merchant_name)
+                from LOY_QY_MERCHANT_INFO s )
+                and t.BATCH_NO=#{batchNo, jdbcType=VARCHAR}
+    </select>
+    <!-- 把临时表的数据插入到正式表中 -->
+    <insert  id="insertList" parameterType="java.lang.String" >
+    	insert into LOY_QY_MERCHANT_INFO
+		  select distinct * from LOY_QY_MERCHANT_INFO_TEMP t
+		   where CONCAT(CONCAT(t.cert_type,t.cert_no),t.merchant_name)  not in
+             (select CONCAT(CONCAT(s.cert_type,s.cert_no),s.merchant_name)
+                from LOY_QY_MERCHANT_INFO s )
+                and t.BATCH_NO=#{batchNo, jdbcType=VARCHAR}
+    </insert>
+    <!-- 删除临时表中对应批次的数据-->
+    <delete id="deleteTempInfo" parameterType="java.lang.String" >
+    	delete from LOY_QY_MERCHANT_INFO_TEMP where BATCH_NO=#{batchNo, jdbcType=VARCHAR}
+    </delete>
+       <!-- 删除商户联系的数据-->
+    <delete id="deleteContactInfo" parameterType="java.lang.String" >
+    	delete from LOY_QY_MERCHANT_CONTACT where MERCHANT_ID = #{merchantId, jdbcType=VARCHAR}
+    </delete>
+     <!-- 删除商户地址的数据-->
+    <delete id="deleteAddressInfo" parameterType="java.lang.String" >
+    	delete from LOY_QY_MERCHANT_ADDRESS where MERCHANT_ID = #{merchantId, jdbcType=VARCHAR}
+    </delete>
+</mapper>

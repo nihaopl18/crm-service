@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.uimp.business.pma.baseIndexUpdate.repository.mapper.PmaFBaseIndexResMapper">
+    <resultMap id="BaseResultMap" type="cn.com.yusys.yusp.uimp.business.pma.baseIndexUpdate.domain.PmaFBaseIndexRes">
+		<id column="ID" jdbcType="VARCHAR" property="id" />
+		<result column="INDEX_ID" jdbcType="VARCHAR" property="indexId" />
+		<result column="EVL_OBJ_ID" jdbcType="VARCHAR" property="evlObjId" />
+		<result column="BAL_TYPE" jdbcType="VARCHAR" property="balType" />
+		<result column="ETL_DATE" jdbcType="VARCHAR" property="etlDate" />
+		<result column="INDEX_VALUE" jdbcType="NUMERIC" property="indexValue" />
+		<result column="OLD_INDEX_VALUE" jdbcType="NUMERIC" property="indexValueF" />
+		<result column="EVL_OBJ_TYPE" jdbcType="VARCHAR" property="evlObjType" />
+		<result column="APPLY_TYPE" jdbcType="VARCHAR" property="applyType" />
+		<result column="DEL_FLG" jdbcType="VARCHAR" property="delFlg" />
+		<result column="MODIFY_USERNAME" jdbcType="VARCHAR" property="modifyUsername" />
+		<result column="MODIFY_DATE" jdbcType="VARCHAR" property="modifyDate" />
+		<result column="MODIFY_DESC" jdbcType="VARCHAR" property="modifyDesc" />
+		<result column="MODIFY_FLAG" jdbcType="VARCHAR" property="modifyFlag" />
+
+    </resultMap>
+    <sql id="Base_Column_List">
+	    INDEX_ID,EVL_OBJ_ID,BAL_TYPE,ETL_DATE,INDEX_VALUE,OLD_INDEX_VALUE,EVL_OBJ_TYPE,APPLY_TYPE,DEL_FLG,MODIFY_USERNAME,MODIFY_DATE,MODIFY_FLAG,ID
+    </sql>
+         <!-- 查询基础指标列表数据 -->
+	<select id="listByModel" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+ 			select A.INDEX_ID || '[' || A.EVL_OBJ_TYPE || '.' ||
+               A.BAL_TYPE || '.' || A.APPLY_TYPE||']' AS INDEX_IDS,A.ID,A.ETL_DATE,A.INDEX_ID,E.INDEX_NAME,A.EVL_OBJ_ID,A.BAL_TYPE,case when A.OLD_INDEX_VALUE  is null then A.INDEX_VALUE else A.OLD_INDEX_VALUE end  AS OLD_INDEX_VALUE, 
+ 			A.INDEX_VALUE  AS INDEX_VALUE,A.EVL_OBJ_TYPE,f.MODIFY_USERNAME,f.MODIFY_DATE
+ 			,A.APPLY_TYPE,D.SCHEME_NAME,CASE WHEN U2.USER_NAME IS NOT NULL  THEN U2.USER_NAME ELSE U3.UNITNAME  end as EVL_OBJ_NAME
+		     from  PMA_F_BASE_INDEX_RES A  
+		      inner join   PMA_F_SCHEME_INDEX_SPLIT B on A.INDEX_ID=B.INDEX_ID 
+		       AND  A.BAL_TYPE=B.BAL_TYPE_ID  AND A.EVL_OBJ_TYPE=B.EVL_OBJ_TYPE   AND  A.APPLY_TYPE =B.APPLY_TYPE_ID 
+		     <if test="condition.schemeId != null and condition.schemeId  != ''">
+	      		and B.SCHEME_ID = #{condition.schemeId}
+		    </if> 
+		     inner join PMA_F_SCHEME_EVLOBJ_REL C  ON C.EVL_OBJ_ID=A.EVL_OBJ_ID 
+		    <if test="condition.schemeId != null and condition.schemeId  != ''">
+	      		and C.SCHEME_ID = #{condition.schemeId}
+		    </if>
+		     left join PMA_F_SCHEME D ON D.SCHEME_ID=B.SCHEME_ID 
+		     left join PMA_F_BASE_INDEX_INFO E on E.INDEX_ID=A.INDEX_ID 
+		     left join PMA_F_SCHEME_INDEX_ADJUST F on  A.INDEX_ID = f.INDEX_ID AND A.BAL_TYPE = f.BAL_TYPE 
+		     AND A.EVL_OBJ_TYPE = f.EVL_OBJ_TYPE  AND A.APPLY_TYPE = f.APPLY_TYPE 
+		     AND A.EVL_OBJ_ID=F.EVL_OBJ_ID 
+		     <if test="condition.etlDate != null and condition.etlDate  != ''">
+	      		AND F.ETL_DATE = #{condition.etlDate}
+		    </if>
+             LEFT JOIN admin_sm_user U2 ON A.EVL_OBJ_ID = U2.LOGIN_CODE  and A.EVL_OBJ_TYPE='01'
+         
+        
+            LEFT JOIN sys_units U3 ON A.EVL_OBJ_ID = U3.UNITID  and A.EVL_OBJ_TYPE='02'
+		<where>
+			<!-- 数据日期 -->
+			<if test="condition.etlDate != null and condition.etlDate  != ''">
+	      		AND A.ETL_DATE = #{condition.etlDate}
+		    </if>
+		    <!-- 考核方案编号 -->
+			<if test="condition.schemeId != null and condition.schemeId  != ''">
+	      		AND B.SCHEME_ID = #{condition.schemeId}
+		    </if>
+			<!-- 指标编号 -->
+        <if test="condition.indexId != null and condition.indexId != ''">
+             AND A.INDEX_ID || '[' || A.EVL_OBJ_TYPE || '.' ||A.BAL_TYPE || '.' ||A.APPLY_TYPE||']' in
+               <foreach collection="condition.indexId"  item="item" open="(" separator="," close=")">
+                    #{item}
+               </foreach>
+        </if>
+		    <!-- 考核方案编号 -->
+        <if test="condition.evlObjId != null and condition.evlObjId != ''">
+             AND A.EVL_OBJ_ID in
+               <foreach collection="condition.evlObjId"  item="item" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+        </if>
+		    
+	    </where>
+	</select>
+	
+	<!-- 查询基础指标原始值 -->
+	<select id="queryIndexValueF" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+ 			select OLD_INDEX_VALUE,INDEX_VALUE from  PMA_F_BASE_INDEX_RES  
+		<where>
+			<!-- id -->
+			<if test="condition.indexId != null and condition.indexId  != ''">
+	      		AND INDEX_ID = #{condition.indexId}
+		    </if>
+		    			<if test="condition.applyType != null and condition.applyType  != ''">
+	      		AND APPLY_TYPE = #{condition.applyType}
+		    </if>
+		    			<if test="condition.balType != null and condition.balType  != ''">
+	      		AND BAL_TYPE = #{condition.balType}
+		    </if>
+		    			<if test="condition.evlObjId != null and condition.evlObjId  != ''">
+	      		AND EVL_OBJ_ID = #{condition.evlObjId}
+		    </if>
+		    			<if test="condition.evlObjType != null and condition.evlObjType  != ''">
+	      		AND EVL_OBJ_TYPE = #{condition.evlObjType}
+		    </if>		
+		    			<if test="condition.etlDate != null and condition.etlDate  != ''">
+	      		AND ETL_DATE = #{condition.etlDate}
+		    </if>
+		    
+	    </where>
+	</select>
+
+</mapper>

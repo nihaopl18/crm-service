@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.cm.cust.repository.mapper.CimpFFqSsolutionMapper">
+	<select id="getSsresult" parameterType="string"  resultType="java.util.HashMap">
+		select * from cimp_f_fq_ssolution where id=#{id, jdbcType=VARCHAR}
+	</select>
+	<select id="getList"  resultType="java.util.HashMap">
+		select * from cimp_f_fq_ssolution 
+	</select>
+	<select id="checkSsolution" parameterType="string"  resultType="cn.com.yusys.yusp.cm.cust.domain.CimpFFqSsolution">
+		select * from cimp_f_fq_ssolution where ss_name=#{ssName, jdbcType=VARCHAR}
+	</select>
+	<select id="getListById" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"  resultType="java.util.HashMap">
+		select s.* from cimp_f_fq_ssolution s
+		<where>
+		<if test="condition.id != null and condition.id !=''">
+				  and s.ID = #{condition.id, jdbcType=VARCHAR}
+		</if>
+		</where>
+	</select>
+</mapper>

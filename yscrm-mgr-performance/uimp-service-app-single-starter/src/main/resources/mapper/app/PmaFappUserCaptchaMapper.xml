@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.uimp.base.app.uaa.repository.mapper.PmaFappUserCaptchaMapper">
+    <resultMap id="BaseResultMap" type="cn.com.yusys.yusp.uimp.base.app.uaa.domain.PmaFappUserCaptcha">
+		<id column="ID" jdbcType="VARCHAR" property="id" />
+		<result column="USER_ID" jdbcType="VARCHAR" property="userId" />
+		<result column="CAPTCHA" jdbcType="VARCHAR" property="captcha" />
+		<result column="SEND_TIME" jdbcType="DATE" property="sendTime" />
+    </resultMap>
+    <sql id="Base_Column_List">
+	    ID,USER_ID,CAPTCHA,SEND_TIME
+    </sql>
+    
+    <!-- 根据用户编号，验证短信验证码 -->
+    <select id="validateCaptcha" parameterType="java.lang.String" resultType="int">
+    	select count(*) from PMA_F_APP_USER_CAPTCHA
+    	<where>
+    	  (sysdate - SEND_TIME) * 24 * 60 * 60 &lt;= :{expiresIn}
+    	  <if test="userId != null and userId != ''">
+    	    and USER_ID = #{userId,jdbcType=VARCHAR}
+    	  </if>
+    	  <if test="captcha != null and captcha != ''">
+    	    and CAPTCHA = #{captcha,jdbcType=VARCHAR}
+    	  </if>
+    	</where>
+    </select>
+
+    <!-- 根据 用户编号、身份信息及手机号，查询对应用户是否存在 -->
+    <select id="selectByUserInfo" parameterType="java.lang.String" resultType="java.lang.String">
+    	select DISTINCT u.USER_ID from ADMIN_SM_USER u left join ADMIN_SM_USER_CERT_INFO c on u.USER_ID = c.USER_ID
+    	<where>
+    	  <if test="userId != null and userId != ''">
+    	    and u.USER_ID = #{userId,jdbcType=VARCHAR}
+    	  </if>
+    	  <if test="userInfo != null and userInfo != ''">
+    	    and (
+    	      (c.CERT_TYPE = '1' and c.CERT_NO = #{userInfo,jdbcType=VARCHAR}) or
+    	      (c.CERT_TYPE = '2' and c.CERT_NO = #{userInfo,jdbcType=VARCHAR}) or
+    	      (u.USER_CODE = #{userInfo,jdbcType=VARCHAR})
+    	    )
+    	  </if>
+    	  <if test="mobilephone != null and mobilephone != ''">
+    	    and u.USER_MOBILEPHONE = #{mobilephone,jdbcType=VARCHAR}
+    	  </if>
+    	</where>
+    </select>
+    
+    <!-- 删除对应用户的验证码信息数据 -->
+    <delete id="deleteByUserId" parameterType="String">
+		 DELETE FROM PMA_F_APP_USER_CAPTCHA WHERE USER_ID = #{userId,jdbcType=VARCHAR}
+	</delete>
+	
+	<!-- 查询 有效期内 验证码 ，根据用户编号userId、有效期expiresIn -->
+    <select id="selectValCaptcha" parameterType="java.lang.String" resultType="java.lang.String">
+    	select CAPTCHA from PMA_F_APP_USER_CAPTCHA 
+    	  where USER_ID = #{userId,jdbcType=VARCHAR} and 
+    	    (sysdate - SEND_TIME) * 24 * 60 * 60 &lt;= :{expiresIn}
+    </select>
+    
+    <!-- 验证码验证成功后，查询用户数据返回 -->
+    <select id="validCaptchaRep" parameterType="java.lang.String" resultType="java.util.HashMap">
+    	select u.USER_ID, u.LOGIN_CODE, u.USER_NAME, u.USER_CODE
+		  from ADMIN_SM_USER u
+    	<where>
+    	  <if test="userId != null and userId != ''">
+    	    and u.USER_ID = #{userId,jdbcType=VARCHAR}
+    	  </if>
+    	</where>
+    </select>
+</mapper>

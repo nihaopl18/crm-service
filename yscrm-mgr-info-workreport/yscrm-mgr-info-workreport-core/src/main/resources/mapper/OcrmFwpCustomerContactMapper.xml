@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.info.workreport.repository.mapper.OcrmFwpCustomerContactMapper">
+    <!-- 根据 报告编号 查询 -->
+    <select id="selectByWorkReportId" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+        select
+        WORK_REPORT_ID,
+        CUSTOMER_CONTACT_ID,
+        CONTACT_TYPE,
+        CONTACT_GOAL,
+        CONTACT_DATE,
+        CONTACT_CUST_ID,
+        CONTACT_CUST_NAME,
+        CREATOR_ID,
+        CREATOR_NAME,
+        CREATOR_ORG_ID,
+        CREATOR_ORG_NAME,
+        PRODUCT,
+        CONTACT_BACK,
+        LAST_CHG_USR_ID,
+        LAST_CHG_USR_NAME,
+        LAST_CHG_USR_ORG_ID,
+        LAST_CHG_USR_ORG_NAME,
+        LAST_CHG_DATE,
+        IS_DELETE,
+        NEXT_CONTACT_DATE,
+        CREATE_DATE,
+        IS_DRAFT,
+        SOURCE_TABLE
+        from OCRM_F_WP_CUSTOMER_CONTACT
+        <where>
+            <if test="isDelete != null and isDelete != ''">
+                AND IS_DELETE = 'N'
+            </if>
+            AND WORK_REPORT_ID in
+            <foreach collection="workReportIds" item="workReportkId" index="index" open="(" close=")" separator=","> #{workReportkId}</foreach>
+        </where>
+    </select>
+
+    <select id="queryConTact" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="cn.com.yusys.yscrm.info.workreport.domain.OcrmFwpCustomerContact">
+        select WORK_REPORT_ID,CUSTOMER_CONTACT_ID,CONTACT_TYPE,CONTACT_GOAL,CONTACT_DATE,CONTACT_CUST_ID,CONTACT_CUST_NAME,CREATOR_ID,CREATOR_NAME,CREATOR_ORG_ID,
+               CREATOR_ORG_NAME,PRODUCT,CONTACT_BACK,LAST_CHG_USR_ID,LAST_CHG_USR_NAME,LAST_CHG_USR_ORG_ID,LAST_CHG_USR_ORG_NAME,LAST_CHG_DATE,IS_DELETE,NEXT_CONTACT_DATE,
+               CREATE_DATE,IS_DRAFT,SOURCE_TABLE
+        from OCRM_F_WP_CUSTOMER_CONTACT
+        where CREATOR_ID = #{condition.finisher} and TO_CHAR(CONTACT_DATE, 'yyyy-MM-dd') = #{condition.startDate,jdbcType=VARCHAR}
+          and SOURCE_TABLE != '0' and WORK_REPORT_ID is null and IS_DELETE = 'N'
+    </select>
+
+    <!-- 根据work删除 逻辑删除 -->
+    <update id="deleteByWorkReportIds" parameterType="java.util.HashMap">
+        update OCRM_F_WP_CUSTOMER_CONTACT set
+        IS_DELETE = #{ocrmFwpCustomerContact.isDelete,jdbcType=VARCHAR},
+        LAST_CHG_USR_ID = #{ocrmFwpCustomerContact.lastChgUsrId,jdbcType=VARCHAR},
+        LAST_CHG_USR_NAME = #{ocrmFwpCustomerContact.lastChgUsrName,jdbcType=VARCHAR},
+        LAST_CHG_USR_ORG_ID = #{ocrmFwpCustomerContact.lastChgUsrOrgId,jdbcType=VARCHAR},
+        LAST_CHG_USR_ORG_NAME = #{ocrmFwpCustomerContact.lastChgUsrOrgName,jdbcType=VARCHAR},
+        LAST_CHG_DATE = #{ocrmFwpCustomerContact.lastChgDate,jdbcType=VARCHAR}
+        where IS_DELETE = 'N' and SOURCE_TABLE = '0' and CUSTOMER_CONTACT_ID in
+        <foreach collection="customerContactIds" item="customerContactId" index="index" open="(" close=")" separator=",">
+            #{customerContactId}
+        </foreach>
+    </update>
+
+    <update id="deleteByWorkReportIdsAndSource" parameterType="java.util.HashMap">
+        update OCRM_F_WP_CUSTOMER_CONTACT set
+        WORK_REPORT_ID = null,
+        LAST_CHG_USR_ID = #{ocrmFwpCustomerContact.lastChgUsrId,jdbcType=VARCHAR},
+        LAST_CHG_USR_NAME = #{ocrmFwpCustomerContact.lastChgUsrName,jdbcType=VARCHAR},
+        LAST_CHG_USR_ORG_ID = #{ocrmFwpCustomerContact.lastChgUsrOrgId,jdbcType=VARCHAR},
+        LAST_CHG_USR_ORG_NAME = #{ocrmFwpCustomerContact.lastChgUsrOrgName,jdbcType=VARCHAR},
+        LAST_CHG_DATE = #{ocrmFwpCustomerContact.lastChgDate,jdbcType=VARCHAR}
+        where IS_DELETE = 'N' and SOURCE_TABLE != '0' and CUSTOMER_CONTACT_ID in
+        <foreach collection="customerContactIds" item="customerContactId" index="index" open="(" close=")" separator=",">
+            #{customerContactId}
+        </foreach>
+    </update>
+
+    <update id="deletecustomerContact" parameterType="java.util.HashMap">
+        update OCRM_F_WP_CUSTOMER_CONTACT set
+        LAST_CHG_USR_ID = #{lastChgUsrId},
+        LAST_CHG_USR_NAME = #{lastChgUsrName},
+        LAST_CHG_USR_ORG_ID = #{lastChgUsrOrgId},
+        LAST_CHG_USR_ORG_NAME = #{lastChgUsrOrgName},
+        LAST_CHG_DATE = to_date(#{lastChgDate},'yyyy-MM-dd HH24:mi:ss'),
+        IS_DELETE = 'Y'
+        where CUSTOMER_CONTACT_ID = #{customerContactId}
+    </update>
+
+    <!-- 根据主键更新  -->
+    <update id="updateCustomerContact" parameterType="cn.com.yusys.yscrm.info.workreport.domain.OcrmFwpCustomerContact">
+        update OCRM_F_WP_CUSTOMER_CONTACT set
+        WORK_REPORT_ID = #{workReportId,jdbcType=VARCHAR},
+        CONTACT_TYPE = #{contactType,jdbcType=VARCHAR},
+        CONTACT_GOAL = #{contactGoal,jdbcType=VARCHAR},
+        CONTACT_CUST_ID = #{contactCustId,jdbcType=VARCHAR},
+        CONTACT_CUST_NAME = #{contactCustName,jdbcType=VARCHAR},
+        PRODUCT = #{product,jdbcType=VARCHAR},
+        CONTACT_BACK = #{contactBack,jdbcType=VARCHAR},
+        LAST_CHG_USR_ID = #{lastChgUsrId,jdbcType=VARCHAR},
+        LAST_CHG_USR_NAME = #{lastChgUsrName,jdbcType=VARCHAR},
+        LAST_CHG_USR_ORG_ID = #{lastChgUsrOrgId,jdbcType=VARCHAR},
+        LAST_CHG_USR_ORG_NAME = #{lastChgUsrOrgName,jdbcType=VARCHAR},
+        LAST_CHG_DATE = #{lastChgDate,jdbcType=VARCHAR},
+        IS_DRAFT = #{isDraft,jdbcType=VARCHAR},
+        IS_DELETE = #{isDelete,jdbcType=VARCHAR}
+        where CUSTOMER_CONTACT_ID = #{customerContactId,jdbcType=VARCHAR}
+    </update>
+
+    <update id="updateStatus" parameterType="java.util.HashMap">
+        update OCRM_F_WP_CUSTOMER_CONTACT set
+            IS_DRAFT = #{isDraft,jdbcType=VARCHAR}
+        where IS_DELETE = 'N'
+              and WORK_REPORT_ID = #{workReportId,jdbcType=VARCHAR}
+    </update>
+</mapper>

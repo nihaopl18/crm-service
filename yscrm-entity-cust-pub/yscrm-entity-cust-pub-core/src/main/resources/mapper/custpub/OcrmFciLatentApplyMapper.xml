@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.custpub.repository.mapper.OcrmFciLatentApplyMapper">
+	<!-- 查询认领历史信息 -->
+	<select id="getListByModel" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"  resultType="java.util.HashMap">
+	SELECT A.APPLY_USERNAME,A.APPLY_INITNAME,A.APPROVEL_STATUS,TO_CHAR(A.CREATE_DATE,'yyyy-mm-dd hh24:mi:ss') AS CREATE_DATE,L.*,P.CUST_NAME,P.CUST_STATUS,P.CERT_TYPE,P.CERT_NO,P.BELONG_MGR,P.BELONG_BRCH,P.SERV_LEV,P.VALUE_LEV FROM OCRM_F_CI_LATENT_APPLY A LEFT JOIN OCRM_F_CI_LATENT_LIST L ON A.APPLY_ID = L.APPLY_ID LEFT JOIN ACRM_F_CI_CUST_ALL C ON C.CUST_ID = L.CUST_ID
+LEFT JOIN 
+   ( 
+   SELECT P.CUST_ID,P.CUST_NAME,P.CUST_STATUS,P.CERT_TYPE,P.CERT_NO,P.BELONG_MGR,P.BELONG_BRCH,P.SERV_LEV,P.VALUE_LEV FROM ACRM_F_CI_PER_ADMIT_INFO P
+   UNION
+   SELECT O.CUST_ID,O.CUST_NAME,O.CUST_STATUS,O.CERT_TYPE,O.CERT_NO,O.BELONG_MGR,O.BELONG_BRCH,O.SERV_LEV,O.VALUE_LEV FROM ACRM_F_CI_ORG_CUST_INFO O
+   ) P ON C.CUST_ID = P.CUST_ID  
+	 <!-- 
+	 SELECT C.CUST_TYPE,C.CUST_ID,C.CUST_NAME,P.CUST_STATUS,P.CERT_TYPE,P.CERT_NO,P.BELONG_MGR,P.BELONG_BRCH,P.SERV_LEV,P.VALUE_LEV FROM ACRM_F_CI_CUST_ALL C
+LEFT JOIN 
+   （  
+   SELECT P.CUST_ID,P.CUST_NAME,P.CUST_STATUS,P.CERT_TYPE,P.CERT_NO,P.BELONG_MGR,P.BELONG_BRCH,P.SERV_LEV,P.VALUE_LEV FROM ACRM_F_CI_PER_ADMIT_INFO P
+   UNION
+   SELECT O.CUST_ID,O.CUST_NAME,O.CUST_STATUS,O.CERT_TYPE,O.CERT_NO,O.BELONG_MGR,O.BELONG_BRCH,O.SERV_LEV,O.VALUE_LEV FROM ACRM_F_CI_ORG_CUST_INFO O
+    ）P ON C.CUST_ID = P.CUST_ID 
+    -->
+    <where>
+    A.APPLY_USER = #{condition.userId, jdbcType=VARCHAR} AND A.APPROVEL_STATUS = '2'
+    <if test="condition.custType != null and condition.custType !=''">
+				  and c.CUST_TYPE = #{condition.custType, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.custStatus != null and condition.custStatus !=''">
+				  and P.CUST_STATUS = #{condition.custStatus, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.custId != null and condition.custId !=''">
+				  and L.CUST_ID LIKE CONCAT(CONCAT('%', #{condition.custId, jdbcType=VARCHAR}),'%')
+		</if>
+		<if test="condition.custName != null and condition.custName !=''">
+				  and P.CUST_NAME LIKE CONCAT(CONCAT('%', #{condition.custName, jdbcType=VARCHAR}),'%')
+		</if>
+		<if test="condition.certType != null and condition.certType !=''">
+				  and P.CERT_TYPE = #{condition.certType, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.certNo != null and condition.certNo !=''">
+				  and P.CERT_NO LIKE CONCAT(CONCAT('%', #{condition.certNo, jdbcType=VARCHAR}),'%')
+		</if>
+    </where>
+	  
+	</select>
+	<!-- 查询全行非准入客户-->
+	<select id="noPotNoForList" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"  resultType="java.util.HashMap">
+	 SELECT P.CUST_ID,P.CUST_NAME,P.CUST_STATUS,P.CERT_TYPE,P.CERT_NO,P.BELONG_MGR,P.BELONG_BRCH,
+	 P.SERV_LEV,P.VALUE_LEV,S.USER_NAME AS MGR_NAME,O.ORG_NAME AS ORG_NAME  
+		<if test="condition.custType == 1">
+	 ,'1' AS CUST_TYPE FROM ACRM_F_CI_PER_ADMIT_INFO P
+		</if>	
+		<if test="condition.custType == 2">
+		,'2' AS CUST_TYPE FROM ACRM_F_CI_ORG_CUST_INFO P
+		</if>
+		LEFT JOIN ADMIN_SM_USER S ON S.USER_ID = P.BELONG_MGR
+		 LEFT JOIN ADMIN_SM_ORG O ON O.ORG_CODE = P.BELONG_BRCH
+		<where>
+		P.IS_ADMIT_ENTER = '0' AND
+     			P.BELONG_MGR LIKE 'VM%' AND (P.CUST_STATUS != 'Q2' OR P.CUST_STATUS != 'Q1')
+		<if test="condition.custId != null and condition.custId !=''">
+				  and P.CUST_ID = #{condition.custId, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.custName != null and condition.custName !=''">
+				  and P.CUST_NAME = #{condition.custName, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.certType != null and condition.certType !=''">
+				  and P.CERT_TYPE = #{condition.certType, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.certNo != null and condition.certNo !=''">
+				  and P.CERT_NO = #{condition.certNo, jdbcType=VARCHAR}
+		</if>
+		</where>
+	</select>
+	
+	<!-- 查询认领机构内准入客户-->
+	<select id="potForList" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"  resultType="java.util.HashMap">
+	 SELECT P.CUST_ID,P.CUST_NAME,P.CUST_STATUS,P.CERT_TYPE,P.CERT_NO,P.BELONG_MGR,P.BELONG_BRCH,P.SERV_LEV,
+	 P.VALUE_LEV,S.USER_NAME AS MGR_NAME,O.ORG_NAME AS ORG_NAME
+	 <if test="condition.custType == 1 and condition.stutas == 1 ">
+	 ,'1' AS CUST_TYPE FROM ACRM_F_CI_PER_ADMIT_INFO P
+				 LEFT JOIN ADMIN_SM_USER S ON S.USER_ID = P.BELONG_MGR
+		 LEFT JOIN ADMIN_SM_ORG O ON O.ORG_CODE = P.BELONG_BRCH
+    WHERE P.IS_ADMIT_ENTER = '1' AND
+		</if>
+		<if test="condition.custType == 2 and condition.stutas == 1 ">
+		,'2' AS CUST_TYPE FROM ACRM_F_CI_ORG_CUST_INFO P
+				 LEFT JOIN ADMIN_SM_USER S ON S.USER_ID = P.BELONG_MGR
+		 LEFT JOIN ADMIN_SM_ORG O ON O.ORG_CODE = P.BELONG_BRCH
+   		 WHERE P.IS_ADMIT_ENTER = '1' AND
+		</if>
+	 <if test="condition.custType == 1 and condition.stutas == 2 ">
+	 ,'1' AS CUST_TYPE FROM ACRM_F_CI_PER_ADMIT_INFO P
+				 LEFT JOIN ADMIN_SM_USER S ON S.USER_ID = P.BELONG_MGR
+		 LEFT JOIN ADMIN_SM_ORG O ON O.ORG_CODE = P.BELONG_BRCH
+    WHERE  P.IS_ADMIT_ENTER = '1' AND
+		</if>
+	<if test="condition.custType == 2 and condition.stutas == 2 ">
+		,'2' AS CUST_TYPE FROM ACRM_F_CI_ORG_CUST_INFO P
+				 LEFT JOIN ADMIN_SM_USER S ON S.USER_ID = P.BELONG_MGR
+		 LEFT JOIN ADMIN_SM_ORG O ON O.ORG_CODE = P.BELONG_BRCH
+   		 WHERE P.IS_ADMIT_ENTER = '1' AND
+		</if>
+		   P.CUST_ID NOT IN 
+    (SELECT CUST_ID FROM OCRM_F_CI_LATENT_LIST WHERE APPLY_ID IN (SELECT APPLY_ID FROM OCRM_F_CI_LATENT_APPLY WHERE APPROVEL_STATUS = '1'))
+   <!--  AND P.Belong_Brch in (select org_code from sys_org_view where sys_org_view.org_seq like '%'||(#{condition.oneOrg, jdbcType=VARCHAR})||',%') -->
+     AND P.Belong_Brch in (select org_code from sys_org_view where sys_org_view.org_seq like '%'||(#{condition.orgId, jdbcType=VARCHAR})||',%')
+    AND P.BELONG_MGR LIKE 'VM%'
+		<if test="condition.stutas == 1 ">
+				  AND P.CUST_STATUS = 'Q1'
+		</if>
+		<if test="condition.stutas == 2 ">
+				  AND (P.CUST_STATUS != 'Q2' OR P.CUST_STATUS != 'Q1')
+		</if>
+		<if test="condition.custId != null and condition.custId !=''">
+				  and P.CUST_ID LIKE CONCAT(CONCAT('%', #{condition.custId, jdbcType=VARCHAR}),'%')
+		</if>
+		<if test="condition.custName != null and condition.custName !=''">
+				  and P.CUST_NAME LIKE CONCAT(CONCAT('%', #{condition.custName, jdbcType=VARCHAR}),'%')
+		</if>
+		<if test="condition.certType != null and condition.certType !=''">
+				  and P.CERT_TYPE = #{condition.certType, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.certNo != null and condition.certNo !=''">
+				  and P.CERT_NO LIKE CONCAT(CONCAT('%', #{condition.certNo, jdbcType=VARCHAR}),'%')
+		</if>
+		<if test="condition.belongBrch != null and condition.belongBrch !=''">
+				  and P.BELONG_BRCH IN (select org_code from sys_org_view where sys_org_view.org_seq like '%'||#{condition.belongBrch, jdbcType=VARCHAR}||',%') 
+		</if>
+		<if test="condition.belongMgr != null and condition.belongMgr !=''">
+				  and P.BELONG_MGR = #{condition.belongMgr, jdbcType=VARCHAR}
+		</if>
+		order by P.BELONG_BRCH
+	</select>
+	<!-- 查询认领行内非潜在客户-->
+	<select id="noPotForList" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"  resultType="java.util.HashMap">
+	SELECT P.CUST_ID,P.CUST_NAME,P.CUST_STATUS,P.CERT_TYPE,P.CERT_NO,P.BELONG_MGR,P.BELONG_BRCH,
+	P.SERV_LEV,P.VALUE_LEV,B.ORG_TYPE,B.ORG_ID,B.ORG_NAME,B.MGR_TYPE,B.MGR_ID,B.MGR_NAME <if test="condition.custType == 1">
+				 ,'1' AS CUST_TYPE FROM ACRM_F_CI_PER_ADMIT_INFO P
+		</if>
+	<if test="condition.custType == 2">
+				 ,'2' AS CUST_TYPE FROM ACRM_F_CI_ORG_CUST_INFO P
+		</if>
+		 LEFT JOIN (SELECT B.CUST_ID,B.ORG_TYPE,B.ORG_ID,B.ORG_NAME,B.MGR_TYPE,B.MGR_ID,B.MGR_NAME FROM OCRM_F_CI_ADMIT_BELONG B) B ON B.CUST_ID = P.CUST_ID
+    LEFT JOIN ACRM_F_CM_CUST_MGR_INFO I ON B.MGR_ID = I.CUST_MANAGER_ID LEFT JOIN ADMIN_SM_ORG O ON B.ORG_ID = O.ORG_CODE
+    WHERE  P.CUST_ID NOT IN 
+    (SELECT CUST_ID FROM OCRM_F_CI_LATENT_LIST WHERE APPLY_ID IN (SELECT APPLY_ID FROM OCRM_F_CI_LATENT_APPLY WHERE APPROVEL_STATUS = '2'))
+   AND P.Belong_Brch in (select org_code from sys_org_view where sys_org_view.org_seq like '%'||(#{condition.oneOrg, jdbcType=VARCHAR})||',%')
+    AND P.BELONG_MGR LIKE 'VM%' AND (P.CUST_STATUS != 'Q2' OR P.CUST_STATUS != 'Q1')
+		<if test="condition.custId != null and condition.custId !=''">
+				  and P.CUST_ID LIKE CONCAT(CONCAT('%', #{condition.custId, jdbcType=VARCHAR}),'%')
+		</if>
+		<if test="condition.custName != null and condition.custName !=''">
+				  and P.CUST_NAME LIKE CONCAT(CONCAT('%', #{condition.custName, jdbcType=VARCHAR}),'%')
+		</if>
+		<if test="condition.certType != null and condition.certType !=''">
+				  and P.CERT_TYPE = #{condition.certType, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.certNo != null and condition.certNo !=''">
+				  and P.CERT_NO LIKE CONCAT(CONCAT('%', #{condition.certNo, jdbcType=VARCHAR}),'%')
+		</if>
+		<if test="condition.belongBrch != null and condition.belongBrch !=''">
+				  and P.BELONG_BRCH = #{condition.belongBrch, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.belongMgr != null and condition.belongMgr !=''">
+				  and P.BELONG_MGR = #{condition.belongMgr, jdbcType=VARCHAR}
+		</if>
+	</select>
+	<!-- 通过申请编号获取认领信息 -->
+	<select id="getClaimInfo" parameterType="String"  resultType="java.util.HashMap">
+	<!-- SELECT A.*,L.*,C.CUST_TYPE,P.CUST_NAME,P.CUST_STATUS,P.CERT_TYPE,P.CERT_NO,P.BELONG_MGR,P.BELONG_BRCH,P.SERV_LEV,P.VALUE_LEV FROM OCRM_F_CI_LATENT_APPLY A LEFT JOIN OCRM_F_CI_LATENT_LIST L ON A.APPLY_ID = L.APPLY_ID LEFT JOIN ACRM_F_CI_CUST_ALL C ON C.CUST_ID = L.CUST_ID
+LEFT JOIN 
+   (
+   SELECT P.CUST_ID,P.CUST_NAME,P.CUST_STATUS,P.CERT_TYPE,P.CERT_NO,P.BELONG_MGR,P.BELONG_BRCH,P.SERV_LEV,P.VALUE_LEV FROM ACRM_F_CI_PER_ADMIT_INFO P
+   UNION
+   SELECT O.CUST_ID,O.CUST_NAME,O.CUST_STATUS,O.CERT_TYPE,O.CERT_NO,O.BELONG_MGR,O.BELONG_BRCH,O.SERV_LEV,O.VALUE_LEV FROM ACRM_F_CI_ORG_CUST_INFO O
+    )P ON C.CUST_ID = P.CUST_ID  WHERE A.APPLY_ID = #{applyId, jdbcType=VARCHAR} -->
+    SELECT A.*,
+       L.*,
+       C.CUST_TYPE,
+       C.CUST_NAME,
+       C.CUST_STATUS,
+       C.CERT_TYPE,
+       C.CERT_NO,
+       C.BELONG_MGR,
+       C.BELONG_BRCH,
+       C.SERV_LEV,
+       C.VALUE_LEV
+  FROM OCRM_F_CI_LATENT_APPLY A
+  LEFT JOIN OCRM_F_CI_LATENT_LIST L
+    ON A.APPLY_ID = L.APPLY_ID
+  LEFT JOIN ACRM_F_CI_CUST_ALL C
+    ON C.CUST_ID = L.CUST_ID
+ WHERE A.APPLY_ID = #{applyId, jdbcType = VARCHAR}
+	</select>
+	<!-- 通过申请编号修改审批状态 -->
+	<update id="updClaimApproval" parameterType="java.util.HashMap">
+	UPDATE OCRM_F_CI_LATENT_APPLY SET APPROVEL_STATUS = #{status, jdbcType=VARCHAR} WHERE APPLY_ID = #{applyId, jdbcType=VARCHAR}
+	</update>
+	
+	<!-- 通过申请编号获取认领信息 -->
+	<select id="getOrgLevel" parameterType="String"  resultType="java.util.HashMap">
+	SELECT * FROM ADMIN_SM_ORG WHERE ORG_CODE = #{getOrgLevel, jdbcType=VARCHAR}
+	</select>
+	<select id="belongOrgId" parameterType="String"  resultType="java.util.HashMap">
+	select up_org_id from ADMIN_SM_ORG WHERE ORG_CODE = #{string, jdbcType=VARCHAR}
+	</select>
+	<select id="getbelongOrgId" parameterType="String"  resultType="java.util.HashMap">
+	select FORMDATA from wf_instance_whole_property WHERE INSTANCEID = #{instanceId, jdbcType=VARCHAR}
+	</select>
+</mapper>

@@ -1,0 +1,284 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.uimp.excel.repository.mapper.PmaFschemeExcelIndexInfoMapper">
+    <resultMap id="BaseResultMap" type="cn.com.yusys.yusp.uimp.excel.domain.PmaFschemeExcelIndexInfo">
+		<id column="SEQ" jdbcType="VARCHAR" property="seq" />
+		<result column="CELL_NO" jdbcType="VARCHAR" property="cellNo" />
+		<result column="TEMPLATE_ID" jdbcType="VARCHAR" property="templateId" />
+		<result column="INDEX_ID" jdbcType="VARCHAR" property="indexId" />
+		<result column="EVL_OBJ_TYPE" jdbcType="VARCHAR" property="evlObjType" />
+		<result column="BAL_TYPE" jdbcType="VARCHAR" property="balType" />
+		<result column="APPLY_TYPE" jdbcType="VARCHAR" property="applyType" />
+		<result column="INDEX_VALUE" jdbcType="NUMERIC" property="indexValue" />
+		<result column="EVL_OBJ_ID" jdbcType="VARCHAR" property="evlObjId" />
+    </resultMap>
+    <sql id="Base_Column_List">
+	    SEQ,CELL_NO,TEMPLATE_ID,INDEX_ID,EVL_OBJ_TYPE,BAL_TYPE,APPLY_TYPE,INDEX_VALUE,EVL_OBJ_ID
+    </sql>
+    
+    <delete id="deleteByTemplateId" parameterType="java.lang.String">
+    	delete from PMA_F_SCHEME_EXCELINDEX_INF where TEMPLATE_ID = #{templateId, jdbcType=VARCHAR}
+    </delete>
+    
+    <insert id="batchInsert" parameterType="cn.com.yusys.yusp.uimp.excel.domain.PmaFschemeExcelIndexInfo">
+    	insert all 
+    	<foreach collection="dataList" item="item" separator=" ">
+    		into PMA_F_SCHEME_EXCELINDEX_INF
+    		(
+	    	    SEQ,
+	    	    CELL_NO,
+	    	    TEMPLATE_ID,
+	    	    INDEX_ID,
+	    	    EVL_OBJ_TYPE,
+	    	    BAL_TYPE,
+	    	    APPLY_TYPE,
+	    	    INDEX_VALUE,
+	    	    EVL_OBJ_ID
+			)
+			values 
+			(
+				#{item.seq, jdbcType=VARCHAR},
+				#{item.cellNo, jdbcType=VARCHAR},
+				#{item.templateId, jdbcType=VARCHAR},
+				#{item.indexId, jdbcType=VARCHAR},
+				#{item.evlObjType, jdbcType=VARCHAR},
+				#{item.balType, jdbcType=VARCHAR},
+				#{item.applyType, jdbcType=VARCHAR},
+				#{item.indexValue, jdbcType=NUMERIC},
+				#{item.evlObjId, jdbcType=VARCHAR}
+			)
+    	</foreach>
+    	select 1 from dual
+    </insert>
+    
+    <select id="getCellInfoByTemplateId" parameterType="java.lang.String" resultType="java.util.Map">
+    	select DISTINCT
+    		 cell.*, idx.INDEX_ID, idxi.INDEX_NAME, idx.EVL_OBJ_TYPE, idx.BAL_TYPE, idx.APPLY_TYPE, idx.INDEX_VALUE, idx.EVL_OBJ_ID
+    	from PMA_F_SCHEME_EXCELINDEX_INF idx 
+    		inner join PMA_F_SCHEME_EXCELCELL_INF cell on idx.SEQ = cell.SEQ and idx.TEMPLATE_ID = cell.TEMPLATE_ID
+    		left join PMA_F_BASE_INDEX_INFO idxi on idx.INDEX_ID = idxi.INDEX_ID
+    	where idx.TEMPLATE_ID = #{templateId, jdbcType=VARCHAR}
+    </select>
+    
+    <select id="getPreviewInfo" parameterType="java.lang.String" resultType="java.util.Map">
+    	select DISTINCT cell.*, idx.INDEX_ID, idxi.INDEX_NAME, idx.EVL_OBJ_TYPE, idx.BAL_TYPE, 
+       		idx.APPLY_TYPE, idx.INDEX_VALUE, idx.EVL_OBJ_ID, 
+       		case when res.INDEX_VALUE is null then 0
+       		     else res.INDEX_VALUE end as RESULT_VALUE
+		from PMA_F_SCHEME_EXCELINDEX_INF idx 
+			inner join PMA_F_SCHEME_EXCELCELL_INF cell on idx.TEMPLATE_ID = #{templateId,jdbcType=VARCHAR} and idx.SEQ = cell.SEQ and idx.TEMPLATE_ID = cell.TEMPLATE_ID
+			left join PMA_F_BASE_INDEX_INFO idxi on idx.INDEX_ID = idxi.INDEX_ID
+			<choose>
+				<when test="evlObjId != null and evlObjId != ''">
+					left join PMA_F_BASE_INDEX_RES res on res.ETL_DATE = #{etlDate,jdbcType=VARCHAR} and idx.INDEX_ID = res.INDEX_ID 
+						and res.EVL_OBJ_ID = #{evlObjId,jdbcType=VARCHAR} and idx.BAL_TYPE = res.BAL_TYPE 
+						and idx.EVL_OBJ_TYPE = res.EVL_OBJ_TYPE and idx.APPLY_TYPE = res.APPLY_TYPE
+				</when>
+				<otherwise>
+					left join PMA_F_BASE_INDEX_RES res on res.ETL_DATE = #{etlDate,jdbcType=VARCHAR} and idx.INDEX_ID = res.INDEX_ID 
+						and idx.EVL_OBJ_ID = res.EVL_OBJ_ID and idx.BAL_TYPE = res.BAL_TYPE 
+						and idx.EVL_OBJ_TYPE = res.EVL_OBJ_TYPE and idx.APPLY_TYPE = res.APPLY_TYPE
+				</otherwise>
+			</choose>
+    </select>
+    
+    <delete id="deleteBackupTableDataByTemplateIdAndEtlDateAndEvlObjId" parameterType="java.lang.String">
+    	delete from PMA_F_SCHEME_EXCELINDEX_BAK where TEMPLATE_ID = #{templateId, jdbcType=VARCHAR} and ETL_DATE = #{etlDate, jdbcType=VARCHAR}
+			<if test="evlObjId != null and evlObjId != ''">
+				and EVL_OBJ_ID = #{evlObjId, jdbcType=VARCHAR}
+			</if>
+    </delete>
+    
+    <insert id="batchInsertBackupTableData" parameterType="java.util.Map">
+    	insert all 
+    	<foreach collection="dataList" item="item" separator=" ">
+    		into PMA_F_SCHEME_EXCELINDEX_BAK
+    		(
+	    	    SEQ,
+	    	    CELL_NO,
+	    	    TEMPLATE_ID,
+	    	    INDEX_ID,
+	    	    EVL_OBJ_TYPE,
+	    	    BAL_TYPE,
+	    	    APPLY_TYPE,
+	    	    INDEX_VALUE,
+	    	    EVL_OBJ_ID,
+	    	    ETL_DATE
+			)
+			values 
+			(
+				#{item.seq, jdbcType=VARCHAR},
+				#{item.cellNo, jdbcType=VARCHAR},
+				#{item.templateId, jdbcType=VARCHAR},
+				#{item.indexId, jdbcType=VARCHAR},
+				#{item.evlObjType, jdbcType=VARCHAR},
+				#{item.balType, jdbcType=VARCHAR},
+				#{item.applyType, jdbcType=VARCHAR},
+				#{item.indexValue, jdbcType=NUMERIC},
+				#{item.evlObjId, jdbcType=VARCHAR},
+				#{etlDate, jdbcType=VARCHAR}
+			)
+    	</foreach>
+    	select 1 from dual
+    </insert>
+    
+    <select id="getIndexInfoCountFromBackupTableByTemplateIdAndEtlDateAndEvlObjId" parameterType="java.lang.String" resultType="java.lang.Integer">
+    	select count(*) from PMA_F_SCHEME_EXCELINDEX_BAK where TEMPLATE_ID = #{templateId, jdbcType=VARCHAR} and ETL_DATE = #{etlDate, jdbcType=VARCHAR}
+			<if test="evlObjId != null and evlObjId != ''">
+				and EVL_OBJ_ID = #{evlObjId, jdbcType=VARCHAR}
+			</if>
+    </select>
+    
+    <select id="getCellInfoFromBackupTableByTemplateIdAndEtlDateAndEvlObjId" parameterType="java.lang.String" resultType="java.util.Map">
+    	select DISTINCT
+    		 cell.*, idx.INDEX_ID, idxi.INDEX_NAME, idx.EVL_OBJ_TYPE, idx.BAL_TYPE, idx.APPLY_TYPE, idx.INDEX_VALUE as RESULT_VALUE, idx.EVL_OBJ_ID
+    	from PMA_F_SCHEME_EXCELINDEX_BAK idx 
+    		inner join PMA_F_SCHEME_EXCELCELL_BAK cell on idx.SEQ = cell.SEQ and idx.ETL_DATE = cell.ETL_DATE and idx.TEMPLATE_ID = cell.TEMPLATE_ID
+    		left join PMA_F_BASE_INDEX_INFO idxi on idx.INDEX_ID = idxi.INDEX_ID
+    	where idx.TEMPLATE_ID = #{templateId, jdbcType=VARCHAR} and idx.ETL_DATE = #{etlDate, jdbcType=VARCHAR}
+			<if test="evlObjId != null and evlObjId != ''">
+				and idx.EVL_OBJ_ID = #{evlObjId, jdbcType=VARCHAR}
+			</if>
+    </select>
+    
+	<select id="getMySchemeCellInfoFromBackupTable" parameterType="java.lang.String" resultType="java.util.Map">
+    	select DISTINCT
+    		 cell.*, idx.INDEX_ID, idxi.INDEX_NAME, idx.EVL_OBJ_TYPE, idx.BAL_TYPE, idx.APPLY_TYPE, idx.INDEX_VALUE as RESULT_VALUE, idx.EVL_OBJ_ID
+    	from PMA_F_SCHEME_EXCELINDEX_BAK idx 
+    		inner join PMA_F_SCHEME_EXCELCELL_BAK cell on idx.SEQ = cell.SEQ and idx.ETL_DATE = cell.ETL_DATE and idx.TEMPLATE_ID = cell.TEMPLATE_ID
+    		left join PMA_F_BASE_INDEX_INFO idxi on idx.INDEX_ID = idxi.INDEX_ID
+    	where idx.TEMPLATE_ID = #{templateId, jdbcType=VARCHAR} and idx.ETL_DATE = #{etlDate, jdbcType=VARCHAR}
+			<!-- 横/纵类型方案，机构考核对象，查询本机构及下辖数据 -->
+    		<if test="(templateType == '04' or templateType == '05') and (evlObjType == '02' or evlObjType == '03')">
+    			and idx.EVL_OBJ_ID in (
+    				SELECT sub_org.ORG_ID FROM ADMIN_SM_ORG sub_org START WITH sub_org.ORG_ID = #{evlObjId, jdbcType=VARCHAR}
+			 			CONNECT BY PRIOR sub_org.ORG_ID = sub_org.UP_ORG_ID
+    			)
+    		</if>
+    		<!-- 横/纵类型方案，员工考核对象，查询本人数据 -->
+    		<if test="(templateType == '04' or templateType == '05') and evlObjType == '01'">	
+    			and idx.EVL_OBJ_ID = #{evlObjId, jdbcType=VARCHAR}
+    		</if>
+    		<!-- 单元格类型方案，机构考核对象，查询本机构数据 -->
+    		<if test="templateType == '02' and (evlObjType == '02' or evlObjType == '03')">
+    			and idx.EVL_OBJ_ID = #{evlObjId, jdbcType=VARCHAR}
+    		</if>
+    		<!-- 单元格类型方案，员工考核对象，查询本人数据 -->
+    		<if test="templateType == '02' and evlObjType == '01'">
+    			and idx.EVL_OBJ_ID = #{evlObjId, jdbcType=VARCHAR}
+    		</if>
+    		<!-- 排除隐藏的行/列数据 -->
+    		<if test="hideRows != null">
+				and cell.ROW_ID not in 
+				<foreach collection="hideRows" item="item" open="(" separator="," close=")">
+					#{item, jdbcType=NUMERIC} - 1
+				</foreach>
+			</if>
+			<if test="hideCols != null">
+				and cell.COL_ID not in
+				<foreach collection="hideCols" item="item" open="(" separator="," close=")">
+					#{item, jdbcType=NUMERIC}
+				</foreach>
+			</if>
+    </select>
+    
+    <select id="getOrgStaffSchemeCellInfoFromBackupTable" parameterType="java.lang.String" resultType="java.util.Map">
+    	select DISTINCT
+    		 cell.*, idx.INDEX_ID, idxi.INDEX_NAME, idx.EVL_OBJ_TYPE, idx.BAL_TYPE, idx.APPLY_TYPE, idx.INDEX_VALUE as RESULT_VALUE, idx.EVL_OBJ_ID
+    	from PMA_F_SCHEME_EXCELINDEX_BAK idx 
+    		inner join PMA_F_SCHEME_EXCELCELL_BAK cell on idx.SEQ = cell.SEQ and idx.ETL_DATE = cell.ETL_DATE and idx.TEMPLATE_ID = cell.TEMPLATE_ID
+    		left join PMA_F_BASE_INDEX_INFO idxi on idx.INDEX_ID = idxi.INDEX_ID
+    	where idx.TEMPLATE_ID = #{templateId, jdbcType=VARCHAR} and idx.ETL_DATE = #{etlDate, jdbcType=VARCHAR}
+    		<!-- 横/纵类型方案，员工考核对象，查询考核对象归属于本机构辖内的数据 -->
+    		<if test="(templateType == '04' or templateType == '05') and evlObjType == '01'">	
+    			and idx.EVL_OBJ_ID in (
+	   				select sub_u.LOGIN_CODE from ADMIN_SM_USER sub_u where sub_u.ORG_ID in (
+	   					SELECT sub_org.ORG_ID FROM ADMIN_SM_ORG sub_org START WITH sub_org.ORG_ID = #{curOrgId, jdbcType=VARCHAR} 
+				 		CONNECT BY PRIOR sub_org.ORG_ID = sub_org.UP_ORG_ID
+	   				)
+	   			)
+    		</if>
+    		<!-- 单元格类型方案，员工考核对象，查询选择的员工数据 -->
+    		<if test="templateType == '02' and evlObjType == '01'">
+    			and idx.EVL_OBJ_ID = #{evlObjId, jdbcType=VARCHAR}
+    		</if>
+    		<!-- 排除隐藏的行/列数据 -->
+    		<if test="hideRows != null">
+				and cell.ROW_ID not in 
+				<foreach collection="hideRows" item="item" open="(" separator="," close=")">
+					#{item, jdbcType=NUMERIC} - 1
+				</foreach>
+			</if>
+			<if test="hideCols != null">
+				and cell.COL_ID not in
+				<foreach collection="hideCols" item="item" open="(" separator="," close=")">
+					#{item, jdbcType=NUMERIC}
+				</foreach>
+			</if>
+    </select>
+    
+    <insert id="copySchemeInf" parameterType="java.lang.String">
+    	insert into PMA_F_SCHEME_EXCELINDEX_INF(SEQ, CELL_NO, TEMPLATE_ID, INDEX_ID, EVL_OBJ_TYPE,
+			BAL_TYPE, APPLY_TYPE, INDEX_VALUE, EVL_OBJ_ID)
+    	select SEQ, CELL_NO, #{newTemplateId}, INDEX_ID, EVL_OBJ_TYPE,
+    		BAL_TYPE, APPLY_TYPE, INDEX_VALUE, EVL_OBJ_ID
+    	from PMA_F_SCHEME_EXCELINDEX_INF where TEMPLATE_ID = #{templateId}
+    </insert>
+    
+    <select id="getAppMySchemeResultInfoFromBackupTable" parameterType="java.lang.String" resultType="java.util.Map">
+    	select DISTINCT
+    		 idx.INDEX_ID, idx.EVL_OBJ_TYPE, idx.BAL_TYPE, idx.APPLY_TYPE, idx.INDEX_VALUE as RESULT_VALUE, idx.EVL_OBJ_ID,
+    		 idxi.INDEX_NAME||'_'||balItem.LOOKUP_ITEM_NAME||'_'||objItem.LOOKUP_ITEM_NAME||'_'||appItem.LOOKUP_ITEM_NAME as IDX_NAME
+    	from PMA_F_SCHEME_EXCELINDEX_BAK idx 
+    		inner join PMA_F_SCHEME_EXCELCELL_BAK cell on idx.SEQ = cell.SEQ and idx.ETL_DATE = cell.ETL_DATE and idx.TEMPLATE_ID = cell.TEMPLATE_ID
+    		left join PMA_F_BASE_INDEX_INFO idxi on idx.INDEX_ID = idxi.INDEX_ID
+    		left join ADMIN_SM_LOOKUP_ITEM balItem on balItem.LOOKUP_CODE = 'YE_TYPE' and balItem.LOOKUP_ITEM_CODE = idx.BAL_TYPE
+		    left join ADMIN_SM_LOOKUP_ITEM objItem on objItem.LOOKUP_CODE = 'OBJ' and objItem.LOOKUP_ITEM_CODE = idx.evl_obj_type
+		    left join ADMIN_SM_LOOKUP_ITEM appItem on appItem.LOOKUP_CODE = 'INDEX_APPLY_TYPE' and appItem.LOOKUP_ITEM_CODE = idx.apply_type
+    	where idx.TEMPLATE_ID = #{templateId, jdbcType=VARCHAR} and idx.ETL_DATE = #{etlDate, jdbcType=VARCHAR}
+   			and idx.EVL_OBJ_ID = #{evlObjId, jdbcType=VARCHAR}
+    		<!-- 排除隐藏的行/列数据 -->
+    		<if test="hideRows != null">
+				and cell.ROW_ID not in 
+				<foreach collection="hideRows" item="item" open="(" separator="," close=")">
+					#{item, jdbcType=NUMERIC} - 1
+				</foreach>
+			</if>
+			<if test="hideCols != null">
+				and cell.COL_ID not in
+				<foreach collection="hideCols" item="item" open="(" separator="," close=")">
+					#{item, jdbcType=NUMERIC}
+				</foreach>
+			</if>
+    </select>
+    
+    <select id="getAppOrgSchemeResultInfoFromBackupTable" parameterType="java.lang.String" resultType="java.util.Map">
+    	select DISTINCT
+    		 idx.INDEX_ID, idx.EVL_OBJ_TYPE, idx.BAL_TYPE, idx.APPLY_TYPE, idx.INDEX_VALUE as RESULT_VALUE, idx.EVL_OBJ_ID,
+    		 idxi.INDEX_NAME||'_'||balItem.LOOKUP_ITEM_NAME||'_'||objItem.LOOKUP_ITEM_NAME||'_'||appItem.LOOKUP_ITEM_NAME as IDX_NAME
+    	from PMA_F_SCHEME_EXCELINDEX_BAK idx 
+    		inner join PMA_F_SCHEME_EXCELCELL_BAK cell on idx.SEQ = cell.SEQ and idx.ETL_DATE = cell.ETL_DATE and idx.TEMPLATE_ID = cell.TEMPLATE_ID
+    		left join PMA_F_BASE_INDEX_INFO idxi on idx.INDEX_ID = idxi.INDEX_ID
+    		left join ADMIN_SM_LOOKUP_ITEM balItem on balItem.LOOKUP_CODE = 'YE_TYPE' and balItem.LOOKUP_ITEM_CODE = idx.BAL_TYPE
+		    left join ADMIN_SM_LOOKUP_ITEM objItem on objItem.LOOKUP_CODE = 'OBJ' and objItem.LOOKUP_ITEM_CODE = idx.evl_obj_type
+		    left join ADMIN_SM_LOOKUP_ITEM appItem on appItem.LOOKUP_CODE = 'INDEX_APPLY_TYPE' and appItem.LOOKUP_ITEM_CODE = idx.apply_type
+    	where idx.TEMPLATE_ID = #{templateId, jdbcType=VARCHAR} and idx.ETL_DATE = #{etlDate, jdbcType=VARCHAR}
+   			and idx.EVL_OBJ_ID in (
+   				SELECT sub_org.ORG_ID FROM ADMIN_SM_ORG sub_org START WITH sub_org.ORG_ID = #{evlObjId, jdbcType=VARCHAR}
+		 			CONNECT BY PRIOR sub_org.ORG_ID = sub_org.UP_ORG_ID
+   			)
+    		<!-- 排除隐藏的行/列数据 -->
+    		<if test="hideRows != null">
+				and cell.ROW_ID not in 
+				<foreach collection="hideRows" item="item" open="(" separator="," close=")">
+					#{item, jdbcType=NUMERIC} - 1
+				</foreach>
+			</if>
+			<if test="hideCols != null">
+				and cell.COL_ID not in
+				<foreach collection="hideCols" item="item" open="(" separator="," close=")">
+					#{item, jdbcType=NUMERIC}
+				</foreach>
+			</if>
+    </select>
+</mapper>

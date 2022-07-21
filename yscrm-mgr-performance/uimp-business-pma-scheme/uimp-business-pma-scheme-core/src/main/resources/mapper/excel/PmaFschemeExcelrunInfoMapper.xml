@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.uimp.excel.repository.mapper.PmaFschemeExcelrunInfoMapper">
+    <resultMap id="BaseResultMap" type="cn.com.yusys.yusp.uimp.excel.domain.PmaFschemeExcelrunInfo">
+    	<result column="ID" jdbcType="VARCHAR" property="id" />
+		<result column="SCHEME_ID" jdbcType="VARCHAR" property="schemeId" />
+		<result column="ETL_DATE" jdbcType="VARCHAR" property="etlDate" />
+		<result column="RUN_START_TIME" jdbcType="TIMESTAMP" property="runStartTime" />
+		<result column="RUN_END_TIME" jdbcType="TIMESTAMP" property="runEndTime" />
+		<result column="RUN_STATUS" jdbcType="VARCHAR" property="runStatus" />
+		<result column="PUB_STATUS" jdbcType="VARCHAR" property="pubStatus" />
+		<result column="CREATE_USER" jdbcType="VARCHAR" property="createUser" />
+		<result column="CREATE_TIME" jdbcType="TIMESTAMP" property="createTime" />
+    </resultMap>
+    <sql id="Base_Column_List">
+	    ID,SCHEME_ID,ETL_DATE,RUN_START_TIME,RUN_END_TIME,RUN_STATUS,PUB_STATUS,CREATE_USER,CREATE_TIME
+    </sql>
+    
+    <select id="getRunInfoBySchemeIdAndEtlDate" parameterType="java.lang.String" resultType="cn.com.yusys.yusp.uimp.excel.domain.PmaFschemeExcelrunInfo">
+    	select * from PMA_F_SCHEME_EXCELRUN_INFO where SCHEME_ID = #{schemeId, jdbcType=VARCHAR} and ETL_DATE = #{etlDate, jdbcType=VARCHAR}
+    </select>
+    
+    <select id="getSchemeRunInfoList" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.Map">
+    	select runinfo.ID, runinfo.SCHEME_ID, runinfo.ETL_DATE, 
+    		case when runinfo.RUN_START_TIME is null then '' 
+    		     else to_char(runinfo.RUN_START_TIME, 'yyyy-MM-dd hh24:mi:ss') end as RUN_START_TIME, 
+    		case when runinfo.RUN_END_TIME is null then ''
+    		     else to_char(runinfo.RUN_END_TIME, 'yyyy-MM-dd hh24:mi:ss') end as RUN_END_TIME, 
+    		runinfo.RUN_STATUS, runinfo.PUB_STATUS, runinfo.CREATE_USER, 
+    		case when runinfo.CREATE_TIME is null then ''
+    		     else to_char(runinfo.CREATE_TIME, 'yyyy-MM-dd hh24:mi:ss') end as CREATE_TIME,
+    		scheme.SCHEME_NAME, scheme.EVL_OBJ_TYPE, scheme.SCHEME_TYPE, 
+    		case when runinfo.CREATE_USER = 'ETL' then '每日跑批' 
+    			 else u.USER_NAME end as CREATE_USER_NAME
+    	from PMA_F_SCHEME_EXCELRUN_INFO runinfo
+    		left join PMA_F_SCHEME scheme on runinfo.SCHEME_ID = scheme.SCHEME_ID
+    		left join ADMIN_SM_USER u on runinfo.CREATE_USER = u.LOGIN_CODE
+    		left join sys_units units on scheme.org_id = units.unitid
+    	<where>
+    		<if test="condition.schemeId != null and condition.schemeId != ''">
+				and scheme.SCHEME_ID = #{condition.schemeId, jdbcType=VARCHAR}
+			</if>
+			<if test="condition.schemeName != null and condition.schemeName != ''">
+				and scheme.SCHEME_NAME LIKE concat(concat('%',#{condition.schemeName,jdbcType=VARCHAR}),'%')
+			</if>
+			<if test="condition.etlDate != null and condition.etlDate != ''">
+				and runinfo.ETL_DATE = #{condition.etlDate, jdbcType=VARCHAR}
+			</if>
+			<if test="condition.userOrgId != null and condition.userOrgId != ''">
+				AND UNITS.UNITSEQ LIKE concat(concat('%',#{condition.userOrgId,jdbcType=VARCHAR}),'%')
+			</if>
+    	</where>
+    	order by runinfo.RUN_START_TIME desc
+    </select>
+    
+    <select id="getMySchemeInfoList" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.Map">
+		select DISTINCT 
+			runInfo.SCHEME_ID, runInfo.ETL_DATE, scheme.SCHEME_NAME,
+			tmpBak.TEMPLATE_TYPE, tmpBak.EVL_OBJ_TYPE
+		from PMA_F_SCHEME_EXCELRUN_INFO runInfo 
+			left join PMA_F_SCHEME scheme on runInfo.SCHEME_ID = scheme.SCHEME_ID
+			left join PMA_F_SCHEME_EVLOBJ_REL_BAK rel on runInfo.SCHEME_ID = rel.SCHEME_ID and runInfo.ETL_DATE = rel.ETL_DATE
+			left join PMA_F_SCHEME_EXCELTMP_BAK tmpBak on runInfo.SCHEME_ID = tmpBak.SCHEME_ID and runInfo.ETL_DATE = tmpBak.ETL_DATE
+		<where> 
+			and runInfo.PUB_STATUS = '1'  
+			and ((rel.EVL_OBJ_TYPE = '01' and rel.EVL_OBJ_ID = #{condition.loginCode, jdbcType=VARCHAR}) or <!-- 考核对象类型： 员工，查询本人 -->
+			 (rel.EVL_OBJ_TYPE = '02' and rel.EVL_OBJ_ID in ( <!-- 考核对象类型： 机构(人)，查询机构及下辖 -->
+			 	SELECT sub_org.ORG_ID FROM ADMIN_SM_ORG sub_org START WITH sub_org.ORG_ID = #{condition.orgId, jdbcType=VARCHAR} 
+			 		CONNECT BY PRIOR sub_org.ORG_ID = sub_org.UP_ORG_ID
+			 	)
+		 	 ) or 
+			 (rel.EVL_OBJ_TYPE = '03' and rel.EVL_OBJ_ID in ( <!-- 考核对象类型： 机构(业务、账面)，查询机构及下辖 -->
+			 	SELECT sub_org.ORG_ID FROM ADMIN_SM_ORG sub_org START WITH sub_org.ORG_ID = #{condition.orgId, jdbcType=VARCHAR} 
+			 		CONNECT BY PRIOR sub_org.ORG_ID = sub_org.UP_ORG_ID
+			 	)
+	 		 )) 
+			<if test="condition.etlDate != null and condition.etlDate != ''">
+				and runInfo.ETL_DATE = #{condition.etlDate, jdbcType=VARCHAR}
+			</if>
+			<if test="condition.schemeName != null and condition.schemeName != ''">
+				and scheme.SCHEME_NAME LIKE concat(concat('%',#{condition.schemeName,jdbcType=VARCHAR}),'%')
+			</if>
+		</where>
+		order by runInfo.ETL_DATE desc
+    </select>
+    
+    <select id="getOrgStaffSchemeInfoList" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.Map">
+    	select DISTINCT 
+			runInfo.SCHEME_ID, runInfo.ETL_DATE, scheme.SCHEME_NAME,
+			tmpBak.TEMPLATE_TYPE, tmpBak.EVL_OBJ_TYPE
+		from PMA_F_SCHEME_EXCELRUN_INFO runInfo 
+			left join PMA_F_SCHEME scheme on runInfo.SCHEME_ID = scheme.SCHEME_ID
+			left join PMA_F_SCHEME_EVLOBJ_REL_BAK rel on runInfo.SCHEME_ID = rel.SCHEME_ID and runInfo.ETL_DATE = rel.ETL_DATE and rel.EVL_OBJ_TYPE = '01'
+			left join PMA_F_SCHEME_EXCELTMP_BAK tmpBak on runInfo.SCHEME_ID = tmpBak.SCHEME_ID and runInfo.ETL_DATE = tmpBak.ETL_DATE
+			left join ADMIN_SM_USER u on rel.EVL_OBJ_ID = u.LOGIN_CODE
+		<where>
+			and runInfo.PUB_STATUS = '1'	<!-- 已发布的考核方案 -->  
+			and tmpBak.EVL_OBJ_TYPE = '01'	<!-- 模板类型为  01员工 -->
+			and u.ORG_ID in (	<!-- 考核对象是本机构辖内的员工 -->
+				SELECT sub_org.ORG_ID FROM ADMIN_SM_ORG sub_org START WITH sub_org.ORG_ID = #{condition.orgId, jdbcType=VARCHAR} 
+			 		CONNECT BY PRIOR sub_org.ORG_ID = sub_org.UP_ORG_ID
+			)
+			<if test="condition.etlDate != null and condition.etlDate != ''">
+				and runInfo.ETL_DATE = #{condition.etlDate, jdbcType=VARCHAR}
+			</if>
+			<if test="condition.schemeName != null and condition.schemeName != ''">
+				and scheme.SCHEME_NAME LIKE concat(concat('%',#{condition.schemeName,jdbcType=VARCHAR}),'%')
+			</if>
+		</where>
+    </select>
+</mapper>

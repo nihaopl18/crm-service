@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.uimp.business.pma.scheme.schememain.repository.mapper.PmaFSchemeIndexScoreMapper">
+
+    <insert id="batchInsert" parameterType="List">
+        INSERT INTO PMA_F_SCHEME_INDEX_SCORE (ID,SCHEME_ID,INDEX_ID,SCORE_MODEL_ID,APPLY_TYPE_ID,BAL_TYPE_ID,EVL_OBJ_TYPE,CURRENCY, SCORE_FORMULA,SCORE_WEIGHT)
+        <foreach collection="list" item="score" index="index" separator="union all" >
+            select #{score.id},#{score.schemeId},#{score.indexId}, #{score.scoreModelId}, #{score.applyTypeId}, #{score.balTypeId}, #{score.evlObjType},#{score.currency}, #{score.scoreFormula}, #{score.scoreWeight}
+            from dual
+        </foreach>
+    </insert>
+
+    <insert id="batchInsertParams" parameterType="List">
+        INSERT INTO PMA_F_SCHEME_INDEX_SCORE_PARAM (ID,EN_NAME,CN_NAME,PARAM_VALUE, SCHEME_ID,INDEX_ID,SCORE_MODEL_ID,APPLY_TYPE_ID,BAL_TYPE_ID,EVL_OBJ_TYPE, CURRENCY)
+        <foreach collection="list" item="param" index="index" separator="union all" >
+            select #{param.id},#{param.enName},#{param.cnName}, #{param.paramValue}, #{param.schemeId},#{param.indexId},#{param.scoreModelId}, #{param.applyTypeId}, #{param.balTypeId}, #{param.evlObjType}, #{param.currency}
+            from dual
+        </foreach>
+    </insert>
+
+    <delete id="deleteScoreParamByModelId">
+        DELETE FROM PMA_F_SCHEME_INDEX_SCORE_PARAM WHERE SCHEME_ID = #{schemeId,jdbcType=VARCHAR} AND INDEX_ID = #{indexId,jdbcType=VARCHAR} AND SCORE_MODEL_ID = #{scoreModelId,jdbcType=VARCHAR} AND APPLY_TYPE_ID = #{applyTypeId,jdbcType=VARCHAR} AND BAL_TYPE_ID = #{balTypeId,jdbcType=VARCHAR} AND EVL_OBJ_TYPE = #{evlObjType,jdbcType=VARCHAR}
+    </delete>
+
+    <delete id="deleteScoreBySchemeId">
+        DELETE FROM PMA_F_SCHEME_INDEX_SCORE WHERE SCHEME_ID = #{schemeId,jdbcType=VARCHAR} AND INDEX_ID=#{indexId,jdbcType=VARCHAR} AND APPLY_TYPE_ID = #{applyTypeId,jdbcType=VARCHAR} AND BAL_TYPE_ID = #{balTypeId,jdbcType=VARCHAR} AND EVL_OBJ_TYPE = #{evlObjType,jdbcType=VARCHAR}
+    </delete>
+
+
+    <select id="queryAllScoreInfo" resultType="java.util.Map">
+        SELECT ID key, MODEL_NAME value, CACL_FORMULA caclFormula, CACL_RULE, MODEL_DESC FROM PMA_SCORE_MODEL_INFO WHERE MODEL_STATUS = 'Y'
+    </select>
+
+    <select id="queryScoreById" resultType="java.util.Map">
+        SELECT ID , MODEL_NAME , CACL_FORMULA caclFormula FROM PMA_SCORE_MODEL_INFO WHERE id = #{id,jdbcType=VARCHAR}
+    </select>
+
+
+    <select id="queryParamsByModelId" parameterType="String" resultType="cn.com.yusys.yusp.uimp.business.pma.scheme.schememain.domain.PmaScoreModelParams">
+        SELECT
+            a.ID id,
+            a.EN_NAME enName,
+            a.CN_NAME cnName,
+            a.PARAM_SOURCE_TYPE paramSourceType,
+            a.PARAM_SOURCE paramSource
+        FROM
+            PMA_SCORE_MODEL_PARAMS a
+                JOIN PMA_SCORE_PARAM_REL b ON
+                    a.ID = b.PARAM_ID
+        WHERE
+            a.PARAM_SOURCE_TYPE = '1'
+           AND b.SCORE_ID = #{scoreId,jdbcType=VARCHAR}
+
+    </select>
+    <select id="queryScoreBySchemeId"
+            resultType="cn.com.yusys.yusp.uimp.business.pma.scheme.schememain.domain.vo.PmaScoreIndexVo">
+        SELECT
+            ID,
+            SCHEME_ID,
+            INDEX_ID,
+            SCORE_MODEL_ID,
+            SCORE_FORMULA,
+            SCORE_WEIGHT
+        FROM
+            PMA_F_SCHEME_INDEX_SCORE
+        WHERE
+            SCHEME_ID = #{schemeId,jdbcType=VARCHAR} AND INDEX_ID= #{indexId,jdbcType=VARCHAR}
+          AND APPLY_TYPE_ID=#{applyTypeId,jdbcType=VARCHAR}
+          AND BAL_TYPE_ID=#{balTypeId,jdbcType=VARCHAR}
+          AND EVL_OBJ_TYPE = #{evlObjType,jdbcType=VARCHAR}
+    </select>
+    <select id="queryFSchemeScoreParams"
+            resultType="cn.com.yusys.yusp.uimp.business.pma.scheme.schememain.domain.vo.PamScoreParamVo">
+        SELECT
+            EN_NAME,
+            CN_NAME,
+            PARAM_VALUE
+        FROM
+            PMA_F_SCHEME_INDEX_SCORE_PARAM
+        WHERE
+            SCHEME_ID = #{schemeId,jdbcType=VARCHAR}
+            AND INDEX_ID = #{indexId,jdbcType=VARCHAR}
+            AND SCORE_MODEL_ID = #{scoreModelId,jdbcType=VARCHAR}
+            AND APPLY_TYPE_ID=#{applyTypeId,jdbcType=VARCHAR}
+            AND BAL_TYPE_ID=#{balTypeId,jdbcType=VARCHAR}
+            AND EVL_OBJ_TYPE = #{evlObjType,jdbcType=VARCHAR}
+    </select>
+
+
+
+    <select id="selectOrgIdBySchemeId" resultType="java.lang.String">
+        SELECT ORG_ID FROM PMA_F_SCHEME_ORG_REL WHERE SCHEME_ID =#{schemeId,jdbcType=VARCHAR}
+    </select>
+
+    <select id="selectTeamIdBySchemeId" resultType="java.lang.String">
+        SELECT MKT_TEAM_ID FROM PMA_F_SCHEME_TEAM_REL WHERE SCHEME_ID =#{schemeId,jdbcType=VARCHAR}
+    </select>
+
+    <select id="selectMtkIdBySchemeId" resultType="java.lang.String">
+        SELECT MKT_ID FROM PMA_F_SCHEME_MKT_REL WHERE  SCHEME_ID =#{schemeId,jdbcType=VARCHAR}
+    </select>
+
+    <select id="selectTotalWeight" resultType="java.lang.String">
+        SELECT
+            sum(SCORE_WEIGHT) TOTAL_WEIGHT
+        FROM
+            (
+                SELECT
+                    SCORE_WEIGHT,
+                    INDEX_id
+                FROM
+                    PMA_F_SCHEME_INDEX_SCORE
+                WHERE
+                    SCHEME_ID = #{schemeId,jdbcType=VARCHAR}
+                GROUP BY
+                    SCORE_WEIGHT,
+                    INDEX_ID
+            )
+    </select>
+    <select id="countByIndexId" resultType="java.lang.Integer">
+        SELECT COUNT(1) FROM PMA_F_SCHEME_INDEX_SCORE
+        WHERE SCHEME_ID=#{schemeId,jdbcType=VARCHAR}
+        AND INDEX_ID=#{indexId,jdbcType=VARCHAR}
+        AND APPLY_TYPE_ID=#{applyType,jdbcType=VARCHAR}
+        AND BAL_TYPE_ID=#{balType,jdbcType=VARCHAR}
+        AND EVL_OBJ_TYPE = #{evlObjType,jdbcType=VARCHAR}
+    </select>
+
+</mapper>

@@ -1,0 +1,281 @@
+###################################################################
+server:
+  port: 7080
+  servlet:
+    context-path: /uimp-app-single
+###################################################################
+spring:
+  application:
+    name: uimp-app-single
+  mail:
+    host: mail.yusys.com.cn #应用email配置地址
+    port: 25 #应用email配置端口
+    username: wangyf10@yusys.com.cn #应用email配置用户名
+    password: DECRYPT@ENps5jJW+dRmEl3ORBr2tQ== #应用email配置用户密码
+  #jackson配置
+  jackson:
+    serialization:
+      INDENT_OUTPUT: true #jackson格式化输出
+  #数据库配置
+  datasource:
+    driver-class-name: oracle.jdbc.driver.OracleDriver #数据库驱动类
+    type: com.zaxxer.hikari.HikariDataSource #datasource使用的连接池类型
+    validation-query: SELECT 1 FROM DUAL #datasource连接验证的查询语句
+    url: jdbc:oracle:thin:@192.168.35.51:1521:orcl #数据库连接的url
+    username: uimp_cs #数据库连接的用户名
+    password: uimp_cs #数据库连接的密码
+    hikari:
+      minimum-idle: 20 #空闲时最小连接数
+      maximum-pool-size: 200 #连接池大小
+      idle-timeout: 60000
+      max-lifetime: 600000
+      data-source-properties:
+        cachePrepStmts: true #是否启用Prep缓存
+        prepStmtCacheSize: 250 #Prep缓存大小
+        prepStmtCacheSqlLimit: 2048 #Prep缓存sql限制大小
+        useServerPrepStmts: true #是否用服务缓存Prep
+  #
+  #spring国际化配置
+  messages:
+    cache-duration: 1
+  #
+  #如不使用redis，请将以下配置删除
+  redis:
+    database: 15 #Redis默认情况下有16个分片，这里配置具体使用的分片，默认是0
+    host: 192.168.35.52 #Redis的地址
+    port: 6379 #Redis的端口
+    password: 123456 #Redis的密码
+    timeout: 60000 #连接超时时间（毫秒）
+    #使用lettce最为redis客户端
+    lettuce:
+      shutdown-timeout: 60000ms #关闭超时时间
+      pool:
+        max-active: 20 #连接池最大连接数（使用负值表示没有限制） 默认 8
+        max-wait: 20000ms #连接池最大阻塞等待时间（使用负值表示没有限制） 默认 -1
+        min-idle: 1 #连接池中的最小空闲连接 默认 0
+        max-idle: 20 #连接池中的最大空闲连接 默认 8
+  cache:
+    type: redis #spring cache类型
+  servlet:
+    multipart:
+      max-file-size: 100MB
+      max-request-size: 100MB
+  sign:
+    privateKey: MIICdQIBADANBgkqhkiG9w0BAQEFAASCAl8wggJbAgEAAoGBAN1XK7TGWTDi71ot90OFJvdusB927R2BnKI1kPKHyHEVr+JJfDomTdosI5X92FJdWBL1oN4xMdVKLgwzgurcnFUa0KjWoVX4Xva5oV7iJtwbU3F8t8dCwDlgp6A57LaqlAavRhA0Mi9xNUY+iGkWMorj10PCAdgOV7capn/+rudBAgMBAAECgYBts+DDrnNSWYfMKHAfFQWlKUU9sxH+x9i8RNRcgJQGCHuuKkHaCFYZxjq1AqWO3Rjj/L4IolVSo3uDLJy8jy8jyxt8IE1j9FqaSbwDy126aVYwWLbBOc9lcK2lGiHTGf8EzSCX19Uc17QgqwMVujE/KOMkg72VwmtKFTVl1yfWAQJBAPW+58N4+e/mqKiBFJzjFN3r4W+TCoh5vn4+QVXnCCrkcV1B7+b6c6vUHhIEX6vf3TGinXh1BeQxN5eFq4ROOPECQQDmk5CnZIn7powbEecQ15n6JBHhbNn6gL6RfmZRD3Xhifu2gd9TLyc/5PXt+MjLYZhSLXt4HKiNKaGCF42nBRNRAkB8dfubnKG5RvEUpotyCfB/lP/QKoCjLkW0WoNspl4Umy5vNP3z1dTPqdaw+VYbDn5QrTNj1qDtOaAWNbTwhU2BAkAtMSz/8g+tWBZL0/Vy8p8GTP2ILlqG46b2Q0zwhFQ5cV75hXjtB+fseQbOrp1EZ4uAR9PUVeGfUVKLeexUmQURAkA2aJGK626A5Vz6u/VDmjW6loktK7vo3SHqBqDDdMqP0nHm+giisf05n+NZRedfe50kCrSBGEuQaBXxoeZks0a3
+    publicKey: MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDdVyu0xlkw4u9aLfdDhSb3brAfdu0dgZyiNZDyh8hxFa/iSXw6Jk3aLCOV/dhSXVgS9aDeMTHVSi4MM4Lq3JxVGtCo1qFV+F72uaFe4ibcG1NxfLfHQsA5YKegOey2qpQGr0YQNDIvcTVGPohpFjKK49dDwgHYDle3GqZ//q7nQQIDAQAB
+###################################################################
+# uaa配置
+uaa:
+  auth:
+    jwt-access-token-converter-class: cn.com.yusys.yusp.uaa.security.jwt.YuspJwtAccessTokenConverter
+    provider-class: cn.com.yusys.yusp.uaa.security.SecurityDaoAuthenticationProvider
+    user-verify-service:
+      unavailable:
+        message: 用户校验服务不可用
+    user-verify-service-name: uaa-example-user
+    user-verify-service-url: /api/user/verify
+    verify-image-code:
+      enabled: false
+  token:
+    # token超时时间单位：分钟
+    timeout: 30
+  refresh-token:
+    # 刷新token超时时间单位：分钟, 要保证刷新token的超时时间比token的超时间长。如果您设置的刷新token的超时时长小于token的，则会在刷新token的时长上默认加10分钟
+    timeout: 40
+  # 密码加解密的公钥和私钥存放地址配置，相对于src/main/resources目录，适用于与认证接口用户密码的加解密
+  password-cert:
+    private-key-path: cert/pwd_private.key
+    public-key-path: cert/pwd_public.key
+###################################################################
+#以下为统一开发平台提供的相关配置，如不使用统一开发平台的相关配置，请删除即可
+###################################################################
+jasypt:
+  encryptor:
+    bootstrap: true #配置意义同上application.decrypt.enabled，如果需要开启，请将该属性改为true，此属性为是否启用
+application:
+  # 绩效系统配置
+  pma:
+    performance-imp:
+      thread-pool-size: 5 #业绩批量导入-发起审批流-执行线程池大小
+      batch-thread-pool-size: 1 #业绩批量导入-发起批次数据-执行线程池大小
+      syn-execute-batch-max-size: 1 #同时发起的批次号数量
+    # 异步导出excel线程池
+    excel:
+      pool:
+        core-pool-size: 10
+        maxPoolSize: 30
+        keepAliveSeconds: 60
+        queueCapacity: 60
+  #应用属性解密配置
+  decrypt:
+    enabled: true #应用属性解密是否开启,如果需要开启，请改为true 在需要解密的字段值前添加“DECRYPT@”
+    type: DES #应用属性解密类型 DES RSA
+  #
+  #excel相关配置
+  excel:
+    enabled: true #应用excel配置是否启用
+    temp-file-dir: /pmswork #应用excel临时文件存放路径
+    batch-size: 20 #应用excel批量提交数量
+  #
+  #应用异步配置
+  async:
+    enabled: true #应用异步配置是否启用
+    core-pool-size: 10 #应用异步配置核心线程池大小
+    max-pool-size: 40 #应用异步配置最大线程池大小
+    queue-capacity: 100 #应用异步配置队列大小
+  #
+  #应用文件配置
+  file:
+    enabled: true #应用文件配置是否启用
+    file-storage-type: localdisk #应用文件配置启用模式  localdisk本地文件存储  fastdfs存储
+    #fastdfs-track-ip: localhost:22122 #应用文件配置fastdfs地址  fastdfs存储使用
+    local-disk-path: /pmswork #应用文件配置本地存储路径
+  #应用文件配置
+  app:
+  #unable-role-codes: R110,R111,R106,R107,R108,R203 # 不允许登录APP的角色代码
+  #manager-role-codes: R109,R101,R102,R103,R104,R105,R401,R301,R201,R202 # 允许登录APP的管理者角色代码
+  #android-download-url: https://www.yusys-sy.com.cn:8443/api/uimp/pma/uimp-app-single/api/app/adminsmusermobile/download?fileId=CS_ANDROID_APP.apk
+  #ios-download-url: itms-services://?action=download-manifest&url=https://www.yusys-sy.com.cn:8443/app-download/setup.plist
+
+  #
+  #是否开启系统缓存配置
+  cache:
+    type: redis #spring cache类型
+    ttl: 720 #spring cache redis 缓存时间
+    user:
+      enabled: true #是否开启系统用户缓存
+    serviceauth:
+      enabled: false #是否开启服务间鉴权缓存-前提启动spring.cache.type=redis和application.filter.serviceauth.enabled=true并引入yusp-common-sercurity-autoconfigure包
+  #
+  #swagger配置
+  swagger:
+    enabled: true #是否开启swagger功能，生产建议关闭
+    bootstrapUI:
+      enabled: true #是否开启bootstrapUI功能 开启时需要将application.swagger.enabled设置为false
+    title: UIMP Application API #swagger显示title
+    description: UIMP API documentation #swagger显示描述
+    version: V1.0.0.RELEASE #swagger显示的api版本
+  #
+  #web安全过滤配置
+  web:
+    ignore-resources: .css, .js, .html, .ttf, .woff, .svg, .eot, .png, .gif, .ico, .json
+    ignore-urls: /,/api-doc,/v2/api-docs,/actuator/**,/oauth/token,/api/codeImage/**,/api/adminsmlogicsys/logicsyskv,/api/server,/error,/echain/studio/eChainStudio.jar,/definitionservlet,/echain/studio/studio.properties,/swagger-resources/**,/swagger-resources,/api/session/info,/api/account/menuandcontr,/actuatorApp,/api/uimpCommonResource/download,/api/adminbasesmappversion/queryapk,/api/adminbasedisplayinfo/querylist,/api/file/provider/download,/api/adminbasedisplayinfo/star/*,/api/adminbasedisplayinfo/unstar/*,/api/app/user/login,/api/pmaappnews/*,/api/file/provider/download,/api/adminsmuser/checkgesturepwd**,/api/commonexcel/runscheme,/api/ssotoken/login,/api/app/adminsmusermobile/download
+  #
+  #发送邮件配置
+  email:
+    enabled: false #是否启用发送邮件，默认为true 不需要改为false即可
+    host: smtp.163.com #应用邮件服务器地址
+    port: 25 #应用邮件服务器端口
+    username: 123@163.com #应用邮件服务器用户名
+    password: DECRYPT@agf4JGILI04= #应用邮件服务器密码
+    send-nick: 《任务调度平台XXL-JOB》 #应用邮件服务器邮件标题
+  #
+  #应用异步日志配置
+  log:
+    async:
+      enabled: true #应用异步日志是否启用
+      core-pool-size: 20 #应用异步日志线程池核心线程大小
+      max-pool-size: 50 #应用异步日志线程池最大线程大小
+      queue-size: 200 #应用异步日志线程池队列大小
+      logprocessor: cn.com.yusys.yusp.admin.log.BusinessLogProcessor #应用异步日志执行器
+  #
+  #应用sequence配置
+  seqconfig:
+    enabled: true #应用sequence配置是否启用
+    default-seq-type: oracle #应用sequence配置类型 db2 mysql oracle sqlserver redis
+  #默认已关闭QuartzConfiguration和XxlJobAutoConfiguration调度配置,如需使用调度功能，请打开@Configuration注解
+  xxl:
+    job:
+      admin:
+        addresses: http://127.0.0.1:${server.port}/${server.servlet.context-path}  #127.0.0.1替换为单体部署实际IP地址
+      enabled: false  #xxl job调度配置是否启用
+      executor:
+        appname: message     #执行器名称
+        ip:  #执行器IP [选填]
+        port: 9999  #执行器端口号
+        logpath: ../logs/job #执行器日志文件路径
+        logretentiondays: 3 # 本地日志保存天数，-1为永远保存
+  #安全相关配置
+  security:
+    resource:
+      permit:
+        - /api/profile-info
+        - /swagger-resources/configuration/ui
+        - /oauth/token
+        - /api/codeImage/*
+        - /api/adminsmlogicsys/logicsyskv
+        - /api/server
+        - /v2/api-docs/**
+        - /actuatorApp
+        - /api/uimpCommonResource/download
+        - /api/adminbasesmappversion/queryapk
+        - /api/adminbasedisplayinfo/querylist
+        - /api/adminbasedisplayinfo/star/*
+        - /api/adminbasedisplayinfo/unstar/*
+        - /api/file/provider/download
+        - /api/app/user/login
+        - /api/pmaappnews/*
+        - /api/file/provider/download
+        - /api/adminsmuser/checkgesturepwd
+        - /api/commonexcel/runscheme
+        - /api/ssotoken/login
+        - /api/app/adminsmusermobile/download #下载APP
+      authenticated:
+        - /api/**
+  #单体允许跨域设置
+  cors:
+    allow-credentials: true
+    allowed-headers: '*'
+    allowed-methods: GET, PUT, POST, DELETE, OPTIONS
+    allowed-origins: '*'
+    exposed-headers: ''
+    max-age: 1800
+  #
+  #过滤器配置
+  filter:
+    access:
+      enabled: true #过滤器-控制点权限
+    serviceauth:
+      enabled: false #过滤器-服务间鉴权  在Feign调用时，执行serviceFiter的校验配置，忽略accessfilter的检验配置
+    dataauth:
+      enabled: true #过滤器-数据权限
+    cors:
+      enabled: true #过滤器-支持跨域
+    xss:
+      enabled: true #过滤器-防跨域攻击和SQL注入
+    fileupload:
+      enabled: true #过滤器-防止恶意文件上传
+      access-file-type: docx,doc,xlsx,xls,txt,jpg,png,pdf,zip,rar,apk #可上传的白名单文件类型，如不配置默认允许的白名单文件类型为：docx,doc,xlsx,xls,txt,jpg,png,pdf,zip,rar
+###################################################################
+#mybatis 配置
+mybatis:
+  mapperLocations: classpath*:mapper/**/*.xml #mybatis对应的xml文件路径
+  configuration:
+    map-underscore-to-camel-case: true #是否开启驼峰命名
+    jdbc-type-for-null: 'null' #mybatis插入null值是默认的jdbctype
+mapper:
+  mappers:
+    - cn.com.yusys.yusp.commons.mapper.CommonMapper
+#分页配置
+pagehelper:
+  helperDialect: oracle #分页使用的数据库方言
+  reasonable: true #最后一页时是否总返回最后一页数据
+###################################################################
+license:
+  licenseContext: <?xml version="1.0" encoding="UTF-8"?><license build-time="Mon Sep 14 12:40:48 CST 2020" validate-code="D434AFF340C3A170F1ABB357FB0950D5"><element name="customer_name">长沙农村商业银行股份有限公司</element><element name="contract_code">HT2020-0292</element><element name="license_code">0000017620</element><element name="product_code">0000001122</element><element name="product_name_zh-cn">宇信科技基于微服务框架统一开发平台</element><element name="product_name_en-us">YUSP</element><element name="version_major">1</element><element name="version_sub">0</element><element name="version_publish">1</element><element name="complie_date">2018-03-20</element><element name="license_type">客户销售许可证</element><element name="license_start_time">2020-09-11</element><element name="license_end_time">2064-09-11</element></license>
+  licenseModel: PRO
+  echainLicenseContext: <?xml version="1.0" encoding="UTF-8"?><license build-time="Mon Sep 14 12:51:40 CST 2020" validate-code="71CBC02549FEF682A9B5217A09400A3F"><element name="customer_name">长沙农村商业银行股份有限公司</element><element name="contract_code">HT2020-0292</element><element name="license_code">0000017623</element><element name="product_code">0000000782</element><element name="product_name_zh-cn">宇信科技工作流平台eChain V3.0</element><element name="product_name_en-us">eChain</element><element name="version_major">3</element><element name="version_sub">0</element><element name="version_publish">1</element><element name="complie_date">2017-06-05</element><element name="license_type">客户销售许可证</element><element name="license_start_time">2020-09-11</element><element name="license_end_time">2064-09-11</element></license>
+echain:
+  license:
+    licenseContext: <?xml version="1.0" encoding="UTF-8"?><license build-time="Mon Sep 14 12:51:40 CST 2020" validate-code="71CBC02549FEF682A9B5217A09400A3F"><element name="customer_name">长沙农村商业银行股份有限公司</element><element name="contract_code">HT2020-0292</element><element name="license_code">0000017623</element><element name="product_code">0000000782</element><element name="product_name_zh-cn">宇信科技工作流平台eChain V3.0</element><element name="product_name_en-us">eChain</element><element name="version_major">3</element><element name="version_sub">0</element><element name="version_publish">1</element><element name="complie_date">2017-06-05</element><element name="license_type">客户销售许可证</element><element name="license_start_time">2020-09-11</element><element name="license_end_time">2064-09-11</element></license>
+    licenseModel: PRO
+# actuator监控配置
+management:
+  endpoints:
+    enabled-by-default: true
+    web:
+      exposure:
+        include: "*"
+  health:
+    mail:
+      enabled: false

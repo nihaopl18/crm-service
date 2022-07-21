@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.climp.acty.repository.mapper.LoyEngRuleInfoMapper">
+    <resultMap id="BaseResultMap" type="cn.com.yusys.climp.acty.domain.LoyEngRuleInfo">
+		<result column="ID" jdbcType="NUMERIC" property="id" />
+		<result column="RULE_SET_ID" jdbcType="NUMERIC" property="ruleSetId" />
+		<result column="CONDITION" jdbcType="VARCHAR" property="condition" />
+		<result column="CONDITION_MEAN" jdbcType="VARCHAR" property="conditionMean" />
+		<result column="PROCESS_ORDER" jdbcType="VARCHAR" property="processOrder" />
+		<result column="FORMULA" jdbcType="VARCHAR" property="formula" />
+		<result column="BEGIN_DATE" jdbcType="DATE" property="beginDate" />
+		<result column="END_DATE" jdbcType="DATE" property="endDate" />
+		<result column="MIN_SCORE" jdbcType="NUMERIC" property="minScore" />
+		<result column="MAX_SCORE" jdbcType="NUMERIC" property="maxScore" />
+		<result column="FORMULA_WAY" jdbcType="VARCHAR" property="formulaWay" />
+		<result column="FORMULA_MEAN" jdbcType="VARCHAR" property="formulaMean" />
+		<result column="RULE_NAME" jdbcType="VARCHAR" property="ruleName" />
+		<result column="RULE_DESC" jdbcType="VARCHAR" property="ruleDesc" />
+		<result column="DELETE_SIGN" jdbcType="VARCHAR" property="deleteSign" />
+		<result column="COST_ORG_TYPE" jdbcType="VARCHAR" property="costOrgType" />
+		<result column="POOL_NO" jdbcType="VARCHAR" property="poolNo" />
+		<result column="ACC_DAYS" jdbcType="VARCHAR" property="accDays" />
+    </resultMap>
+    <sql id="Base_Column_List">
+	    ID,RULE_SET_ID,CONDITION,CONDITION_MEAN,PROCESS_ORDER,FORMULA,BEGIN_DATE,END_DATE,MIN_SCORE,MAX_SCORE,FORMULA_WAY,FORMULA_MEAN,RULE_NAME,RULE_DESC,DELETE_SIGN,COST_ORG_TYPE,POOL_NO,ACC_DAYS
+    </sql>
+    
+    <!-- 积分规则查询 -->
+    <select id="queryRule" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.Map">
+		select  t.*
+		from LOY_ENG_RULE_INFO t
+		where 1=1  and t.rule_set_id = #{condition.activityId}
+	</select>
+	
+	<!-- 查询积分账户类型 -->
+	<select id="queryScoreAccount" resultType="java.util.Map">
+		SELECT T.ACCOUNT_NO as key ,T.ACCOUNT_NAME as value FROM LOY_AC_SCORE_ACCOUNT T WHERE T.WF_APPR_STS ='997' 
+		AND (t.DELETE_SIGN is null or t.DELETE_SIGN != '1' )
+	</select>
+	
+	<!-- 交易字段查询 -->
+    <select id="queryTransCode" parameterType="String" resultType="java.util.Map">
+		select t.* from loy_rl_field_ec_name t where t.IS_DISPLAY = '1' 
+					and  t.table_id = (select table_id from loy_rl_table_ec_name where 
+					(DELETE_SIGN is null or DELETE_SIGN != '1' ) 
+				    and transaction_code = #{transactionCode} ) order by t.field_id
+	</select>
+	<!-- 查询引用参数字段-->
+	<select id="queryRuleParams" resultType="java.util.Map">
+		SELECT T.PARAM_CODE AS FIELD_E_NAME,T.PARAM_NAME AS FIELD_C_NAME,T.PARAM_PROPERTY AS FIELD_TYPE,
+		T.PARAM_MAPPING AS FNAME,T.MAGNIFIER FROM LOY_ENG_RULE_PARAM T WHERE (T.PARAM_TYPE IS NULL OR T.PARAM_TYPE != '3')  
+	</select>
+	
+	<!-- 查询交易类型的金额字段与引用参数的数据字段 -->
+    <select id="queryNumTransCode" parameterType="String" resultType="java.util.Map">
+		select t.FIELD_E_NAME,t.FIELD_C_NAME  from loy_rl_field_ec_name t 
+		where t.IS_DISPLAY = '1' and t.field_type = '2' and  t.table_id = 
+		(select table_id from loy_rl_table_ec_name where 
+			(DELETE_SIGN is null or DELETE_SIGN != '1') 
+			and transaction_code = #{transactionCode} ) 
+		UNION SELECT T.PARAM_CODE AS FIELD_E_NAME, T.PARAM_NAME AS FIELD_C_NAME 
+			FROM LOY_ENG_RULE_PARAM T WHERE T.PARAM_PROPERTY = '2' 
+			AND  (T.PARAM_TYPE IS NULL OR T.PARAM_TYPE != '3')  
+	</select>
+	<!-- 活动校验 -->
+	<select id="verificationActivity" parameterType="String" resultType="java.util.Map">
+		SELECT t.ACTIVITY_ID,t.PROJECT_ID,t.ACTIVITY_NAME,t.BEGIN_DATE,t.END_DATE,
+			t.ACTIVITY_PRIORITY,t.WF_APPR_STS,t.USE_FLAG,t.DELETE_SIGN,t.REMARK,
+			t.CREATE_USER,t.CREATE_DATE,t.CREATE_ORG,t.UPDATE_USER,t.UPDATE_DATE,
+			t.UPDATE_ORG,t.TRANSACTION_CODE,t.POOL_NO,t1.PROJECT_NAME,c.TRANSACTION_NAME,
+			p.pool_name 
+		FROM LOY_RL_ACTIVITY T 
+		LEFT JOIN LOY_RL_SCORE_PROJECT T1 ON T1.PROJECT_ID = T.PROJECT_ID  
+		left join LOY_ENG_TRANSACTION_CATEGORY c on c.transaction_code = t.transaction_code  
+		left join LOY_AC_SCORE_POOL p on p.pool_no = t.pool_no  
+		WHERE T.ACTIVITY_PRIORITY =
+			(SELECT ACTIVITY_PRIORITY FROM LOY_RL_ACTIVITY WHERE ACTIVITY_ID = #{activityId} ) 
+				AND T.ACTIVITY_ID != #{activityId} AND 
+					(t.DELETE_SIGN IS NULL OR t.DELETE_SIGN != '1') 
+					 and t.transaction_code = (SELECT transaction_code FROM LOY_RL_ACTIVITY WHERE ACTIVITY_ID = #{activityId} ) 
+	</select>
+	<!-- 规则校验 -->
+    <select id="verificationRule" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.Map">
+		SELECT A.ACTIVITY_ID AS CONFLICT_ACTIVITY_ID, A.ACTIVITY_NAME AS CONFLICT_ACTIVITY_NAME, 
+			A.ACTIVITY_PRIORITY,A.TRANSACTION_CODE AS CONFLICT_TRANSACTION_CODE,
+			A.BEGIN_DATE AS CONFLICT_BEGIN_DATE,A.END_DATE AS CONFLICT_END_DATE,
+			R.ID AS CONFLICT_RULE_ID, R.RULE_NAME AS CONFLICT_RULE_NAME,R.CONDITION,
+			R.PROCESS_ORDER,R.FORMULA,
+<!-- 			R.FORMULA_WAY,RA.ACCOUNT_NO, -->
+			case when RA.ACCOUNT_NO = #{condition.accountNo} THEN '1' ELSE '2' END AS CONFLICT_TYPE 
+		FROM LOY_ENG_RULE_INFO R 
+		INNER JOIN LOY_RL_ACTIVITY A ON A.ACTIVITY_ID = R.RULE_SET_ID 
+		INNER JOIN LOY_ENG_RULE_ACTION RA ON RA.RULE_ID = R.ID 
+		WHERE A.TRANSACTION_CODE = #{condition.transactionCode} AND (A.DELETE_SIGN IS NULL OR A.DELETE_SIGN != '1') 
+			AND (R.DELETE_SIGN IS NULL OR R.DELETE_SIGN != '1') AND R.ID != #{condition.ruleId} 
+			<if test="condition.variableName != null and condition.variableName !=''">
+				<foreach collection="condition.variableName" item="item" index="index" separator=" " >
+					AND R.CONDITION LIKE CONCAT(CONCAT('%', #{item}),'%') 
+				</foreach>
+			</if>
+		ORDER BY A.ACTIVITY_ID,R.ID 
+	</select>
+	<!-- 根据规则id查询动作 -->
+	<select id="getActionByRuleId" parameterType="String" resultType="java.util.Map">
+		select a.* from loy_eng_rule_action a where a.RULE_ID = #{ruleId}
+	</select>
+	<!-- 删除规则信息 -->
+	<delete id="delRule">
+	 	DELETE FROM LOY_ENG_RULE_INFO T WHERE t.id IN (#{id})
+	</delete>
+	   <!-- 根据活动id删除活动信息 -->
+	<update id="updataRuleInfo" parameterType="java.util.Map">  
+         UPDATE LOY_ENG_RULE_INFO  
+            SET 
+			DELETE_SIGN = '1'
+            WHERE rule_set_id = #{activityId}
+   </update> 
+   	<update id="updatePoolNo" parameterType="java.util.Map">  
+         UPDATE LOY_ENG_RULE_INFO  
+            SET 
+			BEGIN_DATE = #{beginDate},
+			END_DATE = #{endDate}
+			<!-- POOL_NO = #{poolNo} 2019-03-26 chenlin 权益引擎改造-->
+            WHERE rule_set_id = #{ruleSetId}
+   </update> 
+   	<!-- 规则校验 -->
+    <select id="validDateCode" resultType="java.util.Map">
+    	SELECT T.VALIDITY_DATE as valid_date  from LOY_BP_VALIDITY_DATE t
+      		where t.STATUS ='1' and t.WF_APPR_STS = '997'
+
+	</select>
+</mapper>

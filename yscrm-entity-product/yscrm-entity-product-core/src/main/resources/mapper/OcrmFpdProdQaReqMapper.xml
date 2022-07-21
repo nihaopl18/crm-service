@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.product.repository.mapper.OcrmFpdProdQaReqMapper">
+    <!-- Q&A查询 -->
+	<select id="questionsAnswersQuery" parameterType="java.util.Map" resultType="java.util.Map">
+		SELECT A.LAST_CHG_USR, A.LAST_CHG_DT, A.QUESTION_ID, A.CORP_ORG_CODE, 
+		A.PROD_ID, A.QUESTION_CONTENT, A.QUESTION_MAN, A.IS_REMIND, 
+		TO_CHAR(A.QUESTION_DATE,'yyyy-MM-dd') as QUESTION_DATE,
+		B.LAST_CHG_USR AS LAST_CHG_USR2, B.LAST_CHG_DT AS LAST_CHG_DT2, 
+		B.QUESTION_ID AS QUESTION_ID2, B.CORP_ORG_CODE AS CORP_ORG_CODE2, 
+		B.PROD_ID AS PROD_ID2, B.QUESTION_CONTENT AS QUESTION_CONTENT2, 
+		B.QUESTION_MAN AS QUESTION_MAN2, 
+		TO_CHAR(B.QUESTION_DATE,'yyyy-MM-dd') as QUESTION_DATE2,
+		B.IS_REMIND AS IS_REMIND2
+		FROM OCRM_F_PD_PROD_QA_REQ A 
+		LEFT JOIN OCRM_F_PD_PROD_QA_REPLY B
+		ON A.QUESTION_ID = B.QUESTION_ID
+		WHERE 1=1
+		<!-- 关键字 -->
+		<if test="condition.prodId != null and condition.prodId !=''">
+			AND A.PROD_ID = #{condition.prodId, jdbcType=VARCHAR}
+		</if>
+		<!-- 关键字 -->
+		<if test="condition.questionContent != null and condition.questionContent != ''">
+       		AND A.QUESTION_CONTENT LIKE CONCAT(CONCAT('%', #{condition.questionContent, jdbcType=VARCHAR}),'%')
+       		OR B.QUESTION_CONTENT LIKE CONCAT(CONCAT('%', #{condition.questionContent, jdbcType=VARCHAR}),'%')
+	    </if>
+	</select>
+	
+	<!-- 根据编号删除产品QA提问信息 -->
+	<delete id="delerteQuestionsAnswers" parameterType="String">
+		DELETE FROM OCRM_F_PD_PROD_QA_REQ A WHERE A.QUESTION_ID = #{condition.questionId,jdbcType=VARCHAR}
+	</delete>
+    
+</mapper>

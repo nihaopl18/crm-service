@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.admin.repository.mapper.AdminSmAuthRecoMapper">
+
+	<!-- 批量新增数据(mysql) -->
+	<insert id="insertBatchByOracle" parameterType="List" databaseId="mysql">
+		insert into ADMIN_SM_AUTH_RECO (AUTH_RECO_ID,SYS_ID,AUTHOBJ_TYPE,AUTHOBJ_ID,AUTHRES_TYPE,AUTHRES_ID,
+		LAST_CHG_USR,LAST_CHG_DT) values
+		<foreach collection="list" item="poi" index="index" separator="," >  
+         	(#{poi.authRecoId},#{poi.sysId}, #{poi.authobjType}, #{poi.authobjId}, #{poi.authresType}, #{poi.authresId},#{poi.lastChgUsr}, #{poi.lastChgDt})  
+    	</foreach> 
+	</insert>               
+
+    <!-- 根据菜单ID查询所有父节点ID包含本身节点 -->
+    <select id="quryUpIdById" parameterType="java.util.Map" resultType="java.util.Map" databaseId="mysql">
+       select distinct t.menu_id as id,t.menu_type,t.UP_MENU_ID,t.menu_id from(
+            select menu_id,'M' as menu_type,UP_MENU_ID from admin_sm_menu ,(select getParentMenu(
+                 <foreach item="menuId" index="index" collection="list" open="'" separator="," close="'">${menuId}</foreach> 
+               ) pmids) p where
+                FIND_IN_SET(MENU_ID,pmids))t
+    </select> 
+<!--     CREATE FUNCTION getParentMenu(rootId VARCHAR(10000))
+     RETURNS VARCHAR(10000)  
+BEGIN
+             DECLARE pTemp VARCHAR(10000);
+       DECLARE cTemp VARCHAR(10000);
+      
+       SET pTemp = '$';  
+       SET cTemp =cast(rootId as CHAR);
+      
+       WHILE cTemp is not null DO  
+         SET pTemp = concat(pTemp,',',cTemp); 
+         SELECT group_concat(up_menu_id) INTO cTemp FROM admin_sm_menu   
+         WHERE FIND_IN_SET(menu_id,cTemp)>0;              
+       END WHILE;
+
+    RETURN pTemp;
+END   -->
+</mapper>

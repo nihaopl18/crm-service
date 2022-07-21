@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.dycrm.complaintfeedback.repository.mapper.OcrmFClComplaintSheetMapper">
+    <update id="saveData">
+        update OCRM_F_CL_COMPLAINT_SHEET set SHEET_RESULT = #{sheetResult},HANDLE_STATE='1',
+        HANDLETIME= to_date(#{handletime},'yyyy-MM-dd hh24:mi:ss')
+        where SHEET_ID=#{sheetIds}
+    </update>
+
+
+
+    <select id="queryComplaint" resultType="java.util.Map">
+        SELECT SHEET_ID,CUST_ECIF_NO,CUST_NAME,to_char(CREATETIME,'yyyy-mm-dd hh24:mi:ss') as CREATETIME,
+        TS_CONTENT,HANDLE_STATE,SHEET_RESULT,to_char(HANDLETIME,'yyyy-mm-dd hh24:mi:ss') as HANDLETIME,
+        decode(HANDLE_STATE,1,'已处理','未处理') as HANDLE_STATE_DO
+        from OCRM_F_CL_COMPLAINT_SHEET
+        <where>
+            <if test="userId != null and userId !=''">
+                and CUST_MGR_NO=#{userId}
+            </if>
+            <if test="customerId != null and customerId !=''">
+                and CUST_ECIF_NO=#{customerId}
+            </if>
+
+            <if test="custEcifNo != null and custEcifNo !=''">
+                and CUST_ECIF_NO=#{custEcifNo}
+            </if>
+            <if test="sheetId != null and sheetId !=''">
+                and SHEET_ID=#{sheetId}
+            </if>
+            <if test="handleState != null and handleState !=''">
+                and HANDLE_STATE=#{handleState}
+            </if>
+        </where>
+        order by SHEET_ID desc
+    </select>
+    <select id="sheetQueryHandle" resultType="cn.com.yusys.yusp.dycrm.complaintfeedback.domain.OcrmFClComplaintSheet">
+        select t.SHEET_ID, t.CUST_ECIF_NO,t.CUST_NAME,(case t.CUSTCATEGORY
+        when '1' then '普通客户' when '2' then '红名单客户'
+        when '3' then '黑名单客户' when '4' then '贵宾客户' end) CUSTCATEGORY,
+        t.CUST_MGR_NO,t.CUST_MGR_NM,t.CUST_MGR_ORG_NO,t.TS_CONTENT,
+        t.SHEET_RESULT,t.HANDLE_STATE from T_P_COMPLAINT_SHEET_INFO t
+        where t.sheet_id = #{sheetId}
+    </select>
+    <select id="sheetQueryHandleTest"
+            resultType="cn.com.yusys.yusp.dycrm.complaintfeedback.domain.CustomerInformationDTO">
+        select t.SHEET_ID, t.CUST_ECIF_NO,t.CUST_NAME,(case t.CUSTCATEGORY
+        when '1' then '普通客户' when '2' then '红名单客户'
+        when '3' then '黑名单客户' when '4' then '贵宾客户' end) CUSTCATEGORY,
+        t.CUST_MGR_NO,t.CUST_MGR_NM,t.CUST_MGR_ORG_NO,t.TS_CONTENT,
+        t.SHEET_RESULT,t.HANDLE_STATE from OCRM_F_CL_COMPLAINT_SHEET t
+        where t.sheet_id = #{sheetId}
+    </select>
+    <select id="queryComplaintSheetInfo"
+            resultType="cn.com.yusys.yusp.dycrm.complaintfeedback.domain.CustomerInformationDTO">
+        select SHEET_ID,CUST_NAME,CARDNBR,MOBILEPHONE,CALLNUM,GREYFLAG,CUSTCATEGORY,GENDER,
+        TS_DEPART,TS_TYPE,TS_BUSINESS,TS_CHANNEL,DIRECTOR_OPINION,END_DATE,TS_NOTE,TS_CONTENT,
+        SHEET_RESULT,COMPLAIN_REASON
+        from OCRM_F_CL_COMPLAINT_SHEET
+        <where>
+            <if test="sheetId != null and sheetId !=''">
+                and SHEET_ID=#{sheetId}
+            </if>
+        </where>
+    </select>
+
+</mapper>

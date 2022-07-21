@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.uimp.bonus.repository.mapper.PmaFsedBonusAltListMapper">
+    <resultMap id="BaseResultMap" type="cn.com.yusys.yusp.uimp.bonus.domain.PmaFsedBonusAltList">
+		<id column="ID" jdbcType="VARCHAR" property="id" />
+		<result column="EVL_OBJ_ID" jdbcType="VARCHAR" property="evlObjId" />
+		<result column="BELONG_ORG_ID" jdbcType="VARCHAR" property="belongOrgId" />
+		<result column="OPER_ID" jdbcType="VARCHAR" property="operId" />
+		<result column="OPER_TIME" jdbcType="VARCHAR" property="operTime" />
+		<result column="OPER_BONUS" jdbcType="NUMERIC" property="operBonus" />
+		<result column="OPER_TYPE" jdbcType="VARCHAR" property="operType" />
+		<result column="BONUS_TYPE" jdbcType="VARCHAR" property="bonusType" />
+		<result column="STAT_DATE" jdbcType="VARCHAR" property="statDate" />
+    </resultMap>
+    <sql id="Base_Column_List">
+	    ID,EVL_OBJ_ID,BELONG_ORG_ID,OPER_ID,OPER_TIME,OPER_BONUS,OPER_TYPE,BONUS_TYPE,STAT_DATE
+    </sql>
+    
+    <select id="queryBonusAltList" parameterType="java.lang.String" resultType="java.util.Map">
+    	select DISTINCT al.*,
+    		   evlu.USER_NAME as EVL_OBJ_NAME,
+    		   operu.USER_NAME as OPER_NAME,
+    		   o.ORG_NAME as BELONG_ORG_NAME
+    	from PMA_F_SED_BONUS_ALT_LIST al 
+    		left join ADMIN_SM_USER evlu on evlu.LOGIN_CODE = al.EVL_OBJ_ID
+    		left join ADMIN_SM_USER operu on operu.LOGIN_CODE = al.OPER_ID
+    		left join ADMIN_SM_ORG o on o.ORG_ID = al.BELONG_ORG_ID
+    	where al.STAT_DATE = #{statDate} and al.BELONG_ORG_ID = #{orgId}
+    	order by al.OPER_TIME desc
+    </select>
+    
+    <delete id="deleteBonusAltByIds" parameterType="java.lang.String">
+    	delete from PMA_F_SED_BONUS_ALT_LIST 
+		where ID in 
+			<foreach collection="idArr" item="item" index="index" open="(" close=")" separator=",">
+        		#{item}
+        	</foreach>
+    </delete>
+    
+    <delete id="deleteBonusAltListByStatDateAndOrgId" parameterType="java.lang.String">
+    	delete from PMA_F_SED_BONUS_ALT_LIST
+    	where STAT_DATE = #{statDate} and BELONG_ORG_ID = #{orgId}
+    </delete>
+    
+    <insert id="batchInsert" parameterType="cn.com.yusys.yusp.uimp.bonus.domain.PmaFsedBonusAltList">
+    	insert all 
+    	<foreach collection="dataList" item="item" separator=" ">
+    		into PMA_F_SED_BONUS_ALT_LIST
+    		(
+	    	    ID,
+	    	    EVL_OBJ_ID,
+	    	    BELONG_ORG_ID,
+	    	    OPER_ID,
+	    	    OPER_TIME,
+	    	    OPER_BONUS,
+	    	    OPER_TYPE,
+	    	    BONUS_TYPE,
+	    	    STAT_DATE
+			)
+			values 
+			(
+				sys_guid(),
+				#{item.evlObjId, jdbcType=VARCHAR},
+				#{orgId, jdbcType=VARCHAR},
+				#{loginCode, jdbcType=VARCHAR},
+				#{operTime, jdbcType=VARCHAR},
+				#{item.operBonus, jdbcType=NUMERIC},
+				null,
+				null,
+				#{statDate, jdbcType=VARCHAR}
+			)
+    	</foreach>
+    	select 1 from dual
+    </insert>
+</mapper>

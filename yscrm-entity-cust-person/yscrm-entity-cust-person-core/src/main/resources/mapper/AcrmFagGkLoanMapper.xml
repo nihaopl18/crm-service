@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.cust.person.repository.mapper.AcrmFagGkLoanMapper">
+
+    <sql id="Base_Column_List">
+        CORP_ORG_CODE,DATA_DATE,CUST_ID,LOAN_TYPE,CCY_CD,LOAN_BAL,REGULAR_BAL,MONTH_AVG_REGULAR_BAL,QUAR_AVG_REGULAR_BAL,HALF_YEAR_AVG_REGULAR_BAL,YEAR_AVG_REGULAR_BAL,LY_LOAN_BAL,LY_REGULAR_BAL,LY_MONTH_AVG_REGULAR_BAL,LY_QUAR_AVG_REGULAR_BAL,LY_HALF_YEAR_AVG_REGULAR_BAL,LY_YEAR_AVG_REGULAR_BAL
+    </sql>
+    
+	<select id="queryLoanByCustId" parameterType="java.util.Map"  resultType="java.util.HashMap">
+		  select t.CORP_ORG_CODE,
+		       to_char(to_date(t.DATA_DATE,'yyyy-mm-dd'),'yyyy-mm-dd') as DATA_DATE,
+		       t.CUST_ID,
+		       t.LOAN_TYPE,
+		       t.CCY_CD,
+		       t.LOAN_BAL,
+		       t.REGULAR_BAL,
+		       t.MONTH_AVG_REGULAR_BAL,
+		       t.QUAR_AVG_REGULAR_BAL,
+		       t.HALF_YEAR_AVG_REGULAR_BAL,
+		       t.YEAR_AVG_REGULAR_BAL,
+		       t.LY_LOAN_BAL,
+		       t.LY_REGULAR_BAL,
+		       t.LY_MONTH_AVG_REGULAR_BAL,
+		       t.LY_QUAR_AVG_REGULAR_BAL,
+		       t.LY_HALF_YEAR_AVG_REGULAR_BAL,
+		       t.LY_YEAR_AVG_REGULAR_BAL
+	  	  from ACRM_F_AG_GK_LOAN t
+		  where 1=1
+		  <if  test="custId != null and custId != ''">
+	       		and t.CUST_ID =#{custId,jdbcType=VARCHAR} 
+		  </if>
+	</select>
+	
+</mapper>

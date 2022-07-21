@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.cm.ruleConfig.repository.mapper.CmFRcRuleParamMapper">
+	<!-- 查询引用参数配置信息 -->
+	<select id="getParamList" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+		resultType="java.util.Map">
+		SELECT T.* FROM CM_F_RC_RULE_PARAM T
+		<where>
+			<if test="condition.paramCode != null and condition.paramCode !=''">
+				and T.PARAM_CODE  LIKE CONCAT(CONCAT('%', #{condition.paramCode, jdbcType=VARCHAR}),'%') 
+			</if>
+			<if test="condition.paramName != null and condition.paramName !=''">
+				and T.PARAM_NAME  LIKE CONCAT(CONCAT('%', #{condition.paramName, jdbcType=VARCHAR}),'%') 
+			</if>
+			<if test="condition.paramType != null and condition.paramType !=''">
+				and T.PARAM_TYPE  LIKE CONCAT(CONCAT('%', #{condition.paramType, jdbcType=VARCHAR}),'%') 
+			</if>
+			<if test="condition.paramProperty != null and condition.paramProperty !=''">
+				and T.PARAM_PROPERTY  LIKE CONCAT(CONCAT('%', #{condition.paramProperty, jdbcType=VARCHAR}),'%') 
+			</if>
+		</where>
+	</select>
+	
+</mapper>

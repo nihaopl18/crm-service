@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.custgrade.repository.mapper.OcrmFciGradeStandardMapper">
+    <sql id="Base_Column_List">
+	    CORP_ORG_CODE,STANDARD_ID,SCHEME_ID,STANDARD_NAME,MINUS_LEVEL,GRADE_FORMULA_EXPLAIN,GRADE_FORMULA,DEMO,CRAT_DT,CRAT_USR,CRAT_ORG_ID,LAST_CHG_DT,LAST_CHG_USR_ID,LAST_CHG_ORG_ID,STANDARD_TYPE
+    </sql>
+    
+</mapper>

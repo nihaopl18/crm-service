@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.climp.acty.repository.mapper.LoyEngRuleActionMapper">
+    <resultMap id="BaseResultMap" type="cn.com.yusys.climp.acty.domain.LoyEngRuleAction">
+		<result column="ID" jdbcType="NUMERIC" property="id" />
+		<result column="RULE_ID" jdbcType="NUMERIC" property="ruleId" />
+		<result column="EXTERNAL_SQL_NAME" jdbcType="VARCHAR" property="externalSqlName" />
+		<result column="INTERNAL_SQL_ID" jdbcType="NUMERIC" property="internalSqlId" />
+		<result column="CLASS_NAME" jdbcType="VARCHAR" property="className" />
+		<result column="FUNCTION_NAME" jdbcType="VARCHAR" property="functionName" />
+		<result column="ACCOUNT_NO" jdbcType="VARCHAR" property="accountNo" />
+		<result column="VALID_DATE" jdbcType="NUMERIC" property="validDate" />
+		<result column="ACTION_FORMULA" jdbcType="VARCHAR" property="actionFormula" />
+		<result column="ACTION_FORMULA_MEAN" jdbcType="VARCHAR" property="actionFormulaMean" />
+    </resultMap>
+    <sql id="Base_Column_List">
+	    ID,RULE_ID,EXTERNAL_SQL_NAME,INTERNAL_SQL_ID,CLASS_NAME,FUNCTION_NAME,ACCOUNT_NO,VALID_DATE,ACTION_FORMULA,ACTION_FORMULA_MEAN
+    </sql>
+    <!-- 删除没有规则信息的规则动作 -->
+    <delete id="delOtherAction">
+    	 DELETE FROM LOY_ENG_RULE_ACTION T1 WHERE T1.RULE_ID NOT IN (SELECT ID FROM LOY_ENG_RULE_INFO ) 
+    </delete>
+    <select id="getRole" parameterType="string" resultType="java.util.Map">
+		select * from admin_sm_role t
+		<where>
+			<if test="roleCode != null and roleCode != ''">
+				and t.role_code in (${roleCode})
+			</if>
+		</where>
+	</select>
+	<!-- 根据规则id删除规则动作 -->
+	<delete id="delAction">
+    	 DELETE FROM LOY_ENG_RULE_ACTION T1 WHERE T1.RULE_ID = #{ruleId} 
+    </delete>
+</mapper>

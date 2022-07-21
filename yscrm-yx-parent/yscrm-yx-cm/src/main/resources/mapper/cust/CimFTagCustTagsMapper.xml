@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.cm.cust.repository.mapper.CimFTagCustTagsMapper">
+	<!--  ${dataAuth}-->
+	<select id="getListByTags" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+		${condition.SQL}  ORDER BY c.CUST_ID desc
+	</select>
+
+	<select id="getCustIdsByTags" resultType="String">
+		select a.cust_id from CIM_F_TAG_CUST_TAGS a where 1 =1 and
+		<foreach collection="list" item="item" separator="and" close=")" open="(">
+			a.tag_no = #{item}
+		</foreach>
+	</select>
+	<select id="qryTags" parameterType="java.util.Map" resultType="java.util.HashMap">
+		select t.ID, t.TAG_NO, t.TAG_NAME,a.GROUP_NO,a.PROCESS_MODE,a.TAG_LIFECYCLE,c.GROUP_NAME from CIM_F_TAG_CUST_TAGS t, CIM_F_MM_TAG_TAGS a ,CIM_F_MM_TAG_GROUP c
+		 where t.TAG_NO=a.TAG_NO  and t.CUST_ID =#{custId} and a.group_no=c.group_no
+		<![CDATA[ 
+		and t.AVAILABLE_DATE<=to_date(#{today,jdbcType=VARCHAR},'yyyy-mm-dd hh24:mi:ss') and t.DISABLE_DATE>=to_date(#{today,jdbcType=VARCHAR},'yyyy-mm-dd hh24:mi:ss')
+		]]>
+		<if test="tagNo != null and tagNo !=''">
+			AND t.TAG_NO=#{tagNo}
+		</if>
+	</select>
+	<select id="qryTagsname" parameterType="java.util.Map" resultType="java.util.HashMap">
+		select t.ID, t.TAG_NO, t.TAG_NAME,a.GROUP_NO,c.GROUP_NAME from CIM_F_TAG_CUST_TAGS t, CIM_F_MM_TAG_TAGS a ,CIM_F_MM_TAG_GROUP c
+		 where t.TAG_NO=a.TAG_NO  and t.CUST_ID =#{custId} and a.group_no=c.group_no
+		<![CDATA[ 
+		and t.AVAILABLE_DATE<=to_date(#{today,jdbcType=VARCHAR},'yyyy-mm-dd hh24:mi:ss') and t.DISABLE_DATE>=to_date(#{today,jdbcType=VARCHAR},'yyyy-mm-dd hh24:mi:ss')
+		]]>
+		AND t.TAG_NAME=#{tagName} AND a.group_no='1705'
+	</select>
+	
+	<delete id="delcustTags" parameterType="String" >
+		delete from CIM_F_TAG_CUST_TAGS where CUST_ID = #{custId}
+	</delete>
+	
+	<select id="qryAvailable" parameterType="String" resultType="cn.com.yusys.yusp.cm.cust.domain.CimFTagCustTags">
+		SELECT * FROM CIM_F_MM_TAG_TAGS WHERE TAG_NO = #{tagNo, jdbcType=VARCHAR}
+		<![CDATA[ 
+		and AVAILABLE_DATE<=to_date(#{today,jdbcType=VARCHAR},'yyyy-mm-dd hh24:mi:ss') and DISABLE_DATE>=to_date(#{today,jdbcType=VARCHAR},'yyyy-mm-dd hh24:mi:ss')
+		]]>
+	</select>
+	<select id="getSeq" resultType="String">
+		select ysc_sequence.nextval from dual
+	</select>
+	<select id="qryByTagsname" parameterType="java.util.Map" resultType="cn.com.yusys.yusp.cm.cust.domain.CimFTagCustTags">
+		select t.* from CIM_F_MM_TAG_TAGS t
+		 where  t.TAG_NAME=#{tagName}
+		 <![CDATA[ 
+		and t.AVAILABLE_DATE<=to_date(#{today,jdbcType=VARCHAR},'yyyy-mm-dd hh24:mi:ss') and t.DISABLE_DATE>=to_date(#{today,jdbcType=VARCHAR},'yyyy-mm-dd hh24:mi:ss')
+		]]>
+	</select>
+	
+	<!-- 根据授权类型对象和标签编号获取有效的授权数据 -->
+	<select id="getAuthData" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"  resultType="cn.com.yusys.yusp.cm.cust.domain.CimFTagCustTags">
+		select * from CIM_F_MM_TAG_AUTH where TAG_NO=#{condition.tagNo, jdbcType=VARCHAR}
+		and(AUTH_OBJ = #{condition.instu, jdbcType=VARCHAR} 
+			OR AUTH_OBJ = #{condition.org, jdbcType=VARCHAR}
+			OR AUTH_OBJ = #{condition.user, jdbcType=VARCHAR}
+			OR AUTH_OBJ IN
+			<foreach collection="condition.roles" item="condition.roles" open="(" separator="," close=")">
+           		#{condition.roles, jdbcType=VARCHAR}
+        	</foreach> ) 
+        	 and SYSDATE >= AVAILABLE_DATE AND DISABLE_DATE>=SYSDATE
+	</select>
+</mapper>

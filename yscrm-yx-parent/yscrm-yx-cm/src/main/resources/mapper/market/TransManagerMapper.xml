@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.cm.market.repository.mapper.TransManagerMapper">
+
+	<select id="getTransList" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+			resultType="java.util.Map">
+		select fti.*,t1.user_name from FR_RULE_TRANS_INFO fti  left join admin_sm_user t1 on fti.login_no = t1.login_code
+
+		<where>
+
+			<if test="condition.transCode != null and condition.transCode !=''">
+				and fti.trans_code like '%'||#{condition.transCode}||'%'
+			</if>
+
+			<if test="condition.busiCode!= null and condition.busiCode!=''">
+				and fti.busi_code like '%'||#{condition.busiCode}||'%'
+			</if>
+
+			<if test="condition.chanId!= null and condition.chanId!=''">
+				and fti.chan_id =#{condition.chanId}
+			</if>
+
+			<if test="condition.transName!= null and condition.transName!=''">
+				and fti.trans_name  like '%'||#{condition.transName}||'%'
+			</if>
+
+			<if test="condition.transType!= null and condition.transType!=''">
+				and fti.trans_type =#{condition.transType}
+			</if>
+
+			<if test="condition.eventType!= null and condition.eventType!=''">
+				and fti.event_type =#{condition.eventType}
+			</if>
+		</where>
+		order by op_time desc
+	</select>
+	<select id="getTrans" parameterType="String" resultType="cn.com.yusys.yusp.cm.market.domain.FrTransInfoModel">
+		select  * from FR_RULE_TRANS_INFO where TRANS_CODE = #{transCode, jdbcType=VARCHAR}
+	</select>
+	<select id="selectTab" parameterType="String" resultType="java.util.Map">
+		select  * from user_tab_comments where table_name = #{tabName, jdbcType=VARCHAR}
+	</select>
+
+	<select id="getTransListWithNoPage" parameterType="cn.com.yusys.yusp.cm.market.domain.FrTransInfoModel"
+			resultType="cn.com.yusys.yusp.cm.market.domain.FrTransInfoModel">
+		select * from FR_RULE_TRANS_INFO fti where fti.trans_code =#{transCode}
+	</select>
+
+	<!-- 创建表 -->
+	<update id="createTable" parameterType="java.util.Map" statementType="STATEMENT">
+		${ddlStr}
+	</update>
+	<update id="dropTable" parameterType="java.util.Map" statementType="STATEMENT">
+		${ddlDrop}
+	</update>
+
+	<insert id="transInsert"  parameterType="cn.com.yusys.yusp.cm.market.domain.FrTransInfoModel">
+		<!--   insert into FR_RULE_TRANS_INFO(TRANS_CODE,
+          BUSI_CODE,TRANS_NAME,CHAN_ID,EVENT_TYPE,TRANS_TYPE,
+          TRANS_STATE,BAK,TAB_NAME,OP_TIME,LOGIN_NO,OP_ORG)
+           values(#{transCode},#{busiCode},#{transName},#{chanId},#{eventType},#{eventType},#{transType},
+           #{bak},#{tabName},sysdate,#{loginOn},#{opOrg}) -->
+		insert into FR_RULE_TRANS_INFO(TRANS_CODE,
+		BUSI_CODE,TRANS_NAME, EVENT_TYPE,TRANS_TYPE,OP_TIME,LOGIN_NO,OP_ORG,chan_id,TRANS_STATE)
+		values(#{transCode,javaType=java.lang.String},#{busiCode,javaType=java.lang.String},
+		#{transName,javaType=java.lang.String},
+		#{eventType,javaType=java.lang.String},
+		#{transType,javaType=java.lang.String},
+		#{opTime,javaType=java.lang.String},#{loginNo,javaType=java.lang.String},#{opOrg,javaType=java.lang.String},'9','0')
+	</insert>
+	<delete id="delTrans" parameterType="String">
+		delete from loy_eng_transaction_category where TRANSACTION_CODE = #{transCode, jdbcType=VARCHAR}
+	</delete>
+	<insert id="insertTrans"  parameterType="java.util.Map" >
+		insert into
+			loy_eng_transaction_category
+		(TRANSACTION_CODE,
+		 TRANSACTION_NAME,
+		 TABLE_E_NAME,
+		 TRANSACTION_TYPE)
+		values
+			('${transCode}',
+			 '${transName}',
+			 '${tabName}',
+			 '${transType}')
+	</insert>
+	<update id="transUpdateByPk" parameterType="cn.com.yusys.yusp.cm.market.domain.FrTransInfoModel">
+		UPDATE FR_RULE_TRANS_INFO
+		SET BUSI_CODE = #{busiCode,javaType=java.lang.String},
+			TRANS_NAME = #{transName,javaType=java.lang.String},
+			CHAN_ID = #{chanId,javaType=java.lang.String},
+			EVENT_TYPE= #{eventType,javaType=java.lang.String},
+			trans_type=#{transType,javaType=java.lang.String}
+		WHERE TRANS_CODE = #{transCode,javaType=java.lang.String}
+
+	</update>
+
+	<update id="updateTransByCode" parameterType="String">
+		UPDATE FR_RULE_TRANS_INFO
+		SET TRANS_STATE = '1'
+		WHERE TRANS_CODE = #{transCode,javaType=java.lang.String}
+
+	</update>
+	<delete id="deleteTransByPks" parameterType="java.util.Map">
+		delete from FR_RULE_TRANS_INFO where TRANS_CODE in
+		<foreach collection="Listpks"   item="item"
+				 open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</delete>
+
+	<delete id="deleteTransMapByPks" parameterType="java.util.Map">
+		delete from fr_rule_trans_mapping where TRANS_CODE in
+		<foreach collection="Listpks"   item="item"
+				 open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</delete>
+
+
+	<select id="getCurrentTransParamList" parameterType="cn.com.yusys.yusp.cm.market.domain.FrTransInfoModel"
+			resultType="cn.com.yusys.yusp.cm.market.domain.FrTransMapModel" >
+		select * from fr_rule_trans_mapping ftm where ftm.trans_Code=#{transCode}
+	</select>
+
+	<select id="getTransParamList" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+			resultType="cn.com.yusys.yusp.cm.market.domain.FrParamPool" >
+		select * from FR_RULE_PARAM_POOL frp
+		where   frp. PUB_FLAG='1'
+		<if test="condition.paramType!= null and condition.paramType!=''">
+			and frp.param_type=#{condition.paramType}
+		</if>
+
+		<!--		<if test="condition.paramId!= null and condition.paramId!=''">-->
+		<!--				and frp.param_id=#{condition.paramId}-->
+		<!--			</if>-->
+		<if test="condition.paramId!= null and condition.paramId!=''">
+			and frp.param_id like '%'||#{condition.paramId }||'%'
+		</if>
+		<if test="condition.paramName!= null and condition.paramName!=''">
+			and frp.param_name  like '%'||#{condition.paramName}||'%'
+		</if>
+
+	</select>
+
+
+	<select id="getRruleDetailConfigDetail" parameterType="java.lang.String"  resultType="java.util.Map">
+		select sub_id subid, target_tab targettab,LISTAGG(PARAM_ID,',') as paramids from FR_ENG_DETAIL_CONF where sub_id in (
+			select sub_id from FR_ENG_TRANSACTION_ROUTING FETR  inner join FR_ENG_RULE_INFO FERI on(FETR.RULE_SET_ID=FERI.RULE_SET_ID)
+			where FETR.TRANSACTION_CODE = #{value,javaType=java.lang.String})
+		group by sub_id,target_tab
+
+	</select>
+	<select id="querylist" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+			resultType="java.util.Map">
+		SELECT T.* FROM FR_RULE_TRANS_INFO T
+	</select>
+
+	<!-- 根据交易码查询表-->
+	<select id="getTableByTransCode" parameterType="String"
+			resultType="java.util.Map">
+		SELECT T.*,t1.type_name
+		FROM CM_F_RC_TABLE_EC_NAME T
+				 LEFT JOIN cm_f_rc_table_type t1
+						   ON t1.TYPE_ID = t.type_id
+		where (t.DELETE_SIGN is null or t.DELETE_SIGN != '1' )
+		  and T.TRANSACTION_CODE  =#{transCode, jdbcType=VARCHAR}
+	</select>
+
+</mapper>

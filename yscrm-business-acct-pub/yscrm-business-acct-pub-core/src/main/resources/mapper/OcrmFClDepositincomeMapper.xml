@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper
+        namespace="cn.com.yusys.yscrm.fiexdstatement.repository.mapper.OcrmFClDepositincomeMapper">
+    <!-- 条件列表查询 -->
+    <select id="getIncomeList" parameterType="java.util.HashMap"
+            resultType="java.util.HashMap">
+        select BRANCH,ORG_NAME,CUSTOMER_MGR_ID,CUSTOMER_MGR_NAME,CUSTOMER_MGR_TYPE,CUSTOMER_ID,CUSTOMER_NAME,DEPOSIT_PROFIT,AUM_AVG_BALANCE
+        from OCRM_F_CL_DEPOSITINCOME
+        <where>
+            <if test="dataDate != null and dataDate != ''">
+                and DATA_DATE=to_date(#{dataDate},'yyyy-MM-dd')
+            </if>
+            <if test="targetId != null and targetId !=''">
+                AND CUSTOMER_ID=#{targetId}
+            </if>
+            <if test="mktRespPerson != null and mktRespPerson !=''">
+                AND ( ORG_ID=#{mktRespPerson} or BRANCH_NO=#{mktRespPerson} or CUSTOMER_MGR_ID=#{mktRespPerson})
+            </if>
+            <if test="aumAvgBalanceStart != null and aumAvgBalanceStart != ''">
+                and AUM_AVG_BALANCE >= to_number(#{aumAvgBalanceStart,jdbcType=VARCHAR})
+            </if>
+            <if test="aumAvgBalanceEnd != null and aumAvgBalanceEnd != ''">
+                and AUM_AVG_BALANCE &lt;= to_number(#{aumAvgBalanceEnd,jdbcType=VARCHAR})
+            </if>
+            <if test="sqlDataAuth != null and sqlDataAuth != ''">
+                ${sqlDataAuth}
+            </if>
+
+        </where>
+
+    </select>
+
+
+</mapper>

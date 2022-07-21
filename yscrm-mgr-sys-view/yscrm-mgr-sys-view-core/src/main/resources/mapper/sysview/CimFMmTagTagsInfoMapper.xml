@@ -1,0 +1,522 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper
+	namespace="cn.com.yusys.yscrm.sysview.repository.mapper.CimFMmTagTagsInfoMapper">
+	<select id="getTagList" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+		resultType="cn.com.yusys.yscrm.sysview.domain.CimFMmTagTagsInfo">
+		SELECT T.TAG_NO,MAX(T.TAG_NAME) AS
+		TAG_NAME,T.GROUP_NO,T.TAG_DESC,T.TIMELINES_TYPE,T.PROCESS_MODE,
+		T.UPDATE_FREQUENCY,T.TAG_APPLY,T.TAG_LIFECYCLE,T.IF_AVAILABLE,T.TAG_PRI,
+		TO_CHAR(T.AVAILABLE_DATE,'yyyy-MM-DD') AS AVAILABLE_DATE,
+		TO_CHAR(T.DISABLE_DATE,'yyyy-MM-DD') AS DISABLE_DATE,
+		TO_CHAR(T.CREATE_DATE,'yyyy-MM-DD') AS CREATE_DATE,
+		T.CREATE_USER,T.TAG_STATUS,T.SYSTEM_TAG,T.CREATE_SYS,G.GROUP_NAME,S.ORG_NAME
+		FROM CIM_F_MM_TAG_TAGS T
+		LEFT JOIN CIM_F_MM_TAG_GROUP G ON G.GROUP_NO =
+		T.GROUP_NO
+		LEFT JOIN admin_sm_org S ON S.ORG_CODE = T.CREATE_ORG
+		LEFT
+		JOIN CIM_F_MM_TAG_AUTH A ON A.TAG_NO = T.TAG_NO
+		<where>
+			1=1
+			AND (G.PARENT_NO IN('00','1') OR (G.PARENT_NO = '1023' AND G.CREATE_USER = #{condition.user, jdbcType=VARCHAR} AND T.CREATE_USER = #{condition.user, jdbcType=VARCHAR}))
+			<if test="condition.flag == false">
+				AND(
+				(A.AUTH_OBJ = #{condition.instu, jdbcType=VARCHAR}
+				OR A.AUTH_OBJ
+				= #{condition.org, jdbcType=VARCHAR}
+				OR A.AUTH_OBJ =
+				#{condition.user, jdbcType=VARCHAR}
+				OR A.AUTH_OBJ IN
+				<foreach collection="condition.roles" item="condition.roles"
+					open="(" separator="," close=")">
+					#{condition.roles, jdbcType=VARCHAR}
+				</foreach>
+				) AND SYSDATE >= A.AVAILABLE_DATE AND A.DISABLE_DATE>=SYSDATE
+				-- OR T.GROUP_NO = '1705'
+				)
+			</if>
+			<if test="condition.tagNo != null and condition.tagNo !=''">
+				AND T.TAG_NO LIKE CONCAT(CONCAT('%',#{condition.tagNo,
+				jdbcType=VARCHAR}),'%')
+			</if>
+			<if test="condition.tagName != null and condition.tagName !=''">
+				AND T.TAG_NAME LIKE
+				CONCAT(CONCAT('%',#{condition.tagName,
+				jdbcType=VARCHAR}),'%')
+			</if>
+			<if test="condition.groupName != null and condition.groupName !=''">
+				AND G.GROUP_NAME LIKE
+				CONCAT(CONCAT('%',#{condition.groupName,
+				jdbcType=VARCHAR}),'%')
+			</if>
+			<if
+				test="condition.timelinesType != null and condition.timelinesType !=''">
+				AND T.TIMELINES_TYPE LIKE
+				CONCAT(CONCAT('%',#{condition.timelinesType,
+				jdbcType=VARCHAR}),'%')
+			</if>
+			<if test="condition.processMode != null and condition.processMode !=''">
+				AND T.PROCESS_MODE LIKE
+				CONCAT(CONCAT('%',#{condition.processMode,
+				jdbcType=VARCHAR}),'%')
+			</if>
+			<if
+				test="condition.updateFrequency != null and condition.updateFrequency !=''">
+				AND T.UPDATE_FREQUENCY LIKE
+				CONCAT(CONCAT('%',#{condition.updateFrequency,
+				jdbcType=VARCHAR}),'%')
+			</if>
+			<if test="condition.tagApply != null and condition.tagApply !=''">
+				AND T.TAG_APPLY LIKE
+				CONCAT(CONCAT('%',#{condition.tagApply,
+				jdbcType=VARCHAR}),'%')
+			</if>
+			<if test="condition.tagLifecycle != null and condition.tagLifecycle !=''">
+				AND T.TAG_LIFECYCLE LIKE
+				CONCAT(CONCAT('%',#{condition.tagLifecycle,
+				jdbcType=VARCHAR}),'%')
+			</if>
+			<if test="condition.ifAvailable != null and condition.ifAvailable !=''">
+				AND T.IF_AVAILABLE LIKE
+				CONCAT(CONCAT('%',#{condition.ifAvailable,
+				jdbcType=VARCHAR}),'%')
+			</if>
+		</where>
+		<!-- <if test="condition.groupNo != null and condition.groupNo !='' and 
+			condition.groupNo !='0'"> -->
+		<!-- START WITH T.GROUP_NO = #{condition.groupNo, jdbcType=VARCHAR} CONNECT 
+			BY NOCYCLE G.PARENT_NO = PRIOR T.GROUP_NO -->
+		<!-- </if> -->
+		<if
+			test="condition.groupNo != null and condition.groupNo !='' and condition.groupNo !='0'.toString()">
+			START WITH T.GROUP_NO IN(SELECT GROUP_NO
+			FROM CIM_F_MM_TAG_GROUP
+			START WITH GROUP_NO =#{condition.groupNo,
+			jdbcType=VARCHAR} CONNECT BY
+			PRIOR
+			GROUP_NO = PARENT_NO) CONNECT BY NOCYCLE G.PARENT_NO = PRIOR
+			T.GROUP_NO
+		</if>
+		<if
+			test="condition.groupNo != null and condition.groupNo !='' and condition.groupNo =='0'.toString()">
+			START WITH T.GROUP_NO IN(SELECT GROUP_NO
+			FROM CIM_F_MM_TAG_GROUP
+			START WITH GROUP_NO in('1','1023') CONNECT BY
+			PRIOR GROUP_NO =
+			PARENT_NO) CONNECT BY
+			NOCYCLE G.PARENT_NO = PRIOR T.GROUP_NO
+		</if>
+		GROUP BY
+		T.SYSTEM_TAG,T.TAG_NO,T.GROUP_NO,T.TAG_DESC,T.TIMELINES_TYPE,T.PROCESS_MODE,
+		T.UPDATE_FREQUENCY,T.TAG_APPLY,T.TAG_LIFECYCLE,T.IF_AVAILABLE,T.TAG_PRI,
+		T.AVAILABLE_DATE,
+		T.DISABLE_DATE,
+		T.CREATE_DATE,
+		T.CREATE_USER,T.CREATE_SYS,T.TAG_STATUS,G.GROUP_NAME,S.ORG_NAME
+		order by
+		SYSTEM_TAG DESC,to_number(TAG_PRI),CREATE_DATE
+	</select>
+
+	<select id="getSystemTagList" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+		resultType="cn.com.yusys.yscrm.sysview.domain.CimFMmTagTagsInfo">
+		SELECT T.TAG_NO,MAX(T.TAG_NAME) AS
+		TAG_NAME,T.GROUP_NO,T.TAG_DESC,T.TIMELINES_TYPE,T.PROCESS_MODE,
+		T.UPDATE_FREQUENCY,T.TAG_APPLY,T.TAG_LIFECYCLE,T.IF_AVAILABLE,T.TAG_PRI,
+		TO_CHAR(T.AVAILABLE_DATE,'yyyy-MM-DD') AS AVAILABLE_DATE,
+		TO_CHAR(T.DISABLE_DATE,'yyyy-MM-DD') AS DISABLE_DATE,
+		TO_CHAR(T.CREATE_DATE,'yyyy-MM-DD') AS CREATE_DATE,
+		T.CREATE_USER,T.TAG_STATUS,T.SYSTEM_TAG,T.CREATE_SYS,G.GROUP_NAME,S.ORG_NAME
+		FROM CIM_F_MM_TAG_TAGS T
+		LEFT JOIN CIM_F_MM_TAG_GROUP G ON G.GROUP_NO =
+		T.GROUP_NO
+		LEFT JOIN admin_sm_org S ON S.ORG_CODE = T.CREATE_ORG
+		LEFT
+		JOIN CIM_F_MM_TAG_AUTH A ON A.TAG_NO = T.TAG_NO
+		<where>
+			1=1
+			<if test="condition.flag == false">
+				AND(
+				(A.AUTH_OBJ = #{condition.instu, jdbcType=VARCHAR}
+				OR A.AUTH_OBJ
+				= #{condition.org, jdbcType=VARCHAR}
+				OR A.AUTH_OBJ =
+				#{condition.user, jdbcType=VARCHAR}
+				OR A.AUTH_OBJ IN
+				<foreach collection="condition.roles" item="condition.roles"
+					open="(" separator="," close=")">
+					#{condition.roles, jdbcType=VARCHAR}
+				</foreach>
+				) AND SYSDATE >= A.AVAILABLE_DATE AND A.DISABLE_DATE>=SYSDATE
+				-- OR
+				T.GROUP_NO = '1705'
+				)
+			</if>
+			<if test="condition.tagNo != null and condition.tagNo !=''">
+				AND T.TAG_NO LIKE CONCAT(CONCAT('%',#{condition.tagNo,
+				jdbcType=VARCHAR}),'%')
+			</if>
+			<if test="condition.tagName != null and condition.tagName !=''">
+				AND T.TAG_NAME LIKE
+				CONCAT(CONCAT('%',#{condition.tagName,
+				jdbcType=VARCHAR}),'%')
+			</if>
+			<if test="condition.groupName != null and condition.groupName !=''">
+				AND G.GROUP_NAME LIKE
+				CONCAT(CONCAT('%',#{condition.groupName,
+				jdbcType=VARCHAR}),'%')
+			</if>
+			<if
+				test="condition.timelinesType != null and condition.timelinesType !=''">
+				AND T.TIMELINES_TYPE LIKE
+				CONCAT(CONCAT('%',#{condition.timelinesType,
+				jdbcType=VARCHAR}),'%')
+			</if>
+			<if test="condition.processMode != null and condition.processMode !=''">
+				AND T.PROCESS_MODE LIKE
+				CONCAT(CONCAT('%',#{condition.processMode,
+				jdbcType=VARCHAR}),'%')
+			</if>
+			<if
+				test="condition.updateFrequency != null and condition.updateFrequency !=''">
+				AND T.UPDATE_FREQUENCY LIKE
+				CONCAT(CONCAT('%',#{condition.updateFrequency,
+				jdbcType=VARCHAR}),'%')
+			</if>
+			<if test="condition.tagApply != null and condition.tagApply !=''">
+				AND T.TAG_APPLY LIKE
+				CONCAT(CONCAT('%',#{condition.tagApply,
+				jdbcType=VARCHAR}),'%')
+			</if>
+			<if test="condition.tagLifecycle != null and condition.tagLifecycle !=''">
+				AND T.TAG_LIFECYCLE LIKE
+				CONCAT(CONCAT('%',#{condition.tagLifecycle,
+				jdbcType=VARCHAR}),'%')
+			</if>
+			<if test="condition.ifAvailable != null and condition.ifAvailable !=''">
+				AND T.IF_AVAILABLE LIKE
+				CONCAT(CONCAT('%',#{condition.ifAvailable,
+				jdbcType=VARCHAR}),'%')
+			</if>
+		</where>
+		<!-- <if test="condition.groupNo != null and condition.groupNo !='' and 
+			condition.groupNo !='0'"> -->
+		<!-- START WITH T.GROUP_NO = #{condition.groupNo, jdbcType=VARCHAR} CONNECT 
+			BY NOCYCLE G.PARENT_NO = PRIOR T.GROUP_NO -->
+		<!-- </if> -->
+		<if
+			test="condition.groupNo != null and condition.groupNo !='' and condition.groupNo !='0'.toString()">
+			START WITH T.GROUP_NO IN(SELECT GROUP_NO
+			FROM CIM_F_MM_TAG_GROUP
+			START WITH GROUP_NO =#{condition.groupNo,
+			jdbcType=VARCHAR} CONNECT BY
+			PRIOR
+			GROUP_NO = PARENT_NO) CONNECT BY NOCYCLE G.PARENT_NO = PRIOR
+			T.GROUP_NO
+		</if>
+		<if
+			test="condition.groupNo != null and condition.groupNo !='' and condition.groupNo =='0'.toString()">
+			START WITH T.GROUP_NO IN(SELECT GROUP_NO
+			FROM CIM_F_MM_TAG_GROUP
+			START WITH GROUP_NO in('1') CONNECT BY PRIOR
+			GROUP_NO = PARENT_NO)
+			CONNECT BY
+			NOCYCLE G.PARENT_NO = PRIOR T.GROUP_NO
+		</if>
+		GROUP BY
+		T.TAG_NO,T.GROUP_NO,T.TAG_DESC,T.TIMELINES_TYPE,T.PROCESS_MODE,
+		T.UPDATE_FREQUENCY,T.TAG_APPLY,T.TAG_LIFECYCLE,T.IF_AVAILABLE,T.TAG_PRI,
+		T.AVAILABLE_DATE,
+		T.DISABLE_DATE,
+		T.CREATE_DATE,
+		T.CREATE_USER,T.CREATE_SYS,T.TAG_STATUS,T.SYSTEM_TAG,G.GROUP_NAME,S.ORG_NAME
+		order by to_number(TAG_PRI)
+	</select>
+	<select id="judgeSameTag" parameterType="cn.com.yusys.yscrm.sysview.domain.CimFMmTagTagsInfo"
+		resultType="java.util.HashMap">
+		SELECT TAG_NAME FROM CIM_F_MM_TAG_TAGS WHERE TAG_NAME =
+		#{tagName, jdbcType=VARCHAR} AND GROUP_NO = #{groupNo,
+		jdbcType=VARCHAR}
+	</select>
+	<update id="updateTagList" parameterType="cn.com.yusys.yscrm.sysview.domain.CimFMmTagTagsInfo">
+		UPDATE CIM_F_MM_TAG_TAGS T SET
+		T.TAG_NAME = #{tagName,
+		jdbcType=VARCHAR},
+		T.GROUP_NO = #{groupNo, jdbcType=VARCHAR},
+		T.TAG_DESC = #{tagDesc, jdbcType=VARCHAR},
+		T.TIMELINES_TYPE =
+		#{timelinesType, jdbcType=VARCHAR},
+		T.PROCESS_MODE = #{processMode,
+		jdbcType=VARCHAR},
+		T.UPDATE_FREQUENCY = #{updateFrequency,
+		jdbcType=VARCHAR},
+		T.TAG_APPLY = #{tagApply, jdbcType=VARCHAR},
+		T.TAG_LIFECYCLE = #{tagLifecycle, jdbcType=VARCHAR},
+		T.IF_AVAILABLE =
+		#{ifAvailable, jdbcType=VARCHAR},
+		T.TAG_PRI = #{tagPri,
+		jdbcType=VARCHAR},
+		T.TAG_STATUS=#{tagStatus, jdbcType=VARCHAR},
+		<if test="groupNo != '1705' and tagLifecycle != 'OFFLINE'">
+			T.AVAILABLE_DATE = #{availableDate, jdbcType=VARCHAR},
+		</if>
+		T.DISABLE_DATE = #{disableDate, jdbcType=VARCHAR},
+		T.LAST_UPDATE_DT =
+		#{lastUpdateDt, jdbcType=VARCHAR},
+		T.LAST_UPDATE_USER =
+		#{lastUpdateUser, jdbcType=VARCHAR}
+		WHERE T.TAG_NO = #{tagNo,
+		jdbcType=VARCHAR} AND (T.TAG_LIFECYCLE =
+		'UNAPPROVED' OR
+		T.TAG_LIFECYCLE = 'OFFLINE')
+	</update>
+
+	<update id="updateTagStatusJob">
+		UPDATE CIM_F_MM_TAG_TAGS SET
+		TAG_STATUS='0',IF_AVAILABLE='0' WHERE
+		DISABLE_DATE
+		&lt;=TO_DATE(to_char(sysdate,'yyyy-mm-dd'), 'yyyy-mm-dd')
+		AND
+		TAG_STATUS!='0'
+	</update>
+
+	<delete id="deleteByTagNo" parameterType="java.util.Map">
+		DELETE FROM
+		CIM_F_MM_TAG_TAGS WHERE TAG_NO = (#{tagNo, jdbcType=VARCHAR}) AND
+		TAG_LIFECYCLE = 'UNAPPROVED'
+	</delete>
+	<select id="getTagByGroupNo" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+		resultType="java.util.HashMap">
+		SELECT T.*,G.GROUP_NAME FROM CIM_F_MM_TAG_TAGS T LEFT JOIN
+		CIM_F_MM_TAG_GROUP G ON G.GROUP_NO = T.GROUP_NO
+		WHERE T.GROUP_NO =
+		#{condition.groupNo, jdbcType=VARCHAR} 
+        <![CDATA[ 
+		and T.AVAILABLE_DATE<=to_date(#{condition.today,jdbcType=VARCHAR},'yyyy-mm-dd hh24:mi:ss') and T.DISABLE_DATE>=to_date(#{condition.today,jdbcType=VARCHAR},'yyyy-mm-dd hh24:mi:ss')
+		]]>
+		ORDER BY T.TAG_NO
+	</select>
+	<select id="getTagNodeList" parameterType="cn.com.yusys.yscrm.sysview.domain.CimFMmTagTagsInfo"
+		resultType="java.util.HashMap">
+		SELECT GROUP_NO FROM CIM_F_MM_TAG_TAGS WHERE GROUP_NO =
+		#{tagNo, jdbcType=VARCHAR}
+	</select>
+	<delete id="deleteByTagNos" parameterType="java.util.Map">
+		DELETE FROM
+		CIM_F_MM_TAG_TAGS WHERE TAG_NO = (#{tagNos, jdbcType=VARCHAR})
+		AND NOT
+		EXISTS(SELECT GROUP_NO FROM CIM_F_MM_TAG_TAGS WHERE GROUP_NO =
+		#{tagNos, jdbcType=VARCHAR})
+		AND NOT EXISTS(SELECT TAG_NO FROM
+				CIM_F_TAG_CUST_TAGS_SELF WHERE TAG_NO = #{tagNos, jdbcType=VARCHAR})
+	</delete>
+	<select id="getCustTag" parameterType="string" resultType="string">
+		SELECT COUNT(1) FROM CIM_F_TAG_CUST_TAGS_SELF WHERE TAG_NO = #{tagNo,
+		jdbcType=VARCHAR}
+	</select>
+
+	<delete id="deleteCustTag" parameterType="string">
+		DELETE FROM
+			CIM_F_TAG_CUST_TAGS_SELF WHERE TAG_NO = #{tagNo, jdbcType=VARCHAR}
+	</delete>
+	<!-- 查询审批中的标签 -->
+	<select id="getUploadTagById" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+		resultType="java.util.HashMap">
+		select * from CIM_F_MM_TAG_TAGS where TAG_NO =
+		#{condition.id, jdbcType=VARCHAR}
+	</select>
+	<!-- 更新审批中标签生命周期 -->
+	<update id="setTagLifeCycle" parameterType="cn.com.yusys.yscrm.sysview.domain.CimFMmTagTagsInfo">
+		update
+		CIM_F_MM_TAG_TAGS set
+		TAG_LIFECYCLE = #{tagLifecycle,
+		jdbcType=VARCHAR},
+		LAST_UPDATE_DT = #{lastUpdateDt,
+		jdbcType=VARCHAR},
+		LAST_UPDATE_USER = #{lastUpdateUser,
+		jdbcType=VARCHAR},
+		TAG_RESTS =
+		#{tagRests, jdbcType=VARCHAR}
+		where
+		TAG_NO = #{tagNo, jdbcType=VARCHAR}
+	</update>
+	<!-- 更新标签状态（下架，上架） -->
+	<update id="setTagStatus" parameterType="java.util.Map">
+		UPDATE CIM_F_MM_TAG_TAGS
+		<if test="tagNos != null and tagNos.length > 0">
+			SET TAG_STATUS=#{tagStatus, jdbcType=VARCHAR} where TAG_NO in
+			<foreach item="item" index="index" collection="tagNos" open="("
+				separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+	</update>
+	<select id="getCustTagNumber" parameterType="java.util.Map" resultType="cn.com.yusys.yscrm.sysview.domain.TagAnalysis">
+		select TT.TAG_NAME,TT.COUNT
+		from (
+		    select TT.TAG_NAME,TT.TAG_NO,TT.GROUP_NO,COUNT(CT.CUST_ID) COUNT
+		    from CIM_F_MM_TAG_TAGS TT
+		    left join CIM_F_TAG_CUST_TAGS CT on TT.TAG_NO=CT.TAG_NO
+		    where TT.SYSTEM_TAG = '1'
+		    group by TT.TAG_NAME,TT.TAG_NO,TT.GROUP_NO
+		    union
+			select TT.TAG_NAME,TT.TAG_NO,TT.GROUP_NO,COUNT(DISTINCT CT.CUST_ID) COUNT
+			from CIM_F_MM_TAG_TAGS TT
+			left join CIM_F_TAG_CUST_TAGS_SELF CT on TT.TAG_NO=CT.TAG_NO
+			where TT.SYSTEM_TAG = '0' and TT.CREATE_USER = #{user,jdbcType=VARCHAR}
+			group by TT.TAG_NAME,TT.TAG_NO,TT.GROUP_NO) TT
+		<where>
+			<if test="tagNos != null and tagNos.length > 0">
+				AND TT.TAG_NO IN
+					<foreach item="item" index="index" collection="tagNos" open="(" separator="," close=")">
+						#{item}
+					</foreach>
+			</if>
+			<if test="groupNos != null and groupNos.length > 0">
+				OR TT.GROUP_NO IN
+					<foreach item="item" index="index" collection="groupNos" open="(" separator="," close=")">
+						#{item}
+					</foreach>
+			</if>
+		</where>
+		order by TT.COUNT desc
+	</select>
+
+	<select id="getTagFrequency" parameterType="java.util.Map" resultType="cn.com.yusys.yscrm.sysview.domain.TagAnalysis">
+		select TT.TAG_NAME,COUNT(TC.SEQNO) COUNT
+		from CIM_F_MM_TAG_TAGS TT
+		left join OCRM_F_CG_TAGCOUNT_TAG TC on TT.TAG_NO=TC.TAG_ID
+			<if test="startTime !=null and startTime!='' ">
+				AND TC.DATA_DATE &gt;= TO_DATE(#{startTime, jdbcType=VARCHAR}, 'yyyy-mm-dd HH24:MI:SS')
+			</if>
+			<if test="endTime !=null and endTime!='' ">
+				AND TC.DATA_DATE &lt;= TO_DATE(#{endTime, jdbcType=VARCHAR}, 'yyyy-mm-dd HH24:MI:SS')
+			</if>
+		<where>
+		    (TT.SYSTEM_TAG = '1' or (TT.SYSTEM_TAG = '0'and TT.CREATE_USER = #{user,jdbcType=VARCHAR}))
+			<if test="tagNos != null and tagNos.length > 0">
+				AND TT.TAG_NO IN
+				<foreach item="item" index="index" collection="tagNos" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+			<if test="groupNos != null and groupNos.length > 0">
+				OR TT.GROUP_NO IN
+				<foreach item="item" index="index" collection="groupNos" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+		</where>
+		group by TT.TAG_NAME
+		order by COUNT desc
+	</select>
+
+	<select id="tagAnalysis" parameterType="java.util.Map"
+		resultType="cn.com.yusys.yscrm.sysview.domain.TagAnalysis">
+		SELECT RE.TAG_NAME,RE.REQUENCY_COUNT,CU.CUST_COUNT FROM
+		(SELECT
+		T.TAG_NAME,C.REQUENCY_COUNT FROM CIM_F_MM_TAG_TAGS T
+		LEFT JOIN
+		(SELECT
+		COUNT(*) AS REQUENCY_COUNT,TAG_ID FROM OCRM_F_CG_TAGCOUNT_TAG
+		WHERE
+		DATA_DATE &gt;= TO_DATE(#{startTime, jdbcType=VARCHAR}, 'yyyy-mm-dd
+		HH24:MI:SS')
+		AND DATA_DATE &lt;= TO_DATE(#{endTime, jdbcType=VARCHAR},
+		'yyyy-mm-dd
+		HH24:MI:SS')
+		<if test="tagNos != null and tagNos.length > 0">
+			AND TAG_ID IN
+			<foreach item="item" index="index" collection="tagNos" open="("
+				separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+		GROUP BY TAG_ID) C ON C.TAG_ID=T.TAG_NO
+		<if test="tagNos != null and tagNos.length > 0">
+			WHERE T.TAG_NO IN
+			<foreach item="item" index="index" collection="tagNos" open="("
+				separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+		)RE
+		LEFT JOIN
+		(SELECT T.TAG_NAME,C.CUST_COUNT FROM CIM_F_MM_TAG_TAGS T
+		LEFT JOIN
+		(SELECT COUNT(*) AS CUST_COUNT,TAG_NO FROM
+		CIM_F_TAG_CUST_TAGS_SELF
+		WHERE 1=1
+		<if test="tagNos != null and tagNos.length > 0">
+			AND TAG_NO IN
+			<foreach item="item" index="index" collection="tagNos" open="("
+				separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+		GROUP BY TAG_NO) C ON C.TAG_NO=T.TAG_NO
+		<if test="tagNos != null and tagNos.length > 0">
+			WHERE T.TAG_NO IN
+			<foreach item="item" index="index" collection="tagNos" open="("
+				separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+		) CU ON CU.TAG_NAME=RE.TAG_NAME
+	</select>
+	<!-- 查询审批中的标签 -->
+	<select id="getTagById" parameterType="string"
+		resultType="cn.com.yusys.yscrm.sysview.domain.CimFMmTagTagsInfo">
+		select * from CIM_F_MM_TAG_TAGS where TAG_NO = #{tagNo,
+		jdbcType=VARCHAR}
+	</select>
+	<select id="getSeq" resultType="string">
+		select ysc_sequence.nextval from
+		dual
+	</select>
+	<select id="getTagSeq" resultType="string">
+		select TAG_SEQ.nextval from
+		dual
+	</select>
+	<select id="getOrgLevel" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+		resultType="java.util.Map">
+		SELECT ORG_LEVEL FROM admin_sm_org T WHERE ORG_ID =
+		#{condition.id, jdbcType=VARCHAR}
+	</select>
+	<select id="getGroupNo" parameterType="string" resultType="java.util.Map">
+		select count(GROUP_NO) as num from CIM_F_MM_TAG_GROUP where GROUP_NO =
+		#{groupNo, jdbcType=VARCHAR}
+	</select>
+
+	<select id="qryTagBytagno" parameterType="java.util.List"
+		resultType="java.util.HashMap">
+		select * from CIM_F_MM_TAG_TAGS
+		<if test="list != null and list.size > 0">
+			where TAG_NO in
+			<foreach item="item" index="index" collection="list" open="("
+				separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+
+	</select>
+
+	<select id="customTagList" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+		resultType="cn.com.yusys.yscrm.sysview.domain.CustomTag">
+		SELECT T.TAG_NAME,T.TAG_NO,C.DISPLAY FROM CIM_F_TAG_CUST_TAGS_SELF C
+		INNER
+		JOIN (SELECT TAG_NO,TAG_NAME FROM CIM_F_MM_TAG_TAGS WHERE GROUP_NO
+		IN(SELECT GROUP_NO FROM CIM_F_MM_TAG_GROUP
+		START WITH
+		GROUP_NO=#{condition.groupNo, jdbcType=VARCHAR} CONNECT BY PRIOR
+		GROUP_NO = PARENT_NO)
+		<if test="condition.tagName !=null and condition.tagName!='' ">
+			AND TAG_NAME like
+			concat(concat('%',#{condition.tagName,jdbcType=VARCHAR
+			}),'%')
+		</if>
+		) T ON C.TAG_NO=T.TAG_NO
+		WHERE CUST_ID=#{condition.custId,
+		jdbcType=VARCHAR}
+	</select>
+</mapper>

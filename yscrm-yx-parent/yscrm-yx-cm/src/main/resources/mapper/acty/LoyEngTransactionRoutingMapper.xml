@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.climp.acty.repository.mapper.LoyEngTransactionRoutingMapper">
+    <resultMap id="BaseResultMap" type="cn.com.yusys.climp.acty.domain.LoyEngTransactionRouting">
+		<result column="TRANSACTION_CODE" jdbcType="VARCHAR" property="transactionCode" />
+		<result column="RULE_SET_ID" jdbcType="NUMERIC" property="ruleSetId" />
+		<result column="PROCESS_PRIORITY" jdbcType="NUMERIC" property="processPriority" />
+		<result column="PROCESS_ORDER" jdbcType="NUMERIC" property="processOrder" />
+    </resultMap>
+    <sql id="Base_Column_List">
+	    TRANSACTION_CODE,RULE_SET_ID,PROCESS_PRIORITY,PROCESS_ORDER
+    </sql>
+    
+    <!-- 启用新增路由信息 -->
+    <insert id="insertRouting" parameterType="String">
+		INSERT INTO LOY_ENG_TRANSACTION_ROUTING(RULE_SET_ID,TRANSACTION_CODE,
+		PROCESS_PRIORITY,PROCESS_ORDER) 
+		SELECT  T.ACTIVITY_ID,T.TRANSACTION_CODE,T.ACTIVITY_PRIORITY,
+		T.ACTIVITY_ID FROM LOY_RL_ACTIVITY T 
+		WHERE T.ACTIVITY_ID = #{activityId, jdbcType=VARCHAR}
+	</insert>
+    <!-- 停用删除路由信息 -->
+    <delete id="deleteRouting" parameterType="String">
+		DELETE from LOY_ENG_TRANSACTION_ROUTING t 
+		where t.rule_set_id = #{ruleSetId, jdbcType=VARCHAR}
+	</delete>
+</mapper>

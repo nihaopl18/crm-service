@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8"?>
+        <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper
+namespace="cn.com.yusys.yscrm.fiexdstatement.repository.mapper.OcrmFClAumbalanceMapper">
+<!-- 条件列表查询 -->
+<select id="getBalanceList" parameterType="java.util.Map"
+        resultType="java.util.HashMap">
+    select b.NATIONALITY,a.BELONG_BRCH,
+    round(DEPOSIT_BALANCE_RMB/10000,4) as DEPOSIT_BALANCE_RMB,
+    round(NON_EXCHANGE_FIN_BALANCE/10000,4) as NON_EXCHANGE_FIN_BALANCE,
+    round(EXCHANGE_FIN_BALANCE/10000,4) as EXCHANGE_FIN_BALANCE,
+    round(QDII_BALANCE_RMB/10000,4) as QDII_BALANCE_RMB,
+    round(RMB_FUND_BALANCE/10000,4) as RMB_FUND_BALANCE,
+    round(TRUST_BALANCE_RMB/10000,4) as TRUST_BALANCE_RMB,
+    round(ASSEST_MANAGE_BALANCE/10000,4) as ASSEST_MANAGE_BALANCE,
+    round(INSURRANCE_BALANCE/10000,4) as INSURRANCE_BALANCE,
+    round(BALANCE_TOTAL/10000,4) as BALANCE_TOTAL,
+    round(DEPOSIT_MTH_AVG_BALANCE_RMB/10000,4) as DEPOSIT_MTH_AVG_BALANCE_RMB,
+    round(NON_EXCHANGE_FIN_MTH_AVG_BAL_RMB/10000,4) as NON_EXCHANGE_FIN_MTH_AVG_BAL_RMB,
+    round(EXCHANGE_FIN_MTH_AVG_BAL_RMB/10000,4) as EXCHANGE_FIN_MTH_AVG_BAL_RMB,
+    round(QDII_MTH_AVG_BALANCE_RMB/10000,4) as QDII_MTH_AVG_BALANCE_RMB,
+    round(RMB_FUND_MTH_AVG_BAL/10000,4) as RMB_FUND_MTH_AVG_BAL,
+    round(SELL_TRUST_MTH_AVG_BAL_RMB/10000,4) as SELL_TRUST_MTH_AVG_BAL_RMB,
+    round(ASSEST_MANAGE_MTH_AVG_BAL/10000,4) as ASSEST_MANAGE_MTH_AVG_BAL,
+    round(INSURRANCE_MTH_AVG_BAL_RMB/10000,4) as INSURRANCE_MTH_AVG_BAL_RMB,
+    round(MTH_AVG_BALANCE_RMB_TOTAL/10000,4) as MTH_AVG_BALANCE_RMB_TOTAL
+    from
+    OCRM_F_CL_AUMBALANCE a JOIN OCRM_F_CL_NATIONALITY b ON b.BELONG_BRCH_NO =a.BELONG_BRCH_NO
+    <where>
+        <if test="dataDate != null and dataDate != ''">
+            and DATA_DATE=to_date(#{dataDate},'yyyy-MM-dd')
+        </if>
+        <if test="orgCode != null and orgCode != ''">
+            and a.BELONG_BRCH_NO=#{orgCode}
+        </if>
+    </where>
+    ORDER BY b.AREA_NO
+</select>
+    <select id="queryBybrchNo" parameterType="java.util.Map" resultType="cn.com.yusys.yscrm.fiexdstatement.domain.OcrmFClAumbalance">
+        select BELONG_BRCH,
+        round(DEPOSIT_BALANCE_RMB/10000,4) as DEPOSIT_BALANCE_RMB,
+        round(NON_EXCHANGE_FIN_BALANCE/10000,4) as NON_EXCHANGE_FIN_BALANCE,
+        round(EXCHANGE_FIN_BALANCE/10000,4) as EXCHANGE_FIN_BALANCE,
+        round(QDII_BALANCE_RMB/10000,4) as QDII_BALANCE_RMB,
+        round(RMB_FUND_BALANCE/10000,4) as RMB_FUND_BALANCE,
+        round(TRUST_BALANCE_RMB/10000,4) as TRUST_BALANCE_RMB,
+        round(ASSEST_MANAGE_BALANCE/10000,4) as ASSEST_MANAGE_BALANCE,
+        round(INSURRANCE_BALANCE/10000,4) as INSURRANCE_BALANCE,
+        round(BALANCE_TOTAL/10000,4) as BALANCE_TOTAL,
+        round(DEPOSIT_MTH_AVG_BALANCE_RMB/10000,4) as DEPOSIT_MTH_AVG_BALANCE_RMB,
+        round(NON_EXCHANGE_FIN_MTH_AVG_BAL_RMB/10000,4) as NON_EXCHANGE_FIN_MTH_AVG_BAL_RMB,
+        round(EXCHANGE_FIN_MTH_AVG_BAL_RMB/10000,4) as EXCHANGE_FIN_MTH_AVG_BAL_RMB,
+        round(QDII_MTH_AVG_BALANCE_RMB/10000,4) as QDII_MTH_AVG_BALANCE_RMB,
+        round(RMB_FUND_MTH_AVG_BAL/10000,4) as RMB_FUND_MTH_AVG_BAL,
+        round(SELL_TRUST_MTH_AVG_BAL_RMB/10000,4) as SELL_TRUST_MTH_AVG_BAL_RMB,
+        round(ASSEST_MANAGE_MTH_AVG_BAL/10000,4) as ASSEST_MANAGE_MTH_AVG_BAL,
+        round(INSURRANCE_MTH_AVG_BAL_RMB/10000,4) as INSURRANCE_MTH_AVG_BAL_RMB,
+        round(MTH_AVG_BALANCE_RMB_TOTAL/10000,4) as MTH_AVG_BALANCE_RMB_TOTAL
+        from OCRM_F_CL_AUMBALANCE
+        <where>
+            <if  test="belongBrchNo != null and belongBrchNo != ''">
+                and BELONG_BRCH_NO =#{belongBrchNo,jdbcType=VARCHAR}
+            </if>
+            <if test="dataDate != null and dataDate != ''">
+                and DATA_DATE=to_date(#{dataDate},'yyyy-MM-dd')
+            </if>
+        </where>
+
+    </select>
+    <select id="getAumBalanceSum" resultType="cn.com.yusys.yscrm.fiexdstatement.domain.OcrmFClAumbalance">
+
+        SELECT sum(round(a.DEPOSIT_BALANCE_RMB/10000,4)) as DEPOSIT_BALANCE_RMB,
+               sum(round(a.NON_EXCHANGE_FIN_BALANCE/10000,4)) as NON_EXCHANGE_FIN_BALANCE,
+               sum(round(a.EXCHANGE_FIN_BALANCE/10000,4)) as EXCHANGE_FIN_BALANCE,
+               sum(round(a.QDII_BALANCE_RMB/10000,4)) as QDII_BALANCE_RMB,
+               sum(round(a.RMB_FUND_BALANCE/10000,4)) as RMB_FUND_BALANCE,
+               sum(round(a.TRUST_BALANCE_RMB/10000,4)) as TRUST_BALANCE_RMB,
+               sum(round(a.ASSEST_MANAGE_BALANCE/10000,4)) as ASSEST_MANAGE_BALANCE,
+               sum(round(a.INSURRANCE_BALANCE/10000,4)) as INSURRANCE_BALANCE,
+               sum(round(a.BALANCE_TOTAL/10000,4)) as BALANCE_TOTAL,
+               sum(round(a.DEPOSIT_MTH_AVG_BALANCE_RMB/10000,4)) as DEPOSIT_MTH_AVG_BALANCE_RMB,
+               sum(round(a.NON_EXCHANGE_FIN_MTH_AVG_BAL_RMB/10000,4)) as NON_EXCHANGE_FIN_MTH_AVG_BAL_RMB,
+               sum(round(a.EXCHANGE_FIN_MTH_AVG_BAL_RMB/10000,4)) as EXCHANGE_FIN_MTH_AVG_BAL_RMB,
+               sum(round(a.QDII_MTH_AVG_BALANCE_RMB/10000,4)) as QDII_MTH_AVG_BALANCE_RMB,
+               sum(round(a.RMB_FUND_MTH_AVG_BAL/10000,4)) as RMB_FUND_MTH_AVG_BAL,
+               sum(round(a.SELL_TRUST_MTH_AVG_BAL_RMB/10000,4)) as SELL_TRUST_MTH_AVG_BAL_RMB,
+               sum(round(a.ASSEST_MANAGE_MTH_AVG_BAL/10000,4)) as ASSEST_MANAGE_MTH_AVG_BAL,
+               sum(round(a.INSURRANCE_MTH_AVG_BAL_RMB/10000,4)) as INSURRANCE_MTH_AVG_BAL_RMB,
+               sum(round(a.MTH_AVG_BALANCE_RMB_TOTAL/10000,4)) as MTH_AVG_BALANCE_RMB_TOTAL
+        FROM OCRM_F_CL_AUMBALANCE a JOIN OCRM_F_CL_NATIONALITY b ON b.BELONG_BRCH_NO =a.BELONG_BRCH_NO
+        <where>
+            <if test="areaNo != null and areaNo != ''">
+                and b.AREA_NO =#{areaNo,jdbcType=VARCHAR}
+            </if>
+            <if test="dataDate != null and dataDate != ''">
+                and DATA_DATE=to_date(#{dataDate},'yyyy-MM-dd')
+            </if>
+        </where>
+        ORDER BY b.AREA_NO
+
+    </select>
+    <select id="queryCountBybatchArea" parameterType="java.util.Map" resultType="cn.com.yusys.yscrm.fiexdstatement.domain.OcrmFClAumbalance">
+        SELECT sum(round(a.DEPOSIT_BALANCE_RMB/10000,4)) as DEPOSIT_BALANCE_RMB,
+        sum(round(a.NON_EXCHANGE_FIN_BALANCE/10000,4)) as NON_EXCHANGE_FIN_BALANCE,
+        sum(round(a.EXCHANGE_FIN_BALANCE/10000,4)) as EXCHANGE_FIN_BALANCE,
+        sum(round(a.QDII_BALANCE_RMB/10000,4)) as QDII_BALANCE_RMB,
+        sum(round(a.RMB_FUND_BALANCE/10000,4)) as RMB_FUND_BALANCE,
+        sum(round(a.TRUST_BALANCE_RMB/10000,4)) as TRUST_BALANCE_RMB,
+        sum(round(a.ASSEST_MANAGE_BALANCE/10000,4)) as ASSEST_MANAGE_BALANCE,
+        sum(round(a.INSURRANCE_BALANCE/10000,4)) as INSURRANCE_BALANCE,
+        sum(round(a.BALANCE_TOTAL/10000,4)) as BALANCE_TOTAL,
+        sum(round(a.DEPOSIT_MTH_AVG_BALANCE_RMB/10000,4)) as DEPOSIT_MTH_AVG_BALANCE_RMB,
+        sum(round(a.NON_EXCHANGE_FIN_MTH_AVG_BAL_RMB/10000,4)) as NON_EXCHANGE_FIN_MTH_AVG_BAL_RMB,
+        sum(round(a.EXCHANGE_FIN_MTH_AVG_BAL_RMB/10000,4)) as EXCHANGE_FIN_MTH_AVG_BAL_RMB,
+        sum(round(a.QDII_MTH_AVG_BALANCE_RMB/10000,4)) as QDII_MTH_AVG_BALANCE_RMB,
+        sum(round(a.RMB_FUND_MTH_AVG_BAL/10000,4)) as RMB_FUND_MTH_AVG_BAL,
+        sum(round(a.SELL_TRUST_MTH_AVG_BAL_RMB/10000,4)) as SELL_TRUST_MTH_AVG_BAL_RMB,
+        sum(round(a.ASSEST_MANAGE_MTH_AVG_BAL/10000,4)) as ASSEST_MANAGE_MTH_AVG_BAL,
+        sum(round(a.INSURRANCE_MTH_AVG_BAL_RMB/10000,4)) as INSURRANCE_MTH_AVG_BAL_RMB,
+        sum(round(a.MTH_AVG_BALANCE_RMB_TOTAL/10000,4)) as MTH_AVG_BALANCE_RMB_TOTAL
+        FROM OCRM_F_CL_AUMBALANCE a JOIN OCRM_F_CL_NATIONALITY b ON b.BELONG_BRCH_NO =a.BELONG_BRCH_NO
+
+        <where>
+            <if test="areaSumList != null">
+                and b.BELONG_BRCH_NO not in <foreach collection="areaSumList" index="index" item="item" open="(" close=")"  separator=",">#{item} </foreach>
+            </if>
+            <if test="dataDate != null and dataDate != ''">
+                and DATA_DATE=to_date(#{dataDate},'yyyy-MM-dd')
+            </if>
+        </where>
+
+    </select>
+    <select id="queryCountAll" resultType="cn.com.yusys.yscrm.fiexdstatement.domain.OcrmFClAumbalance">
+        SELECT BELONG_BRCH,
+        round(DEPOSIT_BALANCE_RMB/10000,4) as DEPOSIT_BALANCE_RMB,
+        round(NON_EXCHANGE_FIN_BALANCE/10000,4) as NON_EXCHANGE_FIN_BALANCE,
+        round(EXCHANGE_FIN_BALANCE/10000,4) as EXCHANGE_FIN_BALANCE,
+        round(QDII_BALANCE_RMB/10000,4) as QDII_BALANCE_RMB,
+        round(RMB_FUND_BALANCE/10000,4) as RMB_FUND_BALANCE,
+        round(TRUST_BALANCE_RMB/10000,4) as TRUST_BALANCE_RMB,
+        round(ASSEST_MANAGE_BALANCE/10000,4) as ASSEST_MANAGE_BALANCE,
+        round(INSURRANCE_BALANCE/10000,4) as INSURRANCE_BALANCE,
+        round(BALANCE_TOTAL/10000,4) as BALANCE_TOTAL,
+        round(DEPOSIT_MTH_AVG_BALANCE_RMB/10000,4) as DEPOSIT_MTH_AVG_BALANCE_RMB,
+        round(NON_EXCHANGE_FIN_MTH_AVG_BAL_RMB/10000,4) as NON_EXCHANGE_FIN_MTH_AVG_BAL_RMB,
+        round(EXCHANGE_FIN_MTH_AVG_BAL_RMB/10000,4) as EXCHANGE_FIN_MTH_AVG_BAL_RMB,
+        round(QDII_MTH_AVG_BALANCE_RMB/10000,4) as QDII_MTH_AVG_BALANCE_RMB,
+        round(RMB_FUND_MTH_AVG_BAL/10000,4) as RMB_FUND_MTH_AVG_BAL,
+        round(SELL_TRUST_MTH_AVG_BAL_RMB/10000,4) as SELL_TRUST_MTH_AVG_BAL_RMB,
+        round(ASSEST_MANAGE_MTH_AVG_BAL/10000,4) as ASSEST_MANAGE_MTH_AVG_BAL,
+        round(INSURRANCE_MTH_AVG_BAL_RMB/10000,4) as INSURRANCE_MTH_AVG_BAL_RMB,
+        round(MTH_AVG_BALANCE_RMB_TOTAL/10000,4) as MTH_AVG_BALANCE_RMB_TOTAL
+        FROM OCRM_F_CL_AUMBALANCE
+        <where>
+            <if test="dataDate != null and dataDate != ''">
+                and DATA_DATE=to_date(#{dataDate},'yyyy-MM-dd')
+            </if>
+            <if test="belongBrchNo != null and belongBrchNo != ''">
+                and BELONG_BRCH_NO =#{belongBrchNo,jdbcType=VARCHAR}
+            </if>
+        </where>
+    </select>
+
+
+</mapper>

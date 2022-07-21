@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.admin.repository.mapper.AdminSmAuthInfoMapper">
+	<select id="getAuthKeyValue" parameterType="java.util.Map"		
+	   resultType="java.util.Map" databaseId="oracle">
+		SELECT AUTH_ID AS KEY,AUTH_NAME AS VALUE FROM ADMIN_SM_AUTH_INFO
+	</select>
+
+    <!-- 根据认证类型查找逻辑系统ID -->
+    <select id="getSysIdByAuthId" parameterType="String" resultType="String" databaseId="oracle">
+        SELECT SYS_ID FROM ADMIN_SM_LOGIC_SYS WHERE AUTH_ID=#{id}
+    </select>
+</mapper>

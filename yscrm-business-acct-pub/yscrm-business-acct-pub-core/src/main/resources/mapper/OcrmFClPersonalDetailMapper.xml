@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper
+        namespace="cn.com.yusys.yscrm.fiexdstatement.repository.mapper.OcrmFClPersonalDetailMapper">
+    <!-- 条件列表查询 -->
+    <select id="queryDetailList" parameterType="java.util.Map"
+            resultType="java.util.HashMap">
+        select MGR_ID,MGR_NAME,MGR_TYPE,BRANCH_NAME,NDS_CUST_NO,CUST_NAME,ECIF_CUST_NO,PROD_CODE,PROD_NAME,MONTH_SIMULATE_INCOME,QUARTER_SIMULATE_INCOME,YEAR_SIMULATE_INCOME,AUM_AVG_BALANCE
+        from OCRM_F_CL_PERSONAL_DETAIL
+        <where>
+            <if test="prodCode != null and prodCode != ''">
+                AND PROD_CODE=#{prodCode,jdbcType=VARCHAR}
+            </if>
+            <if test="prodName != null and prodName != ''">
+                AND PROD_NAME
+                LIKE CONCAT(CONCAT('%', #{prodName, jdbcType=VARCHAR}),'%')
+            </if>
+            <if test="custName != null and custName != ''">
+                AND CUST_NAME
+                LIKE CONCAT(CONCAT('%', #{custName, jdbcType=VARCHAR}),'%')
+            </if>
+            <if test="dataDate != null and dataDate != ''">
+                and DATA_DATE=to_date(#{dataDate},'yyyy-MM-dd')
+            </if>
+            <if test="targetId != null and targetId !=''">
+                AND MGR_ID=#{targetId}
+            </if>
+            <if test="mktRespPerson != null and mktRespPerson !=''">
+                AND (BRANCH_NO = #{mktRespPerson} or ORG_NO = #{mktRespPerson} or MGR_ID = #{mktRespPerson})
+            </if>
+            <if test="aumAvgBalanceStart != null and aumAvgBalanceStart != ''">
+                and AUM_AVG_BALANCE >= to_number(#{aumAvgBalanceStart,jdbcType=VARCHAR})
+            </if>
+            <if test="aumAvgBalanceEnd != null and aumAvgBalanceEnd != ''">
+                and AUM_AVG_BALANCE &lt;= to_number(#{aumAvgBalanceEnd,jdbcType=VARCHAR})
+            </if>
+            <if test="sqlDataAuth != null and sqlDataAuth != ''">
+                ${sqlDataAuth}
+            </if>
+
+        </where>
+
+    </select>
+
+
+</mapper>

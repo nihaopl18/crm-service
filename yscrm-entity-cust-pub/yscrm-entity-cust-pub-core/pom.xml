@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+    xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>cn.com.yusys.yscrm.entity</groupId>  
+  		<artifactId>yscrm-entity-cust-pub</artifactId> 
+        <version>2.0.0-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>yscrm-entity-cust-pub-core</artifactId>
+    <description>yscrm-entity-cust-pub-core</description>
+    <packaging>jar</packaging>
+    <properties>
+		<yusp-uaa-core.version>2.0.0-SNAPSHOT</yusp-uaa-core.version>
+		<yusp-app-crmOca-core.version>2.0.0</yusp-app-crmOca-core.version>
+		<yusp-echain-server.version>1.2.0.20190128.RELEASE</yusp-echain-server.version>
+		<yusp-app-common-core.version>2.0.0-SNAPSHOT</yusp-app-common-core.version>
+	</properties>
+     <dependencies>
+		<!-- Yusp-Commons -->
+		<dependency>
+			<groupId>cn.com.yusys.yusp</groupId>
+			<artifactId>yusp-commons</artifactId>
+			<optional>true</optional>
+		</dependency>
+
+		<dependency>
+			<groupId>com.zaxxer</groupId>
+			<artifactId>HikariCP</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-webmvc</artifactId>
+		</dependency>
+		<!-- mybatis -->
+		<dependency>
+			<groupId>tk.mybatis</groupId>
+			<artifactId>mapper-spring-boot-starter</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>com.github.pagehelper</groupId>
+			<artifactId>pagehelper-spring-boot-starter</artifactId>
+		</dependency>
+		
+		<dependency>
+			<groupId>cn.com.yusys.yusp.uaa</groupId>
+			<artifactId>yusp-uaa-core</artifactId>
+			<version>${yusp-uaa-core.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>cn.com.yusys.yusp.uaa</groupId>
+					<artifactId>yusp-uaa-client</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.springframework.cloud</groupId>
+					<artifactId>*</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<artifactId>yusp-app-crmOca-core</artifactId>
+			<groupId>cn.com.yusys.crm</groupId>
+			<version>${yusp-app-crmOca-core.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>cn.com.yusys.yusp</groupId>
+					<artifactId>yusp-app-common-client</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>cn.com.yusys.yusp.uaa</groupId>
+					<artifactId>yusp-uaa-client</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>cn.com.yusys.yusp</groupId>
+			<artifactId>yusp-echain-server</artifactId>
+			<version>${yusp-echain-server.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>log4j</groupId>
+					<artifactId>log4j</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.springframework.cloud</groupId>
+					<artifactId>*</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<artifactId>yusp-app-common-core</artifactId>
+			<groupId>cn.com.yusys.yusp</groupId>
+			<version>${yusp-app-common-core.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>cn.com.yusys.yusp</groupId>
+					<artifactId>yusp-app-common-client</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>cn.com.yusys.yusp.uaa</groupId>
+					<artifactId>yusp-uaa-client</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+	    <dependency>
+			<groupId>com.alibaba</groupId>
+			<artifactId>fastjson</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-log4j12</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>	
+		 <groupId>net.sf.json-lib</groupId>
+		 <artifactId>json-lib</artifactId>		
+		 <version>2.2.3</version>
+		 <classifier>jdk15</classifier><!-- jdk版本 -->	
+		</dependency>
+         <dependency>
+             <groupId>cn.com.yusys.yscrm.pcrm</groupId>
+             <artifactId>yscrm-pcrm-common-core</artifactId>
+             <version>2.0.0-SNAPSHOT</version>
+             <scope>compile</scope>
+         </dependency>
+		 <dependency>
+			 <groupId>cn.com.yusys.yscrm.mgr</groupId>
+			 <artifactId>yscrm-mgr-info-workreport-core</artifactId>
+			 <version>2.0.0-SNAPSHOT</version>
+			 <scope>compile</scope>
+		 </dependency>
+		 <dependency>
+			 <groupId>cn.com.yusys.yscrm.pcrm</groupId>
+			 <artifactId>yscrm-pcrm-common-core</artifactId>
+			 <version>2.0.0-SNAPSHOT</version>
+			 <scope>compile</scope>
+		 </dependency>
+	 </dependencies>
+</project>

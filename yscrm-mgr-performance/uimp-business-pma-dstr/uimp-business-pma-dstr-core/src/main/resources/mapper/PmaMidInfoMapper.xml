@@ -1,0 +1,592 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.com.yusys.yusp.uimp.distribution.repository.mapper.PmaMidInfoMapper" >
+  <resultMap id="BaseResultMap" type="cn.com.yusys.yusp.uimp.distribution.model.PmaMidInfo" >
+    <id column="ID" property="id" jdbcType="VARCHAR" />
+    <result column="TRANSACTION_MARK" property="transactionMark" jdbcType="VARCHAR" />
+    <result column="AVG" property="avg" jdbcType="VARCHAR" />
+    <result column="ORG_NAME" property="orgName" jdbcType="VARCHAR" />
+    <result column="ORG_ID" property="orgId" jdbcType="VARCHAR" />
+    <result column="DISTRIBUTION_MODE" property="distributionMode" jdbcType="VARCHAR" />
+    <result column="DSTR_STS" property="dstrSts" jdbcType="VARCHAR" />
+    <result column="ACCT_NO" property="acctNo" jdbcType="VARCHAR" />
+    <result column="TRANSACTION_DATE" property="transactionDate" jdbcType="VARCHAR" />
+    <result column="START_DATE" property="startDate" jdbcType="VARCHAR" />
+    <result column="END_DATE" property="endDate" jdbcType="VARCHAR" />
+    <result column="TRANSACTION_AMOUNT" property="transactionAmount" jdbcType="VARCHAR" />
+    <result column="SERVICE_CHARGE" property="serviceCharge" jdbcType="VARCHAR" />
+    <result column="CUSTOMER_NUMBER" property="customerNumber" jdbcType="VARCHAR" />
+    <result column="CUSTOMER_NAME" property="customerName" jdbcType="VARCHAR" />
+    <result column="PRODUCT_NUMBER" property="productNumber" jdbcType="VARCHAR" />
+    <result column="PRODUCT_NAME" property="productName" jdbcType="VARCHAR" />
+    <result column="CONFIRMATION_DATE" property="confirmationDate" jdbcType="VARCHAR" />
+    <result column="MANAGER_ID" property="managerId" jdbcType="VARCHAR" />
+    <result column="MANAGER_NAME" property="managerName" jdbcType="VARCHAR" />
+    <result column="BUSS_TYPE" property="bussType" jdbcType="VARCHAR" />
+    <result column="APPLY_STS" property="applySts" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    ID, TRANSACTION_MARK, AVG, ORG_NAME, ORG_ID, DISTRIBUTION_MODE, DSTR_STS, ACCT_NO, 
+    TRANSACTION_DATE, START_DATE, END_DATE, TRANSACTION_AMOUNT, SERVICE_CHARGE, CUSTOMER_NUMBER, 
+    CUSTOMER_NAME, PRODUCT_NUMBER, PRODUCT_NAME, CONFIRMATION_DATE, MANAGER_ID, MANAGER_NAME, BUSS_TYPE,
+    APPLY_STS
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from PMA_F_COM_MID_INFO
+    where ID = #{id,jdbcType=VARCHAR}
+  </select>
+
+  <sql id="whereDto">
+    <where>
+      <if test="condition.transactionMark != null and condition.transactionMark!=''" >
+        AND TRANSACTION_MARK = #{condition.transactionMark,jdbcType=VARCHAR}
+      </if>
+      <if test="condition.avg != null and condition.avg!=''" >
+        AND   AVG = #{condition.avg,jdbcType=VARCHAR}
+      </if>
+      <if test="condition.orgName != null and condition.orgName!=''" >
+        AND   ORG_NAME = #{condition.orgName,jdbcType=VARCHAR}
+      </if>
+      <if test="condition.orgId != null and condition.orgId!=''" >
+        AND   ORG_ID = #{condition.orgId,jdbcType=VARCHAR}
+      </if>
+      <if test="condition.distributionMode != null and condition.distributionMode!=''" >
+        AND   DISTRIBUTION_MODE = #{condition.distributionMode,jdbcType=VARCHAR}
+      </if>
+      <if test="condition.dstrSts != null and condition.dstrSts!=''" >
+        AND   DSTR_STS = #{condition.dstrSts,jdbcType=VARCHAR}
+      </if>
+      <if test="condition.acctNo != null and condition.acctNo!=''" >
+        AND   ACCT_NO = #{condition.acctNo,jdbcType=VARCHAR}
+      </if>
+      <if test="condition.transactionDate != null and condition.transactionDate!=''" >
+        AND   TRANSACTION_DATE = #{condition.transactionDate,jdbcType=VARCHAR}
+      </if>
+      <if test="condition.startDate != null and condition.startDate!=''" >
+          <![CDATA[
+            AND TO_DATE(TRANSACTION_DATE, 'yyyy-MM-dd hh24:mi:ss') >= TO_DATE(#{condition.startDate,jdbcType=VARCHAR}, 'yyyy-MM-dd')
+            ]]>
+      </if>
+      <if test="condition.endDate != null and condition.endDate!=''" >
+          <![CDATA[
+            AND TO_DATE(transaction_date, 'yyyy-MM-dd hh24:mi:ss') <= TO_DATE(#{condition.endDate,jdbcType=VARCHAR}, 'yyyy-MM-dd')
+            ]]>
+      </if>
+      <if test="condition.transactionAmount != null and condition.transactionAmount!=''" >
+        AND   TRANSACTION_AMOUNT = #{condition.transactionAmount,jdbcType=VARCHAR}
+      </if>
+      <if test="condition.serviceCharge != null and condition.serviceCharge!=''" >
+        AND   SERVICE_CHARGE = #{condition.serviceCharge,jdbcType=VARCHAR}
+      </if>
+      <if test="condition.customerNumber != null and condition.customerNumber!=''" >
+        AND   CUSTOMER_NUMBER = #{condition.customerNumber,jdbcType=VARCHAR}
+      </if>
+      <if test="condition.customerName != null and condition.customerName!=''" >
+        AND   CUSTOMER_NAME = #{condition.customerName,jdbcType=VARCHAR}
+      </if>
+      <if test="condition.productNumber != null and condition.productNumber!=''" >
+        and   PRODUCT_NUMBER = #{condition.productNumber,jdbcType=VARCHAR}
+      </if>
+      <if test="condition.productName != null and condition.productName!=''" >
+        AND   PRODUCT_NAME = #{condition.productName,jdbcType=VARCHAR}
+      </if>
+      <if test="condition.confirmationDate != null and condition.confirmationDate!=''" >
+        AND   CONFIRMATION_DATE = #{condition.confirmationDate,jdbcType=VARCHAR}
+      </if>
+      <if test="condition.managerId != null and condition.managerId!=''" >
+        AND   MANAGER_ID = #{condition.managerId,jdbcType=VARCHAR}
+      </if>
+      <if test="condition.managerName != null and condition.managerName!=''" >
+        AND   MANAGER_NAME = #{condition.managerName,jdbcType=VARCHAR}
+      </if>
+      <if test="condition.bussType != null and condition.bussType!=''" >
+        AND   BUSS_TYPE = #{condition.bussType,jdbcType=VARCHAR}
+      </if>
+      <if test="condition.applySts != null and condition.applySts!=''" >
+        AND   APPLY_STS = #{condition.applySts,jdbcType=VARCHAR}
+      </if>
+      <if test="condition.operUserId != null and condition.operUserId!=''" >
+        AND   creator = #{condition.operUserId,jdbcType=VARCHAR}
+      </if>
+      <if test="dataAuth != null and dataAuth != ''">
+        ${dataAuth}
+      </if>
+
+    </where>
+  </sql>
+
+  <select id="selectList" resultMap="BaseResultMap" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel">
+    select
+    <include refid="Base_Column_List" />
+    from PMA_F_COM_MID_INFO
+    <include refid="whereDto"/>
+  </select>
+
+  <select id="selectCount" resultType="java.lang.Long" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" >
+    select count(1)
+    from PMA_F_COM_MID_INFO
+    <include refid="whereDto"/>
+  </select>
+
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+    delete from PMA_F_COM_MID_INFO
+    where ID = #{id,jdbcType=VARCHAR}
+  </delete>
+  <insert id="insert" parameterType="cn.com.yusys.yusp.uimp.distribution.model.PmaMidInfo" >
+    insert into PMA_F_COM_MID_INFO (ID, TRANSACTION_MARK, AVG, 
+      ORG_NAME, ORG_ID, DISTRIBUTION_MODE, 
+      DSTR_STS, ACCT_NO, TRANSACTION_DATE, 
+      START_DATE, END_DATE, TRANSACTION_AMOUNT, 
+      SERVICE_CHARGE, CUSTOMER_NUMBER, CUSTOMER_NAME, 
+      PRODUCT_NUMBER, PRODUCT_NAME, CONFIRMATION_DATE, 
+      MANAGER_ID, MANAGER_NAME)
+    values (#{id,jdbcType=VARCHAR}, #{transactionMark,jdbcType=VARCHAR}, #{avg,jdbcType=VARCHAR}, 
+      #{orgName,jdbcType=VARCHAR}, #{orgId,jdbcType=VARCHAR}, #{distributionMode,jdbcType=VARCHAR}, 
+      #{dstrSts,jdbcType=VARCHAR}, #{acctNo,jdbcType=VARCHAR}, #{transactionDate,jdbcType=VARCHAR}, 
+      #{startDate,jdbcType=VARCHAR}, #{endDate,jdbcType=VARCHAR}, #{transactionAmount,jdbcType=VARCHAR}, 
+      #{serviceCharge,jdbcType=VARCHAR}, #{customerNumber,jdbcType=VARCHAR}, #{customerName,jdbcType=VARCHAR}, 
+      #{productNumber,jdbcType=VARCHAR}, #{productName,jdbcType=VARCHAR}, #{confirmationDate,jdbcType=VARCHAR}, 
+      #{managerId,jdbcType=VARCHAR}, #{managerName,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="cn.com.yusys.yusp.uimp.distribution.model.PmaMidInfo" >
+    insert into PMA_F_COM_MID_INFO
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        ID,
+      </if>
+      <if test="transactionMark != null" >
+        TRANSACTION_MARK,
+      </if>
+      <if test="avg != null" >
+        AVG,
+      </if>
+      <if test="orgName != null" >
+        ORG_NAME,
+      </if>
+      <if test="orgId != null" >
+        ORG_ID,
+      </if>
+      <if test="distributionMode != null" >
+        DISTRIBUTION_MODE,
+      </if>
+      <if test="dstrSts != null" >
+        DSTR_STS,
+      </if>
+        <if test="applySts != null" >
+            APPLY_STS,
+        </if>
+      <if test="acctNo != null" >
+        ACCT_NO,
+      </if>
+      <if test="transactionDate != null" >
+        TRANSACTION_DATE,
+      </if>
+      <if test="startDate != null" >
+        START_DATE,
+      </if>
+      <if test="endDate != null" >
+        END_DATE,
+      </if>
+      <if test="transactionAmount != null" >
+        TRANSACTION_AMOUNT,
+      </if>
+      <if test="serviceCharge != null" >
+        SERVICE_CHARGE,
+      </if>
+      <if test="customerNumber != null" >
+        CUSTOMER_NUMBER,
+      </if>
+      <if test="customerName != null" >
+        CUSTOMER_NAME,
+      </if>
+      <if test="productNumber != null" >
+        PRODUCT_NUMBER,
+      </if>
+      <if test="productName != null" >
+        PRODUCT_NAME,
+      </if>
+      <if test="confirmationDate != null" >
+        CONFIRMATION_DATE,
+      </if>
+      <if test="managerId != null" >
+        MANAGER_ID,
+      </if>
+      <if test="managerName != null" >
+        MANAGER_NAME,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=VARCHAR},
+      </if>
+      <if test="transactionMark != null" >
+        #{transactionMark,jdbcType=VARCHAR},
+      </if>
+      <if test="avg != null" >
+        #{avg,jdbcType=VARCHAR},
+      </if>
+      <if test="orgName != null" >
+        #{orgName,jdbcType=VARCHAR},
+      </if>
+      <if test="orgId != null" >
+        #{orgId,jdbcType=VARCHAR},
+      </if>
+      <if test="distributionMode != null" >
+        #{distributionMode,jdbcType=VARCHAR},
+      </if>
+      <if test="dstrSts != null" >
+        #{dstrSts,jdbcType=VARCHAR},
+      </if>
+        <if test="applySts != null" >
+            #{applySts,jdbcType=VARCHAR},
+        </if>
+      <if test="acctNo != null" >
+        #{acctNo,jdbcType=VARCHAR},
+      </if>
+      <if test="transactionDate != null" >
+        #{transactionDate,jdbcType=VARCHAR},
+      </if>
+      <if test="startDate != null" >
+        #{startDate,jdbcType=VARCHAR},
+      </if>
+      <if test="endDate != null" >
+        #{endDate,jdbcType=VARCHAR},
+      </if>
+      <if test="transactionAmount != null" >
+        #{transactionAmount,jdbcType=VARCHAR},
+      </if>
+      <if test="serviceCharge != null" >
+        #{serviceCharge,jdbcType=VARCHAR},
+      </if>
+      <if test="customerNumber != null" >
+        #{customerNumber,jdbcType=VARCHAR},
+      </if>
+      <if test="customerName != null" >
+        #{customerName,jdbcType=VARCHAR},
+      </if>
+      <if test="productNumber != null" >
+        #{productNumber,jdbcType=VARCHAR},
+      </if>
+      <if test="productName != null" >
+        #{productName,jdbcType=VARCHAR},
+      </if>
+      <if test="confirmationDate != null" >
+        #{confirmationDate,jdbcType=VARCHAR},
+      </if>
+      <if test="managerId != null" >
+        #{managerId,jdbcType=VARCHAR},
+      </if>
+      <if test="managerName != null" >
+        #{managerName,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="cn.com.yusys.yusp.uimp.distribution.model.PmaMidInfo" >
+    update PMA_F_COM_MID_INFO
+    <set >
+      <if test="transactionMark != null" >
+        TRANSACTION_MARK = #{transactionMark,jdbcType=VARCHAR},
+      </if>
+      <if test="avg != null" >
+        AVG = #{avg,jdbcType=VARCHAR},
+      </if>
+      <if test="orgName != null" >
+        ORG_NAME = #{orgName,jdbcType=VARCHAR},
+      </if>
+      <if test="orgId != null" >
+        ORG_ID = #{orgId,jdbcType=VARCHAR},
+      </if>
+      <if test="distributionMode != null" >
+        DISTRIBUTION_MODE = #{distributionMode,jdbcType=VARCHAR},
+      </if>
+      <if test="dstrSts != null" >
+        DSTR_STS = #{dstrSts,jdbcType=VARCHAR},
+      </if>
+        <if test="applySts != null" >
+            APPLY_STS = #{applySts,jdbcType=VARCHAR},
+        </if>
+      <if test="acctNo != null" >
+        ACCT_NO = #{acctNo,jdbcType=VARCHAR},
+      </if>
+      <if test="transactionDate != null" >
+        TRANSACTION_DATE = #{transactionDate,jdbcType=VARCHAR},
+      </if>
+      <if test="startDate != null" >
+        START_DATE = #{startDate,jdbcType=VARCHAR},
+      </if>
+      <if test="endDate != null" >
+        END_DATE = #{endDate,jdbcType=VARCHAR},
+      </if>
+      <if test="transactionAmount != null" >
+        TRANSACTION_AMOUNT = #{transactionAmount,jdbcType=VARCHAR},
+      </if>
+      <if test="serviceCharge != null" >
+        SERVICE_CHARGE = #{serviceCharge,jdbcType=VARCHAR},
+      </if>
+      <if test="customerNumber != null" >
+        CUSTOMER_NUMBER = #{customerNumber,jdbcType=VARCHAR},
+      </if>
+      <if test="customerName != null" >
+        CUSTOMER_NAME = #{customerName,jdbcType=VARCHAR},
+      </if>
+      <if test="productNumber != null" >
+        PRODUCT_NUMBER = #{productNumber,jdbcType=VARCHAR},
+      </if>
+      <if test="productName != null" >
+        PRODUCT_NAME = #{productName,jdbcType=VARCHAR},
+      </if>
+      <if test="confirmationDate != null" >
+        CONFIRMATION_DATE = #{confirmationDate,jdbcType=VARCHAR},
+      </if>
+      <if test="managerId != null" >
+        MANAGER_ID = #{managerId,jdbcType=VARCHAR},
+      </if>
+      <if test="managerName != null" >
+        MANAGER_NAME = #{managerName,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where ID = #{id,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="cn.com.yusys.yusp.uimp.distribution.model.PmaMidInfo" >
+    update PMA_F_COM_MID_INFO
+    set TRANSACTION_MARK = #{transactionMark,jdbcType=VARCHAR},
+      AVG = #{avg,jdbcType=VARCHAR},
+      ORG_NAME = #{orgName,jdbcType=VARCHAR},
+      ORG_ID = #{orgId,jdbcType=VARCHAR},
+      DISTRIBUTION_MODE = #{distributionMode,jdbcType=VARCHAR},
+      DSTR_STS = #{dstrSts,jdbcType=VARCHAR},
+      ACCT_NO = #{acctNo,jdbcType=VARCHAR},
+      TRANSACTION_DATE = #{transactionDate,jdbcType=VARCHAR},
+      START_DATE = #{startDate,jdbcType=VARCHAR},
+      END_DATE = #{endDate,jdbcType=VARCHAR},
+      TRANSACTION_AMOUNT = #{transactionAmount,jdbcType=VARCHAR},
+      SERVICE_CHARGE = #{serviceCharge,jdbcType=VARCHAR},
+      CUSTOMER_NUMBER = #{customerNumber,jdbcType=VARCHAR},
+      CUSTOMER_NAME = #{customerName,jdbcType=VARCHAR},
+      PRODUCT_NUMBER = #{productNumber,jdbcType=VARCHAR},
+      PRODUCT_NAME = #{productName,jdbcType=VARCHAR},
+      CONFIRMATION_DATE = #{confirmationDate,jdbcType=VARCHAR},
+      MANAGER_ID = #{managerId,jdbcType=VARCHAR},
+      MANAGER_NAME = #{managerName,jdbcType=VARCHAR}
+    where ID = #{id,jdbcType=VARCHAR}
+  </update>
+
+  <select id="queryMidHis" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+          resultType="java.util.HashMap">
+    select pa.transaction_mark,
+            pa.CUSTOMER_NUMBER,
+            pa.CUSTOMER_NAME,
+            pa.TRANSACTION_DATE,
+            pa.BUSS_TYPE,
+            pa.product_Number,
+            pa.product_name,
+            pa.TRANSACTION_AMOUNT,
+            pa.SERVICE_CHARGE,
+            pa.ORG_ID,
+            pa.ORG_NAME,
+            pd.creator as operUserId,
+            au.USER_NAME as creator,
+            to_char(to_date(pd.create_date, 'yyyy-MM-dd hh24:mi:ss'), 'yyyy-MM-dd') as operTime,
+            pd.MANAGER_ID,
+            pd.manager_name,
+            pd.DISTR_RATE
+    from PMA_F_COM_MID_INFO pa
+    left join PMA_F_COM_MID_DISTRIBUTE pd
+    on pa.id = pd.MID_INFO_ID
+    left join admin_sm_user au
+    on au.login_code = pd.creator
+
+    <include refid="whereDto"/>
+  </select>
+
+  <select id="oneToManyQueryList" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+    SELECT
+    midInfo.ID,
+    midInfo.TRANSACTION_MARK,
+    midInfo.AVG,
+    midInfo.ORG_NAME,
+    midInfo.ORG_ID,
+    midInfo.DISTRIBUTION_MODE,
+    midInfo.DSTR_STS,
+    midInfo.ACCT_NO,
+    midInfo.BUSS_TYPE,
+    midInfo.TRANSACTION_DATE,
+    midInfo.START_DATE,
+    midInfo.END_DATE,
+    midInfo.TRANSACTION_AMOUNT,
+    midInfo.SERVICE_CHARGE,
+    midInfo.CUSTOMER_NUMBER,
+    midInfo.CUSTOMER_NAME,
+    midInfo.PRODUCT_NUMBER,
+    midInfo.PRODUCT_NAME,
+    midInfo.CONFIRMATION_DATE,
+    midDistribute.MID_INFO_ID,
+    midDistribute.ALLOT_TYPE,
+    midDistribute.MANAGER_ID,
+    midDistribute.MANAGER_NAME,
+    midDistribute.DISTR_RATE,
+    midDistribute.START_AMT,
+    midDistribute.END_AMT
+    from PMA_F_COM_MID_INFO midInfo
+    left join PMA_F_COM_MID_DISTRIBUTE midDistribute on midDistribute.MID_INFO_ID = midInfo.ID
+    <where>
+      <if test="condition.transactionMark != null and condition.transactionMark!=''" >
+        AND midInfo.TRANSACTION_MARK = #{condition.transactionMark,jdbcType=VARCHAR}
+      </if>
+      <if test="condition.avg != null and condition.avg!=''" >
+        AND   midInfo.AVG = #{condition.avg,jdbcType=VARCHAR}
+      </if>
+      <if test="condition.orgName != null and condition.orgName!=''" >
+        AND   midInfo.ORG_NAME = #{condition.orgName,jdbcType=VARCHAR}
+      </if>
+      <if test="condition.orgId != null and condition.orgId!=''" >
+        AND   midInfo.ORG_ID = #{condition.orgId,jdbcType=VARCHAR}
+      </if>
+      <if test="condition.distributionMode != null and condition.distributionMode!=''" >
+        AND   midInfo.DISTRIBUTION_MODE = #{condition.distributionMode,jdbcType=VARCHAR}
+      </if>
+      <if test="condition.dstrSts != null and condition.dstrSts!=''" >
+        AND   midInfo.DSTR_STS = #{condition.dstrSts,jdbcType=VARCHAR}
+      </if>
+      <if test="condition.acctNo != null and condition.acctNo!=''" >
+        AND   midInfo.ACCT_NO = #{condition.acctNo,jdbcType=VARCHAR}
+      </if>
+      <if test="condition.transactionDate != null and condition.transactionDate!=''" >
+        AND   midInfo.TRANSACTION_DATE = #{condition.transactionDate,jdbcType=VARCHAR}
+      </if>
+      <if test="condition.startDate != null and condition.startDate!=''" >
+        <![CDATA[
+            AND midInfo.TO_DATE(TRANSACTION_DATE, 'yyyy-MM-dd hh24:mi:ss') >= TO_DATE(#{condition.startDate,jdbcType=VARCHAR}, 'yyyy-MM-dd')
+            ]]>
+      </if>
+      <if test="condition.endDate != null and condition.endDate!=''" >
+        <![CDATA[
+            AND midInfo.TO_DATE(transaction_date, 'yyyy-MM-dd hh24:mi:ss') <= TO_DATE(#{condition.endDate,jdbcType=VARCHAR}, 'yyyy-MM-dd')
+            ]]>
+      </if>
+      <if test="condition.transactionAmount != null and condition.transactionAmount!=''" >
+        AND   midInfo.TRANSACTION_AMOUNT = #{condition.transactionAmount,jdbcType=VARCHAR}
+      </if>
+      <if test="condition.serviceCharge != null and condition.serviceCharge!=''" >
+        AND   midInfo.SERVICE_CHARGE = #{condition.serviceCharge,jdbcType=VARCHAR}
+      </if>
+      <if test="condition.custNumber != null and condition.custNumber!=''" >
+        AND   midInfo.CUSTOMER_NUMBER = #{condition.custNumber,jdbcType=VARCHAR}
+      </if>
+      <if test="condition.custName != null and condition.custName!=''" >
+        AND   midInfo.CUSTOMER_NAME = #{condition.custName,jdbcType=VARCHAR}
+      </if>
+      <if test="condition.productNumber != null and condition.productNumber!=''" >
+        AND   midInfo.PRODUCT_NUMBER = #{condition.productNumber,jdbcType=VARCHAR}
+      </if>
+      <if test="condition.productName != null and condition.productName!=''" >
+        AND   midInfo.PRODUCT_NAME = #{condition.productName,jdbcType=VARCHAR}
+      </if>
+      <if test="condition.confirmationDate != null and condition.confirmationDate!=''" >
+        AND   midInfo.CONFIRMATION_DATE = #{condition.confirmationDate,jdbcType=VARCHAR}
+      </if>
+      <if test="condition.bussType != null and condition.bussType!=''" >
+        AND   midInfo.BUSS_TYPE = #{condition.bussType,jdbcType=VARCHAR}
+      </if>
+      <if test="condition.applySts != null and condition.applySts!=''" >
+        AND   midInfo.APPLY_STS = #{condition.applySts,jdbcType=VARCHAR}
+      </if>
+      <if test="condition.managerId != null and condition.managerId!=''" >
+        AND   midDistribute.MANAGER_ID = #{condition.managerId,jdbcType=VARCHAR}
+      </if>
+      <if test="condition.managerName != null and condition.managerName!=''" >
+        AND   midDistribute.MANAGER_NAME = #{condition.managerName,jdbcType=VARCHAR}
+      </if>
+    </where>
+  </select>
+  <select id="oneToManyQueryCount" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.lang.Long">
+    select
+    count(1)
+    from PMA_F_COM_MID_INFO midInfo
+    left join PMA_F_COM_MID_DISTRIBUTE midDistribute on midDistribute.MID_INFO_ID = midInfo.ID
+    <where>
+      <if test="condition.transactionMark != null and condition.transactionMark!=''" >
+        AND midInfo.TRANSACTION_MARK = #{condition.transactionMark,jdbcType=VARCHAR}
+      </if>
+      <if test="condition.avg != null and condition.avg!=''" >
+        AND   midInfo.AVG = #{condition.avg,jdbcType=VARCHAR}
+      </if>
+      <if test="condition.orgName != null and condition.orgName!=''" >
+        AND   midInfo.ORG_NAME = #{condition.orgName,jdbcType=VARCHAR}
+      </if>
+      <if test="condition.orgId != null and condition.orgId!=''" >
+        AND   midInfo.ORG_ID = #{condition.orgId,jdbcType=VARCHAR}
+      </if>
+      <if test="condition.distributionMode != null and condition.distributionMode!=''" >
+        AND   midInfo.DISTRIBUTION_MODE = #{condition.distributionMode,jdbcType=VARCHAR}
+      </if>
+      <if test="condition.dstrSts != null and condition.dstrSts!=''" >
+        AND   midInfo.DSTR_STS = #{condition.dstrSts,jdbcType=VARCHAR}
+      </if>
+      <if test="condition.acctNo != null and condition.acctNo!=''" >
+        AND   midInfo.ACCT_NO = #{condition.acctNo,jdbcType=VARCHAR}
+      </if>
+      <if test="condition.transactionDate != null and condition.transactionDate!=''" >
+        AND   midInfo.TRANSACTION_DATE = #{condition.transactionDate,jdbcType=VARCHAR}
+      </if>
+      <if test="condition.startDate != null and condition.startDate!=''" >
+        <![CDATA[
+            AND midInfo.TO_DATE(TRANSACTION_DATE, 'yyyy-MM-dd hh24:mi:ss') >= TO_DATE(#{condition.startDate,jdbcType=VARCHAR}, 'yyyy-MM-dd')
+            ]]>
+      </if>
+      <if test="condition.endDate != null and condition.endDate!=''" >
+        <![CDATA[
+            AND midInfo.TO_DATE(transaction_date, 'yyyy-MM-dd hh24:mi:ss') <= TO_DATE(#{condition.endDate,jdbcType=VARCHAR}, 'yyyy-MM-dd')
+            ]]>
+      </if>
+      <if test="condition.transactionAmount != null and condition.transactionAmount!=''" >
+        AND   midInfo.TRANSACTION_AMOUNT = #{condition.transactionAmount,jdbcType=VARCHAR}
+      </if>
+      <if test="condition.serviceCharge != null and condition.serviceCharge!=''" >
+        AND   midInfo.SERVICE_CHARGE = #{condition.serviceCharge,jdbcType=VARCHAR}
+      </if>
+      <if test="condition.custNumber != null and condition.custNumber!=''" >
+        AND   midInfo.CUSTOMER_NUMBER = #{condition.custNumber,jdbcType=VARCHAR}
+      </if>
+      <if test="condition.custName != null and condition.custName!=''" >
+        AND   midInfo.CUSTOMER_NAME = #{condition.custName,jdbcType=VARCHAR}
+      </if>
+      <if test="condition.productNumber != null and condition.productNumber!=''" >
+        AND   midInfo.PRODUCT_NUMBER = #{condition.productNumber,jdbcType=VARCHAR}
+      </if>
+      <if test="condition.productName != null and condition.productName!=''" >
+        AND   midInfo.PRODUCT_NAME = #{condition.productName,jdbcType=VARCHAR}
+      </if>
+      <if test="condition.confirmationDate != null and condition.confirmationDate!=''" >
+        AND   midInfo.CONFIRMATION_DATE = #{condition.confirmationDate,jdbcType=VARCHAR}
+      </if>
+      <if test="condition.bussType != null and condition.bussType!=''" >
+        AND   midInfo.BUSS_TYPE = #{condition.bussType,jdbcType=VARCHAR}
+      </if>
+      <if test="condition.applySts != null and condition.applySts!=''" >
+        AND   midInfo.APPLY_STS = #{condition.applySts,jdbcType=VARCHAR}
+      </if>
+      <if test="condition.managerId != null and condition.managerId!=''" >
+        AND   midDistribute.MANAGER_ID = #{condition.managerId,jdbcType=VARCHAR}
+      </if>
+      <if test="condition.managerName != null and condition.managerName!=''" >
+        AND   midDistribute.MANAGER_NAME = #{condition.managerName,jdbcType=VARCHAR}
+      </if>
+    </where>
+  </select>
+
+  <select id="selectItem" parameterType="java.lang.String" resultType="java.util.HashMap">
+    select * from ADMIN_SM_LOOKUP_ITEM item where lookup_code = #{lookupCode,jdbcType=VARCHAR}
+  </select>
+
+  <select id="selectManager" parameterType="java.lang.String" resultType="java.util.HashMap">
+		select * from ADMIN_SM_USER  where login_code = #{loginCode,jdbcType=VARCHAR}
+	</select>
+  <select id="selectUser" resultType="java.util.Map">
+    SELECT *
+    FROM admin_sm_user
+    WHERE login_code = #{loginCode,jdbcType=VARCHAR}
+  </select>
+</mapper>

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.admin.repository.mapper.AdminSmTeamMapper">
+	
+	<select id="queryList" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+		resultType="java.util.Map">
+		select a.id,a.team_name,a.team_belong_org,a.creator_id,a.creator_name,a.create_time,
+		a.updater_id,a.updater_name,a.update_time,a.team_code,a.dpt_id,a.up_team_code,sut.unitname as team_belong_name
+		from admin_sm_team a
+		left join sys_units sut on a.team_belong_org = sut.unitid
+		<where>
+			<if test="condition.teamName != null and condition.teamName != ''">
+				and a.team_name like concat(concat('%',#{condition.teamName,jdbcType=VARCHAR}),'%')
+			</if>
+			<if test="condition.teamCode != null and condition.teamCode != ''">
+				and a.team_code =#{condition.teamCode}
+			</if>
+			<if test="condition.teamBelongOrg != null and condition.teamBelongOrg != ''">
+				and sut.unitseq LIKE CONCAT(CONCAT('%',#{condition.teamBelongOrg}),'%')			
+			</if>
+			<if test="condition.userOrg != null and condition.userOrg != ''">
+				and sut.unitseq LIKE CONCAT(CONCAT('%',#{condition.userOrg}),'%')
+			</if>
+		</where> 
+	</select>
+	
+	<select id="findTeamByParam" parameterType="java.util.Map"
+		resultType="java.util.Map">
+		select a.* from admin_sm_team a
+		<where>
+			<if test="teamCode != null and teamCode !=''">
+				and a.team_code  =#{teamCode, jdbcType=VARCHAR}
+			</if>
+		</where>
+	</select>
+</mapper>

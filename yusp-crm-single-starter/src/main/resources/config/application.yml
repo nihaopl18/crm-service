@@ -1,0 +1,275 @@
+# ===================================================================
+# Spring Boot configuration.
+#
+# This configuration will be overriden by the Spring profile you use,
+# for example application-dev.yml if you use the "dev" profile.
+#
+# More information on profiles: https://jhipster.github.io/profiles/
+# More information on configuration properties: https://jhipster.github.io/common-application-properties/
+# ===================================================================
+
+# ===================================================================
+# Standard Spring Boot properties.
+# Full reference is available at:
+# http://docs.spring.io/spring-boot/docs/current/reference/html/common-application-properties.html
+# ===================================================================
+management:
+  security:
+    roles: ADMIN
+    enabled: false
+  context-path: /actuator
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+    enabled-by-default: true
+  health:
+    mail:
+      enabled: false
+spring:
+  application:
+    name: pcrm
+    nameErr: pcrm_err
+    buildFolder: pcrm
+  sign:
+    privateKey: MIICdQIBADANBgkqhkiG9w0BAQEFAASCAl8wggJbAgEAAoGBAN1XK7TGWTDi71ot90OFJvdusB927R2BnKI1kPKHyHEVr+JJfDomTdosI5X92FJdWBL1oN4xMdVKLgwzgurcnFUa0KjWoVX4Xva5oV7iJtwbU3F8t8dCwDlgp6A57LaqlAavRhA0Mi9xNUY+iGkWMorj10PCAdgOV7capn/+rudBAgMBAAECgYBts+DDrnNSWYfMKHAfFQWlKUU9sxH+x9i8RNRcgJQGCHuuKkHaCFYZxjq1AqWO3Rjj/L4IolVSo3uDLJy8jy8jyxt8IE1j9FqaSbwDy126aVYwWLbBOc9lcK2lGiHTGf8EzSCX19Uc17QgqwMVujE/KOMkg72VwmtKFTVl1yfWAQJBAPW+58N4+e/mqKiBFJzjFN3r4W+TCoh5vn4+QVXnCCrkcV1B7+b6c6vUHhIEX6vf3TGinXh1BeQxN5eFq4ROOPECQQDmk5CnZIn7powbEecQ15n6JBHhbNn6gL6RfmZRD3Xhifu2gd9TLyc/5PXt+MjLYZhSLXt4HKiNKaGCF42nBRNRAkB8dfubnKG5RvEUpotyCfB/lP/QKoCjLkW0WoNspl4Umy5vNP3z1dTPqdaw+VYbDn5QrTNj1qDtOaAWNbTwhU2BAkAtMSz/8g+tWBZL0/Vy8p8GTP2ILlqG46b2Q0zwhFQ5cV75hXjtB+fseQbOrp1EZ4uAR9PUVeGfUVKLeexUmQURAkA2aJGK626A5Vz6u/VDmjW6loktK7vo3SHqBqDDdMqP0nHm+giisf05n+NZRedfe50kCrSBGEuQaBXxoeZks0a3
+    publicKey: MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDdVyu0xlkw4u9aLfdDhSb3brAfdu0dgZyiNZDyh8hxFa/iSXw6Jk3aLCOV/dhSXVgS9aDeMTHVSi4MM4Lq3JxVGtCo1qFV+F72uaFe4ibcG1NxfLfHQsA5YKegOey2qpQGr0YQNDIvcTVGPohpFjKK49dDwgHYDle3GqZ//q7nQQIDAQAB
+
+  profiles:
+    active: cloud
+  security:
+    basic:
+      enabled: false
+    oauth2:
+      resource:
+        filter-order: 3
+  jackson:
+    serialization.write_dates_as_timestamps: false
+    time-zone: GMT+8
+    date-format: yyyy-MM-dd HH:mm:ss
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: none
+      naming:
+        physical-strategy: org.springframework.boot.orm.jpa.hibernate.SpringPhysicalNamingStrategy
+        implicit-strategy: org.springframework.boot.orm.jpa.hibernate.SpringImplicitNamingStrategy
+  messages:
+    basename: i18n/messages
+  mvc:
+    favicon:
+      enabled: false
+  thymeleaf:
+    mode: HTML5
+    prefix: classpath:/templates/
+    suffix: .html
+
+jhipster:
+  async:
+    core-pool-size: 2
+    max-pool-size: 50
+    queue-capacity: 10000
+  swagger:
+    default-include-pattern: /api/.*
+    title: yusp-crm-single API
+    description: yusp-crm-single API documentation
+    version: 0.0.1
+    terms-of-service-url:
+    contact-name:
+    contact-url:
+    contact-email:
+    license:
+    license-url:
+
+# ===================================================================
+# Application specific properties
+# Add your own application properties here, see the ApplicationProperties class
+# to have type-safe configuration, like in the JHipsterProperties above
+#
+# More documentation is available at:
+# https://jhipster.github.io/common-application-properties/
+# ===================================================================
+
+# Mybatis 相关配置
+mybatis:
+  mapperLocations: classpath*:mapper/**/*.xml
+  type-aliases-package: cn.com.yusys.yusp.uaa.domain,cn.com.yusys.yusp.admin.domain,cn.com.yusys.yusp.echain.server.repository,com.yusys.streaminghub.app.domain
+  configuration:
+    map-underscore-to-camel-case: true
+
+mapper:
+  mappers:
+    - cn.com.yusys.yusp.commons.mapper.CommonMapper
+pagehelper:
+  #  helperDialect: DB2
+  helperDialect: oracle
+  reasonable: true
+asynclog:
+  corePoolSize: 3
+  maxPoolSize: 5
+  queueSize: 2000
+  logProcessor: cn.com.yusys.yusp.admin.log.client.BusinessLogProcessor
+#token 有效时间
+token:
+  timeout: 30 #分钟
+echain:
+  message:
+    used: false
+    impl:
+      bean:
+  license:
+    licenseContext: <?xml version="1.0" encoding="UTF-8"?><license build-time="Mon Sep 14 12:51:40 CST 2020" validate-code="71CBC02549FEF682A9B5217A09400A3F"><element name="customer_name">长沙农村商业银行股份有限公司</element><element name="contract_code">HT2020-0292</element><element name="license_code">0000017623</element><element name="product_code">0000000782</element><element name="product_name_zh-cn">宇信科技工作流平台eChain V3.0</element><element name="product_name_en-us">eChain</element><element name="version_major">3</element><element name="version_sub">0</element><element name="version_publish">1</element><element name="complie_date">2017-06-05</element><element name="license_type">客户销售许可证</element><element name="license_start_time">2020-09-11</element><element name="license_end_time">2064-09-11</element></license>
+    licenseModel: PRO
+
+web:
+  ignore-resources: .css, .js, .html, .ttf, .woff, .svg, .eot, .png, .gif, .ico, .json
+  ignore-urls: /oauth/token, /api/codeImage, /api/adminsmlogicsys/logicsyskv, /api/server, /error,/echain/studio/eChainStudio.jar,/definitionservlet,/echain/studio/studio.properties,/swagger-resources,/api-doc,/v2/api-docs
+
+# ===================================================================
+server:
+  port: 30001
+  servlet:
+    context-path: /yusp-crm-single
+    session:
+      cookie:
+        http-only: true
+# ===================================================================
+
+logback:
+  loglevel: INFO
+  path: /opt/log/
+
+info:
+  file:
+    local-disk-path: /pmswork
+    enabled: true #应用文件配置是否启用
+    file-storage-type: localdisk #应用文件配置启用模式  localdisk本地文件存储  fastdfs存储
+  pma:
+    performance-imp:
+      thread-pool-size: 5 #业绩批量导入-发起审批流-执行线程池大小
+      batch-thread-pool-size: 1 #业绩批量导入-发起批次数据-执行线程池大小
+      syn-execute-batch-max-size: 1 #同时发起的批次号数量
+    # 异步导出excel线程池
+    excel:
+      pool:
+        core-pool-size: 10
+        maxPoolSize: 30
+        keepAliveSeconds: 60
+        queueCapacity: 60
+  decrypt:
+    enabled: true #应用属性解密是否开启,如果需要开启，请改为true 在需要解密的字段值前添加“DECRYPT@”
+    type: DES #应用属性解密类型 DES RSA
+  excel:
+    enabled: true #应用excel配置是否启用
+    temp-file-dir: /pmswork #应用excel临时文件存放路径
+    batch-size: 20 #应用excel批量提交数量
+  async:
+    enabled: true #应用异步配置是否启用
+    core-pool-size: 10 #应用异步配置核心线程池大小
+    max-pool-size: 40 #应用异步配置最大线程池大小
+    queue-capacity: 100 #应用异步配置队列大小
+  app:
+  #unable-role-codes: R110,R111,R106,R107,R108,R203 # 不允许登录APP的角色代码
+  #manager-role-codes: R109,R101,R102,R103,R104,R105,R401,R301,R201,R202 # 允许登录APP的管理者角色代码
+  #android-download-url: https://www.yusys-sy.com.cn:8443/api/uimp/pma/uimp-app-single/api/app/adminsmusermobile/download?fileId=CS_ANDROID_APP.apk
+  #ios-download-url: itms-services://?action=download-manifest&url=https://www.yusys-sy.com.cn:8443/app-download/setup.plist
+  cache:
+    type: redis #spring cache类型
+    ttl: 720 #spring cache redis 缓存时间
+    user:
+      enabled: true #是否开启系统用户缓存
+    serviceauth:
+      enabled: false #是否开启服务间鉴权缓存-前提启动spring.cache.type=redis和application.filter.serviceauth.enabled=true并引入yusp-common-sercurity-autoconfigure包
+  web:
+    ignore-resources: .css, .js, .html, .ttf, .woff, .svg, .eot, .png, .gif, .ico, .json
+    ignore-urls: /,/api-doc,/v2/api-docs,/actuator/**,/oauth/token,/api/codeImage/**,/api/adminsmlogicsys/logicsyskv,/api/server,/error,/echain/studio/eChainStudio.jar,/definitionservlet,/echain/studio/studio.properties,/swagger-resources/**,/swagger-resources,/api/session/info,/api/account/menuandcontr,/actuatorApp,/api/uimpCommonResource/download,/api/adminbasesmappversion/queryapk,/api/adminbasedisplayinfo/querylist,/api/file/provider/download,/api/adminbasedisplayinfo/star/*,/api/adminbasedisplayinfo/unstar/*,/api/app/user/login,/api/pmaappnews/*,/api/file/provider/download,/api/adminsmuser/checkgesturepwd**,/api/commonexcel/runscheme,/api/ssotoken/login,/api/app/adminsmusermobile/download
+  email:
+    enabled: false #是否启用发送邮件，默认为true 不需要改为false即可
+    host: smtp.163.com #应用邮件服务器地址
+    port: 25 #应用邮件服务器端口
+    username: 123@163.com #应用邮件服务器用户名
+    password: DECRYPT@agf4JGILI04= #应用邮件服务器密码
+    send-nick: 《任务调度平台XXL-JOB》 #应用邮件服务器邮件标题
+#  log:
+#    async:
+#      enabled: true #应用异步日志是否启用
+#      core-pool-size: 20 #应用异步日志线程池核心线程大小
+#      max-pool-size: 50 #应用异步日志线程池最大线程大小
+#      queue-size: 200 #应用异步日志线程池队列大小
+#      logprocessor: cn.com.yusys.yusp.admin.log.BusinessLogProcessor #应用异步日志执行器
+  seqconfig:
+    enabled: true #应用sequence配置是否启用
+    default-seq-type: oracle #应用sequence配置类型 db2 mysql oracle sqlserver redis
+    #默认已关闭QuartzConfiguration和XxlJobAutoConfiguration调度配置,如需使用调度功能，请打开@Configuration注解
+  xxl:
+    job:
+      admin:
+        addresses: http://127.0.0.1:${server.port}/${server.servlet.context-path}  #127.0.0.1替换为单体部署实际IP地址
+      enabled: false  #xxl job调度配置是否启用
+      executor:
+        appname: message     #执行器名称
+        ip:  #执行器IP [选填]
+        port: 9999  #执行器端口号
+        logpath: ../logs/job #执行器日志文件路径
+        logretentiondays: 3 # 本地日志保存天数，-1为永远保存
+  security:
+    resource:
+      permit:
+        - /api/profile-info
+        - /swagger-resources/configuration/ui
+        - /oauth/token
+        - /api/codeImage/*
+        - /api/adminsmlogicsys/logicsyskv
+        - /api/server
+        - /v2/api-docs/**
+        - /actuatorApp
+        - /api/uimpCommonResource/download
+        - /api/adminbasesmappversion/queryapk
+        - /api/adminbasedisplayinfo/querylist
+        - /api/adminbasedisplayinfo/star/*
+        - /api/adminbasedisplayinfo/unstar/*
+        - /api/file/provider/download
+        - /api/app/user/login
+        - /api/pmaappnews/*
+        - /api/file/provider/download
+        - /api/adminsmuser/checkgesturepwd
+        - /api/commonexcel/runscheme
+        - /api/ssotoken/login
+        - /api/app/adminsmusermobile/download #下载APP
+      authenticated:
+        - /api/**
+  cors:
+    allow-credentials: true
+    allowed-headers: '*'
+    allowed-methods: GET, PUT, POST, DELETE, OPTIONS
+    allowed-origins: '*'
+    exposed-headers: ''
+    max-age: 1800
+  filter:
+    access:
+      enabled: true #过滤器-控制点权限
+    serviceauth:
+      enabled: false #过滤器-服务间鉴权  在Feign调用时，执行serviceFiter的校验配置，忽略accessfilter的检验配置
+    dataauth:
+      enabled: true #过滤器-数据权限
+    cors:
+      enabled: true #过滤器-支持跨域
+    xss:
+      enabled: true #过滤器-防跨域攻击和SQL注入
+    fileupload:
+      enabled: true #过滤器-防止恶意文件上传
+      access-file-type: docx,doc,xlsx,xls,txt,jpg,png,pdf,zip,rar,apk #可上传的白名单文件类型，如不配置默认允许的白名单文件类型为：docx,doc,xlsx,xls,txt,jpg,png,pdf,zip,rar
+
+
+#==================================
+rpc:
+  service:
+    #交易代码关键字，客户端请求中以此判断是哪类交易，该关键字wfcv被调度到相应的rpcService上，因此注意添加。
+    keywords:
+      - SERVICE_CODE
+      - FunctionId
+  server:
+    port: 30000
+    nThreads:
+      boss: 1
+      work: 4

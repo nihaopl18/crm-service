@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.climp.qypool.repository.mapper.LoyQyVirtTicketMapper">
+ 	<!-- 分也查询虚拟票券信息 -->
+	<select id="queryInfoByPage" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+		SELECT T.*,U1.USER_NAME AS CREATE_USER_NAME,U2.USER_NAME AS UPDATE_USER_NAME,O1.ORG_NAME AS CREATE_ORG_NAME,O2.ORG_NAME AS UPDATE_ORG_NAME,
+			O.org_name as SUIT_NAME,M.MERCHANT_NAME FROM loy_qy_virt_ticket T
+			LEFT JOIN LOY_QY_MERCHANT_INFO M ON M.MERCHANT_ID =T.MERCHANT_NO
+			LEFT JOIN sys_org_view O ON O.ORG_CODE=T.SUIT_ORG
+			LEFT JOIN ADMIN_SM_ORG O1 ON O1.ORG_CODE=T.CREATE_ORG
+			LEFT JOIN ADMIN_SM_ORG O2 ON O2.ORG_CODE=T.UPDATE_ORG
+			LEFT JOIN ADMIN_SM_USER U1 ON T.CREATE_USER=U1.LOGIN_CODE 
+			LEFT JOIN ADMIN_SM_USER U2 ON T.UPDATE_USER=U2.LOGIN_CODE 
+        <where>
+        	<if test="condition.ticketName != null and condition.ticketName !=''">
+        		AND T.TICKET_NAME LIKE CONCAT(CONCAT('%',#{condition.ticketName}),'%')
+        	</if>
+        	<if test="condition.ticketType != null and condition.ticketType !=''">
+        		AND T.TICKET_TYPE = #{condition.ticketType, jdbcType=VARCHAR}
+        	</if>
+        	<if test="condition.merchantNo != null and condition.merchantNo !=''">
+        		AND T.MERCHANT_NO = #{condition.merchantNo, jdbcType=VARCHAR}
+        	</if>
+        	<if test="condition.ticketStatus != null and condition.ticketStatus !=''">
+        		AND T.TICKET_STATUS = #{condition.ticketStatus, jdbcType=VARCHAR}
+        	</if>
+        	<if test="condition.suitOrg != null and condition.suitOrg !=''">
+        		AND O.ORG_SEQ LIKE CONCAT(CONCAT('%',#{condition.suitOrg, jdbcType=VARCHAR}),'%') 
+        	</if>
+        	<if test="condition.merchantId != '' and condition.merchantId != null">
+			   AND T.MERCHANT_NO = #{condition.merchantId, jdbcType=VARCHAR}
+		    </if>
+			<if test="condition.subType != null and condition.subType !='' and condition.subType !='0'.toString()">
+				AND t.KIND_ID in (select KIND_ID from
+				LOY_QY_VIRT_TICKET_KIND
+				WHERE SUP_KIND_ID = #{condition.subType, jdbcType=VARCHAR} or
+				KIND_ID = #{condition.subType, jdbcType=VARCHAR})
+        	</if>        	
+        </where>
+        ORDER BY T.CREATE_DATE DESC
+    </select>
+    <!-- 根据票券编号查询虚拟票券信息 -->
+	<select id="getTicketInfoByNo" parameterType="java.lang.String" resultType="cn.com.yusys.climp.qypool.domain.LoyQyVirtTicket">
+		SELECT T.* FROM loy_qy_virt_ticket T
+        <where>
+        	<if test="ticketNo != null and ticketNo !=''">
+        		AND T.TICKET_NO = #{ticketNo}
+        	</if>
+        </where>
+    </select>
+    <!-- 根据多条票券编号查询虚拟票券信息 -->
+	<select id="getTicketInfoByNos" parameterType="java.util.HashMap" resultType="cn.com.yusys.climp.qypool.domain.LoyQyVirtTicket">
+		SELECT T.* FROM loy_qy_virt_ticket T
+			where 1=1 
+        	<if test="ticketNo != null">
+        		AND T.TICKET_NO in 
+                <foreach item="item" index="index" collection="ticketNo" open="(" separator="," close=")">  
+                  #{item,jdbcType=VARCHAR}  
+                </foreach>
+        	</if>
+    </select>
+       <!-- 根据票券编号查询虚拟票券批次信息 -->
+	<select id="getBatchInfoByNo" parameterType="java.lang.String" resultType="cn.com.yusys.climp.qypool.domain.LoyQyVirtBatch">
+		SELECT T.BATCH_ID,T.TICKET_NO,T.BATCH_NO,T.TICKET_ALL_NUM,T.VALID_START_DATE,T.VALID_END_DATE,T.CREATE_USER,
+	       T.CREATE_DATE,T.CREATE_ORG,T.UPDATE_USER,T.UPDATE_DATE,T.UPDATE_ORG,T.WF_APPR_STS,T.SOURCE_TYPE,
+	       (select count(T1.VIRT_NO) from LOY_QY_VIRT_STOCK T1 where T1.BATCH_NO = T.BATCH_NO AND T1.USED_STS = '0') AS UN_SHIPPED_NUM,
+	       (select count(T2.VIRT_NO) from LOY_QY_VIRT_STOCK T2 where T2.BATCH_NO = T.BATCH_NO AND T2.USED_STS = '1') AS SHIPPED_NUM,
+	       (select count(T3.VIRT_NO) from LOY_QY_VIRT_STOCK T3 where T3.BATCH_NO = T.BATCH_NO AND T3.USED_STS = '2') AS USED_NUM,
+	       (select count(T4.VIRT_NO) from LOY_QY_VIRT_STOCK T4 where T4.BATCH_NO = T.BATCH_NO AND T4.USED_STS = '3') AS UN_USED_NUM
+  			FROM LOY_QY_VIRT_BATCH T
+        <where>
+        	<if test="batchNo != null and batchNo !=''">
+        		AND T.BATCH_NO = #{batchNo}
+        	</if>
+        </where>
+    </select>
+     	<!-- 审批页面查询虚拟票券信息 -->
+	<select id="wfQueryTicketInfo" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+		SELECT T.*,U1.USER_NAME AS CREATE_USER_NAME,U2.USER_NAME AS UPDATE_USER_NAME,O1.ORG_NAME AS CREATE_ORG_NAME,O2.ORG_NAME AS UPDATE_ORG_NAME,
+			O.org_name as SUIT_NAME,M.MERCHANT_NAME FROM loy_qy_virt_ticket T
+			left join LOY_QY_MERCHANT_INFO M ON M.MERCHANT_ID=T.MERCHANT_NO
+			LEFT JOIN sys_org_view O ON O.ORG_CODE=T.SUIT_ORG
+			LEFT JOIN ADMIN_SM_ORG O1 ON O1.ORG_CODE=T.CREATE_ORG
+			LEFT JOIN ADMIN_SM_ORG O2 ON O2.ORG_CODE=T.UPDATE_ORG
+			LEFT JOIN ADMIN_SM_USER U1 ON T.CREATE_USER=U1.LOGIN_CODE 
+			LEFT JOIN ADMIN_SM_USER U2 ON T.UPDATE_USER=U2.LOGIN_CODE 
+        <where>
+        	<if test="ticketId != null and ticketId !=''">
+        		AND T.TICKET_ID = #{ticketId}
+        	</if>
+        </where>
+    </select>
+    	<!-- 分也查询虚拟票券批次信息 -->
+	<select id="queryBatchByPage" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+		SELECT T.BATCH_ID,T.TICKET_NO,T.BATCH_NO,T.TICKET_ALL_NUM,T.VALID_START_DATE,T.VALID_END_DATE,T.CREATE_USER,
+	       T.CREATE_DATE,T.CREATE_ORG,T.UPDATE_USER,T.UPDATE_DATE,T.UPDATE_ORG,T.WF_APPR_STS,T.SOURCE_TYPE,
+	       U1.USER_NAME AS CREATE_USER_NAME,U2.USER_NAME AS UPDATE_USER_NAME,O1.ORG_NAME AS CREATE_ORG_NAME,O2.ORG_NAME AS UPDATE_ORG_NAME,
+	       (select count(T1.VIRT_NO) from LOY_QY_VIRT_STOCK T1 where T1.BATCH_NO = T.BATCH_NO AND T1.USED_STS = '0') AS UN_SHIPPED_NUM,
+	       (select count(T2.VIRT_NO) from LOY_QY_VIRT_STOCK T2 where T2.BATCH_NO = T.BATCH_NO AND T2.USED_STS = '1') AS SHIPPED_NUM,
+	       (select count(T3.VIRT_NO) from LOY_QY_VIRT_STOCK T3 where T3.BATCH_NO = T.BATCH_NO AND T3.USED_STS = '2') AS USED_NUM,
+	       (select count(T4.VIRT_NO) from LOY_QY_VIRT_STOCK T4 where T4.BATCH_NO = T.BATCH_NO AND T4.USED_STS = '3') AS UN_USED_NUM
+  			FROM LOY_QY_VIRT_BATCH T
+			LEFT JOIN ADMIN_SM_ORG O1 ON O1.ORG_CODE=T.CREATE_ORG
+			LEFT JOIN ADMIN_SM_ORG O2 ON O2.ORG_CODE=T.UPDATE_ORG
+			LEFT JOIN ADMIN_SM_USER U1 ON T.CREATE_USER=U1.LOGIN_CODE 
+			LEFT JOIN ADMIN_SM_USER U2 ON T.UPDATE_USER=U2.LOGIN_CODE 
+        <where>
+        	<if test="condition.ticketNo != null and condition.ticketNo !=''">
+        		AND T.TICKET_NO = #{condition.ticketNo, jdbcType=VARCHAR}
+        	</if>
+        </where>
+        ORDER BY T.CREATE_DATE DESC
+    </select>
+       <!-- 审批页面查询虚拟票券批次信息 -->
+	<select id="wfQueryBatchInfo" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+		SELECT T.*,U1.USER_NAME AS CREATE_USER_NAME,U2.USER_NAME AS UPDATE_USER_NAME,O1.ORG_NAME AS CREATE_ORG_NAME,O2.ORG_NAME AS UPDATE_ORG_NAME,
+			O.TICKET_NAME FROM LOY_QY_VIRT_BATCH T
+			LEFT JOIN loy_qy_virt_ticket O ON O.TICKET_NO=T.TICKET_NO
+			LEFT JOIN ADMIN_SM_ORG O1 ON O1.ORG_CODE=T.CREATE_ORG
+			LEFT JOIN ADMIN_SM_ORG O2 ON O2.ORG_CODE=T.UPDATE_ORG
+			LEFT JOIN ADMIN_SM_USER U1 ON T.CREATE_USER=U1.LOGIN_CODE 
+			LEFT JOIN ADMIN_SM_USER U2 ON T.UPDATE_USER=U2.LOGIN_CODE 
+        <where>
+        	<if test="ticketId != null and ticketId !=''">
+        		AND T.BATCH_ID = #{batchId}
+        	</if>
+        </where>
+    </select>
+    <!-- 分也查询虚拟票券批次的明细库存信息 -->
+	<select id="queryStockByPage" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+		SELECT T.*,U1.USER_NAME AS CREATE_USER_NAME,U2.USER_NAME AS UPDATE_USER_NAME,O1.ORG_NAME AS CREATE_ORG_NAME,O2.ORG_NAME AS UPDATE_ORG_NAME
+			 FROM LOY_QY_VIRT_STOCK T
+			LEFT JOIN ADMIN_SM_ORG O1 ON O1.ORG_CODE=T.CREATE_ORG
+			LEFT JOIN ADMIN_SM_ORG O2 ON O2.ORG_CODE=T.UPDATE_ORG
+			LEFT JOIN ADMIN_SM_USER U1 ON T.CREATE_USER=U1.LOGIN_CODE 
+			LEFT JOIN ADMIN_SM_USER U2 ON T.UPDATE_USER=U2.LOGIN_CODE 
+        <where>
+        	<if test="condition.batchNo != null and condition.batchNo !=''">
+        		AND T.BATCH_NO = #{condition.batchNo, jdbcType=VARCHAR}
+        	</if>
+        </where>
+        ORDER BY T.CREATE_DATE DESC
+    </select>
+    <!-- 根据ID编号，修改对应记录的生效状态 -->
+    <update id="updateInfoStsById" parameterType="java.util.HashMap">
+    	UPDATE loy_qy_virt_ticket SET TICKET_STATUS=#{status},UPDATE_USER=#{updateUser},UPDATE_DATE=to_date(#{updateDate},'yyyy-mm-dd'),UPDATE_ORG=#{updateOrg} WHERE TICKET_ID in 
+    	<if test="id != null and id !=''">
+				<foreach collection="id" item="item" index="index" separator=" " >
+					 #{item}
+				</foreach>
+		</if>
+    </update>
+    <!-- 根据ID编号，修改对应记录的审批状态 -->
+    <update id="changeBizWfStatus" parameterType="java.util.HashMap">
+    	UPDATE loy_qy_virt_ticket SET WF_APPR_STS=#{status},UPDATE_USER=#{updateUser},UPDATE_DATE=to_date(#{updateDate},'yyyy-mm-dd'),UPDATE_ORG=#{updateOrg} WHERE TICKET_ID=#{id}
+    </update>
+      <!-- 汇总导入的条数 -->
+    <select id="getNum" resultType="java.util.Map" parameterType="java.lang.String" >
+		  select count(distinct t.VIRT_NO) as num 
+		    from LOY_QY_VIRT_STOCK_TEMP t
+		    where t.VIRT_NO  not in
+             (select s.VIRT_NO
+                from LOY_QY_VIRT_STOCK s )
+                and t.BATCH_NO=#{batchNo, jdbcType=VARCHAR}
+    </select>
+    <!-- 把临时表的数据插入到正式表中 -->
+    <insert  id="insertList" parameterType="java.lang.String" >
+    	insert into LOY_QY_VIRT_STOCK
+		  select distinct * from LOY_QY_VIRT_STOCK_TEMP t
+		   where t.VIRT_NO  not in
+             (select s.VIRT_NO
+                from LOY_QY_VIRT_STOCK s )
+                and t.BATCH_NO=#{batchNo, jdbcType=VARCHAR}
+    </insert>
+    <!-- 删除临时表中对应批次的数据-->
+    <delete id="deleteTempInfo" parameterType="java.lang.String" >
+    	delete from LOY_QY_VIRT_STOCK_TEMP where BATCH_NO=#{batchNo, jdbcType=VARCHAR}
+    </delete>
+    <!-- 查询类目树 -->
+    <select id="getListTree" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+		resultType="java.util.Map">
+		select t.* from LOY_QY_VIRT_TICKET_KIND t 
+		<where>
+			<if test="condition.orgCode!=null and condition.orgCode!= '' and condition.orgCode!= '500'">
+					(t.corp_org = #{condition.orgCode, jdbcType=VARCHAR}  or t.kind_id = '0')
+			</if>
+		</where>
+		order by t.kind_order
+	</select>
+	<!-- 查询类目录子节点 -->
+	<select id="selectSubdirectory" parameterType="String" resultType="int">
+		select (select count(*) from LOY_QY_VIRT_TICKET_KIND c where c.sup_kind_id = #{id, jdbcType=VARCHAR}) from dual
+	</select>
+		<!-- 查询类目录下的票券信息 -->
+	<select id="selectSubVirtStock" parameterType="String" resultType="int">
+		select (select count(*) from loy_qy_virt_ticket c where c.KIND_ID= #{id, jdbcType=VARCHAR}) from dual
+	</select>
+</mapper>

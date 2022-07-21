@@ -1,0 +1,560 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.uimp.business.pma.scheme.schememain.repository.mapper.PmaFSchemeMapper">
+    <resultMap id="BaseResultMap" type="cn.com.yusys.yusp.uimp.business.pma.scheme.schememain.domain.PmaFScheme">
+		<id column="ID" jdbcType="VARCHAR" property="id" />
+		<result column="SCHEME_ID" jdbcType="VARCHAR" property="schemeId" />
+		<result column="SCHEME_NAME" jdbcType="VARCHAR" property="schemeName" />
+		<result column="REMARK" jdbcType="VARCHAR" property="remark" />
+		<result column="ORG_LEVEL" jdbcType="VARCHAR" property="orgLevel" />
+		<result column="MENU_ID" jdbcType="VARCHAR" property="menuId" />
+		<result column="CREATOR" jdbcType="VARCHAR" property="creator" />
+		<result column="CREATE_DATE" jdbcType="VARCHAR" property="createDate" />
+		<result column="UPDATER_ID" jdbcType="VARCHAR" property="updaterId" />
+		<result column="UPDATE_DATE" jdbcType="VARCHAR" property="updateDate" />
+		<result column="ORG_ID" jdbcType="VARCHAR" property="orgId" />
+		<result column="BUSS_SYS_NO" jdbcType="VARCHAR" property="bussSysNo" />
+		<result column="START_DATE" jdbcType="VARCHAR" property="startDate" />
+		<result column="END_DATE" jdbcType="VARCHAR" property="endDate" />
+		<result column="CHECK_SCENE" jdbcType="VARCHAR" property="checkScene" />
+		<result column="EVL_OBJ_TYPE" jdbcType="VARCHAR" property="evlObjType" />
+		<result column="SPE_RULE_TYPE" jdbcType="VARCHAR" property="speRuleType" />
+		<result column="STAT_FLAG" jdbcType="VARCHAR" property="statFlag" />
+		<result column="SCHEME_TYPE" jdbcType="VARCHAR" property="schemeType" />
+    </resultMap>
+    <sql id="Base_Column_List">
+	    ID,SCHEME_ID,SCHEME_NAME,REMARK,ORG_LEVEL,MENU_ID,CREATOR,CREATE_DATE,UPDATER_ID,UPDATE_DATE,ORG_ID,BUSS_SYS_NO,START_DATE,END_DATE,CHECK_SCENE,EVL_OBJ_TYPE,SPE_RULE_TYPE,STAT_FLAG
+    </sql>
+    
+    <!-- 根据方案编号 查询方案名称，可以包含多个 -->
+    <select id="queryNames" parameterType="String" resultType="String">
+        select SCHEME_NAME from PMA_F_SCHEME
+        where SCHEME_ID in 
+        <foreach collection="schemeId" item="schemeId" index="index" open="(" close=")" separator=",">
+        	#{schemeId}
+        </foreach>
+    </select>
+    <!-- 考核方案查询sql -->
+    <select id="listByModel" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+        SELECT PI.ID,PI.SCHEME_ID,PI.SCHEME_NAME,PI.MENU_ID,to_char(to_date(PI.CREATE_DATE,'yyyy-MM-dd'),'yyyy-MM-dd') as CREATE_DATE,to_char(to_date(PI.UPDATE_DATE,'yyyy-MM-dd'),'yyyy-MM-dd') as UPDATE_DATE,
+        to_char(to_date(PI.START_DATE,'yyyy-MM-dd'),'yyyy-MM-dd') as START_DATE, to_char(to_date(PI.END_DATE,'yyyy-MM-dd'),'yyyy-MM-dd') as END_DATE,PI.CHECK_SCENE,
+        PI.EVL_OBJ_TYPE,PI.STAT_FLAG,PL.MENU_NAME, SUT.UNITNAME AS ORG_NAME, PI.SCHEME_TYPE,PI.SCHEME_CYCLE_TYPE,
+        (SELECT acc.USER_NAME FROM ADMIN_SM_USER acc WHERE acc.LOGIN_CODE = PI.CREATOR) CREATOR_NAME,PI.CREATOR,
+        (SELECT acc.USER_NAME FROM ADMIN_SM_USER acc WHERE acc.LOGIN_CODE = PI.UPDATER_ID) UPDATER_NAME 
+        FROM PMA_F_SCHEME PI 
+         INNER JOIN PMA_F_SCHEME_MENU PL 
+         ON PI.MENU_ID = PL.MENU_ID
+         LEFT JOIN SYS_UNITS SUT 
+         ON PI.ORG_ID = SUT.UNITID
+         <if test="condition.objId != null and condition.objId  != ''">
+	      			LEFT JOIN PMA_F_SCHEME_EVLOBJ_REL SRE
+        	 		ON PI.SCHEME_ID = SRE.SCHEME_ID
+		  </if>
+
+         <where>
+            <if test="condition.orgId != null and condition.orgId   != ''">
+	      		AND SUT.UNITSEQ LIKE  concat(concat('%',#{condition.orgId,jdbcType=VARCHAR}),'%')
+		    </if>
+            <if test="condition.menuId != null and condition.menuId != ''">
+	      	   AND PI.menu_id in ( select b.menu_id from PMA_F_SCHEME_MENU b start with menu_id=#{condition.menuId,jdbcType=VARCHAR} connect by prior menu_id =parent_menu_id)
+		    </if>
+		    <if test="condition.schemeId != null and condition.schemeId  != ''">
+	      		AND PI.SCHEME_ID = #{condition.schemeId,jdbcType=VARCHAR}
+		    </if>
+			<if test="condition.schemeName != null and condition.schemeName  != ''">
+	      		AND PI.SCHEME_NAME  LIKE concat(concat('%',#{condition.schemeName,jdbcType=VARCHAR}),'%')
+		    </if>
+		    <if test="condition.evlObjType != null and condition.evlObjType  != ''">
+	      		AND PI.EVL_OBJ_TYPE = #{condition.evlObjType,jdbcType=VARCHAR}
+		    </if>
+			 <if test="condition.schemeCycleType != null and condition.schemeCycleType != ''">
+				 AND PI.SCHEME_CYCLE_TYPE = #{condition.schemeCycleType,jdbcType=VARCHAR}
+			 </if>
+			 <if test="condition.statFlag != null and condition.statFlag != ''">
+				 AND PI.STAT_FLAG = #{condition.statFlag,jdbcType=VARCHAR}
+			 </if>
+		    <if test="(condition.objId != null and condition.objId  != '') and (condition.grantObjId == null or condition.grantObjId == '')">
+	      		AND SRE.EVL_OBJ_ID = #{condition.objId,jdbcType=VARCHAR}
+		    </if>
+		    <if test="condition.isExcel != null and condition.isExcel  != ''">
+	      		AND PI.IS_EXCEL = #{condition.isExcel,jdbcType=VARCHAR}
+		    </if>
+		    <if test="condition.isManager != null and condition.isManager != ''">
+	      		AND SRE.EVL_OBJ_ID = #{condition.isManager,jdbcType=VARCHAR}
+		    </if>
+
+		    <!-- objId:考核对象编号(包含人员/机构); grantObjId:当前登录人授权机构(首页专用) -->
+		    <if test="(condition.objId != null and condition.objId  != '') and (condition.grantObjId != null and condition.grantObjId != '')">
+	      		AND (SRE.EVL_OBJ_ID = #{condition.objId,jdbcType=VARCHAR} or 
+	      			 (SRE.EVL_OBJ_ID = #{condition.grantObjId,jdbcType=VARCHAR} and PI.EVL_OBJ_TYPE in ('02', '03'))
+	      			)
+		    </if>
+         </where>
+    </select>
+    <select id="querySchemeInfo" parameterType="java.lang.String" resultType="java.util.HashMap">
+    	select DISTINCT 
+    		PI.SCHEME_ID, PI.SCHEME_NAME 
+    	from PMA_F_SCHEME pi
+    		 LEFT JOIN PMA_F_SCHEME_EVLOBJ_REL sre ON pi.SCHEME_ID = sre.SCHEME_ID
+    	where 1=1
+    		<if test='type == "1"'>	<!-- 查询考核对象为员工 -->
+    			and pi.EVL_OBJ_TYPE = '01' and sre.EVL_OBJ_ID = #{evlObjId, jdbcType=VARCHAR}
+    		</if>
+    		<if test='type == "2"'>	<!-- 查询考核对象为机构 -->
+    			and pi.EVL_OBJ_TYPE in ('02', '03') and sre.EVL_OBJ_ID = #{evlObjId, jdbcType=VARCHAR}
+    		</if>
+    </select>
+     <!-- 首页查询sql -->
+    <select id="queryHomePageIndex" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+        select sut.unitid as evl_obj_id,round(nvl(pb.index_value, 0) / 10000, 4) as index_value,pb.apply_type,sut.unitname as evl_obj_name
+  				from pma_f_scheme_index_split t
+  				left join pma_f_base_index_res pb on t.bal_type_id = pb.bal_type
+                                   and t.index_id = pb.index_id
+                                   and t.evl_obj_type = pb.evl_obj_type
+                                   and t.apply_type_id = pb.apply_type
+                                  <if test="condition.indexId != null and condition.indexId   != ''">
+	      							and pb.index_id =  #{condition.indexId,jdbcType=VARCHAR}
+		    					  </if>
+  				inner join sys_units sut on pb.evl_obj_id = sut.unitid
+         <where> 
+            <if test="condition.orgId != null and condition.orgId   != ''">
+	      		AND SUT.UNITSEQ LIKE  concat(concat('%',#{condition.orgId,jdbcType=VARCHAR}),'%')
+		    </if>
+		    <if test="condition.province != null and condition.province   != ''">
+	      		and sut.province = #{condition.province,jdbcType=VARCHAR}
+		    </if>
+		    <if test="condition.city != null and condition.city   != ''">
+	      		and sut.city = #{condition.city,jdbcType=VARCHAR}
+		    </if>
+		    <if test="condition.county != null and condition.county   != ''">
+	      		and sut.county = #{condition.county,jdbcType=VARCHAR}
+		    </if>
+		    <if test="condition.indexId != null and condition.indexId   != ''">
+	      		and t.index_id =  #{condition.indexId,jdbcType=VARCHAR}
+		    </if>
+		    <if test="condition.schemeId != null and condition.schemeId   != ''">
+	      		AND t.scheme_id = #{condition.schemeId,jdbcType=VARCHAR}
+		    </if>
+   			and pb.etl_date = '20191231'
+            AND T.apply_type_id IN ('00','01')
+         </where>
+    </select>
+         <!-- 首页查询sql -->
+    <select id="queryHomePageIndexNew" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+    	select
+	    	ID,
+			ETL_DATE,
+			SCHEME_ID,
+			SCHEME_NAME,
+			EVL_OBJ_ID,
+			INDEX_ID_STR,
+			INDEX_NAME,
+			INDEX_VALUE,
+			IMP_VALUE,
+			WEIGHT,
+			SCORE,
+			ROUND(to_number(INDEX_VALUE) / to_number(IMP_VALUE) * 100, 2) as PLAN_PER_VAL,
+			ROUND(to_number(INDEX_VALUE) / to_number(IMP_VALUE) * 100, 2) || '%' as PLAN_PER
+    	from PMA_F_HOME_MY_INDEX mi
+    	where 1=1
+    		and mi.SCHEME_ID = #{condition.schemeId,jdbcType=VARCHAR}
+    		and mi.EVL_OBJ_ID = #{condition.evlObjId,jdbcType=VARCHAR}
+    		and mi.INDEX_ID_STR in 
+    			<foreach collection="condition.indexIdStr" item="item" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+    		and mi.ETL_DATE = (
+    			select max(sub_mi.ETL_DATE) 
+    				from PMA_F_HOME_MY_INDEX sub_mi 
+    			where 1=1
+    				and sub_mi.SCHEME_ID = #{condition.schemeId,jdbcType=VARCHAR}
+		    		and sub_mi.EVL_OBJ_ID = #{condition.evlObjId,jdbcType=VARCHAR}
+		    		and sub_mi.INDEX_ID_STR in 
+		    			<foreach collection="condition.indexIdStr" item="item" open="(" separator="," close=")">
+							#{item}
+						</foreach>
+			)
+		order by to_number(WEIGHT) desc
+        <!-- select  pb.index_id,pb.evl_obj_id, round(nvl(pb.index_value, 0) / 10000, 4) as index_value,t.apply_type_id,e.index_name
+  				from pma_f_scheme_index_split t
+  				left join pma_f_base_index_res pb on t.bal_type_id = pb.bal_type
+                                   and t.index_id = pb.index_id
+                                   and t.apply_type_id = pb.apply_type
+                                   and t.evl_obj_type = pb.evl_obj_type
+                left join pma_f_base_index_info e on pb.index_id = e.index_id
+         <where> 
+            <if test="condition.userId != null and condition.userId   != ''">
+	      		AND pb.evl_obj_id = #{condition.userId,jdbcType=VARCHAR}
+		    </if>
+		    		
+		    <if test="condition.indexId != null and condition.indexId   != ''">
+		   		AND PB.INDEX_ID IN 
+	      		        <foreach collection="condition.indexId"  item="item" open="(" separator="," close=")">
+                    			#{item}
+               			</foreach>
+		    </if>
+		    <if test="condition.schemeId != null and condition.schemeId   != ''">
+	      		AND t.scheme_id = #{condition.schemeId,jdbcType=VARCHAR}
+		    </if>
+   			and pb.etl_date = '20191231'
+            AND T.apply_type_id IN ('00','01')
+         </where> -->
+    </select>
+             <!-- 首页查询sql -->
+    <select id="queryHomePageIndexRate" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+    	select 	ID,
+				SCHEME_ID,
+				SCHEME_NAME,
+				EVL_OBJ_ID,
+				INDEX_ID_STR,
+				INDEX_NAME,
+				INDEX_VALUE,
+				IMP_VALUE,
+				WEIGHT,
+				SCORE,
+				ROUND(to_number(INDEX_VALUE) / to_number(IMP_VALUE) * 100, 2) as PLAN_PER,
+				etl_date 
+				from pma_f_home_my_index t 
+		where  t.etl_date = #{condition.etlDate,jdbcType=VARCHAR}
+			and t.SCHEME_ID = #{condition.schemeId,jdbcType=VARCHAR}
+    		and t.EVL_OBJ_ID = #{condition.evlObjId,jdbcType=VARCHAR}
+    		and t.INDEX_ID_STR in 
+    			<foreach collection="condition.indexIdStr" item="item" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+
+    </select>
+     <!-- 首页查询sql -->
+    <select id="queryHomePageIndexName" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+    	select 	DISTINCT(INDEX_NAME),
+				INDEX_ID_STR,
+				WEIGHT
+				from pma_f_home_my_index t 
+		where  
+			t.SCHEME_ID = #{condition.schemeId,jdbcType=VARCHAR}
+			and ROWNUM &lt;= 3
+    		and t.EVL_OBJ_ID = #{condition.evlObjId,jdbcType=VARCHAR}
+    		and t.INDEX_ID_STR in 
+    			<foreach collection="condition.indexIdStr" item="item" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			and t.etl_date in (select TO_CHAR(TRUNC(to_date(etl_date, 'YYYYMMDD')-1), 'YYYYMMDD') AS etl_date
+  				from pma_f_etl_date
+ 				where etl_state = '1'
+   				AND ETL_TYPE = 'PMA')
+		order by to_number(WEIGHT) desc
+    </select>
+    <select id="queryHomePageIndexDate" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+		select AA.etl_date AS SJ_DATE,SUBSTR(AA.etl_date,0,6) AS etl_date from (		
+        select TO_CHAR(TRUNC(to_date(etl_date, 'YYYYMMDD')-1), 'YYYYMMDD') AS etl_date
+  					from pma_f_etl_date
+ 					where etl_state = '1'
+   					AND ETL_TYPE = 'PMA'
+                   UNION 
+        select TO_CHAR(LAST_DAY(ADD_MONTHS(to_date(a.etl_date,'YYYYMMDD'), -1)),'YYYYMMDD') AS etl_date
+                   					from pma_f_etl_date a where a.etl_state = '1' AND ETL_TYPE = 'PMA'
+                  				 	UNION 
+                   					select TO_CHAR(LAST_DAY(ADD_MONTHS(to_date(a.etl_date,'YYYYMMDD'), -2)),'YYYYMMDD') AS etl_date
+                   					from pma_f_etl_date a where a.etl_state = '1' AND ETL_TYPE = 'PMA'
+                             UNION 
+                             select TO_CHAR(LAST_DAY(ADD_MONTHS(to_date(a.etl_date,'YYYYMMDD'), -3)),'YYYYMMDD') AS etl_date
+                             from pma_f_etl_date a where a.etl_state = '1' AND ETL_TYPE = 'PMA'
+                             UNION 
+                             select TO_CHAR(LAST_DAY(ADD_MONTHS(to_date(a.etl_date,'YYYYMMDD'), -4)),'YYYYMMDD') AS etl_date
+                             from pma_f_etl_date a where a.etl_state = '1' AND ETL_TYPE = 'PMA'
+                             UNION 
+                             select TO_CHAR(LAST_DAY(ADD_MONTHS(to_date(a.etl_date,'YYYYMMDD'), -5)),'YYYYMMDD') AS etl_date
+                             from pma_f_etl_date a where a.etl_state = '1' AND ETL_TYPE = 'PMA') aa
+    ORDER BY  to_date(aa.etl_date,'YYYYMMDD')
+    </select>
+           <!-- 指标补录指标放大镜考核指标查询sql -->
+    <select id="querySchemeIndex" parameterType="string" resultType="java.util.HashMap">
+    	select 
+    	T.INDEX_ID||'['||T.EVL_OBJ_TYPE||','||T.APPLY_TYPE_ID||','||T.BAL_TYPE_ID||']' as scheme_index_id
+    	FROM PMA_F_SCHEME_INDEX_REL T
+    	 INNER JOIN (SELECT A.INDEX_ID,A.INDEX_NAME,'' as INDEX_TYPE
+    	  FROM PMA_F_EVL_INDEX_INFO A 
+    	   UNION SELECT B.INDEX_ID,B.INDEX_NAME,B.INDEX_TYPE
+    	    FROM PMA_F_BASE_INDEX_INFO B) T1 
+    	     ON T.INDEX_ID = T1.INDEX_ID
+    	 INNER JOIN ADMIN_SM_LOOKUP_ITEM MBONE ON MBONE.LOOKUP_CODE ='YE_TYPE' AND MBONE.LOOKUP_ITEM_CODE = T.BAL_TYPE_ID
+         INNER JOIN ADMIN_SM_LOOKUP_ITEM MBTWO ON MBTWO.LOOKUP_CODE ='INDEX_APPLY_TYPE' AND MBTWO.LOOKUP_ITEM_CODE = T.APPLY_TYPE_ID
+         INNER JOIN ADMIN_SM_LOOKUP_ITEM MBTHREE ON MBTHREE.LOOKUP_CODE ='OBJ' AND MBTHREE.LOOKUP_ITEM_CODE = T.EVL_OBJ_TYPE
+       <where>
+	      		AND T.SCHEME_ID = #{schemeId}
+	    </where>
+    </select>
+    <!-- 考核方案查询指标是否重复 -->
+    <select id="queryIndexCount" parameterType="hashmap" resultType="string">
+        select count(*) from PMA_F_SCHEME_INDEX_REL
+            <where>
+				AND SCHEME_ID = #{schemeId}
+				AND INDEX_TYPE = #{indexType}
+				AND INDEX_ID = #{indexId}
+				AND BAL_TYPE_ID = #{balTypeId}
+				AND EVL_OBJ_TYPE = #{evlObjType}
+				AND APPLY_TYPE_ID = #{applyTypeId}
+         </where>
+    </select>
+        <!-- 考核方案查询sql -->
+    <select id="getQueryId" parameterType="string" resultType="java.util.HashMap">
+        :{value} 
+    </select>
+    <!-- 根据方案编号删除方案机构关联表 -->
+    <delete id="delorg" parameterType="String"  >
+	   delete from   PMA_F_SCHEME_ORG_REL  where SCHEME_ID=#{schemeId}
+	</delete>
+	 <!-- 根据方案编号删除方案岗位关联表 -->
+    <delete id="delpost" parameterType="String"  >
+	   delete from   PMA_F_SCHEME_POST_REL  where SCHEME_ID=#{schemeId}
+	</delete>
+	<!-- 根据方案编号删除方案特殊规则表 -->
+    <delete id="delsperule" parameterType="String"  >
+	   delete from   PMA_F_SCHEME_SPERULE_REL  where SCHEME_ID=#{schemeId}
+	</delete>
+	<!-- 根据方案编号删除考核对象表 -->
+    <delete id="delobj" parameterType="String"  >
+	   delete from   PMA_F_SCHEME_EVLOBJ_REL  where SCHEME_ID=#{schemeId}
+	</delete>
+		<!-- 根据方案编号方案信息表 -->
+    <delete id="delinfo" parameterType="String"  >
+	   delete from   PMA_F_SCHEME  where SCHEME_ID=#{schemeId}
+	</delete>
+		<!-- 根据方案编号删除考核对象表 -->
+    <delete id="delindex" parameterType="String"  >
+	   delete from   PMA_F_SCHEME_INDEX_REL  where SCHEME_ID=#{schemeId}
+	</delete>
+		<!-- 根据方案编号方案信息表 -->
+    <delete id="delsplit" parameterType="String"  >
+	   delete from   PMA_F_SCHEME_INDEX_SPLIT  where SCHEME_ID=#{schemeId}
+	</delete>
+	
+	<delete id="delinfoBySchemeIds">
+		delete from PMA_F_SCHEME where SCHEME_ID in
+	   	<foreach collection="array" index="index" item="item" open="(" separator="," close=")">
+	   		#{item}
+	   	</foreach> 
+	</delete>
+	<delete id="delobjBySchemeIds">
+	   	delete from PMA_F_SCHEME_EVLOBJ_REL where SCHEME_ID in 
+	   	<foreach collection="array" index="index" item="item" open="(" separator="," close=")">
+	   		#{item}
+	   	</foreach> 
+	</delete>
+	<delete id="delorgBySchemeIds">
+	   	delete from PMA_F_SCHEME_ORG_REL where SCHEME_ID in
+	    <foreach collection="array" index="index" item="item" open="(" separator="," close=")">
+	   		#{item}
+	   	</foreach>
+	</delete>
+	<delete id="delTeamBySchemeIds">
+		delete from PMA_F_SCHEME_TEAM_REL where SCHEME_ID in
+		<foreach collection="array" index="index" item="item" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</delete>
+	<delete id="delMktBySchemeIds">
+		delete from PMA_F_SCHEME_MKT_REL where SCHEME_ID in
+		<foreach collection="array" index="index" item="item" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</delete>
+	<delete id="delpostBySchemeIds">
+	   	delete from PMA_F_SCHEME_POST_REL where SCHEME_ID in
+	   	<foreach collection="array" index="index" item="item" open="(" separator="," close=")">
+	   		#{item}
+	   	</foreach>
+	</delete>
+	<delete id="delsperuleBySchemeIds">
+	   	delete from PMA_F_SCHEME_SPERULE_REL where SCHEME_ID in
+	   	<foreach collection="array" index="index" item="item" open="(" separator="," close=")">
+	   		#{item}
+	   	</foreach>
+	</delete>
+	<delete id="delindexBySchemeIds">
+	   	delete from PMA_F_SCHEME_INDEX_REL where SCHEME_ID in
+	   	<foreach collection="array" index="index" item="item" open="(" separator="," close=")">
+	   		#{item}
+	   	</foreach>
+	</delete>
+	<delete id="delsplitBySchemeIds">
+	   	delete from PMA_F_SCHEME_INDEX_SPLIT where SCHEME_ID in
+	   	<foreach collection="array" index="index" item="item" open="(" separator="," close=")">
+	   		#{item}
+	   	</foreach>
+	</delete>
+	
+	<!-- 根据方案编号从特殊规则表中插入方案对象表 -->
+    <insert id="insertObj" parameterType="String">
+		 INSERT INTO PMA_F_SCHEME_EVLOBJ_REL
+		  (ID, SCHEME_ID, EVL_OBJ_TYPE, EVL_OBJ_ID) 
+		   SELECT sys_guid(), A.SCHEME_ID, A.EVL_OBJ_TYPE, A.EVL_OBJ_ID 
+		    FROM PMA_F_SCHEME_SPERULE_REL A  
+		     LEFT JOIN  ADMIN_SM_USER B ON A.EVL_OBJ_ID = B.LOGIN_CODE AND B.USER_STS = 'A'  
+		      WHERE scheme_id = #{schemeId} 
+	</insert>
+	<!-- 根据方案编号从特殊规则表中插入方案对象表 -->
+    <insert id="insertObjNew" parameterType="String">
+		 INSERT INTO PMA_F_SCHEME_EVLOBJ_REL
+		  (ID, SCHEME_ID, EVL_OBJ_TYPE, EVL_OBJ_ID) 
+		   SELECT sys_guid(), #{schemeId},'01', LOGIN_CODE 
+		     FROM (  
+		        SELECT DISTINCT adu.LOGIN_CODE 
+		         from ADMIN_SM_USER adu
+		            INNER JOIN PMA_F_SCHEME_ORG_REL T2 
+		                 ON adu.ORG_ID = T2.ORG_ID   AND T2.SCHEME_ID=#{schemeId}
+		                 INNER JOIN Admin_Sm_User_Duty_Rel T1 ON T1.user_id = adu.user_id and rel_sts='A' 
+                		 INNER JOIN ADMIN_SM_DUTY T4 ON T1.DUTY_ID = T4.DUTY_ID 
+		                 INNER JOIN PMA_F_SCHEME_POST_REL T3 
+		                      ON T4.DUTY_CDE = T3.POST_ID AND  T3.SCHEME_ID=#{schemeId}
+		                          WHERE T2.SCHEME_ID=#{schemeId}
+		                          AND adu.USER_STS = 'A'  AND adu.LOGIN_CODE NOT IN (
+		                               SELECT EVL_OBJ_ID 
+		                                    FROM PMA_F_SCHEME_SPERULE_REL 
+		                                         WHERE SCHEME_ID=#{schemeId}
+		                                         ))
+	</insert>
+	<!-- 根据方案编号从特殊规则表中插入方案对象表 -->
+    <insert id="insertOrgObjNew" parameterType="String">
+		 INSERT INTO PMA_F_SCHEME_EVLOBJ_REL
+		  (ID, SCHEME_ID, EVL_OBJ_TYPE, EVL_OBJ_ID) 
+		   SELECT sys_guid(), T1.SCHEME_ID, #{evlObjType}, T1.ORG_ID
+		    FROM PMA_F_SCHEME_ORG_REL T1  
+		      where T1.ORG_ID NOT IN ( 
+		           SELECT EVL_OBJ_ID 
+		                FROM PMA_F_SCHEME_SPERULE_REL 
+		                     WHERE SCHEME_ID =#{schemeId} )
+		                      AND T1.SCHEME_ID =#{schemeId}
+	</insert>
+	<!-- 更新考核方案信息表中的特殊规则 -->
+	<update id="updateSchemeInfo">
+	  UPDATE PMA_F_SCHEME P SET P.SPE_RULE_TYPE =#{specialValue} WHERE p.SCHEME_ID =#{schemeId}
+	</update>
+		<!-- 考核方案信息启用停用 -->
+	<update id="schemePub">
+	  UPDATE PMA_F_SCHEME P SET P.STAT_FLAG =#{statFlag}, P.UPDATER_ID=#{updaterId}, P.UPDATE_DATE=#{updateDate}  WHERE p.SCHEME_ID =#{schemeId}
+	</update>
+	<!-- 考核方案查询sql -->
+    <select id="selectDrawSchemeInfo"  resultType="cn.com.yusys.yusp.uimp.business.pma.scheme.schememain.domain.PmaFScheme">
+		select SCHEME_ID,
+		SCHEME_NAME,
+		REMARK,
+		ORG_LEVEL,
+		MENU_ID,
+		ORG_ID,
+		START_DATE,
+		END_DATE,
+		CHECK_SCENE,
+		EVL_OBJ_TYPE,
+		SPE_RULE_TYPE,
+		STAT_FLAG
+		FROM PMA_F_SCHEME
+		where SCHEME_ID =  #{schemeId,jdbcType=VARCHAR}
+    </select>
+    
+    <!-- 考核方案查询sql -->
+    <select id="querySpecialList" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+        SELECT PI.ID,PI.SCHEME_ID,PI.SCHEME_NAME,PI.MENU_ID,to_char(to_date(PI.CREATE_DATE,'yyyy-MM-dd'),'yyyy-MM-dd') as CREATE_DATE,to_char(to_date(PI.UPDATE_DATE,'yyyy-MM-dd'),'yyyy-MM-dd') as UPDATE_DATE,
+        to_char(to_date(PI.START_DATE,'yyyy-MM-dd'),'yyyy-MM-dd') as START_DATE, to_char(to_date(PI.END_DATE,'yyyy-MM-dd'),'yyyy-MM-dd') as END_DATE,PI.CHECK_SCENE,
+        PI.EVL_OBJ_TYPE,PI.STAT_FLAG,PL.MENU_NAME, SUT.UNITNAME AS ORG_NAME, PI.SCHEME_TYPE,
+        (SELECT acc.USER_NAME FROM ADMIN_SM_USER acc WHERE acc.LOGIN_CODE = PI.CREATOR) CREATOR_NAME,
+        (SELECT acc.USER_NAME FROM ADMIN_SM_USER acc WHERE acc.LOGIN_CODE = PI.UPDATER_ID) UPDATER_NAME 
+        FROM PMA_F_SCHEME PI 
+         INNER JOIN PMA_F_SCHEME_MENU PL 
+         ON PI.MENU_ID = PL.MENU_ID
+         LEFT JOIN SYS_UNITS SUT 
+         ON PI.ORG_ID = SUT.UNITID
+         <if test="condition.objId != null and condition.objId  != ''">
+	      			LEFT JOIN PMA_F_SCHEME_EVLOBJ_REL SRE
+        	 		ON PI.SCHEME_ID = SRE.SCHEME_ID
+		  </if>
+
+         <where>
+            <if test="condition.orgId != null and condition.orgId   != ''">
+	      		AND (SUT.UNITSEQ LIKE  concat(concat('%',#{condition.orgId,jdbcType=VARCHAR}),'%')
+	      		or PI.ORG_ID = '80101000')
+		    </if>
+            <if test="condition.menuId != null and condition.menuId != ''">
+	      	   AND PI.menu_id in ( select b.menu_id from PMA_F_SCHEME_MENU b start with menu_id=#{condition.menuId,jdbcType=VARCHAR} connect by prior menu_id =parent_menu_id)
+		    </if>
+		    <if test="condition.schemeId != null and condition.schemeId  != ''">
+	      		AND PI.SCHEME_ID = #{condition.schemeId,jdbcType=VARCHAR}
+		    </if>
+			<if test="condition.schemeName != null and condition.schemeName  != ''">
+	      		AND PI.SCHEME_NAME  LIKE concat(concat('%',#{condition.schemeName,jdbcType=VARCHAR}),'%')
+		    </if>
+		    <if test="condition.evlObjType != null and condition.evlObjType  != ''">
+	      		AND PI.EVL_OBJ_TYPE = #{condition.evlObjType,jdbcType=VARCHAR}
+		    </if>
+		    <if test="(condition.objId != null and condition.objId  != '') and (condition.grantObjId == null or condition.grantObjId == '')">
+	      		AND SRE.EVL_OBJ_ID = #{condition.objId,jdbcType=VARCHAR}
+		    </if>
+		    <if test="condition.isExcel != null and condition.isExcel  != ''">
+	      		AND PI.IS_EXCEL = #{condition.isExcel,jdbcType=VARCHAR}
+		    </if>
+		    <if test="condition.isManager != null and condition.isManager != ''">
+	      		AND SRE.EVL_OBJ_ID = #{condition.isManager,jdbcType=VARCHAR}
+		    </if>
+		    <!-- objId:考核对象编号(包含人员/机构); grantObjId:当前登录人授权机构(首页专用) -->
+		    <if test="(condition.objId != null and condition.objId  != '') and (condition.grantObjId != null and condition.grantObjId != '')">
+	      		AND (SRE.EVL_OBJ_ID = #{condition.objId,jdbcType=VARCHAR} or 
+	      			 (SRE.EVL_OBJ_ID = #{condition.grantObjId,jdbcType=VARCHAR} and PI.EVL_OBJ_TYPE in ('02', '03'))
+	      			)
+		    </if>
+         </where>
+    </select>
+	<select id="querySchemeList" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.Map">
+		SELECT PI.ID,PI.SCHEME_ID,PI.SCHEME_NAME,PI.MENU_ID,to_char(to_date(PI.CREATE_DATE,'yyyy-MM-dd'),'yyyy-MM-dd') as CREATE_DATE,to_char(to_date(PI.UPDATE_DATE,'yyyy-MM-dd'),'yyyy-MM-dd') as UPDATE_DATE,
+		to_char(to_date(PI.START_DATE,'yyyy-MM-dd'),'yyyy-MM-dd') as START_DATE, to_char(to_date(PI.END_DATE,'yyyy-MM-dd'),'yyyy-MM-dd') as END_DATE,PI.CHECK_SCENE,
+		PI.EVL_OBJ_TYPE,PI.STAT_FLAG,PL.MENU_NAME, SUT.UNITNAME AS ORG_NAME, PI.SCHEME_TYPE,
+		(SELECT acc.USER_NAME FROM ADMIN_SM_USER acc WHERE acc.LOGIN_CODE = PI.CREATOR) CREATOR_NAME,PI.CREATOR,
+		(SELECT acc.USER_NAME FROM ADMIN_SM_USER acc WHERE acc.LOGIN_CODE = PI.UPDATER_ID) UPDATER_NAME
+		FROM PMA_F_SCHEME PI
+		INNER JOIN PMA_F_SCHEME_MENU PL
+		ON PI.MENU_ID = PL.MENU_ID
+		LEFT JOIN SYS_UNITS SUT
+		ON PI.ORG_ID = SUT.UNITID
+		<where>
+			<if test="condition.objType != null and condition.objType  != ''">
+				AND PI.evl_obj_type = #{condition.objType,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.schemeId != null and condition.schemeId  != ''">
+				AND PI.SCHEME_ID = #{condition.schemeId,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.schemeName != null and condition.schemeName  != ''">
+				AND PI.SCHEME_NAME  LIKE concat(concat('%',#{condition.schemeName,jdbcType=VARCHAR}),'%')
+			</if>
+		</where>
+
+	</select>
+    <select id="queryManagerTeamList" resultType="java.util.Map">
+		select * from OCRM_F_CM_MKT_TEAM where org_id=#{orgCode,jdbcType=VARCHAR}
+	</select>
+	<select id="queryManagerTeamListByUserId" resultType="java.util.Map">
+		select * from OCRM_F_CM_MKT_TEAM where team_leader_id=#{userId,jdbcType=VARCHAR}
+	</select>
+	<select id="selectAllUser" resultType="java.lang.String">
+		select user_id from ADMIN_SM_USER where org_id=#{code,jdbcType=VARCHAR}
+	</select>
+	<select id="selectMgrRoleId" resultType="java.lang.String">
+		select role_id from admin_sm_role where role_code=#{custMgr,jdbcType=VARCHAR}
+	</select>
+	<select id="selectMgrList" resultType="java.util.Map">
+		select * from ADMIN_SM_USER
+		<where>
+			<if test="userList != null and userList.size > 0">
+			and user_id in
+				<foreach collection="userList" item="user" separator="," open="(" close=")">
+					#{user,jdbcType=VARCHAR}
+				</foreach>
+			</if>
+			<if test="code !=null and code !='' ">
+				and org_id=#{code}
+			</if>
+		</where>
+	</select>
+	<select id="selectUserIdList" resultType="java.lang.String">
+		select user_id from ADMIN_SM_USER_ROLE_REL where role_id=#{roleId,jdbcType=VARCHAR}
+	</select>
+
+</mapper>

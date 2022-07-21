@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.cm.sysKeyWord.repository.mapper.CmFRcSysTypeMapper">
+	<!-- 查询渠道模型表 -->
+	<select id="getList" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.Map">
+		SELECT t.id,
+               t.model_name,
+               t.model_info,
+               t.model_type,
+               t.is_enable,
+               t.apply_type,
+               t.catl_code,
+               t.catl_name,
+               t.creat_user,
+               t.updata_user,
+               t.creat_user_name,
+               t.updata_user_name,
+               t.wf_app_status,
+               t.apply_object,
+               t.apply_channel,
+               t.apply_object_name,
+               t.apply_channel_name,
+               substr(t.creat_date, 0,10) as create_date,
+               substr(t.updata_date, 0,10) as updata_date
+          FROM cm_f_rc_sys_type t
+		<where>
+			<if test="condition.modelName != null and condition.modelName !=''">
+				AND T.MODEL_NAME LIKE CONCAT('%',CONCAT(#{condition.modelName, jdbcType=VARCHAR},'%'))
+			</if>
+			<if test="condition.applyType != null and condition.applyType !=''">
+				AND T.APPLY_TYPE = #{condition.applyType, jdbcType=VARCHAR}
+			</if>
+		</where>
+		ORDER BY T.ID DESC
+	</select>
+		<!-- 营销动作组件查询模板信息-->
+	<select id="getListByNodeId" parameterType="java.util.Map" resultType="cn.com.yusys.yusp.cm.sysKeyWord.domain.CmFRcSysTypeInfo">
+		SELECT t.id,
+               t.model_name,
+               t.model_info,
+               t.model_type,
+               t.is_enable,
+               t.apply_type,
+               t.catl_code,
+               t.catl_name,
+               t.creat_user,
+               t.updata_user,
+               t.creat_user_name,
+               t.updata_user_name,
+               t.wf_app_status,
+               t.apply_object,
+               t.apply_channel,
+               t.apply_object_name,
+               t.apply_channel_name
+          FROM cm_f_rc_sys_type t
+		<where>
+			<if test="modelId != null and modelId !=''">
+				and t.id in 
+				<foreach collection="modelId" item="item" index="index" open="(" close=")" separator=",">
+        		#{item}
+        	</foreach>
+			</if>
+		</where>
+		ORDER BY T.ID DESC
+	</select>
+	<!-- 获取自增序列 -->
+	<select id="getSeq" resultType="String">
+		SELECT ysc_sequence.nextval FROM dual
+	</select>
+	<!-- 删除数据 -->
+	<delete id="deleteList" parameterType="cn.com.yusys.yusp.cm.sysKeyWord.domain.CmFRcSysTypeInfo">
+		DELETE FROM cm_f_rc_sys_type WHERE ID = #{id, jdbcType=VARCHAR}
+	</delete>
+	<!-- 获取用户名称-->
+	<select id="getUserName" parameterType="String" resultType="String">
+		SELECT USER_NAME FROM ADMIN_SM_USER WHERE LOGIN_CODE = #{loginCode, jdbcType=VARCHAR}
+	</select>
+	<!-- 获取关键字/别名 -->
+	<select id="getAliasName" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+		SELECT T.SOURCE_FIELD_CNAME AS KEYWORD,T.ALIAS_NAME AS ALIASNAME FROM cm_f_rc_sys_key_word T 
+		WHERE T.ALIAS_NAME IS NOT NULL
+		AND T.SOURCE_FIELD_CNAME IS NOT NULL
+	</select>
+	<!-- 获取适用对象名称 -->
+	<select id="getApplyObjectName" parameterType="int" resultType="String">
+		SELECT CATL_NAME FROM CM_F_RC_PROD_CATL WHERE CATL_CODE = #{catlCode}
+	</select>
+	<!-- 获取产品名称 -->
+	<select id="getProdName" parameterType="String" resultType="String">
+		SELECT PROD_NAME FROM CM_F_RC_PROD_INFO WHERE PRODUCT_ID = #{productId}
+	</select>
+	<!-- 产品视图查询渠道模型表 -->
+	<select id="getListProd" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.Map">
+		SELECT * FROM cm_f_rc_sys_type WHERE APPLY_OBJECT = #{condition.catlCode, jdbcType=VARCHAR}
+		ORDER BY ID DESC
+	</select>
+	<!-- 模板名称验重 -->
+	<select id="getSameName" parameterType="cn.com.yusys.yusp.cm.sysKeyWord.domain.CmFRcSysTypeInfo" resultType="int">
+		SELECT COUNT(1) FROM cm_f_rc_sys_type WHERE MODEL_NAME = #{modelName} AND ID <![CDATA[!= ]]> #{id}
+	</select>
+</mapper>

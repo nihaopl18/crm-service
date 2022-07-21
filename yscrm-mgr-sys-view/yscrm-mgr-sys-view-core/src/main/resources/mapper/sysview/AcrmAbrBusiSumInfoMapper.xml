@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.sysview.repository.mapper.AcrmAbrBusiSumInfoMapper">
+
+    <select id="getProdConfRaInfo" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+            resultType="cn.com.yusys.yscrm.sysview.domain.ProdConfRaInfo">
+            SELECT * FROM
+            (SELECT ROWNUM a, TRUST_BALANCE_RMB,
+        RMB_FUND_BALANCE,
+        STRUCT_FIN_BALANCE_RMB,
+        TIME_DEPOSIT_BALANCE,
+        DEMAND_DEPOSIT_BALANCE,
+        QDII_BALANCE_RMB,INSURRANCE_BALANCE  FROM ACRM_F_PD_CUST_INDEXS WHERE
+            CUST_NO=#{condition.custId, jdbcType=VARCHAR} ORDER BY DATA_DATE DESC) WHERE a=1
+    </select>
+
+    <select id="getProdHoldDeInfo" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+            resultType="cn.com.yusys.yscrm.sysview.domain.ProdHoldDeInfo">
+        SELECT PROD_CODE,SRC_PROD_CODE,PROD_NAME,FIRST_SUBSCRIBE_AMT,ESCROW_ACCT_NO,ESCROW_FEE_RATE,PROD_STATUS,CUR_NET_VALUE,
+        to_char(PROD_EXPIRY_DATE,'YYYY-MM-DD')  AS PROD_EXPIRY_DATE,
+        TRANS_CCY,
+        to_char(SUBSCRIBE_START_DATE,'YYYY-MM-DD')  AS SUBSCRIBE_START_DATE,
+        to_char(SUBSCRIBE_END_DATE,'YYYY-MM-DD')  AS SUBSCRIBE_END_DATE,
+        to_char(PROD_NET_UPDATE_TIME,'YYYY-MM-DD')  AS PROD_NET_UPDATE_TIME,
+        FIRST_MIN_INVEST_AMT,TOTAL_AMT,SURPLUS_AMT,INCOME_FEATURES,RISK_LEVEL,EXPECT_RETURN_RATE,PRICE_CCY
+        FROM ACRM_F_AGREEMENT_FINACE_ACCT_INFO WHERE CUST_NO=#{condition.custId, jdbcType=VARCHAR}
+        <if test="condition.prodType != null and condition.prodType != ''">
+            AND PROD_TYPE=#{condition.prodType, jdbcType=VARCHAR}
+        </if>
+        <if test="condition.holdType != null and condition.holdType != '' and condition.holdType=='1'.toString()">
+            AND HOLD_TYPE='1'
+        </if>
+
+    </select>
+
+    <select id="exportProdHoldDeInfo" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+            resultType="cn.com.yusys.yscrm.sysview.domain.ProdHoldDeInfo">
+        SELECT PROD_CODE,SRC_PROD_CODE,PROD_NAME,FIRST_SUBSCRIBE_AMT,ESCROW_ACCT_NO,ESCROW_FEE_RATE,LI1.LOOKUP_ITEM_NAME AS PROD_STATUS,				CUR_NET_VALUE,
+        to_char(PROD_EXPIRY_DATE,'YYYY-MM-DD') AS PROD_EXPIRY_DATE,
+        LI5.LOOKUP_ITEM_NAME AS TRANS_CCY,
+        to_char(SUBSCRIBE_START_DATE,'YYYY-MM-DD') AS SUBSCRIBE_START_DATE,
+        to_char(SUBSCRIBE_END_DATE,'YYYY-MM-DD')  AS SUBSCRIBE_END_DATE,
+        to_char(PROD_NET_UPDATE_TIME,'YYYY-MM-DD')  AS PROD_NET_UPDATE_TIME,
+        FIRST_MIN_INVEST_AMT,TOTAL_AMT,SURPLUS_AMT,
+        LI2.LOOKUP_ITEM_NAME AS INCOME_FEATURES,
+        LI4.LOOKUP_ITEM_NAME AS PRICE_CCY,
+        case when PROD_TYPE = '1' then '-' else LI3.LOOKUP_ITEM_NAME end AS RISK_LEVEL,
+        EXPECT_RETURN_RATE FROM ACRM_F_AGREEMENT_FINACE_ACCT_INFO
+        LEFT JOIN ADMIN_SM_LOOKUP_ITEM LI1 on LI1.LOOKUP_CODE='PROD_STATUS' and LI1.LOOKUP_ITEM_CODE=PROD_STATUS
+        LEFT JOIN ADMIN_SM_LOOKUP_ITEM LI2 on LI2.LOOKUP_CODE='INCOME_FEATURES' and LI2.LOOKUP_ITEM_CODE=INCOME_FEATURES
+        LEFT JOIN ADMIN_SM_LOOKUP_ITEM LI3 on LI3.LOOKUP_CODE='RISKLEVEL' and LI3.LOOKUP_ITEM_CODE=RISK_LEVEL
+        LEFT JOIN ADMIN_SM_LOOKUP_ITEM LI4 on LI4.LOOKUP_CODE='CD0433' and LI4.LOOKUP_ITEM_CODE=PRICE_CCY
+        LEFT JOIN ADMIN_SM_LOOKUP_ITEM LI5 on LI5.LOOKUP_CODE='CD0433' and LI5.LOOKUP_ITEM_CODE=TRANS_CCY
+        WHERE CUST_NO=#{condition.custId, jdbcType=VARCHAR}
+        <if test="condition.prodType != null and condition.prodType != ''">
+            AND PROD_TYPE=#{condition.prodType, jdbcType=VARCHAR}
+        </if>
+        <if test="condition.holdType != null and condition.holdType != '' and condition.holdType=='1'.toString()">
+            AND HOLD_TYPE='1'
+        </if>
+    </select>
+
+    <select id="getDepositProdHoldDel" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+            resultType="cn.com.yusys.yscrm.sysview.domain.DepositProdHoldDel">
+    SELECT ACCT_TYPE,ACCT_NO,TERM_TYPE,PROD_TYPE,PROD_CODE,PROD_NAME,TERM,RATE,RATE_TYPE,CCY,AMT,AMT_RMB,SRC_PROD_CODE
+    FROM ACRM_F_AGREEMENT_DEPOSIT_ACCT_INFO A
+		WHERE CUST_NO=#{condition.custId, jdbcType=VARCHAR}
+		AND PROD_TYPE=#{condition.prodType, jdbcType=VARCHAR}
+        <if test="condition.holdType != null and condition.holdType != '' and condition.holdType=='1'.toString()">
+            AND HOLD_TYPE='1'
+        </if>
+    </select>
+
+    <select id="exportDepositProdHoldDel" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+            resultType="cn.com.yusys.yscrm.sysview.domain.DepositProdHoldDel">
+        SELECT LI3.LOOKUP_ITEM_NAME AS ACCT_TYPE,A.ACCT_NO,LI2.LOOKUP_ITEM_NAME AS TERM_TYPE,A.PROD_TYPE,A.PROD_CODE,A.PROD_NAME,A.TERM,A.RATE,A.SRC_PROD_CODE,
+               LI4.LOOKUP_ITEM_NAME AS RATE_TYPE,LI.LOOKUP_ITEM_NAME AS CCY,A.AMT,A.AMT_RMB
+        FROM ACRM_F_AGREEMENT_DEPOSIT_ACCT_INFO A
+        LEFT JOIN ADMIN_SM_LOOKUP_ITEM LI on LI.LOOKUP_CODE='CD0433' and LI.LOOKUP_ITEM_CODE=A.CCY
+        LEFT JOIN ADMIN_SM_LOOKUP_ITEM LI2 on LI2.LOOKUP_CODE='DY0008' and LI2.LOOKUP_ITEM_CODE=TERM_TYPE
+        LEFT JOIN ADMIN_SM_LOOKUP_ITEM LI3 on LI3.LOOKUP_CODE='ACCOUNT_TYPE' and LI3.LOOKUP_ITEM_CODE=ACCT_TYPE
+        LEFT JOIN ADMIN_SM_LOOKUP_ITEM LI4 on LI4.LOOKUP_CODE='RATE_TYPE' and LI4.LOOKUP_ITEM_CODE=RATE_TYPE
+        WHERE CUST_NO=#{condition.custId, jdbcType=VARCHAR}
+        AND PROD_TYPE=#{condition.prodType, jdbcType=VARCHAR}
+        <if test="condition.holdType != null and condition.holdType != '' and condition.holdType=='1'.toString()">
+            AND HOLD_TYPE='1'
+        </if>
+    </select>
+
+    <select id="getInsuranceProdHoldDel" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+            resultType="cn.com.yusys.yscrm.sysview.domain.InsuranceProdHoldDel">
+    SELECT INSURANCE_ACCT,PROD_NAME,PROD_KIND,CCY,INSURANCE_AMT,PAY_TYPE,PAY_TERM_TYPE,PAY_YEAR_TERM,to_char(INSURANCE_EXPIRY_DATE,'YYYY-MM-DD') AS INSURANCE_EXPIRY_DATE
+    FROM ACRM_F_AGREEMENT_INSSURANCE_ACCT_INFO WHERE CUST_NO=#{condition.custId, jdbcType=VARCHAR}
+        <if test="condition.holdType != null and condition.holdType != '' and condition.holdType=='1'.toString()">
+            AND HOLD_TYPE='1'
+        </if>
+    </select>
+
+    <select id="exportInsuranceProdHoldDel" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+            resultType="cn.com.yusys.yscrm.sysview.domain.InsuranceProdHoldDel">
+    	SELECT INSURANCE_ACCT,PROD_NAME,PROD_TYPE,INSURANCE_AMT,
+		LI1.LOOKUP_ITEM_NAME AS PAY_TYPE,
+		LI2.LOOKUP_ITEM_NAME AS PAY_TERM_TYPE,
+        LI3.LOOKUP_ITEM_NAME AS PROD_KIND,
+        LI4.LOOKUP_ITEM_NAME AS CCY,
+		PAY_YEAR_TERM,to_char(INSURANCE_EXPIRY_DATE,'YYYY-MM-DD') AS INSURANCE_EXPIRY_DATE
+		FROM ACRM_F_AGREEMENT_INSSURANCE_ACCT_INFO
+		LEFT JOIN ADMIN_SM_LOOKUP_ITEM LI1 on LI1.LOOKUP_CODE='PAY_TYPE' and LI1.LOOKUP_ITEM_CODE=PAY_TYPE
+		LEFT JOIN ADMIN_SM_LOOKUP_ITEM LI2 on LI2.LOOKUP_CODE='PAY_TERM_TYPE' and LI2.LOOKUP_ITEM_CODE=PAY_TERM_TYPE
+        LEFT JOIN ADMIN_SM_LOOKUP_ITEM LI3 on LI3.LOOKUP_CODE='KIND_TYPE' and LI3.LOOKUP_ITEM_CODE=PROD_KIND
+        LEFT JOIN ADMIN_SM_LOOKUP_ITEM LI4 on LI4.LOOKUP_CODE='CD0433' and LI4.LOOKUP_ITEM_CODE=CCY
+		WHERE CUST_NO=#{condition.custId, jdbcType=VARCHAR}
+        <if test="condition.holdType != null and condition.holdType != '' and condition.holdType=='1'.toString()">
+            AND HOLD_TYPE='1'
+        </if>
+    </select>
+
+    <select id="getLoanProdHoldDel" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="cn.com.yusys.yscrm.sysview.domain.LoanProdHoldDel">
+    		SELECT LOAN_TYPE,PROD_TYPE,PROD_CODE,SRC_PROD_CODE,PROD_NAME,REPAYED_PERIOD,LOAN_PURPOSE,CCY,TERM,ACTUAL_RATE,LOAN_PRINCIPAL,INT_BALANCE,
+    		       TOTAL_REPAY_AMT,TOTAL_PAID_INT,LAST_YEAR_LOAN_BALANCE,CURRENT_LOAN_BALANCE,DATA_DATE,
+    		       to_char(VALUE_DATE,'YYYY-MM-DD') AS VALUE_DATE,to_char(PRINCIPAL_EXPIRY_DATE,'YYYY-MM-DD') AS PRINCIPAL_EXPIRY_DATE,
+    		       to_char(INT_EXPIRY_DATE,'YYYY-MM-DD') AS INT_EXPIRY_DATE,to_char(LOAN_DATE,'YYYY-MM-DD') AS LOAN_DATE,
+    		       BASE_RATE,GUARANTEE_TYPE,IS_NEED_COLLATERAL,FIVE_TIRE_CLASS,
+    		       LOAN_NO,CURRENT_SHOULD_REPAY_PRINCIPLE,CURRENT_SHOULD_REPAY_INTEREST
+            FROM ACRM_F_AGREEMENT_LOAN_ACCT_INFO
+            WHERE CUST_NO=#{condition.custId, jdbcType=VARCHAR}
+            <if test="condition.holdType != null and condition.holdType != '' and condition.holdType=='1'.toString()">
+                AND HOLD_TYPE='1'
+            </if>
+    </select>
+
+    <select id="exportLoanProdHoldDel" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="cn.com.yusys.yscrm.sysview.domain.LoanProdHoldDel">
+		SELECT
+		LI1.LOOKUP_ITEM_NAME AS LOAN_TYPE,PROD_TYPE,PROD_CODE,SRC_PROD_CODE,PROD_NAME,REPAYED_PERIOD,
+		LI2.LOOKUP_ITEM_NAME AS LOAN_PURPOSE,
+		LI3.LOOKUP_ITEM_NAME AS CCY,TERM,ACTUAL_RATE,LOAN_PRINCIPAL,INT_BALANCE,TOTAL_REPAY_AMT,TOTAL_PAID_INT,LAST_YEAR_LOAN_BALANCE,CURRENT_LOAN_BALANCE,DATA_DATE,
+		to_char(VALUE_DATE,'YYYY-MM-DD') AS VALUE_DATE,
+		to_char(PRINCIPAL_EXPIRY_DATE,'YYYY-MM-DD') AS PRINCIPAL_EXPIRY_DATE,
+		to_char(INT_EXPIRY_DATE,'YYYY-MM-DD') AS INT_EXPIRY_DATE,BASE_RATE,
+        to_char(LOAN_DATE,'YYYY-MM-DD') AS LOAN_DATE,
+		LI4.LOOKUP_ITEM_NAME AS GUARANTEE_TYPE,IS_NEED_COLLATERAL,
+		LI5.LOOKUP_ITEM_NAME AS FIVE_TIRE_CLASS,
+        LOAN_NO,CURRENT_SHOULD_REPAY_PRINCIPLE,CURRENT_SHOULD_REPAY_INTEREST
+		FROM ACRM_F_AGREEMENT_LOAN_ACCT_INFO
+		LEFT JOIN ADMIN_SM_LOOKUP_ITEM LI1 on LI1.LOOKUP_CODE='CD0353' and LI1.LOOKUP_ITEM_CODE=LOAN_TYPE
+		LEFT JOIN ADMIN_SM_LOOKUP_ITEM LI2 on LI2.LOOKUP_CODE='CD0079' and LI2.LOOKUP_ITEM_CODE=LOAN_PURPOSE
+		LEFT JOIN ADMIN_SM_LOOKUP_ITEM LI3 on LI3.LOOKUP_CODE='CD0433' and LI3.LOOKUP_ITEM_CODE=CCY
+		LEFT JOIN ADMIN_SM_LOOKUP_ITEM LI4 on LI4.LOOKUP_CODE='CD0357' and LI4.LOOKUP_ITEM_CODE=GUARANTEE_TYPE
+		LEFT JOIN ADMIN_SM_LOOKUP_ITEM LI5 on LI5.LOOKUP_CODE='CD0315' and LI5.LOOKUP_ITEM_CODE=FIVE_TIRE_CLASS
+        WHERE CUST_NO=#{condition.custId, jdbcType=VARCHAR}
+        <if test="condition.holdType != null and condition.holdType != '' and condition.holdType=='1'.toString()">
+            AND HOLD_TYPE='1'
+        </if>
+    </select>
+
+    <select id="getCreditCardProdHoldDel" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+            resultType="cn.com.yusys.yscrm.sysview.domain.CreditCardProdHoldDel">
+        SELECT BANK_NO,ACCT_NO,PROD_TYPE,CCY,TOTAL_AMT,USED_AMT,POINTS_BALANCE,TOTAL_INSTALMENT_MONTH,CURRENT_PERIOD,SURPLUS_NOPAY_AMT,
+               TOTAL_INT_AMT,SURPLUS_NOPAY_INT,REPAY_DATE,BILL_DATE,LOAN_BALANCE,INT_BALANCE,FEE_BALANCE,INSTALLMENT_BALANCE,CURRENT_SHOULD_REPAY_AMT,
+               CURRENT_REPAY_AMT,PROD_CODE,TOTAL_PROD_AMT
+        FROM ACRM_F_AGREEMENT_CREDIT_CARD_ACCT_INFO WHERE CUST_NO=#{condition.custId, jdbcType=VARCHAR}
+        <if test="condition.holdType != null and condition.holdType != '' and condition.holdType=='1'.toString()">
+            AND HOLD_TYPE='1'
+        </if>
+    </select>
+
+    <select id="exportCreditCardProdHoldDel" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+            resultType="cn.com.yusys.yscrm.sysview.domain.CreditCardProdHoldDel">
+		    SELECT BANK_NO,ACCT_NO,PROD_TYPE,
+			LI.LOOKUP_ITEM_NAME AS CCY,TOTAL_AMT,USED_AMT,POINTS_BALANCE,TOTAL_INSTALMENT_MONTH,CURRENT_PERIOD,SURPLUS_NOPAY_AMT,TOTAL_INT_AMT,
+		           SURPLUS_NOPAY_INT,REPAY_DATE,BILL_DATE,LOAN_BALANCE,INT_BALANCE,FEE_BALANCE,INSTALLMENT_BALANCE,CURRENT_SHOULD_REPAY_AMT,
+		           CURRENT_REPAY_AMT,PROD_CODE,TOTAL_PROD_AMT
+        FROM ACRM_F_AGREEMENT_CREDIT_CARD_ACCT_INFO
+			LEFT JOIN ADMIN_SM_LOOKUP_ITEM LI on LI.LOOKUP_CODE='CD0433' and LI.LOOKUP_ITEM_CODE=CCY
+			WHERE CUST_NO=#{condition.custId, jdbcType=VARCHAR}
+        <if test="condition.holdType != null and condition.holdType != '' and condition.holdType=='1'.toString()">
+            AND HOLD_TYPE='1'
+        </if>
+    </select>
+
+</mapper>

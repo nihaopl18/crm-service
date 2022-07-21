@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.uimp.base.repository.mapper.AdminBaseMetaFunPageCfgMapper">
+	<resultMap id="BaseResultMap"
+		type="cn.com.yusys.yusp.uimp.base.domain.AdminBaseMetaFunPageCfg">
+		<id column="ID" jdbcType="VARCHAR" property="id" />
+		<result column="FUN_CODE" jdbcType="VARCHAR" property="funCode" />
+		<result column="CONFIG_NAME" jdbcType="VARCHAR" property="configName" />
+		<result column="CONFIG_VALUE" jdbcType="VARCHAR" property="configValue" />
+	</resultMap>
+	<sql id="Base_Column_List">
+		ID,FUN_CODE,CONFIG_NAME,CONFIG_VALUE
+	</sql>
+
+	<delete id="delPageCfgByFunCode">
+		DELETE FROM ADMIN_BASE_META_FUN_PAGE_CFG T WHERE T.FUN_CODE = #{funCode}
+	</delete>
+	
+	<!-- 查询业务注册信息 -->
+	<select id="queryPageCfg" resultType="java.util.HashMap">
+		SELECT T.* FROM ADMIN_BASE_META_FUN_PAGE_CFG T
+		<where>
+		    <!-- 业务功能编码 -->
+			<if test="funCode != null and funCode  != ''">
+	      		AND T.FUN_CODE = #{funCode,jdbcType=VARCHAR}
+		    </if>
+	    </where>
+	</select>
+</mapper>

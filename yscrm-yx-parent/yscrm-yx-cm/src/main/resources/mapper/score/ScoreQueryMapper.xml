@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.climp.score.repository.mapper.ScoreQueryMapper">
+    <select id="getList" parameterType="java.util.Map" resultType="java.util.Map">
+        select
+            PAI.cust_id, PAI.cust_name, PAI.english_name, PAI.country_cd,
+            SV.useable_score, SV.donate_score, SV.reduce_score, SV.invalid_score, SV.invaliding_score, SV.invaliding_dt,
+            CGI.aum_grade,
+            i1.cert_type, i1.cert_no, i1.iss_country
+        from ACRM_F_CI_PER_ADMIT_INFO PAI
+        left join LOY_SR_CUST_SCORE_VIEW SV on PAI.CUST_ID = SV.CUST_NO
+        left join V_APP_CUST_GRADE_INFO CGI on PAI.CUST_ID = CGI.ecif_cust_no
+        left join (select * from
+            (SELECT
+                 t1.cust_id ,t1.cert_type ,t1.cert_no ,t1.iss_country ,
+                 RANK() OVER(PARTITION BY t1.cust_id ORDER BY t1.cert_type) AS rm
+             FROM ACRM_F_CI_CUST_IDENT_INFO t1) tmp where tmp.rm = 1) i1 on PAI.cust_id = i1.cust_id
+        where 1=1
+        <if test="condition.custId != null and condition.custId != ''">
+            and PAI.CUST_ID = #{condition.custId,jdbcType=VARCHAR}
+        </if>
+        <if test="condition.custName != null and condition.custName != ''">
+            and PAI.cust_name like '%' || #{condition.custName,jdbcType=VARCHAR} || '%'
+        </if>
+        <if test="condition.englishName != null and condition.englishName != ''">
+            and PAI.english_name like '%' || #{condition.englishName,jdbcType=VARCHAR} || '%'
+        </if>
+        <if test="condition.issCountry != null and condition.issCountry != ''">
+            and i1.iss_country =  #{condition.issCountry,jdbcType=VARCHAR}
+        </if>
+        <if test="condition.certType != null and condition.certType != ''">
+            and i1.cert_type = #{condition.certType,jdbcType=VARCHAR}
+        </if>
+        <if test="condition.certNo != null and condition.certNo != ''">
+            and i1.cert_no = #{condition.certNo,jdbcType=VARCHAR}
+        </if>
+        <if test="dataAuth != null and dataAuth != ''">
+            and PAI.CUST_ID in (
+            select S.CUST_ID from OCRM_F_CI_ADMIT_BELONG S
+            <where>
+                <if test="dataAuth != null and dataAuth != ''">${dataAuth}</if>
+            </where>
+            )
+        </if>
+        order by SV.useable_score desc nulls last
+    </select>
+    <select id="getDetail" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.Map">
+        SELECT DISTINCT T.*,
+                        (case when T.SCORE_DEAL_TYPE != '10' then '' else TF.ACCT_TYPE end) ACCT_TYPE,
+                        (case when T.SCORE_DEAL_TYPE != '10' then '' else TF.GAME_DESC end) GAME_DESC,
+                        T1.cust_name ,
+                        T1.english_name ,
+                        T2.aum_grade
+        FROM LOY_SR_SCORE_ACCUTE_SUM T
+        LEFT JOIN ACRM_F_CI_PER_ADMIT_INFO T1 ON T.CUST_NO = T1.CUST_ID
+        LEFT JOIN V_APP_CUST_GRADE_INFO T2 ON T.CUST_NO = T2.ecif_cust_no
+        LEFT JOIN LOY_SR_SCORE_COLLECT TP ON T.CUST_NO=TP.CUST_NO AND T.SCD_ID =TP.SCD_ID
+        LEFT JOIN LOY_SR_SCORE_COLLECT_VIEW TF ON T.CUST_NO=TF.CUST_NO AND TP.account_code =TF.SDA_ID
+        WHERE T.CUST_NO = #{condition.custId,jdbcType=VARCHAR}
+        <if test="condition.startDate != null and condition.startDate != ''">
+            and trunc(T.BUSN_DATE,'dd') >= to_date(#{condition.startDate,jdbcType=VARCHAR},'yyyy-MM-dd')
+        </if>
+        <if test="condition.endDate != null and condition.endDate != ''">
+            and trunc(T.BUSN_DATE,'dd') &lt;= to_date(#{condition.endDate,jdbcType=VARCHAR},'yyyy-MM-dd')
+        </if>
+        order by T.BUSN_DATE desc, T.LAST_SR_ACCUTE desc
+    </select>
+</mapper>

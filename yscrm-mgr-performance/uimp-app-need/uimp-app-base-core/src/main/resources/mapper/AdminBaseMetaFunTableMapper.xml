@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.uimp.base.repository.mapper.AdminBaseMetaFunTableMapper">
+    <resultMap id="BaseResultMap" type="cn.com.yusys.yusp.uimp.base.domain.AdminBaseMetaFunTable">
+		<id column="ID" jdbcType="VARCHAR" property="id" />
+		<result column="FUN_CODE" jdbcType="VARCHAR" property="funCode" />
+		<result column="TABLE_NAME" jdbcType="VARCHAR" property="tableName" />
+		<result column="TABLE_CN_NAME" jdbcType="VARCHAR" property="tableCnName" />
+		<result column="TABLE_CODE" jdbcType="VARCHAR" property="tableCode" />
+		<result column="FUN_SUB_TYPE" jdbcType="VARCHAR" property="funSubType" />
+    </resultMap>
+    <sql id="Base_Column_List">
+	    ID,FUN_CODE,TABLE_NAME,TABLE_CN_NAME,TABLE_CODE,FUN_SUB_TYPE
+    </sql>
+    
+    <!-- 查询业务功能注册列表数据 -->
+	<select id="querylist" resultType="java.util.HashMap">
+		SELECT T.* FROM ADMIN_BASE_META_FUN_TABLE T 
+		WHERE T.FUN_CODE = #{funCode,jdbcType=VARCHAR} 
+		ORDER BY T.TABLE_CODE
+	</select>
+	
+	<!-- 删除 -->
+	<delete id="delMetaFunByFunCode">
+		DELETE FROM ADMIN_BASE_META_FUN_TABLE T WHERE T.FUN_CODE = #{funCode}
+	</delete>
+	
+	<select id="queryFunTableInfo" resultMap="BaseResultMap">
+		select * from ADMIN_BASE_META_FUN_TABLE where fun_code = #{funCode} and fun_sub_type = #{funSubType}
+	</select>
+    
+</mapper>

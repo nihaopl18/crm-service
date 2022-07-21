@@ -1,0 +1,347 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.cm.taskcenter.repository.mapper.CimFTcTaskPoolMapper">
+	<!--查询任务池 -->
+	<!--	<select id="getTaskPoolList" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">-->
+	<!--		select t.TASK_ID,t.TASK_NAME,t.TASK_TYPE,t.TASK_STATE,t.CREATE_TIME,-->
+	<!--		TO_CHAR(t.START_TIME,'yyyy-MM-dd') AS START_TIME,-->
+	<!--		TO_CHAR(t.END_TIME,'yyyy-MM-dd') AS END_TIME-->
+	<!--        from CIMP_TC_TASKPOOL_INFO t-->
+	<!--		<where>-->
+	<!--			<if test="condition != null and condition.taskName != null and condition.taskName !=''">-->
+	<!--				and t.TASK_NAME  LIKE CONCAT(CONCAT('%', #{condition.taskName, jdbcType=VARCHAR}),'%')-->
+	<!--			</if>-->
+	<!--			<if test="condition != null and condition.taskType != null and condition.taskType !=''">-->
+	<!--				and t.TASK_TYPE  LIKE CONCAT(CONCAT('%', #{condition.taskType, jdbcType=VARCHAR}),'%')-->
+	<!--			</if>-->
+	<!--			and t.TASK_STATE = 'UNASSIGNED'-->
+	<!--		</where>-->
+	<!--	    ORDER BY t.CREATE_TIME DESC-->
+	<!--	</select>-->
+	<select id="getTaskPoolList" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+		select t.TASK_ID,t.TASK_NAME,t.TASK_TYPE,t.TASK_STATE,
+		TO_CHAR(t.START_TIME,'yyyy-MM-dd') AS START_TIME,
+		TO_CHAR(t.END_TIME,'yyyy-MM-dd') AS END_TIME,
+		TO_CHAR(t.CREATE_TIME,'yyyy-MM-dd') AS CREATE_TIME,
+		TO_CHAR(t.LAST_UPDATE_DT,'yyyy-MM-dd') AS LAST_UPDATE_DT,
+		TO_CHAR(t.ALLOT_TIME,'yyyy-MM-dd') AS ALLOT_TIME,
+		t.LAST_UPDATE_USER,t.ACTIVITY_ID,t.BELONG_ORG,t.BELONG_MGR,t.CUST_ID,t.CUST_Name,t.ALLOT_USER,t.DUTY_USER,t.MGR_NAME,T.ORG_NAME
+		from CIMP_TC_TASKPOOL_INFO t
+		<where>
+			<if test="condition != null and condition.taskName != null and condition.taskName !=''">
+				and t.TASK_NAME  LIKE CONCAT(CONCAT('%', #{condition.taskName, jdbcType=VARCHAR}),'%')
+			</if>
+			<!--			<if test="condition != null and condition.taskType != null and condition.taskType !=''">-->
+			<!--				and t.TASK_TYPE  LIKE CONCAT(CONCAT('%', #{condition.taskType, jdbcType=VARCHAR}),'%')-->
+			<!--			</if>-->
+			<if test="condition.taskType != null and condition.taskType !=''">
+				and t.TASK_TYPE = #{condition.taskType, jdbcType=VARCHAR}
+			</if>
+			and t.BELONG_ORG = #{condition.orgId, jdbcType=VARCHAR}
+		</where>
+		ORDER BY t.CREATE_TIME DESC
+	</select>
+	<select id="queryTaskPoolList" resultType="cn.com.yusys.yusp.cm.taskcenter.domain.CimFTcTaskPoolDto">
+		select t.TASK_ID,t.TASK_NAME,t.TASK_TYPE,t.TASK_STATE,
+		TO_CHAR(t.START_TIME,'yyyy-MM-dd') AS START_TIME,
+		TO_CHAR(t.END_TIME,'yyyy-MM-dd') AS END_TIME,
+		TO_CHAR(t.CREATE_TIME,'yyyy-MM-dd') AS CREATE_TIME,
+		TO_CHAR(t.LAST_UPDATE_DT,'yyyy-MM-dd') AS LAST_UPDATE_DT,
+		TO_CHAR(t.ALLOT_TIME,'yyyy-MM-dd') AS ALLOT_TIME,
+		t.LAST_UPDATE_USER,t.ACTIVITY_ID,t.BELONG_ORG,t.BELONG_MGR,
+		t.CUST_ID,t.CUST_Name,t.ALLOT_USER,t.DUTY_USER,t.MGR_NAME,t.ORG_NAME,t.ACTIVITY_NAME,t.PRODUCT_NAME,t.PRODUCT_ID
+		from CIMP_TC_TASKPOOL_INFO t
+		<where>
+			<if test="model.condition.taskName != null and model.condition.taskName !=''">
+				and t.TASK_NAME  LIKE CONCAT(CONCAT('%', #{model.condition.taskName, jdbcType=VARCHAR}),'%')
+			</if>
+			<if test="model.condition.taskType != null and model.condition.taskType !=''">
+				and t.TASK_TYPE = #{model.condition.taskType, jdbcType=VARCHAR}
+			</if>
+			<if test="model.condition.taskState != null and model.condition.taskState !=''">
+				and t.TASK_STATE = #{model.condition.taskState, jdbcType=VARCHAR}
+			</if>
+			<if test="model.condition.productName != null and model.condition.productName !=''">
+				and t.PRODUCT_NAME LIKE CONCAT(CONCAT('%', #{model.condition.productName, jdbcType=VARCHAR}),'%')
+			</if>
+			<if test="model.condition.orgName != null and model.condition.orgName !=''">
+				and t.BELONG_ORG =#{model.condition.orgName, jdbcType=VARCHAR}
+			</if>
+			<if test="model.condition.mgrtName != null and model.condition.mgrtName !=''">
+				and t.MGR_NAME LIKE CONCAT(CONCAT('%',  #{model.condition.mgrtName, jdbcType=VARCHAR}),'%')
+			</if>
+			<if test="list != null and list.size > 0">
+				and t.BELONG_ORG in
+				<foreach item="item" collection="list" separator="," open="(" close=")" index="">
+					#{item, jdbcType=VARCHAR}
+				</foreach>
+			</if>
+		</where>
+		ORDER BY t.CREATE_TIME DESC
+	</select>
+
+	<!-- 更新任务状态 -->
+	<update id="updateTaskState" parameterType="java.util.Map">
+		update CIMP_TC_TASKPOOL_INFO p set
+										   p.TASK_STATE = #{taskState, jdbcType=VARCHAR},
+										   p.LAST_UPDATE_DT = #{lastUpdateDt, jdbcType=DATE},
+										   p.LAST_UPDATE_USER = #{lastUpdateUser, jdbcType=VARCHAR}
+		where p.TASK_ID = #{taskId, jdbcType=VARCHAR}
+	</update>
+
+	<!-- 更新审批后的任务状态 -->
+	<update id="allotTask" parameterType="java.util.Map">
+		update CIMP_TC_TASKPOOL_INFO p set
+										   p.TASK_STATE = #{taskState, jdbcType=VARCHAR},
+										   p.LAST_UPDATE_DT = #{lastUpdateDt, jdbcType=DATE},
+										   p.LAST_UPDATE_USER = #{lastUpdateUser, jdbcType=VARCHAR}
+		where p.TASK_ID = #{taskId, jdbcType=VARCHAR}
+	</update>
+
+
+	<select id="getTaskById" parameterType="String" resultType="cn.com.yusys.yusp.cm.taskcenter.domain.CimFTcTaskPool">
+		select * from CIMP_TC_TASKPOOL_INFO where TASK_ID = #{taskId, jdbcType=VARCHAR}
+	</select>
+
+	<!--审批时列出任务信息 -->
+	<select id="getApplyList" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+		select t.TASK_ID,t.TASK_NAME,t.TASK_TYPE,t.TASK_STATE,
+			   TO_CHAR(t.START_TIME,'yyyy-MM-dd') AS START_TIME,
+			   TO_CHAR(t.END_TIME,'yyyy-MM-dd') AS END_TIME
+		from CIMP_TC_TASKPOOL_INFO t
+				 left join CIMP_TC_TP_INFO p
+						   on
+							   t.TASK_ID=p.TASK_ID
+
+		where
+			p.BIZ_SEQ_NO =#{condition.bizSeqNo, jdbcType=VARCHAR}
+
+	</select>
+
+
+	<!--审批时列出任务信息 -->
+	<select id="conmpletedTask" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+		select count(*) from cimp_tc_taskpool_info t
+								 left join
+							 cimp_tc_mytask_info m
+							 on
+								 t.task_id=m.task_id
+		where
+					t.task_state ='SUCCESSEND'and m.duty_user= #{condition.dutyUser, jdbcType=VARCHAR}
+		   or
+					t.task_state='FAILEND' and m.duty_user = #{condition.dutyUser, jdbcType=VARCHAR}
+	</select>
+
+	<!-- 申领任务到中间表 -->
+	<insert id="insertTP" parameterType="cn.com.yusys.yusp.cm.taskcenter.domain.CimFTcTP">
+		INSERT INTO CIMP_TC_TP_INFO m
+			(
+	     m.BIZ_SEQ_NO,m.TASK_ID )
+		VALUES
+			(
+			#{bizSeqNo, jdbcType=VARCHAR},
+			#{taskId, jdbcType=VARCHAR}
+			)
+	</insert>
+
+	<insert id="insertAll" parameterType="java.util.List">
+		INSERT ALL
+		<foreach item="taskPool" index="index" collection="list">
+			into cimp_tc_taskpool_info
+			(TASK_ID, TASK_NAME, TASK_TYPE, TASK_STATE, START_TIME, END_TIME, TASK_CONTENT, CREATE_TIME, ACTIVITY_ID,
+			DUTY_USER, ALLOT_TIME, BELONG_MGR, BELONG_ORG,CUST_ID, CUST_NAME, MGR_NAME, ORG_NAME,ACTIVITY_NAME,PRODUCT_ID,PRODUCT_NAME)
+			VALUES (
+			#{taskPool.taskId, jdbcType=VARCHAR},
+			#{taskPool.taskName, jdbcType=VARCHAR},
+			#{taskPool.taskType, jdbcType=VARCHAR},
+			#{taskPool.taskState, jdbcType=VARCHAR},
+			#{taskPool.startTime, jdbcType=DATE},
+			#{taskPool.endTime, jdbcType=DATE},
+			#{taskPool.taskContent, jdbcType=VARCHAR},
+			#{taskPool.createTime, jdbcType=DATE},
+			#{taskPool.activityId, jdbcType=VARCHAR},
+			#{taskPool.dutyUser, jdbcType=VARCHAR},
+			#{taskPool.allotTime, jdbcType=VARCHAR},
+			#{taskPool.belongMgr, jdbcType=VARCHAR},
+			#{taskPool.belongOrg, jdbcType=VARCHAR},
+			#{taskPool.custId, jdbcType=VARCHAR},
+			#{taskPool.custName, jdbcType=VARCHAR},
+			#{taskPool.mgrName, jdbcType=VARCHAR},
+			#{taskPool.orgName, jdbcType=VARCHAR},
+			#{taskPool.activityName, jdbcType=VARCHAR},
+			#{taskPool.productId, jdbcType=VARCHAR},
+			#{taskPool.productName, jdbcType=VARCHAR}
+			)
+		</foreach>
+		select 1 from dual
+	</insert>
+
+	<insert id="insertRiskInfo" parameterType="cn.com.yusys.yusp.cm.taskcenter.domain.CimFTcRisk">
+		insert into CIMP_TC_RISK_INFO m
+			(m.RISK_ID,
+		m.TASK_ID,
+		m.CUSTOMER_ID,
+		m.EXECUTE_USER,
+		m.RISK_CONTENT,
+		m.FEEDBACK_CONTENT,
+		m.EXECUTION,
+		m.FEEDBACK_TIME,
+		m.LAST_UPDATE_USER,
+		m.LAST_UPDATE_DT)
+		values
+			(#{riskId,jdbcType=VARCHAR},
+			#{taskId,jdbcType=VARCHAR},
+			#{customerId,jdbcType=VARCHAR},
+			#{executeUser,jdbcType=VARCHAR},
+			#{riskContent,jdbcType=VARCHAR},
+			#{feedbackContent,jdbcType=VARCHAR},
+			#{execution,jdbcType=VARCHAR},
+			#{feedbackTime,jdbcType=VARCHAR},
+			#{lastUpdateUser,jdbcType=VARCHAR},
+			#{lastUpdateDt,jdbcType=DATE})
+	</insert>
+	<insert id="insertCareInfo" parameterType="cn.com.yusys.yusp.cm.taskcenter.domain.CimpTcCareInfo">
+		insert into CIMP_TC_CARE_INFO m
+			(m.CARE_ID,m.TASK_ID,m.CUSTOMER_ID,m.EXECUTE_USER,
+		m.CARE_CONTENT,m.FEEDBACK_CONTENT,m.EXECUTION,m.FEEDBACK_TIME,m.LAST_UPDATE_USER,m.LAST_UPDATE_DT)
+		values
+			(#{careId,jdbcType=VARCHAR},#{taskId,jdbcType=VARCHAR},#{executeUser,jdbcType=VARCHAR},
+			#{feedbackContent,jdbcType=VARCHAR},#{execution,jdbcType=VARCHAR},#{feedbackTime,jdbcType=VARCHAR},
+			#{riskContent,jdbcType=VARCHAR},#{customerId,jdbcType=VARCHAR},#{lastUpdateUser,jdbcType=VARCHAR},
+			#{lastUpdateDt,jdbcType=DATE})
+	</insert>
+	<insert id="insertTask" parameterType="cn.com.yusys.yusp.cm.taskcenter.domain.CimFTcTaskPool">
+		insert into cimp_tc_taskpool_info
+		(TASK_ID, TASK_NAME, TASK_TYPE, TASK_STATE, START_TIME, END_TIME, TASK_CONTENT, CREATE_TIME, ACTIVITY_ID,
+		 DUTY_USER, ALLOT_TIME, BELONG_MGR, BELONG_ORG,CUST_ID, CUST_NAME, MGR_NAME, ORG_NAME)
+		values
+			(#{taskId, jdbcType=VARCHAR},
+			 #{taskName, jdbcType=VARCHAR},
+			 #{taskType, jdbcType=VARCHAR},
+			 #{taskState, jdbcType=VARCHAR},
+			 #{startTime, jdbcType=DATE},
+			 #{endTime, jdbcType=DATE},
+			 #{taskContent, jdbcType=VARCHAR},
+			 #{createTime, jdbcType=DATE},
+			 #{activityId, jdbcType=VARCHAR},
+			 #{dutyUser, jdbcType=VARCHAR},
+			 #{allotTime, jdbcType=VARCHAR},
+			 #{belongMgr, jdbcType=VARCHAR},
+			 #{belongOrg, jdbcType=VARCHAR},
+			 #{custId, jdbcType=VARCHAR},
+			 #{custName, jdbcType=VARCHAR},
+			 #{mgrName, jdbcType=VARCHAR},
+			 #{orgName, jdbcType=VARCHAR})
+	</insert>
+	<insert id="insertRiskAll" parameterType="java.util.List">
+		insert all
+		<foreach item="riskTask" index="index" collection="list" >
+			into CIMP_TC_RISK_INFO
+			(
+			RISK_ID,TASK_ID,CUSTOMER_ID,EXECUTE_USER,RISK_CONTENT,
+			FEEDBACK_CONTENT,EXECUTION,FEEDBACK_TIME,LAST_UPDATE_USER，LAST_UPDATE_DT
+			)
+			values
+			(
+			#{riskTask.riskId,jdbcType=VARCHAR},
+			#{riskTask.taskId,jdbcType=VARCHAR},
+			#{riskTask.customerId,jdbcType=VARCHAR},
+			#{riskTask.executeUser,jdbcType=VARCHAR},
+			#{riskTask.riskContent,jdbcType=VARCHAR},
+			#{riskTask.feedbackContent,jdbcType=VARCHAR},
+			#{riskTask.execution,jdbcType=VARCHAR},
+			#{riskTask.feedbackTime,jdbcType=VARCHAR},
+			#{riskTask.lastUpdateUser,jdbcType=VARCHAR},
+			#{riskTask.lastUpdateDt,jdbcType=DATE}
+			)
+		</foreach>
+		SELECT 1 FROM DUAL
+	</insert>
+	<insert id="insertCareAll" parameterType="java.util.List">
+		insert all
+		<foreach item="careTask" index="index" collection="list" >
+			into CIMP_TC_CARE_INFO
+			(
+			CARE_ID,TASK_ID,CUSTOMER_ID,EXECUTE_USER,CARE_CONTENT,
+			FEEDBACK_CONTENT,EXECUTION,FEEDBACK_TIME,LAST_UPDATE_USER，LAST_UPDATE_DT
+			)
+			values
+			(
+			#{careTask.careId,jdbcType=VARCHAR},
+			#{careTask.taskId,jdbcType=VARCHAR},
+			#{careTask.customerId,jdbcType=VARCHAR},
+			#{careTask.executeUser,jdbcType=VARCHAR},
+			#{careTask.careContent,jdbcType=VARCHAR},
+			#{careTask.feedbackContent,jdbcType=VARCHAR},
+			#{careTask.execution,jdbcType=VARCHAR},
+			#{careTask.feedbackTime,jdbcType=VARCHAR},
+			#{careTask.lastUpdateUser,jdbcType=VARCHAR},
+			#{careTask.lastUpdateDt,jdbcType=DATE}
+			)
+		</foreach>
+		SELECT 1 FROM DUAL
+	</insert>
+
+
+	<select id="getlist"  parameterType="String" resultType="cn.com.yusys.yusp.cm.taskcenter.domain.CimFTcTP">
+		select t.task_id from CIMP_TC_TP_INFO t
+		where
+			t.BIZ_SEQ_NO = #{BizSeqNo, jdbcType=VARCHAR}
+	</select>
+
+	<delete id="deleteList" parameterType="cn.com.yusys.yusp.cm.taskcenter.domain.CimFTcTP">
+		delete from CIMP_TC_TP_INFO t where t.BIZ_SEQ_NO = #{BizSeqNo, jdbcType=VARCHAR}
+	</delete>
+
+	<!--分配查询角色名称 -->
+	<select id="getAllotRoleCode" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+		select s.role_code,a.user_name ,a.user_id ,a.login_code,s.role_name from ADMIN_SM_ROLE s
+																					 left join ADMIN_SM_USER_ROLE_REL r on s.ROLE_ID = r.ROLE_ID
+																					 left join ADMIN_SM_USER a on r.USER_ID = a.USER_ID
+		where s.ROLE_CODE ='R_MKPL' and a.login_code = #{condition.sessionLoginCode, jdbcType=VARCHAR}
+		   or s.ROLE_CODE ='R_MKCHR' and a.login_code = #{condition.sessionLoginCode, jdbcType=VARCHAR}
+		   or s.ROLE_CODE ='R_MKANS' and a.login_code = #{condition.sessionLoginCode, jdbcType=VARCHAR}
+
+
+	</select>
+
+	<!--申领查询角色名称 -->
+	<select id="getApplyRoleCode" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+		select s.role_code,a.user_name ,a.user_id ,a.login_code,s.role_name from ADMIN_SM_ROLE s
+																					 left join ADMIN_SM_USER_ROLE_REL r on s.ROLE_ID = r.ROLE_ID
+																					 left join ADMIN_SM_USER a on r.USER_ID = a.USER_ID
+		where s.ROLE_CODE ='CM'
+		  and a.login_code = #{condition.sessionLoginCode, jdbcType=VARCHAR}
+	</select>
+
+
+	<!--查询客户经理 -->
+	<select id="getUser" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+		SELECT t.login_code, s.DPT_NAME, t.user_name, t.dpt_id, t.org_id
+		FROM ADMIN_SM_USER t
+		LEFT JOIN ADMIN_SM_DPT s ON s.DPT_ID = t.DPT_ID
+		left join ADMIN_SM_USER_ROLE_REL sr on t.user_id = sr.user_id
+		left join ADMIN_SM_ROLE ad on ad.role_id = sr.role_id
+		<where>
+			ad.ROLE_CODE  = 'CM'
+			and t.USER_STS='A'
+			<if test="loginCode!=null and loginCode!=''">
+				AND t.LOGIN_CODE LIKE CONCAT(CONCAT('%',#{loginCode}),'%')
+			</if>
+			<if test="userName!=null and userName!=''">
+				AND t.USER_NAME LIKE CONCAT(CONCAT('%',#{userName}),'%')
+			</if>
+		</where>
+
+	</select>
+	<select id="getOrgId" resultType="java.lang.String">
+		select ORG_ID from ADMIN_SM_USER  where LOGIN_CODE=#{admin}
+	</select>
+	<select id="getOrgName" parameterType="String" resultType="java.lang.String">
+		SELECT ORG_NAME FROM ADMIN_SM_ORG where ORG_ID=#{belongOrg,jdbcType=VARCHAR}
+	</select>
+	<select id="getMgrName" parameterType="String" resultType="java.lang.String">
+		select USER_NAME FROM ADMIN_SM_USER WHERE LOGIN_CODE=#{belongMgr,jdbcType=VARCHAR}
+	</select>
+
+</mapper>

@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.uimp.business.pma.statisticalAnalysis.repository.mapper.PmaFSchemeIndexScoreTeamMapper">
+
+    <select id="teamAssessSelfDesc"
+            resultType="cn.com.yusys.yusp.uimp.business.pma.statisticalAnalysis.domain.vo.PmaFSchemeIndexScoreTeamVo">
+        select * from (select ID, SCHEME_CYCLE,TEAM_ID,TEAM_NAME,SCHEME_ID,SCHEME_NAME,TOTAL_SCORE,dense_rank() over(partition by scheme_id order by total_score desc) as total_score_rank
+        from PMA_F_SCHEME_INDEX_SCORE_SUM_TEAM )
+        <where>
+            <if test="startTime !=null and startTime != ''">
+                and scheme_cycle &gt;= #{startTime,jdbcType=VARCHAR}
+            </if>
+            <if test="endTime !=null and endTime != ''">
+                and scheme_cycle &lt;= #{endTime,jdbcType=VARCHAR}
+            </if>
+            <if test="schemeId !=null and schemeId != ''">
+                and scheme_id=#{schemeId,jdbcType=VARCHAR}
+            </if>
+            <if test="teamIdList !=null and teamIdList.size > 0 ">
+                and team_id in
+                <foreach collection="teamIdList" item="item" index="index" open="(" close=")" separator=",">
+                    #{item,jdbcType=VARCHAR}
+                </foreach>
+            </if>
+        </where>
+        order by total_score_rank desc
+    </select>
+    <select id="teamAssessSelfAsc"
+            resultType="cn.com.yusys.yusp.uimp.business.pma.statisticalAnalysis.domain.vo.PmaFSchemeIndexScoreTeamVo">
+        select * from (select ID, SCHEME_CYCLE,TEAM_ID,TEAM_NAME,SCHEME_ID,SCHEME_NAME,TOTAL_SCORE,dense_rank() over(partition by scheme_id order by total_score desc) as total_score_rank
+        from PMA_F_SCHEME_INDEX_SCORE_SUM_TEAM )
+        <where>
+            <if test="startTime !=null and startTime != ''">
+                and scheme_cycle &gt;= #{startTime,jdbcType=VARCHAR}
+            </if>
+            <if test="endTime !=null and endTime != ''">
+                and scheme_cycle &lt;= #{endTime,jdbcType=VARCHAR}
+            </if>
+            <if test="schemeId !=null and schemeId != ''">
+                and scheme_id=#{schemeId,jdbcType=VARCHAR}
+            </if>
+            <if test="teamIdList !=null and teamIdList.size > 0 ">
+                and team_id in
+                <foreach collection="teamIdList" item="item" index="index" open="(" close=")" separator=",">
+                    #{item,jdbcType=VARCHAR}
+                </foreach>
+            </if>
+        </where>
+        order by total_score_rank asc
+    </select>
+    <select id="selectScheme"
+            resultType="cn.com.yusys.yusp.uimp.business.pma.statisticalAnalysis.domain.dto.PmaFSchemeIndexScoreSumTeam">
+        select * from PMA_F_SCHEME_INDEX_SCORE_SUM_TEAM
+        where TEAM_ID = #{teamId,jdbcType=VARCHAR} and SCHEME_ID =#{schemeId,jdbcType=VARCHAR} and SCHEME_CYCLE =#{schemeCycle}
+    </select>
+    <select id="teamAssessIndexInfoAscAndAsc"
+            resultType="cn.com.yusys.yusp.uimp.business.pma.statisticalAnalysis.domain.vo.SchemeScoreInfoVo">
+        select INDEX_ID,INDEX_NAME,INDEX_TARGET_VALUE,INDEX_RES,COMP_RATE,SCORE_WEIGHT,SCORE_FORMULA,SCORE
+        from PMA_F_SCHEME_INDEX_SCORE_DETAIL_TEAM
+        <where>
+            <if test="id !=null and id != ''">
+                and MAIN_ID=#{id,jdbcType=VARCHAR}
+            </if>
+            <if test="indexId !=null and indexId != ''">
+                and INDEX_ID=#{indexId,jdbcType=VARCHAR}
+            </if>
+        </where>
+        order by SCORE asc,COMP_RATE asc
+    </select>
+    <select id="teamAssessIndexInfoAscAndDesc"
+            resultType="cn.com.yusys.yusp.uimp.business.pma.statisticalAnalysis.domain.vo.SchemeScoreInfoVo">
+        select INDEX_ID,INDEX_NAME,INDEX_TARGET_VALUE,INDEX_RES,COMP_RATE,SCORE_WEIGHT,SCORE_FORMULA,SCORE
+        from PMA_F_SCHEME_INDEX_SCORE_DETAIL_TEAM
+        <where>
+            <if test="id !=null and id != ''">
+                and MAIN_ID=#{id,jdbcType=VARCHAR}
+            </if>
+            <if test="indexId !=null and indexId != ''">
+                and INDEX_ID=#{indexId,jdbcType=VARCHAR}
+            </if>
+        </where>
+        order by SCORE asc,COMP_RATE desc
+    </select>
+    <select id="teamAssessIndexInfoDescAndAsc"
+            resultType="cn.com.yusys.yusp.uimp.business.pma.statisticalAnalysis.domain.vo.SchemeScoreInfoVo">
+        select INDEX_ID,INDEX_NAME,INDEX_TARGET_VALUE,INDEX_RES,COMP_RATE,SCORE_WEIGHT,SCORE_FORMULA,SCORE
+        from PMA_F_SCHEME_INDEX_SCORE_DETAIL_TEAM
+        <where>
+            <if test="id !=null and id != ''">
+                and MAIN_ID=#{id,jdbcType=VARCHAR}
+            </if>
+            <if test="indexId !=null and indexId != ''">
+                and INDEX_ID=#{indexId,jdbcType=VARCHAR}
+            </if>
+        </where>
+        order by SCORE desc,COMP_RATE asc
+    </select>
+    <select id="teamAssessIndexInfoDescAndDesc"
+            resultType="cn.com.yusys.yusp.uimp.business.pma.statisticalAnalysis.domain.vo.SchemeScoreInfoVo">
+        select INDEX_ID,INDEX_NAME,INDEX_TARGET_VALUE,INDEX_RES,COMP_RATE,SCORE_WEIGHT,SCORE_FORMULA,SCORE
+        from PMA_F_SCHEME_INDEX_SCORE_DETAIL_TEAM
+        <where>
+            <if test="id !=null and id != ''">
+                and MAIN_ID=#{id,jdbcType=VARCHAR}
+            </if>
+            <if test="indexId !=null and indexId != ''">
+                and INDEX_ID=#{indexId,jdbcType=VARCHAR}
+            </if>
+        </where>
+        order by SCORE desc,COMP_RATE desc
+    </select>
+    <select id="selectManagerTeam" resultType="java.lang.String">
+        select mkt_team_id from OCRM_F_CM_MKT_TEAM where org_id=#{orgId,jdbcType=VARCHAR}
+    </select>
+    <select id="selectManagerTeamList" resultType="java.lang.String">
+        select mkt_team_id from OCRM_F_CM_MKT_TEAM where team_leader_id=#{userId,jdbcType=VARCHAR}
+    </select>
+    <select id="selectAllToExcel"
+            resultType="cn.com.yusys.yusp.uimp.business.pma.statisticalAnalysis.domain.form.TeamExcleData">
+        select * from (select ID,SCHEME_CYCLE,TEAM_ID,TEAM_NAME,SCHEME_ID,SCHEME_NAME,TOTAL_SCORE,dense_rank() over(partition by scheme_id order by total_score desc) as total_score_rank
+        from PMA_F_SCHEME_INDEX_SCORE_SUM_TEAM )
+        <where>
+            <if test="teamIdList !=null and teamIdList.size > 0 ">
+                and team_id in
+                <foreach collection="teamIdList" item="item" index="index" open="(" close=")" separator=",">
+                    #{item,jdbcType=VARCHAR}
+                </foreach>
+            </if>
+            <if test="dataIds != null and dataIds.length>0">
+                and ID in
+                <foreach collection="dataIds" item="item" index="index" open="(" close=")" separator=",">
+                    #{item,jdbcType=VARCHAR}
+                </foreach>
+            </if>
+            <if test="startTime != null and startTime != ''">
+                AND SHCEME_CYCLE >= #{startTime}
+            </if>
+            <if test="endTime != null and endTime != ''">
+                AND SHCEME_CYCLE <![CDATA[<]]>= #{endTime}
+            </if>
+            <if test="teamId != null and teamId != ''">
+                AND team_id = #{teamId}
+            </if>
+            <if test="schemeId != null and schemeId != ''">
+                AND SCHEME_ID = #{schemeId}
+            </if>
+            <if test="rankMethod != null and rankMethod != ''">
+                ORDER BY total_score_rank ${rankMethod}
+            </if>
+        </where>
+    </select>
+</mapper>

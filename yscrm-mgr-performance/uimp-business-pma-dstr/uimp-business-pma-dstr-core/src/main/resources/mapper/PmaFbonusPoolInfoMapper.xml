@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.uimp.bonus.repository.mapper.PmaFbonusPoolInfoMapper">
+    <resultMap id="BaseResultMap" type="cn.com.yusys.yusp.uimp.bonus.domain.PmaFbonusPoolInfo">
+		<id column="ID" jdbcType="VARCHAR" property="id" />
+		<result column="BONUS_TYPE" jdbcType="VARCHAR" property="bonusType" />
+		<result column="POOL_TYPE" jdbcType="VARCHAR" property="poolType" />
+		<result column="STAT_DATE" jdbcType="VARCHAR" property="statDate" />
+		<result column="ORG_ID" jdbcType="VARCHAR" property="orgId" />
+		<result column="POOL_BONUS" jdbcType="NUMERIC" property="poolBonus" />
+		<result column="IF_FLAG" jdbcType="VARCHAR" property="ifFlag" />
+		<result column="SUR_POOL_BONUS" jdbcType="NUMERIC" property="surPoolBonus" />
+		<result column="ASSIGN_POOL_BONUS" jdbcType="NUMERIC" property="assignPoolBonus" />
+    </resultMap>
+    <sql id="Base_Column_List">
+	    ID,BONUS_TYPE,POOL_TYPE,STAT_DATE,ORG_ID,POOL_BONUS,IF_FLAG,SUR_POOL_BONUS,ASSIGN_POOL_BONUS
+    </sql>
+    
+    <select id="queryBonusPoolInfo" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.Map">
+    	select p.ID,
+    	       p.BONUS_TYPE,
+    	       p.POOL_TYPE,
+    	       p.STAT_DATE,
+    	       p.ORG_ID,
+    	       p.POOL_BONUS,
+    	       p.IF_FLAG,
+    	       p.SUR_POOL_BONUS,
+    	       p.ASSIGN_POOL_BONUS,
+    	       o.ORG_NAME 
+    	from PMA_F_BONUS_POOL_INFO p 
+    		left join ADMIN_SM_ORG o on o.ORG_ID = p.ORG_ID
+    	<where>
+    		<if test="condition.statDate != null and condition.statDate !=''">
+         	    AND p.STAT_DATE = #{condition.statDate}
+         	</if>
+         	<if test="condition.orgId != null and condition.orgId != ''">
+                AND p.ORG_ID = #{condition.orgId}
+            </if>
+    	</where>
+    	order by p.STAT_DATE desc
+    </select>
+    
+    <select id="queryBonusPoolInfoByStatDateAndOrgId" parameterType="java.lang.String" resultMap="BaseResultMap">
+    	select * from PMA_F_BONUS_POOL_INFO
+    	where STAT_DATE = #{statDate} and ORG_ID = #{orgId}
+    </select>
+</mapper>

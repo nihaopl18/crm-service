@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.sysview.repository.mapper.PcustViewHeaderMapper">
+
+    <select id="getEventInfo" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+            resultType="cn.com.yusys.yscrm.sysview.domain.EventInfo">
+        select EVENT_NAME,EVENT_TYPE,EVENT_DESC from OCRM_F_CI_EVENT_INFO where CUST_ID=#{condition.custId, jdbcType=VARCHAR}
+    </select>
+
+    <select id="getContactWay" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+            resultType="cn.com.yusys.yscrm.sysview.domain.BaseInfo">
+		SELECT AI.PHONE_NO,CI.CONT_METH, CI2.CONT_METH AS TEL_PHONE_NO FROM ACRM_F_CI_PER_ADMIT_INFO AI
+        LEFT JOIN ACRM_F_CI_CONTACT_INFO CI on CI.CUST_ID=#{condition.custId, jdbcType=VARCHAR} and  CI.CONT_TYPE='500' and CI.LAST_CHG_DT=(SELECT MAX(LAST_CHG_DT) as LAST_CHG_DT FROM ACRM_F_CI_CONTACT_INFO WHERE CUST_ID=#{condition.custId, jdbcType=VARCHAR} and  CONT_TYPE='500' GROUP BY CONT_TYPE )
+        LEFT JOIN ACRM_F_CI_CONTACT_INFO CI2 on CI2.CUST_ID=#{condition.custId, jdbcType=VARCHAR} and  CI2.CONT_TYPE='204' and CI2.LAST_CHG_DT=(SELECT MAX(LAST_CHG_DT) as LAST_CHG_DT FROM ACRM_F_CI_CONTACT_INFO WHERE CUST_ID=#{condition.custId, jdbcType=VARCHAR} and  CONT_TYPE='204' GROUP BY CONT_TYPE )
+        WHERE AI.CUST_ID=#{condition.custId, jdbcType=VARCHAR}
+    </select>
+
+    <select id="getPerInfo" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+            resultType="cn.com.yusys.yscrm.sysview.domain.PerInfo">
+        select PAI.CUST_PHOTO,PAI.CUST_NAME,PAI.SEX,PAI.AGE,PAI.INDIV_OCC,PAI.VALUE_SCORE,PAI. LAST_VALUE_SCORE,LI.LOOKUP_ITEM_NAME IND_OWN_UNIT,
+               case when length(AB1.MGR_ID) > 4 then CONCAT(AB1.MGR_NAME, CONCAT('/', AB1.MGR_ID)) else '-' end FINANING_MGR_USER_NAME,
+               case when length(AB2.MGR_ID) > 4 then CONCAT(AB2.MGR_NAME, CONCAT('/', AB2.MGR_ID)) else '-' end LOAN_MGR_USER_NAME,
+               PAI.NEW_LOGIN_DATE,II.INCOME_Y from ACRM_F_CI_PER_ADMIT_INFO PAI
+        FULL JOIN OCRM_F_CI_PER_INCOME_INFO II on II.CUST_ID=#{condition.custId, jdbcType=VARCHAR}
+        LEFT JOIN  OCRM_F_CI_ADMIT_BELONG AB1 ON PAI.CUST_ID  = AB1.CUST_ID AND AB1.MGR_TYPE='1'
+        LEFT JOIN  OCRM_F_CI_ADMIT_BELONG AB2 ON PAI.CUST_ID  = AB2.CUST_ID AND AB2.MGR_TYPE='2'
+        LEFT JOIN OCRM_F_CI_PER_WORK_INFO PW on PAI.CUST_ID  = PW.CUST_ID AND PW.CUST_ID=#{condition.custId, jdbcType=VARCHAR}
+        LEFT JOIN ADMIN_SM_LOOKUP_ITEM LI ON LI.LOOKUP_ITEM_CODE = PW.IND_OWN_UNIT AND LI.LOOKUP_CODE = 'CD0070'
+        where PAI.CUST_ID=#{condition.custId, jdbcType=VARCHAR}
+    </select>
+
+    <select id="getAumDpsInfo" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+            resultType="cn.com.yusys.yscrm.sysview.domain.AumInfo">
+        SELECT RE.AUM_BALANCE_AVG_RMB AS AGO_0M,CAT.DATA_DATE,RE.AUM_BALANCE AS CURRENT_AUM,AGO_1M,AGO_2M,AGO_3M,AGO_4M,AGO_5M,AGO_6M,AGO_7M,AGO_8M,AGO_9M,AGO_10M,AGO_11M,AGO_12M,to_char(MAX_AUM_DATE,'YYYY-MM-DD') AS MAX_AUM_DATE,MAX_AUM,MAX_AUM_HIS,to_char(MAX_AUM_DATE_HIS,'YYYY-MM-DD') AS MAX_AUM_DATE_HIS FROM
+        (SELECT ROWNUM A,AUM_BALANCE,DATA_DATE,AUM_BALANCE_AVG_RMB FROM ACRM_F_PD_CUST_INDEXS WHERE CUST_NO=#{condition.custId, jdbcType=VARCHAR} ORDER BY DATA_DATE DESC) RE
+        FULL JOIN  OCRM_F_CI_AUM_TREND CAT ON CAT.CUST_NO=#{condition.custId, jdbcType=VARCHAR}
+        WHERE RE.A=1
+    </select>
+    <select id="getPropertyInfo" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+            resultType="cn.com.yusys.yscrm.sysview.domain.PropertyInfo">
+            SELECT AUM_BALANCE_AVG_RMB,AUM_BALANCE_AVG_RMB_QOQ,DEPOSIT_BALANCE_RMB,DEPOSIT_BALANCE_RMB_QOQ,LOAN_BALANCE,LOAN_BALANCE_RMB_QOQ FROM
+             (SELECT ROWNUM a,AUM_BALANCE_AVG_RMB,AUM_BALANCE_AVG_RMB_QOQ,DEPOSIT_BALANCE_RMB,DEPOSIT_BALANCE_RMB_QOQ,LOAN_BALANCE,LOAN_BALANCE_RMB_QOQ from ACRM_F_PD_CUST_INDEXS where
+            CUST_NO=#{condition.custId, jdbcType=VARCHAR} ORDER BY DATA_DATE DESC) WHERE a=1
+    </select>
+
+    <select id="getPerLabelInfo" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+            resultType="cn.com.yusys.yscrm.sysview.domain.PerLabelInfo">
+        SELECT DISTINCT T.TAG_NAME,T.SYSTEM_TAG,TAG_PRI FROM CIM_F_TAG_CUST_TAGS C
+        INNER JOIN  CIM_F_MM_TAG_TAGS T ON C.TAG_NO=T.TAG_NO AND T.SYSTEM_TAG='1'
+        WHERE C.CUST_ID=#{condition.custId, jdbcType=VARCHAR}
+        ORDER BY to_number(T.TAG_PRI)
+    </select>
+
+    <select id="getCustomLabel" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+            resultType="cn.com.yusys.yscrm.sysview.domain.PerLabelInfo">
+        SELECT T.TAG_NAME,T.SYSTEM_TAG FROM CIM_F_TAG_CUST_TAGS_SELF C
+        INNER JOIN  CIM_F_MM_TAG_TAGS T ON C.TAG_NO=T.TAG_NO AND T.SYSTEM_TAG='0'
+        WHERE C.CUST_ID=#{condition.custId, jdbcType=VARCHAR} AND C.DISPLAY='1'
+        ORDER BY T.CREATE_DATE
+    </select>
+
+    <select id="ispcustview" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+            resultType="int">
+        SELECT COUNT(S.CUST_ID) count FROM OCRM_F_CI_ADMIT_BELONG S
+        LEFT JOIN OCRM_F_CI_TRUSTEESHIP_LIST R ON R.CUST_ID=S.CUST_ID
+        LEFT JOIN OCRM_F_CI_TRUSTEESHIP_APPLY TT ON TT.APPLY_ID = R.APPLY_NO
+        AND TT.TRUST_STAT='04'
+        AND TT.DEAD_LINE &gt;= to_date('${condition.dataDate}','yyyy-mm-dd')
+        WHERE S.MGR_ID=#{condition.mgrId, jdbcType=VARCHAR} AND S.CUST_ID=#{condition.custId, jdbcType=VARCHAR}
+    </select>
+    <select id="selectinner" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+            resultType="String">
+    SELECT S.STAFF_FLG  FROM ACRM_F_CI_PER_ADMIT_INFO S
+    WHERE S.CUST_ID=#{condition.custId, jdbcType=VARCHAR} AND rownum=1
+    </select>
+</mapper>

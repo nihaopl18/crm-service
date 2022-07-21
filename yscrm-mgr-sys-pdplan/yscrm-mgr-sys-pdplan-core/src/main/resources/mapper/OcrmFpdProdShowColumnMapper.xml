@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.mgr.sys.pdplan.repository.mapper.OcrmFpdProdShowColumnMapper">
+
+	<!-- 通过产品展示方案ID获取关联表关联属性 -->
+    <select id="getList" parameterType="String"  resultType="java.util.HashMap">
+  	SELECT * FROM ( SELECT C.* FROM OCRM_F_PD_PROD_COLUMN C WHERE C.TABLE_ID IN (SELECT TABLE_ID FROM OCRM_F_PD_PROD_SHOW_TABLE  WHERE PLAN_ID = #{planId, jdbcType=VARCHAR})
+     AND C.COLUMN_ID IN (SELECT COLUMN_ID FROM OCRM_F_PD_PROD_SHOW_COLUMN WHERE PLAN_ID = #{planId, jdbcType=VARCHAR}))C
+     LEFT JOIN OCRM_F_PD_PROD_SHOW_TABLE T ON T.TABLE_ID = C.TABLE_ID LEFT JOIN OCRM_F_PD_PROD_SHOW_COLUMN S ON S.COLUMN_ID = C.COLUMN_ID
+     WHERE T.PLAN_ID = #{planId, jdbcType=VARCHAR} AND S.PLAN_ID = #{planId, jdbcType=VARCHAR}
+     ORDER BY S.CLOUMN_SQUENCE
+	</select>
+	
+	<!-- 通过产品展示方案ID获取关联表未关联属性 -->
+	<select id="getListNo" parameterType="String"  resultType="java.util.HashMap">
+	 SELECT * FROM ( SELECT C.* FROM OCRM_F_PD_PROD_COLUMN C WHERE C.TABLE_ID IN (SELECT TABLE_ID FROM OCRM_F_PD_PROD_SHOW_TABLE  WHERE PLAN_ID = #{planId, jdbcType=VARCHAR})
+     AND C.COLUMN_ID NOT IN (SELECT COLUMN_ID FROM OCRM_F_PD_PROD_SHOW_COLUMN WHERE PLAN_ID = #{planId, jdbcType=VARCHAR}))C
+     LEFT JOIN OCRM_F_PD_PROD_SHOW_TABLE T ON T.TABLE_ID = C.TABLE_ID 
+     WHERE T.PLAN_ID = #{planId, jdbcType=VARCHAR}
+	</select>
+	<!-- 通过产品展示方案ID删除关联表关联属性 -->
+	<delete id="deleteByPlanId" parameterType="String">
+	delete OCRM_F_PD_PROD_SHOW_COLUMN where PLAN_ID = #{planId,jdbcType=VARCHAR}
+	</delete>
+    
+    <!-- 通过产品展示关联数据表ID删除关联表关联属性 -->
+	<delete id="deleteByRTableId" parameterType="String">
+	delete OCRM_F_PD_PROD_SHOW_COLUMN where R_TABLE_ID = #{rtableId,jdbcType=VARCHAR}
+	</delete>
+	
+	<select id="getprodInfo" parameterType="String"  resultType="java.util.HashMap">
+	${sql}
+	</select>
+	
+	
+	<select id="getProdTree" parameterType="String"  resultType="java.util.HashMap">
+	${sql}
+	</select>
+	<select id="getCustProd" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"  resultType="java.util.HashMap">
+	SELECT * FROM ACRM_F_PD_PROD_INFO P WHERE P.PRODUCT_ID IN (SELECT PRODUCT_ID FROM ACRM_F_AG_AGREEMENT WHERE CUST_ID = #{condition.custId,jdbcType=VARCHAR})
+	</select>
+	<select id="gettopName" parameterType="String"  resultType="java.util.HashMap">
+	SELECT *
+  FROM (SELECT C.*
+          FROM OCRM_F_PD_PROD_COLUMN C
+         WHERE C.TABLE_ID IN
+               (SELECT TABLE_ID
+                  FROM OCRM_F_PD_PROD_SHOW_TABLE
+                 WHERE PLAN_ID = (SELECT DISPLAY_SCHEME
+                                    FROM ACRM_F_PD_PROD_CATL
+                                   WHERE CATL_CODE = #{catlCode,jdbcType=VARCHAR}))
+           AND C.COLUMN_ID IN
+               (SELECT COLUMN_ID
+                  FROM OCRM_F_PD_PROD_SHOW_COLUMN
+                 WHERE PLAN_ID = (SELECT DISPLAY_SCHEME
+                                    FROM ACRM_F_PD_PROD_CATL
+                                   WHERE CATL_CODE = #{catlCode,jdbcType=VARCHAR}))) C
+  LEFT JOIN OCRM_F_PD_PROD_SHOW_TABLE T
+    ON T.TABLE_ID = C.TABLE_ID
+  LEFT JOIN OCRM_F_PD_PROD_SHOW_COLUMN S
+    ON S.COLUMN_ID = C.COLUMN_ID
+ WHERE T.PLAN_ID = (SELECT DISPLAY_SCHEME
+                      FROM ACRM_F_PD_PROD_CATL
+                     WHERE CATL_CODE = #{catlCode,jdbcType=VARCHAR})
+   AND S.PLAN_ID = (SELECT DISPLAY_SCHEME
+                      FROM ACRM_F_PD_PROD_CATL
+                     WHERE CATL_CODE = #{catlCode,jdbcType=VARCHAR})
+                     ORDER BY S.CLOUMN_SQUENCE
+	</select>
+	<select id="getSql" parameterType="String"  resultType="java.util.HashMap">
+	SELECT R.*,P.PLAN_TYPE FROM OCRM_F_PD_PROD_SHOW_R R LEFT JOIN OCRM_F_PD_PROD_SHOW_PLAN P ON P.PLAN_ID = R.PLAN_ID
+	WHERE R.PLAN_ID = (select DISPLAY_SCHEME FROM ACRM_F_PD_PROD_CATL WHERE CATL_CODE = #{catlCode,jdbcType=VARCHAR})
+	</select>
+	
+	<select id="checkjoin" parameterType="String"  resultType="int">
+	SELECT COUNT(*) FROM OCRM_F_PD_PROD_SHOW_COLUMN WHERE PLAN_ID = #{planId,jdbcType=VARCHAR} 
+	AND COLUMN_ID = #{columnId,jdbcType=VARCHAR}
+	</select>
+	
+</mapper>

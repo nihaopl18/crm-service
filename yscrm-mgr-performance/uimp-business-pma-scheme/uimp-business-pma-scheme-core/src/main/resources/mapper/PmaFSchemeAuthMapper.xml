@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.uimp.business.pma.scheme.schememain.repository.mapper.PmaFSchemeAuthMapper">
+    <resultMap id="BaseResultMap" type="cn.com.yusys.yusp.uimp.business.pma.scheme.schememain.domain.PmaFSchemeAuth">
+		<id column="ID" jdbcType="VARCHAR" property="id" />
+		<result column="SCHEME_ID" jdbcType="VARCHAR" property="schemeId" />
+		<result column="PARAM_ID" jdbcType="VARCHAR" property="paramId" />
+		<result column="PARAM_NAME" jdbcType="VARCHAR" property="paramName" />
+		<result column="SQ_OBJ_TYPE" jdbcType="VARCHAR" property="sqObjType" />
+    </resultMap>
+    <sql id="Base_Column_List">
+	    ID,SCHEME_ID,SCHEME_NAME,GRANT_OBJ_ID,GRANT_OBJ_NAME,CREATE_TIME
+    </sql>
+    <delete id="deleteByScheme"  >
+	   delete from   pma_f_scheme_auth  
+	   where SCHEME_ID=#{schemeId,jdbcType=VARCHAR} 
+	</delete>
+	<delete id="deleteBySchemeIds"  >
+	   delete from pma_f_scheme_auth
+	   where SCHEME_ID in
+	   <foreach collection="array" index="index" item="item" open="(" separator="," close=")">
+	   	#{item}
+	   </foreach>
+	</delete>
+	<select id="listByModel" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+        select <include refid="Base_Column_List"/>
+        from pma_f_scheme_auth A
+         <where>
+            <if test="condition.schemeId != null and condition.schemeId  != ''">
+	      		AND A.SCHEME_ID = #{condition.schemeId,jdbcType=VARCHAR}
+		    </if>
+		    <if test="condition.schemeName != null and condition.schemeName  != ''">
+	      		AND A.SCHEME_NAME LIKE concat(concat('%',#{condition.schemeName,jdbcType=VARCHAR}),'%')
+		    </if>
+		   	<if test="condition.orgCode != null and condition.orgCode  != ''">
+	      		AND A.GRANT_OBJ_ID = #{condition.orgCode}
+		    </if>
+		     
+         </where>
+         order by CREATE_TIME desc
+    </select>
+    	<select id="checkData" parameterType="cn.com.yusys.yusp.uimp.business.pma.scheme.schememain.domain.PmaFSchemeAuth" resultType="java.lang.Integer">
+		select count(*) from pma_f_scheme_auth
+		<where>
+			<if test="schemeId != null and schemeId != ''">
+				and SCHEME_ID = #{schemeId, jdbcType=VARCHAR}
+			</if>
+			<if test="schemeName != null and schemeName != ''">
+				and SCHEME_NAME = #{schemeName, jdbcType=VARCHAR}
+			</if>
+			<if test="grantObjId != null and grantObjId != ''">
+				and GRANT_OBJ_ID = #{grantObjId, jdbcType=VARCHAR}
+			</if>
+		</where>
+	</select>
+	<delete id="deleteData" parameterType="java.lang.String">
+		delete from pma_f_scheme_auth 
+		where ID in 
+			<foreach collection="ids" item="item" index="index" open="(" close=")" separator=",">
+        		#{item}
+        	</foreach>
+	</delete>
+</mapper>

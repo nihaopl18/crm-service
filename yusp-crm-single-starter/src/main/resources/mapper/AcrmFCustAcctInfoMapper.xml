@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper
+	namespace="cn.com.yusys.yusp.dycrm.transferInfo.repository.mapper.AcrmFCustAcctInfoMapper">
+	<!-- 条件列表查询 -->
+	<select id="querySubAcctNo" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+		resultType="java.lang.String">
+		select DISTINCT SUB_ACCT_NO
+		from ACRM_F_CUST_ACCT_INFO
+		where
+		      CUST_NO = #{condition.custNo,jdbcType=VARCHAR}
+		  and ACCT_TYPE = #{condition.acctType,jdbcType=VARCHAR}
+	</select>
+
+	<select id="queryMainAcctNo" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+			resultType="java.lang.String">
+		select DISTINCT MAIN_ACCT
+		from ACRM_F_CUST_ACCT_INFO
+		where
+		      CUST_NO = #{condition.custNo,jdbcType=VARCHAR}
+		  and ACCT_TYPE = #{condition.acctType,jdbcType=VARCHAR}
+	</select>
+</mapper>

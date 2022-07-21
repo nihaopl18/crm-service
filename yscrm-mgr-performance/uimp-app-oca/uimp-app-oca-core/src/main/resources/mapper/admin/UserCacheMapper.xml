@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.admin.repository.mapper.UserCacheMapper">
+	<resultMap id="ContrBeanMap" type="cn.com.yusys.yusp.commons.dto.def.ContrBean" >
+	    <result column="CONTR_URL" property="contrUrl" jdbcType="VARCHAR" />
+	    <result column="METHOD_TYPE" property="methodType" jdbcType="VARCHAR" />
+  	</resultMap>
+    <select id="selectAllContr" resultMap="ContrBeanMap">
+        SELECT DISTINCT CONTR_URL,METHOD_TYPE FROM ADMIN_SM_RES_CONTR WHERE CONTR_URL is not null
+    </select>
+    
+    <resultMap id="MenuBeanMap" type="cn.com.yusys.yusp.commons.dto.def.MenuBean" >
+	    <result column="MENU_ID" property="menuId" jdbcType="VARCHAR" />
+	    <result column="MENU_NAME" property="menuName" jdbcType="VARCHAR" />
+	    <result column="UP_MENU_ID" property="upMenuId" jdbcType="VARCHAR" />
+	    <result column="MENU_ORDER" property="menuOrder" jdbcType="VARCHAR" />
+	    <result column="MENU_ICON" property="menuIcon" jdbcType="VARCHAR" />
+	    <result column="FUNC_URL" property="funcUrl" jdbcType="VARCHAR" />
+	    <result column="FUNC_URL_JS" property="funcUrlJs" jdbcType="VARCHAR" />
+	    <result column="FUNC_URL_CSS" property="funcUrlCss" jdbcType="VARCHAR" />
+	    <result column="FUNC_ID" property="funcId" jdbcType="VARCHAR" />
+	    <result column="SYS_ID" property="sysId" jdbcType="VARCHAR" />
+  	</resultMap>
+    
+    <select id="selectMenu" parameterType="String" resultMap="MenuBeanMap">
+		SELECT DISTINCT T_MENU.MENU_ID,T_MENU.MENU_NAME,T_MENU.UP_MENU_ID,T_MENU.MENU_ORDER,T_MENU.MENU_ICON,T_MENU.FUNC_ID,
+		       T_FUNC.FUNC_URL,T_FUNC.FUNC_URL_JS,T_FUNC.FUNC_URL_CSS,T_MENU.SYS_ID FROM
+		  ADMIN_SM_AUTH_RECO T_RECO
+		  JOIN (
+		      SELECT T_USER.USER_ID USER_ID,
+		        T_USER.ORG_ID ORG_ID,T_USER.DPT_ID DPT_ID,T_ROELREL.ROLE_ID ROLE_ID FROM
+		       ADMIN_SM_USER T_USER LEFT JOIN
+		       ADMIN_SM_USER_ROLE_REL T_ROELREL ON (T_USER.USER_ID=T_ROELREL.USER_ID)
+		    <where>
+	            <if test="loginCode != null">
+	                and T_USER.LOGIN_CODE=#{loginCode}
+	            </if>
+            </where>
+		  ) T_AUTHOBJ
+		  ON(
+		         (T_RECO.AUTHOBJ_TYPE='U' AND T_RECO.AUTHOBJ_ID = T_AUTHOBJ.USER_ID) OR
+		         (T_RECO.AUTHOBJ_TYPE='R' AND T_RECO.AUTHOBJ_ID = T_AUTHOBJ.ROLE_ID) OR
+		         (T_RECO.AUTHOBJ_TYPE='G' AND T_RECO.AUTHOBJ_ID = T_AUTHOBJ.ORG_ID)  OR
+		         (T_RECO.AUTHOBJ_TYPE='D' AND T_RECO.AUTHOBJ_ID = T_AUTHOBJ.DPT_ID)
+		   )
+		   JOIN ADMIN_SM_MENU T_MENU ON(T_RECO.AUTHRES_TYPE ='M' AND T_RECO.AUTHRES_ID=T_MENU.MENU_ID)
+		   LEFT JOIN ADMIN_SM_BUSI_FUNC T_FUNC ON(T_MENU.FUNC_ID = T_FUNC.FUNC_ID)
+        <where>
+            <if test="sysId != null">
+            AND T_MENU.SYS_ID=#{sysId}
+            </if>
+        </where>
+		   ORDER BY T_MENU.UP_MENU_ID,T_MENU.MENU_ORDER ASC
+	</select>
+    
+    <resultMap id="UserContrBeanMap" type="cn.com.yusys.yusp.commons.dto.def.ContrBean" >
+	    <result column="CONTR_CODE" property="contrCode" jdbcType="VARCHAR" />
+	    <result column="CONTR_NAME" property="contrName" jdbcType="VARCHAR" />
+	    <result column="CONTR_URL" property="contrUrl" jdbcType="VARCHAR" />
+	    <result column="METHOD_TYPE" property="methodType" jdbcType="VARCHAR" />
+	    <result column="FUNC_ID" property="funcId" jdbcType="VARCHAR" />
+	    <result column="SYS_ID" property="sysId" jdbcType="VARCHAR" />
+  	</resultMap>
+    <select id="selectUserContr" parameterType="String" resultMap="UserContrBeanMap">
+			  SELECT DISTINCT T_RESCTRL.FUNC_ID,T_RESCTRL.CONTR_CODE,T_RESCTRL.CONTR_NAME,T_RESCTRL.CONTR_URL,T_RESCTRL.METHOD_TYPE,T_RECO.SYS_ID FROM
+		      ADMIN_SM_AUTH_RECO T_RECO
+		      JOIN (
+		          SELECT T_USER.USER_ID USER_ID,
+		            T_USER.ORG_ID ORG_ID,T_USER.DPT_ID DPT_ID,T_ROELREL.ROLE_ID ROLE_ID FROM
+		           ADMIN_SM_USER T_USER LEFT JOIN
+		           ADMIN_SM_USER_ROLE_REL T_ROELREL ON (T_USER.USER_ID=T_ROELREL.USER_ID)
+	           <where>
+	                <if test="loginCode != null">
+	                    and T_USER.LOGIN_CODE=#{loginCode}
+	                </if>
+                </where>
+		             ) T_AUTHOBJ
+		      ON(
+		             (T_RECO.AUTHOBJ_TYPE='U' AND T_RECO.AUTHOBJ_ID = T_AUTHOBJ.USER_ID) OR
+		             (T_RECO.AUTHOBJ_TYPE='R' AND T_RECO.AUTHOBJ_ID = T_AUTHOBJ.ROLE_ID) OR
+		             (T_RECO.AUTHOBJ_TYPE='G' AND T_RECO.AUTHOBJ_ID = T_AUTHOBJ.ORG_ID)  OR
+		             (T_RECO.AUTHOBJ_TYPE='D' AND T_RECO.AUTHOBJ_ID = T_AUTHOBJ.DPT_ID)
+		       )
+		       JOIN ADMIN_SM_RES_CONTR T_RESCTRL ON(T_RECO.AUTHRES_TYPE ='C' AND T_RECO.AUTHRES_ID=T_RESCTRL.CONTR_ID)
+                <where>
+                    <if test="sysId != null">
+                        AND T_RECO.SYS_ID=#{sysId}
+                    </if>
+                </where>
+     </select>
+     
+    
+	<!--查询用户信息-->
+	<select id="selectUserInfo" parameterType="String" resultType="map">
+		SELECT
+		T_USER.USER_ID,
+		T_USER.LOGIN_CODE,
+		T_USER.USER_PASSWORD,
+		T_USER.USER_SEX,
+		T_USER.USER_STS,
+		T_USER.OFFEN_IP,
+		T_USER.LAST_LOGIN_TIME,
+		T_USER.LAST_EDIT_PASS_TIME,
+		T_USER.USER_CODE,
+		T_USER.USER_NAME,
+		T_USER.USER_AVATAR,
+		T_USER.USER_EMAIL,
+		T_USER.USER_MOBILEPHONE,
+		case when T_USER.GESTURE_PASSWORD is null then '0' else '1' end as GESTURE_PASSWORD,
+		T_USER.ORG_ID,
+		T_USER.DPT_ID,
+		T_USER.LAST_CHG_USR,
+		T_USER.LAST_CHG_DT,
+		T_ROLE.ROLE_ID,
+		T_ROLE.ROLE_CODE,
+		T_ROLE.ROLE_NAME,
+		T_ROLE.ORG_ID,
+		T_ROLE.ROLE_LEVEL,
+		T_ROLE.ROLE_STS,
+		T_ORG.ORG_CODE,
+		T_ORG.ORG_NAME,
+		T_ORG.INSTU_ID,
+		T_ORG.UP_ORG_ID,
+		T_ORG.ORG_LEVEL,
+		T_ORG.ORG_STS,
+		T_DPT.DPT_CDE,
+		T_DPT.DPT_NAME,
+		T_DPT.BELONG_ORG_ID,
+		T_DPT.UP_DPT_ID,
+		T_DPT.DPT_STS,
+		T_ORG1.ORG_CODE GRANT_ORG_CODE,
+		T_ORG1.ORG_NAME GRANT_ORG_NAME,
+		T_ROLE.IS_MGR
+		FROM
+		ADMIN_SM_USER T_USER
+		LEFT JOIN ADMIN_SM_USER_ROLE_REL T_REL ON T_USER.USER_ID = T_REL.USER_ID
+		LEFT JOIN ADMIN_SM_ROLE T_ROLE ON T_ROLE.ROLE_ID = T_REL.ROLE_ID
+		LEFT JOIN ADMIN_SM_ORG T_ORG ON T_USER.ORG_ID=T_ORG.ORG_ID
+		LEFT JOIN ADMIN_SM_DPT T_DPT ON T_USER.DPT_ID=T_DPT.DPT_ID
+		LEFT JOIN ADMIN_SM_USER_MGR_ORG T_MGR_ORG ON T_USER.USER_ID=T_MGR_ORG.USER_ID
+		LEFT JOIN ADMIN_SM_ORG T_ORG1 ON T_MGR_ORG.ORG_ID=T_ORG1.ORG_ID
+		WHERE T_USER.LOGIN_CODE=#{loginCode}
+	</select>
+</mapper>

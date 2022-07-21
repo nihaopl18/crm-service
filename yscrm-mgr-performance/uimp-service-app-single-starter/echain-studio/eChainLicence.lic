@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<license build-time="Thu Jul 18 15:46:17 CST 2019" validate-code="C77F4E673F252B5EECF618FD0225675A">
+  <element name="contract_code">YTEC-2019-1136-B</element>
+  <element name="customer_name">echain工作流推广维护2019Q2项目</element>
+  <element name="license_code">0000012874</element>
+  <element name="product_code">0000000782</element>
+  <element name="product_name_zh-cn">宇信科技工作流平台eChain V3.0</element>
+  <element name="product_name_en-us">eChain</element>
+  <element name="version_major">3</element>
+  <element name="version_sub">0</element>
+  <element name="version_publish">1</element>
+  <element name="complie_date">2017-06-05</element>
+  <element name="license_type">内部试用许可证</element>
+  <element name="license_start_time">2019-07-18</element>
+  <element name="license_end_time">2019-12-18</element>
+</license>

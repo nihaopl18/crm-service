@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.exchange.repository.mapper.OcrmFwpShareReplyInfoMapper">
+    <resultMap id="BaseResultMap" type="cn.com.yusys.yscrm.exchange.domain.OcrmFwpShareReplyInfo">
+		<id column="REPLY_ID" jdbcType="VARCHAR" property="replyId" />
+		<result column="SHARE_ID" jdbcType="VARCHAR" property="shareId" />
+		<result column="CREATE_USER_ID" jdbcType="VARCHAR" property="createUserId" />
+		<result column="CREATE_USER_NAME" jdbcType="VARCHAR" property="createUserName" />
+		<result column="CREATE_ORG_ID" jdbcType="VARCHAR" property="createOrgId" />
+		<result column="CREATE_ORG_NAME" jdbcType="VARCHAR" property="createOrgName" />
+		<result column="CREATE_TIME" jdbcType="DATE" property="createTime" />
+		<result column="REPLY_CONTENT" jdbcType="CLOB" javaType="String" property="replyContent" />
+		<result column="UP_REPLY_ID" jdbcType="VARCHAR" property="upReplyId" />
+		<result column="UP_CREATE_USER_NAME" jdbcType="VARCHAR" property="upCreateUserName" />
+		<result column="CORP_ORG_CODE" jdbcType="VARCHAR" property="corpOrgCode" />
+		<result column="ROWNO" jdbcType="VARCHAR" property="rowno" />
+		<result column="REPLY_COUNT" jdbcType="NUMERIC" property="replyCount" />
+    </resultMap>
+    <sql id="Base_Column_List">
+	    REPLY_ID,SHARE_ID,CREATE_USER_ID,CREATE_USER_NAME,CREATE_ORG_ID,CREATE_ORG_NAME,CREATE_TIME,REPLY_CONTENT,UP_REPLY_ID,UP_CREATE_USER_NAME,CORP_ORG_CODE
+    </sql>
+    
+    <!-- 交流评论 查询评论总数 -->
+    <select id="queryReplyCount" parameterType="java.lang.String" resultType="int">
+    	select count(*) from OCRM_F_WP_SHARE_REPLY_INFO
+		<where>
+			(UP_REPLY_ID is null or UP_REPLY_ID = '')
+			<if test="shareId != null and shareId != ''">
+				AND SHARE_ID = #{shareId,jdbcType=VARCHAR}
+			</if>
+		</where>
+    </select>
+    
+    <!-- 交流评论 列表查询 -->
+    <select id="queryReply" parameterType="java.util.Map" resultMap="BaseResultMap">
+    	SELECT *
+		  FROM (SELECT t.*, ROWNUM AS rowno
+		          FROM (select REPLY_ID,
+		                       SHARE_ID,
+		                       CREATE_USER_ID,
+		                       CREATE_USER_NAME,
+		                       CREATE_ORG_ID,
+		                       CREATE_ORG_NAME,
+		                       CREATE_TIME,
+		                       REPLY_CONTENT,
+		                       UP_REPLY_ID,
+		                       UP_CREATE_USER_NAME,
+		                       CORP_ORG_CODE,
+		                       case when (select count(*) from OCRM_F_WP_SHARE_REPLY_INFO sub 
+		                                    START WITH sub.REPLY_ID = main.REPLY_ID CONNECT BY PRIOR sub.REPLY_ID = sub.UP_REPLY_ID) - 1 > 0 
+		                            then (select count(*) from OCRM_F_WP_SHARE_REPLY_INFO sub 
+		                                    START WITH sub.REPLY_ID = main.REPLY_ID CONNECT BY PRIOR sub.REPLY_ID = sub.UP_REPLY_ID) - 1
+		                            else 0
+		                       end as REPLY_COUNT 
+		                  from OCRM_F_WP_SHARE_REPLY_INFO main
+							<where>
+							    (main.UP_REPLY_ID is null or main.UP_REPLY_ID = '')
+								<if test="shareId != null and shareId != ''">
+									and main.SHARE_ID = #{shareId,jdbcType=VARCHAR}
+								</if>
+							</where>
+		                 order by main.CREATE_TIME desc) t
+        <![CDATA[
+		         WHERE ROWNUM <= #{endNum,jdbcType=NUMERIC}) tt
+		WHERE tt.rowno >= #{startNum,jdbcType=NUMERIC}
+		]]>
+    </select>
+    
+    <!-- 交流回复 列表查询 -->
+    <select id="querySubReply" parameterType="java.util.Map" resultMap="BaseResultMap">
+    	select REPLY_ID,
+               SHARE_ID,
+               CREATE_USER_ID,
+               CREATE_USER_NAME,
+               CREATE_ORG_ID,
+               CREATE_ORG_NAME,
+               CREATE_TIME,
+               REPLY_CONTENT,
+               UP_REPLY_ID,
+               UP_CREATE_USER_NAME,
+               CORP_ORG_CODE 
+         from OCRM_F_WP_SHARE_REPLY_INFO
+         <where>
+			<if test="replyId != null and replyId != ''">
+				and REPLY_ID != #{replyId,jdbcType=VARCHAR}
+			</if>
+		</where>
+		START WITH REPLY_ID = #{replyId,jdbcType=VARCHAR} CONNECT BY PRIOR REPLY_ID = UP_REPLY_ID
+		ORDER BY CREATE_TIME
+    </select>
+</mapper>

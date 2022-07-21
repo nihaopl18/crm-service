@@ -1,0 +1,759 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.cust.person.repository.mapper.PCustFinaViewMapper">
+	<!-- 财务信息查询 -->
+	<select id="getFinList" parameterType="java.util.Map"
+		resultType="java.util.HashMap">
+		select t.ID ,
+		t.DATA_DATE ,
+		t.CRAT_DT ,
+		t.CRAT_ORG_ID ,
+		t.CRAT_USR ,
+		t.LAST_CHG_SYS ,
+		t.LAST_CHG_USR ,
+		t.LAST_CHG_DT ,
+		t.CORP_ORG_CODE ,
+		t.CUST_ID ,
+		t.PETIRE_PLAN ,
+		t.HOUSE_PUR_PLAN ,
+		t.CHILD_EDU_PLAN ,
+		t.ASSET_TOTAL_VAL ,
+		t.INTERN_FIN_INFO ,
+		t.MORTGAGE_FLG ,
+		t.HOUSE_INFO ,
+		t.OVERS_ASSET
+
+
+		from OCRM_F_CI_PER_FINANCE_INFO t
+		<if test="custId != null and custId != ''">
+			where t.CUST_ID =#{custId,jdbcType=VARCHAR}
+		</if>
+	</select>
+	<!-- 投资信息 -->
+	<select id="getInvestList" parameterType="java.util.Map"
+		resultType="java.util.HashMap">
+		select t.ID ,
+		t.DATA_DATE ,
+		t.CRAT_DT ,
+		t.CRAT_ORG_ID ,
+		t.CRAT_USR ,
+		t.LAST_CHG_SYS ,
+		t.LAST_CHG_USR ,
+		t.LAST_CHG_DT ,
+		t.CORP_ORG_CODE ,
+		t.CUST_ID ,
+		t.INV_NAME ,
+		t.INV_TYPE ,
+		t.INV_LOAN_CARD ,
+		t.INV_LEGAL ,
+		t.CURR_CD ,
+		t.INV_AMT ,
+		t.PAY_TYPE ,
+		t.INV_PERC ,
+		t.STOCK_PERC ,
+		t.INV_DESC ,
+		t.INV_DATE ,
+		t.INV_PRJ_DESC ,
+		t.WORK_ADDR ,
+		t.WORK_RANGE ,
+		t.REMARKS ,
+		t.INV_CODE
+		from OCRM_F_CI_PER_INV_INFO t
+		<if test="custId != null and custId != ''">
+			where t.CUST_ID =#{custId,jdbcType=VARCHAR}
+		</if>
+	</select>
+	<!-- 收入信息 -->
+	<select id="getIncomeList" parameterType="java.util.Map"
+		resultType="java.util.HashMap">
+		select t.ID ,
+		t.DATA_DATE ,
+		t.CRAT_DT ,
+		t.CRAT_ORG_ID ,
+		t.CRAT_USR ,
+		t.LAST_CHG_SYS ,
+		t.LAST_CHG_USR ,
+		t.LAST_CHG_DT ,
+		t.CORP_ORG_CODE ,
+		t.CUST_ID ,
+		t.SUR_YEAR ,
+		t.INCOME_SRC ,
+		t.INCOME_Y ,
+		t.SAL_ACCT_BANK ,
+		t.REMARKS
+
+		from OCRM_F_CI_PER_INCOME_INFO t
+		<if test="custId != null and custId != ''">
+			where t.CUST_ID =#{custId,jdbcType=VARCHAR}
+		</if>
+	</select>
+	<!-- 家庭收支信息 -->
+	<select id="getFamilyincList" parameterType="java.util.Map"
+		resultType="java.util.HashMap">
+		select t.ID ,
+		t.DATA_DATE ,
+		t.CRAT_DT ,
+		t.CRAT_ORG_ID ,
+		t.CRAT_USR ,
+		t.LAST_CHG_SYS ,
+		t.LAST_CHG_USR ,
+		t.LAST_CHG_DT ,
+		t.CORP_ORG_CODE ,
+		t.CUST_ID ,
+		t.SUR_YEAR ,
+		t.YEAR_INCOME ,
+		t.ANN_INCOME ,
+		t.POPU_NUM ,
+		t.LABOR_NUM ,
+		t.FAM_PER_INCOME ,
+		t.FAM_EXPEN_DESC ,
+		t.FAM_EXPEN_AMT ,
+		t.ASSET_TOTAL ,
+		t.DEBT_TOTAL ,
+		t.NET_ASSET ,
+		t.REMARK
+
+		from OCRM_F_CI_PER_FAMI_BALANCE t
+		<if test="custId != null and custId != ''">
+			where t.CUST_ID =#{custId,jdbcType=VARCHAR}
+		</if>
+	</select>
+	<!-- 资产信息 -->
+	<select id="getAssetsList" parameterType="java.util.Map"
+		resultType="java.util.HashMap">
+		select t. ID ,
+		t. DATA_DATE ,
+		t. CRAT_DT ,
+		t. CRAT_ORG_ID ,
+		t. CRAT_USR ,
+		t. LAST_CHG_SYS ,
+		t. LAST_CHG_USR ,
+		t. LAST_CHG_DT ,
+		t. CORP_ORG_CODE ,
+		t. CUST_ID ,
+		t. ASS_ID ,
+		t. ASSET_NAME ,
+		t. ASSET_UNIT ,
+		t. ASSET_NUM ,
+		t. ASSET_EVAL ,
+		t. EVAL_DATE ,
+		t. ASSET_PUR_DATE ,
+		t. ASSET_PUR_PRICE ,
+		t. ASSET_DESC ,
+		t. MORTGAGE_STAT ,
+		t. REMARKS
+
+		from OCRM_F_CI_PER_ASSET_INFO t
+		<if test="custId != null and custId != ''">
+			where t.CUST_ID =#{custId,jdbcType=VARCHAR}
+		</if>
+	</select>
+	<!-- 负债信息 -->
+	<select id="getLiabiList" parameterType="java.util.Map"
+		resultType="java.util.HashMap">
+		select t.DATA_DATE ,
+		t.CRAT_DT ,
+		t.CRAT_ORG_ID ,
+		t.CRAT_USR ,
+		t.LAST_CHG_SYS ,
+		t.LAST_CHG_USR ,
+		t.LAST_CHG_DT ,
+		t.CORP_ORG_CODE ,
+		t.CUST_ID ,
+		t.INDIV_DEBT_ID ,
+		t.LIAB_TYPE ,
+		t.LIAB_DESC ,
+		t.CREDITOR ,
+		t.LIAB_CURR_CD ,
+		t.LIAB_AMT ,
+		t.LIAB_START_DATE ,
+		t.LIAB_END_DATE ,
+		t.CRED_CRD_NUM ,
+		t.LOAN_GUAR_BAL ,
+		t.REMARKS ,
+		t.ID
+
+		from OCRM_F_CI_PER_LIAB_INFO t
+		<if test="custId != null and custId != ''">
+			where t.CUST_ID =#{custId,jdbcType=VARCHAR}
+		</if>
+	</select>
+	<!-- 保险信息 -->
+	<select id="getInsurList" parameterType="java.util.Map"
+		resultType="java.util.HashMap">
+		select t.DATA_DATE ,
+		t.CRAT_DT ,
+		t.CRAT_ORG_ID ,
+		t.CRAT_USR ,
+		t.LAST_CHG_SYS ,
+		t.LAST_CHG_USR ,
+		t.LAST_CHG_DT ,
+		t.CORP_ORG_CODE ,
+		t.CUST_ID ,
+		t.INSUR_NO ,
+		t.INSUR_NAME ,
+		t.INSUR_COM ,
+		t.INSUR_TYPE ,
+		t.INSURED ,
+		t.BFCY_MAN ,
+		t.INSUR_TAR ,
+		t.INSUR_VAL ,
+		t.INSUR_FEE ,
+		t.INSUR_TOT_AMT ,
+		t.INSUR_START_DATE ,
+		t.INSUR_END_DATE ,
+		t.INSUR_AMT ,
+		t.MORTGAGE_STAT ,
+		t.REMARKS ,
+		t.ID
+
+		from OCRM_F_CI_PER_INSUR_INFO t
+		<if test="custId != null and custId != ''">
+			where t.CUST_ID =#{custId,jdbcType=VARCHAR}
+		</if>
+	</select>
+	<!-- 纳税信息 -->
+	<select id="getPayList" parameterType="java.util.Map"
+		resultType="java.util.HashMap">
+		select t.DATA_DATE ,
+		t.CRAT_DT ,
+		t.CRAT_ORG_ID ,
+		t.CRAT_USR ,
+		t.LAST_CHG_SYS ,
+		t.LAST_CHG_USR ,
+		t.LAST_CHG_DT ,
+		t.CORP_ORG_CODE ,
+		t.CUST_ID ,
+		t.REG_SEQ_NO ,
+		t.TAX_NO ,
+		t.SUR_YEAR ,
+		t.TAXES ,
+		t.TAX_AMT ,
+		t.TAX_PAY_AMT ,
+
+		t.TAX_DATE ,
+		t.NORMAL_FLG ,
+		t.REMARKS ,
+		t.ID
+
+		from OCRM_F_CI_PER_TAX_INFO t
+		<if test="custId != null and custId != ''">
+			where t.CUST_ID =#{custId,jdbcType=VARCHAR}
+		</if>
+	</select>
+	<!-- 经营信息 -->
+	<select id="getOperList" parameterType="java.util.Map"
+		resultType="java.util.HashMap">
+		select t.DATA_DATE ,
+		t.CRAT_DT ,
+		t.CRAT_ORG_ID ,
+		t.CRAT_USR ,
+		t.LAST_CHG_SYS ,
+		t.LAST_CHG_USR ,
+		t.LAST_CHG_DT ,
+		t.CORP_ORG_CODE ,
+		t.CUST_ID ,
+		t.BUSI_NAME ,
+		t.BUSI_CUST_ID ,
+		t.PRINCIPAL ,
+		t.PRIN_TEL_NO ,
+		t.COM_TYPE ,
+		t.COM_SCALE ,
+		t.COM_VAL ,
+		t.REG_CURR_CD ,
+		t.REG_AMT ,
+		t.PARTNER_NUM ,
+		t.EMP_NUM ,
+		t.OPEN_DATE ,
+		t.MAIN_RANGE ,
+		t.PART_RANGE ,
+		t.UNIT_ADDR ,
+		t.CONT_NAME ,
+		t.CONT_TEL_NO ,
+		t.CUST_POSI ,
+		t.CUST_STOCK_PERT ,
+		t.REMARKS ,
+		t.ID
+
+		from OCRM_F_CI_PER_MANAGE_INFO t
+		<if test="custId != null and custId != ''">
+			where t.CUST_ID =#{custId,jdbcType=VARCHAR}
+		</if>
+	</select>
+	<!-- 农户生产情况 -->
+	<select id="getFarmerList" parameterType="java.util.Map"
+		resultType="java.util.HashMap">
+		select t.DATA_DATE ,
+		t.CRAT_DT ,
+		t.CRAT_ORG_ID ,
+		t.CRAT_USR ,
+		t.LAST_CHG_SYS ,
+		t.LAST_CHG_USR ,
+		t.LAST_CHG_DT ,
+		t.CORP_ORG_CODE ,
+		t.CUST_ID ,
+		t.REG_SEQ_NO ,
+		t.SUR_YEAR ,
+		t.PROD_BUSI_TYPE ,
+		t.PROD_BUSI_NAME ,
+		t.UNITS ,
+		t.NUM ,
+		t.INCOME_Y ,
+		t.REMARKS ,
+		t.ID
+
+		from OCRM_F_CI_PER_FARMER_PROD t
+		<if test="custId != null and custId != ''">
+			where t.CUST_ID =#{custId,jdbcType=VARCHAR}
+		</if>
+	</select>
+	<!-- 财务信息修改 -->
+	<update id="updatefinInfo" parameterType="java.util.Map">
+		UPDATE OCRM_F_CI_PER_FINANCE_INFO t SET
+		t.LAST_CHG_SYS =#{lastChgSys,jdbcType=VARCHAR},
+		t.LAST_CHG_USR =#{lastChgUsr,jdbcType=VARCHAR},
+		t.LAST_CHG_DT=TO_DATE(#{lastChgDt,jdbcType=DATE}, 'yyyy-MM-dd')
+
+
+		<if test="petirePlan != null and petirePlan != ''">
+			,t.PETIRE_PLAN =#{petirePlan,jdbcType=VARCHAR}
+		</if>
+		<if test="housePurPlan != null and housePurPlan != ''">
+			,t.HOUSE_PUR_PLAN =#{housePurPlan,jdbcType=VARCHAR}
+		</if>
+		<if test="childEduPlan != null and childEduPlan != ''">
+			,t.CHILD_EDU_PLAN =#{childEduPlan,jdbcType=VARCHAR}
+		</if>
+		<if test="assetTotalVal != null and assetTotalVal != ''">
+			,t.ASSET_TOTAL_VAL =#{assetTotalVal,jdbcType=VARCHAR}
+		</if>
+		<if test="internFinInfo != null and internFinInfo != ''">
+			,t.INTERN_FIN_INFO =#{internFinInfo,jdbcType=VARCHAR}
+		</if>
+		<if test="mortgageFlg != null and mortgageFlg != ''">
+			,t.MORTGAGE_FLG =#{mortgageFlg,jdbcType=VARCHAR}
+		</if>
+		<if test="houseInfo != null and houseInfo != ''">
+			,t.HOUSE_INFO =#{houseInfo,jdbcType=VARCHAR}
+		</if>
+		<if test="oversAsset != null and oversAsset != ''">
+			,t.OVERS_ASSET =#{oversAsset,jdbcType=VARCHAR}
+		</if>
+
+		WHERE t.CUST_ID = #{custId,jdbcType=VARCHAR}
+	</update>
+	<!-- 投资信息修改 -->
+	<update id="updateInvestInfo" parameterType="java.util.Map">
+		UPDATE OCRM_F_CI_PER_INV_INFO t SET
+		t.LAST_CHG_SYS =#{lastChgSys,jdbcType=VARCHAR},
+		t.LAST_CHG_USR =#{lastChgUsr,jdbcType=VARCHAR},
+		t.LAST_CHG_DT=TO_DATE(#{lastChgDt,jdbcType=DATE}, 'yyyy-MM-dd')
+
+
+		<if test="invName != null and invName != ''">
+			,t.INV_NAME =#{invName,jdbcType=VARCHAR}
+		</if>
+		<if test="invType != null and invType != ''">
+			,t.INV_TYPE =#{invType,jdbcType=VARCHAR}
+		</if>
+		<if test="invCode != null and invCode != ''">
+			,t.INV_CODE =#{invCode,jdbcType=VARCHAR}
+		</if>
+		<if test="invLegal != null and invLegal != ''">
+			,t.INV_LEGAL =#{invLegal,jdbcType=VARCHAR}
+		</if>
+		<if test="currCd != null and currCd != ''">
+			,t.CURR_CD =#{currCd,jdbcType=VARCHAR}
+		</if>
+		<if test="invAmt != null and invAmt != ''">
+			,t.INV_AMT =#{invAmt,jdbcType=VARCHAR}
+		</if>
+		<if test="payType != null and payType != ''">
+			,t.PAY_TYPE =#{payType,jdbcType=VARCHAR}
+		</if>
+		<if test="invPerc != null and invPerc != ''">
+			,t.INV_PERC =#{invPerc,jdbcType=VARCHAR}
+		</if>
+		<if test="stockPerc != null and stockPerc != ''">
+			,t.STOCK_PERC =#{stockPerc,jdbcType=VARCHAR}
+		</if>
+		<if test="invDesc != null and invDesc != ''">
+			,t.INV_DESC =#{invDesc,jdbcType=VARCHAR}
+		</if>
+		<if test="invDate != null and invDate != ''">
+			,t.INV_DATE =#{invDate,jdbcType=VARCHAR}
+		</if>
+		<if test="invPrjDesc != null and invPrjDesc != ''">
+			,t.INV_PRJ_DESC =#{invPrjDesc,jdbcType=VARCHAR}
+		</if>
+		<if test="workAddr != null and workAddr != ''">
+			,t.WORK_ADDR =#{workAddr,jdbcType=VARCHAR}
+		</if>
+		<if test="workRange != null and workRange != ''">
+			,t.WORK_RANGE =#{workRange,jdbcType=VARCHAR}
+		</if>
+		<if test="remarks != null and remarks != ''">
+			,t.REMARKS =#{remarks,jdbcType=VARCHAR}
+		</if>
+
+		WHERE t.CUST_ID = #{custId,jdbcType=VARCHAR}
+	</update>
+	<!-- 收入信息修改 -->
+	<update id="updateIncomeInfo" parameterType="java.util.Map">
+		UPDATE OCRM_F_CI_PER_INCOME_INFO t SET
+		t.LAST_CHG_SYS =#{lastChgSys,jdbcType=VARCHAR},
+		t.LAST_CHG_USR =#{lastChgUsr,jdbcType=VARCHAR},
+		t.LAST_CHG_DT=TO_DATE(#{lastChgDt,jdbcType=DATE}, 'yyyy-MM-dd')
+
+
+		<if test="surYear != null and surYear != ''">
+			,t.SUR_YEAR =#{surYear,jdbcType=VARCHAR}
+		</if>
+		<if test="incomeSrc != null and incomeSrc != ''">
+			,t.INCOME_SRC =#{incomeSrc,jdbcType=VARCHAR}
+		</if>
+		<if test="incomeY != null and incomeY != ''">
+			,t.INCOME_Y =#{incomeY,jdbcType=VARCHAR}
+		</if>
+		<if test="salAcctBank != null and salAcctBank != ''">
+			,t.SAL_ACCT_BANK =#{salAcctBank,jdbcType=VARCHAR}
+		</if>
+		<if test="remarks != null and remarks != ''">
+			,t.REMARKS =#{remarks,jdbcType=VARCHAR}
+		</if>
+
+
+		WHERE t.CUST_ID = #{custId,jdbcType=VARCHAR}
+	</update>
+	<!-- 家庭收支信息修改 -->
+	<update id="updateFamInfo" parameterType="java.util.Map">
+		UPDATE OCRM_F_CI_PER_FAMI_BALANCE t SET
+		t.LAST_CHG_SYS =#{lastChgSys,jdbcType=VARCHAR},
+		t.LAST_CHG_USR =#{lastChgUsr,jdbcType=VARCHAR},
+		t.LAST_CHG_DT=TO_DATE(#{lastChgDt,jdbcType=DATE}, 'yyyy-MM-dd')
+
+
+		<if test="surYear != null and surYear != ''">
+			,t.SUR_YEAR =#{surYear,jdbcType=VARCHAR}
+		</if>
+		<if test="yearIncome != null and yearIncome != ''">
+			,t.YEAR_INCOME =#{yearIncome,jdbcType=VARCHAR}
+		</if>
+		<if test="annIncome != null and annIncome != ''">
+			,t.ANN_INCOME =#{annIncome,jdbcType=VARCHAR}
+		</if>
+		<if test="popuNum != null and popuNum != ''">
+			,t.POPU_NUM =#{popuNum,jdbcType=VARCHAR}
+		</if>
+		<if test="laborNum != null and laborNum != ''">
+			,t.LABOR_NUM =#{laborNum,jdbcType=VARCHAR}
+		</if>
+		<if test="famPerIncome != null and famPerIncome != ''">
+			,t.FAM_PER_INCOME =#{famPerIncome,jdbcType=VARCHAR}
+		</if>
+		<if test="famExpenDesc != null and famExpenDesc != ''">
+			,t.FAM_EXPEN_DESC =#{famExpenDesc,jdbcType=VARCHAR}
+		</if>
+		<if test="famExpenAmt != null and famExpenAmt != ''">
+			,t.FAM_EXPEN_AMT =#{famExpenAmt,jdbcType=VARCHAR}
+		</if>
+		<if test="assetTotal != null and assetTotal != ''">
+			,t.ASSET_TOTAL =#{assetTotal,jdbcType=VARCHAR}
+		</if>
+		<if test="debtTotal != null and debtTotal != ''">
+			,t.DEBT_TOTAL =#{debtTotal,jdbcType=VARCHAR}
+		</if>
+		<if test="netAsset != null and netAsset != ''">
+			,t.NET_ASSET =#{netAsset,jdbcType=VARCHAR}
+		</if>
+		<if test="remark != null and remark != ''">
+			,t.REMARK =#{remark,jdbcType=VARCHAR}
+		</if>
+		WHERE t.CUST_ID = #{custId,jdbcType=VARCHAR}
+	</update>
+	<!-- 资产信息修改 -->
+	<update id="updateAssInfo" parameterType="java.util.Map">
+		UPDATE OCRM_F_CI_PER_ASSET_INFO t SET
+		t.LAST_CHG_SYS =#{lastChgSys,jdbcType=VARCHAR},
+		t.LAST_CHG_USR =#{lastChgUsr,jdbcType=VARCHAR},
+		t.LAST_CHG_DT=TO_DATE(#{lastChgDt,jdbcType=DATE}, 'yyyy-MM-dd')
+
+
+		<if test="assetName != null and assetName != ''">
+			,t.ASSET_NAME =#{assetName,jdbcType=VARCHAR}
+		</if>
+		<if test="assetUnit != null and assetUnit != ''">
+			,t.ASSET_UNIT =#{assetUnit,jdbcType=VARCHAR}
+		</if>
+		<if test="assetNum != null and assetNum != ''">
+			,t.ASSET_NUM =#{assetNum,jdbcType=VARCHAR}
+		</if>
+		<if test="assetEval != null and assetEval != ''">
+			,t.ASSET_EVAL =#{assetEval,jdbcType=VARCHAR}
+		</if>
+		<if test="evalDate != null and evalDate != ''">
+			,t.EVAL_DATE =#{evalDate,jdbcType=VARCHAR}
+		</if>
+		<if test="assetDesc != null and assetDesc != ''">
+			,t.ASSET_DESC =#{assetDesc,jdbcType=VARCHAR}
+		</if>
+		<if test="assetPurDate != null and assetPurDate != ''">
+			,t.ASSET_PUR_DATE =#{assetPurDate,jdbcType=VARCHAR}
+		</if>
+		<if test="assetPurPrice != null and assetPurPrice != ''">
+			,t.ASSET_PUR_PRICE =#{assetPurPrice,jdbcType=VARCHAR}
+		</if>
+		<if test="mortgageStat != null and mortgageStat != ''">
+			,t.MORTGAGE_STAT =#{mortgageStat,jdbcType=VARCHAR}
+		</if>
+		<if test="remarks != null and remarks != ''">
+			,t.REMARKS =#{remarks,jdbcType=VARCHAR}
+		</if>
+
+		WHERE t.CUST_ID = #{custId,jdbcType=VARCHAR}
+	</update>
+	<!-- 负债信息修改 -->
+	<update id="updateLiabiInfo" parameterType="java.util.Map">
+		UPDATE OCRM_F_CI_PER_LIAB_INFO t SET
+		t.LAST_CHG_SYS =#{lastChgSys,jdbcType=VARCHAR},
+		t.LAST_CHG_USR =#{lastChgUsr,jdbcType=VARCHAR},
+		t.LAST_CHG_DT=TO_DATE(#{lastChgDt,jdbcType=DATE}, 'yyyy-MM-dd')
+
+
+		<if test="liabType != null and liabType != ''">
+			,t.LIAB_TYPE =#{liabType,jdbcType=VARCHAR}
+		</if>
+		<if test="liabDesc != null and liabDesc != ''">
+			,t.LIAB_DESC =#{liabDesc,jdbcType=VARCHAR}
+		</if>
+		<if test="creditor != null and creditor != ''">
+			,t.CREDITOR =#{creditor,jdbcType=VARCHAR}
+		</if>
+		<if test="liabCurrCd != null and liabCurrCd != ''">
+			,t.LIAB_CURR_CD =#{liabCurrCd,jdbcType=VARCHAR}
+		</if>
+		<if test="liabAmt != null and liabAmt != ''">
+			,t.LIAB_AMT =#{liabAmt,jdbcType=VARCHAR}
+		</if>
+		<if test="liabStartDate != null and liabStartDate != ''">
+			,t.LIAB_START_DATE =#{liabStartDate,jdbcType=VARCHAR}
+		</if>
+		<if test="liabEndDate != null and liabEndDate != ''">
+			,t.LIAB_END_DATE =#{liabEndDate,jdbcType=VARCHAR}
+		</if>
+		<if test="credCrdNum != null and credCrdNum != ''">
+			,t.CRED_CRD_NUM =#{credCrdNum,jdbcType=VARCHAR}
+		</if>
+		<if test="loanGuarBal != null and loanGuarBal != ''">
+			,t.LOAN_GUAR_BAL =#{loanGuarBal,jdbcType=VARCHAR}
+		</if>
+		<if test="remarks != null and remarks != ''">
+			,t.REMARKS =#{remarks,jdbcType=VARCHAR}
+		</if>
+
+		WHERE t.CUST_ID = #{custId,jdbcType=VARCHAR}
+	</update>
+	<!-- 保险信息修改 -->
+	<update id="updateInsurInfo" parameterType="java.util.Map">
+		UPDATE OCRM_F_CI_PER_INSUR_INFO t SET
+		t.LAST_CHG_SYS =#{lastChgSys,jdbcType=VARCHAR},
+		t.LAST_CHG_USR =#{lastChgUsr,jdbcType=VARCHAR},
+		t.LAST_CHG_DT=TO_DATE(#{lastChgDt,jdbcType=DATE}, 'yyyy-MM-dd')
+
+
+		<if test="insurNo != null and insurNo != ''">
+			,t.INSUR_NO =#{insurNo,jdbcType=VARCHAR}
+		</if>
+		<if test="insurName != null and insurName != ''">
+			,t.INSUR_NAME =#{insurName,jdbcType=VARCHAR}
+		</if>
+		<if test="insurCom != null and insurCom != ''">
+			,t.INSUR_COM =#{insurCom,jdbcType=VARCHAR}
+		</if>
+		<if test="insurType != null and insurType != ''">
+			,t.INSUR_TYPE =#{insurType,jdbcType=VARCHAR}
+		</if>
+		<if test="insured != null and insured != ''">
+			,t.INSURED =#{insured,jdbcType=VARCHAR}
+		</if>
+		<if test="bfcyMan != null and bfcyMan != ''">
+			,t.BFCY_MAN =#{bfcyMan,jdbcType=VARCHAR}
+		</if>
+		<if test="insurTar != null and insurTar != ''">
+			,t.INSUR_TAR =#{insurTar,jdbcType=VARCHAR}
+		</if>
+		<if test="insurVal != null and insurVal != ''">
+			,t.INSUR_VAL =#{insurVal,jdbcType=VARCHAR}
+		</if>
+		<if test="insurFee != null and insurFee != ''">
+			,t.INSUR_FEE =#{insurFee,jdbcType=VARCHAR}
+		</if>
+		<if test="insurTotAmt != null and insurTotAmt != ''">
+			,t.INSUR_TOT_AMT =#{insurTotAmt,jdbcType=VARCHAR}
+		</if>
+
+		<if test="insurStartDate != null and insurStartDate != ''">
+			,t.INSUR_START_DATE =#{insurStartDate,jdbcType=VARCHAR}
+		</if>
+		<if test="insurEndDate != null and insurEndDate != ''">
+			,t.INSUR_END_DATE =#{insurEndDate,jdbcType=VARCHAR}
+		</if>
+		<if test="insurAmt != null and insurAmt != ''">
+			,t.INSUR_AMT =#{insurAmt,jdbcType=VARCHAR}
+		</if>
+
+		<if test="mortgageStat != null and mortgageStat != ''">
+			,t.MORTGAGE_STAT =#{mortgageStat,jdbcType=VARCHAR}
+		</if>
+		<if test="remarks != null and remarks != ''">
+			,t.REMARKS =#{remarks,jdbcType=VARCHAR}
+		</if>
+		WHERE t.CUST_ID = #{custId,jdbcType=VARCHAR}
+	</update>
+	<!-- 纳税信息修改 -->
+	<update id="updatePayInfo" parameterType="java.util.Map">
+		UPDATE OCRM_F_CI_PER_TAX_INFO t SET
+		t.LAST_CHG_SYS =#{lastChgSys,jdbcType=VARCHAR},
+		t.LAST_CHG_USR =#{lastChgUsr,jdbcType=VARCHAR},
+		t.LAST_CHG_DT=TO_DATE(#{lastChgDt,jdbcType=DATE}, 'yyyy-MM-dd')
+
+
+		<if test="regSeqNo != null and regSeqNo != ''">
+			,t.REG_SEQ_NO =#{regSeqNo,jdbcType=VARCHAR}
+		</if>
+		<if test="taxNo != null and taxNo != ''">
+			,t.TAX_NO =#{taxNo,jdbcType=VARCHAR}
+		</if>
+		<if test="surYear != null and surYear != ''">
+			,t.SUR_YEAR =#{surYear,jdbcType=VARCHAR}
+		</if>
+		<if test="taxes != null and taxes != ''">
+			,t.TAXES =#{taxes,jdbcType=VARCHAR}
+		</if>
+		<if test="taxAmt != null and taxAmt != ''">
+			,t.TAX_AMT =#{taxAmt,jdbcType=VARCHAR}
+		</if>
+		<if test="taxPayAmt != null and taxPayAmt != ''">
+			,t.TAX_PAY_AMT =#{taxPayAmt,jdbcType=VARCHAR}
+		</if>
+		<if test="taxDate != null and taxDate != ''">
+			,t.TAX_DATE =#{taxDate,jdbcType=VARCHAR}
+		</if>
+		<if test="normalFlg != null and normalFlg != ''">
+			,t.NORMAL_FLG =#{normalFlg,jdbcType=VARCHAR}
+		</if>
+		<if test="remarks != null and remarks != ''">
+			,t.REMARKS =#{remarks,jdbcType=VARCHAR}
+		</if>
+
+
+		WHERE t.CUST_ID = #{custId,jdbcType=VARCHAR}
+	</update>
+	<!-- 经营信息修改 -->
+	<update id="updateOperInfo" parameterType="java.util.Map">
+		UPDATE OCRM_F_CI_PER_MANAGE_INFO t SET
+		t.LAST_CHG_SYS =#{lastChgSys,jdbcType=VARCHAR},
+		t.LAST_CHG_USR =#{lastChgUsr,jdbcType=VARCHAR},
+		t.LAST_CHG_DT=TO_DATE(#{lastChgDt,jdbcType=DATE}, 'yyyy-MM-dd')
+
+
+		<if test="busiName != null and busiName != ''">
+			,t.BUSI_NAME =#{busiName,jdbcType=VARCHAR}
+		</if>
+		<if test="busiCustId != null and busiCustId != ''">
+			,t.BUSI_CUST_ID =#{busiCustId,jdbcType=VARCHAR}
+		</if>
+		<if test="principal != null and principal != ''">
+			,t.PRINCIPAL =#{principal,jdbcType=VARCHAR}
+		</if>
+		<if test="prinTelNo != null and prinTelNo != ''">
+			,t.PRIN_TEL_NO =#{prinTelNo,jdbcType=VARCHAR}
+		</if>
+		<if test="comType != null and comType != ''">
+			,t.COM_TYPE =#{comType,jdbcType=VARCHAR}
+		</if>
+		<if test="comScale != null and comScale != ''">
+			,t.COM_SCALE =#{comScale,jdbcType=VARCHAR}
+		</if>
+		<if test="comVal != null and comVal != ''">
+			,t.COM_VAL =#{comVal,jdbcType=VARCHAR}
+		</if>
+		<if test="regCurrCd != null and regCurrCd != ''">
+			,t.REG_CURR_CD =#{regCurrCd,jdbcType=VARCHAR}
+		</if>
+		<if test="regAmt != null and regAmt != ''">
+			,t.REG_AMT =#{regAmt,jdbcType=VARCHAR}
+		</if>
+		<if test="partnerNum != null and partnerNum != ''">
+			,t.PARTNER_NUM =#{partnerNum,jdbcType=VARCHAR}
+		</if>
+		<if test="empNum != null and empNum != ''">
+			,t.EMP_NUM =#{empNum,jdbcType=VARCHAR}
+		</if>
+		<if test="openDate != null and openDate != ''">
+			,t.OPEN_DATE =#{openDate,jdbcType=VARCHAR}
+		</if>
+		<if test="mainRange != null and mainRange != ''">
+			,t.MAIN_RANGE =#{mainRange,jdbcType=VARCHAR}
+		</if>
+		<if test="partRange != null and partRange != ''">
+			,t.PART_RANGE =#{partRange,jdbcType=VARCHAR}
+		</if>
+		<if test="unitAddr != null and unitAddr != ''">
+			,t.UNIT_ADDR =#{unitAddr,jdbcType=VARCHAR}
+		</if>
+		<if test="contName != null and contName != ''">
+			,t.CONT_NAME =#{contName,jdbcType=VARCHAR}
+		</if>
+		<if test="contTelNo != null and contTelNo != ''">
+			,t.CONT_TEL_NO =#{contTelNo,jdbcType=VARCHAR}
+		</if>
+		<if test="custPosi != null and custPosi != ''">
+			,t.CUST_POSI =#{custPosi,jdbcType=VARCHAR}
+		</if>
+		<if test="custStockPert != null and custStockPert != ''">
+			,t.CUST_STOCK_PERT =#{custStockPert,jdbcType=VARCHAR}
+		</if>
+		<if test="remarks != null and remarks != ''">
+			,t.REMARKS =#{remarks,jdbcType=VARCHAR}
+		</if>
+		WHERE t.CUST_ID = #{custId,jdbcType=VARCHAR}
+	</update>
+	<!-- 农户信息修改 -->
+	<update id="updateFarmerInfo" parameterType="java.util.Map">
+		UPDATE OCRM_F_CI_PER_FARMER_PROD t SET
+		t.LAST_CHG_SYS =#{lastChgSys,jdbcType=VARCHAR},
+		t.LAST_CHG_USR =#{lastChgUsr,jdbcType=VARCHAR},
+		t.LAST_CHG_DT=TO_DATE(#{lastChgDt,jdbcType=DATE}, 'yyyy-MM-dd')
+
+
+		<if test="regSeqNo != null and regSeqNo != ''">
+			,t.REG_SEQ_NO =#{regSeqNo,jdbcType=VARCHAR}
+		</if>
+		<if test="surYear != null and surYear != ''">
+			,t.SUR_YEAR =#{surYear,jdbcType=VARCHAR}
+		</if>
+		<if test="prodBusiType != null and prodBusiType != ''">
+			,t.PROD_BUSI_TYPE =#{prodBusiType,jdbcType=VARCHAR}
+		</if>
+		<if test="prodBusiName != null and prodBusiName != ''">
+			,t.PROD_BUSI_NAME =#{prodBusiName,jdbcType=VARCHAR}
+		</if>
+		<if test="units != null and units != ''">
+			,t.UNITS =#{units,jdbcType=VARCHAR}
+		</if>
+		<if test="num != null and num != ''">
+			,t.NUM =#{num,jdbcType=VARCHAR}
+		</if>
+		<if test="incomeY != null and incomeY != ''">
+			,t.INCOME_Y =#{incomeY,jdbcType=VARCHAR}
+		</if>
+		<if test="remarks != null and remarks != ''">
+			,t.REMARKS =#{remarks,jdbcType=VARCHAR}
+		</if>
+		WHERE t.CUST_ID = #{custId,jdbcType=VARCHAR}
+	</update>
+	<select id="getNextId" resultType="String">
+		select acrm.id_info.NEXTVAL from dual
+	</select>
+</mapper>

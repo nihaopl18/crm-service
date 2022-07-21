@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.cust.person.repository.mapper.AcrmFagGkZjywMapper">
+    <sql id="Base_Column_List">
+	    ID,CUST_ID,ETL_DATE,TYPE,COUNT,AMOUNT,INCOME,CUST_TYPE,CCY_CD,CORP_ORG_CODE
+    </sql>
+    
+    <select id="queryZjywByCustId" parameterType="java.util.Map"  resultType="java.util.HashMap">
+		    
+		  select 
+		       t.CUST_ID,
+		       t.DATA_DATE,
+		       t.TYPE,
+		       t.COUNT,
+		       t.AMOUNT,
+		       t.INCOME,
+		       t.CUST_TYPE,
+		       t.CCY_CD,
+		       t.CORP_ORG_CODE
+		  from ACRM_F_AG_GK_ZJYW t
+		  where 1=1
+		  <if  test="custId != null and custId != ''">
+	       		and t.CUST_ID =#{custId,jdbcType=VARCHAR} 
+		  </if>
+	</select>
+	
+</mapper>

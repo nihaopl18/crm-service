@@ -1,0 +1,284 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.uimp.distribution.repository.mapper.PmaFComDepLoansInfoMapper">
+
+	<sql id="whereSql">
+		<where>
+			<if test="condition.id != null and condition.id != ''">
+				AND pa.id = #{condition.id,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.billNo != null and condition.billNo != ''">
+				AND pa.bill_no = #{condition.billNo,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.contractNo != null and condition.contractNo != ''">
+				AND pa.contract_no like concat(concat('%',#{condition.contractNo,jdbcType=VARCHAR}),'%')
+			</if>
+			<if test="condition.custId != null and condition.custId != ''">
+				AND pa.cust_id = #{condition.custId,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.custName != null and condition.custName != ''">
+				AND pa.cust_name like concat(concat('%',#{condition.custName,jdbcType=VARCHAR}),'%')
+			</if>
+			<if test="condition.openDateStart != null and condition.openDateStart != ''">
+				<![CDATA[
+	                AND TO_DATE(pa.open_date, 'yyyy-MM-dd hh24:mi:ss') >= TO_DATE(#{condition.openDateStart,jdbcType=VARCHAR}, 'yyyy-MM-dd')
+	            ]]>
+			</if>
+			<if test="condition.openDateEnd != null and condition.openDateEnd != ''">
+				<![CDATA[
+	                AND TO_DATE(pa.open_date, 'yyyy-MM-dd hh24:mi:ss') <= TO_DATE(#{condition.openDateEnd,jdbcType=VARCHAR}, 'yyyy-MM-dd')
+	            ]]>
+			</if>
+			<if test="condition.orgId != null and condition.orgId != ''">
+				AND pa.org_id = #{condition.orgId,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.dstrSts != null and condition.dstrSts != ''">
+				AND pa.dstr_sts = #{condition.dstrSts,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.applySts != null and condition.applySts != ''">
+				AND pa.apply_sts = #{condition.applySts,jdbcType=VARCHAR}
+			</if>
+
+			<if test="condition.operUserId != null and condition.operUserId != ''">
+				AND pp.oper_user_id = #{condition.operUserId,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.operTimeStart != null and condition.operTimeStart != ''">
+				<![CDATA[
+	                AND TO_DATE(pp.oper_time, 'yyyy-MM-dd hh24:mi:ss') >= TO_DATE(#{condition.operTimeStart,jdbcType=VARCHAR}, 'yyyy-MM-dd')
+	            ]]>
+			</if>
+			<if test="condition.operTimeEnd != null and condition.operTimeEnd != ''">
+				<![CDATA[
+	                AND TO_DATE(pp.oper_time, 'yyyy-MM-dd hh24:mi:ss') <= TO_DATE(#{condition.operTimeEnd,jdbcType=VARCHAR}, 'yyyy-MM-dd')
+	            ]]>
+			</if>
+			<if  test="condition.sql != null and condition.sql  != ''">
+				:{condition.sql}
+			</if>
+
+            <if test="condition.rateNotNull != null and condition.rateNotNull != ''">
+                AND pd.distr_rate is not null
+            </if>
+
+            <if test="dataAuth != null">
+                ${dataAuth}
+            </if>
+		</where>
+	</sql>
+
+	<select id="queryList" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+		select pa.id		 ,
+		pa.bill_no    ,
+		pa.contract_no,
+		pa.cust_id    ,
+		pa.cust_name  ,
+		pa.open_date  ,
+		pa.due_date   ,
+		pa.cancel_date,
+		pa.l_amt      ,
+		pa.l_bal      ,
+		pa.loan_type  ,
+		pa.l_period   ,
+		pa.cla_five   ,
+		pa.org_id     ,
+		pa.org_name   ,
+		pa.dstr_sts   ,
+        pa.apply_sts  ,
+		pa.creator    ,
+		pa.create_date,
+		pa.create_org ,
+		pa.updater_id ,
+		pa.update_date,
+		pa.update_org from PMA_F_COM_DEP_LOANS_INFO pa
+		<include refid="whereSql"/>
+		order by pa.CREATE_DATE desc
+	</select>
+
+
+	<delete id="delPmaFComDepLoansInfo" parameterType="cn.com.yusys.yusp.uimp.distribution.domain.PmaFComDepLoansInfo" >
+		delete from PMA_F_COM_DEP_LOANS_INFO t where  t.id = #{id}
+	</delete>
+
+	<select id="queryLoansHis" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+		select pa.bill_no,
+               pa.apply_sts  ,
+			   pd.period_id,
+			   pa.contract_no,
+			   pa.cust_id,
+			   pa.cust_name,
+               pa.org_id,
+               pa.org_name,
+               pa.open_date,
+			   pd.manager_id,
+               pd.manager_name,
+			   pp.oper_time,
+			   pp.effect_date,
+			   pp.expirate_date,
+			   pd.distr_rate,
+			   pp.oper_user_id,
+               pp.oper_user_name
+		  from PMA_F_COM_DEP_LOANS_INFO pa
+		  left join PMA_F_COM_DEP_LOANS_PERIOD pp
+			on pa.id = pp.loans_info_id
+		  left join PMA_F_COM_DEP_LOANS_REL pd
+			on pp.id = pd.period_id
+
+		<include refid="whereSql"/>
+
+	</select>
+
+    <select id="oneToManyQueryList" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+        SELECT
+        loan.id		 ,
+        loan.bill_no    ,
+        loan.contract_no,
+        loan.cust_id    ,
+        loan.cust_name  ,
+        loan.open_date  ,
+        loan.due_date   ,
+        loan.cancel_date,
+        loan.l_amt      ,
+        loan.l_bal      ,
+        loan.loan_type  ,
+        loan.l_period   ,
+        loan.cla_five   ,
+        loan.org_id     ,
+        loan.org_name   ,
+        loan.dstr_sts   ,
+        period.loans_info_id,
+        period.oper_time    ,
+        period.effect_date  ,
+        period.expirate_date,
+        period.data_src     ,
+        period.oper_user_id ,
+        period.oper_org_id  ,
+        rel.period_id  ,
+        rel.allot_type ,
+        rel.manager_id ,
+        rel.manager_name ,
+        rel.distr_rate ,
+        rel.start_amt  ,
+        rel.end_amt
+        from PMA_F_COM_DEP_LOANS_INFO loan
+        left join PMA_F_COM_DEP_LOANS_PERIOD period on period.loans_info_id = loan.ID
+        left join PMA_F_COM_DEP_LOANS_REL rel on rel.period_id = period.ID
+        <if test="condition.id != null and condition.id != ''">
+            AND t.id = #{condition.id,jdbcType=VARCHAR}
+        </if>
+        <if test="condition.billNo != null and condition.billNo != ''">
+            AND t.bill_no = #{condition.billNo,jdbcType=VARCHAR}
+        </if>
+        <if test="condition.contractNo != null and condition.contractNo != ''">
+            AND t.contract_no like concat(concat('%',#{condition.contractNo,jdbcType=VARCHAR}),'%')
+        </if>
+        <if test="condition.custNumber != null and condition.custNumber != ''">
+            AND t.cust_id = #{condition.custNumber,jdbcType=VARCHAR}
+        </if>
+        <if test="condition.custName != null and condition.custName != ''">
+            AND t.cust_name like concat(concat('%',#{condition.custName,jdbcType=VARCHAR}),'%')
+        </if>
+        <if test="condition.openDate != null and condition.openDate != ''">
+            <![CDATA[
+	                AND TO_DATE(t.open_date, 'yyyy-MM-dd hh24:mi:ss') >= TO_DATE(#{condition.openDate,jdbcType=VARCHAR}, 'yyyy-MM-dd')
+	            ]]>
+        </if>
+        <if test="condition.dueDate != null and condition.dueDate != ''">
+            <![CDATA[
+	                AND TO_DATE(t.due_date, 'yyyy-MM-dd hh24:mi:ss') <= TO_DATE(#{condition.dueDate,jdbcType=VARCHAR}, 'yyyy-MM-dd')
+	            ]]>
+        </if>
+        <if test="condition.cancelDate != null and condition.cancelDate != ''">
+            AND t.close_date = #{condition.cancelDate,jdbcType=VARCHAR}
+        </if>
+        <if test="condition.lAmt != null and condition.lAmt != ''">
+            AND t.l_amt = #{condition.lAmt,jdbcType=VARCHAR}
+        </if>
+        <if test="condition.lBal != null and condition.lBal != ''">
+            AND t.l_bal = #{condition.lBal,jdbcType=VARCHAR}
+        </if>
+        <if test="condition.loanType != null and condition.loanType != ''">
+            AND t.loan_type = #{condition.loanType,jdbcType=VARCHAR}
+        </if>
+        <if test="condition.lPeriod != null and condition.lPeriod != ''">
+            AND t.l_period = #{condition.lPeriod,jdbcType=VARCHAR}
+        </if>
+        <if test="condition.claFive != null and condition.claFive != ''">
+            AND t.cla_five = #{condition.claFive,jdbcType=VARCHAR}
+        </if>
+        <if test="condition.orgId != null and condition.orgId != ''">
+            AND t.org_id = #{condition.orgId,jdbcType=VARCHAR}
+        </if>
+        <if test="condition.orgName != null and condition.orgName != ''">
+            AND t.org_name = #{condition.orgName,jdbcType=VARCHAR}
+        </if>
+        <if test="condition.dstrSts != null and condition.dstrSts != ''">
+            AND t.dstr_sts = #{condition.dstrSts,jdbcType=VARCHAR}
+        </if>
+        <if test="condition.managerId != null and condition.managerId != ''">
+            AND distribute.manager_id = #{condition.managerId,jdbcType=VARCHAR}
+        </if>
+    </select>
+
+    <select id="oneToManyQueryCount" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.lang.Long">
+        select
+        count(1)
+        from PMA_F_COM_DEP_LOANS_INFO loan
+        left join PMA_F_COM_DEP_LOANS_PERIOD period on period.loans_info_id = loan.ID
+        left join PMA_F_COM_DEP_LOANS_REL rel on rel.period_id = period.ID
+        <if test="condition.id != null and condition.id != ''">
+            AND t.id = #{condition.id,jdbcType=VARCHAR}
+        </if>
+        <if test="condition.billNo != null and condition.billNo != ''">
+            AND t.bill_no = #{condition.billNo,jdbcType=VARCHAR}
+        </if>
+        <if test="condition.contractNo != null and condition.contractNo != ''">
+            AND t.contract_no like concat(concat('%',#{condition.contractNo,jdbcType=VARCHAR}),'%')
+        </if>
+        <if test="condition.custNumber != null and condition.custNumber != ''">
+            AND t.cust_id = #{condition.custNumber,jdbcType=VARCHAR}
+        </if>
+        <if test="condition.custName != null and condition.custName != ''">
+            AND t.cust_name like concat(concat('%',#{condition.custName,jdbcType=VARCHAR}),'%')
+        </if>
+        <if test="condition.openDate != null and condition.openDate != ''">
+            <![CDATA[
+	                AND TO_DATE(t.open_date, 'yyyy-MM-dd hh24:mi:ss') >= TO_DATE(#{condition.openDate,jdbcType=VARCHAR}, 'yyyy-MM-dd')
+	            ]]>
+        </if>
+        <if test="condition.dueDate != null and condition.dueDate != ''">
+            <![CDATA[
+	                AND TO_DATE(t.due_date, 'yyyy-MM-dd hh24:mi:ss') <= TO_DATE(#{condition.dueDate,jdbcType=VARCHAR}, 'yyyy-MM-dd')
+	            ]]>
+        </if>
+        <if test="condition.cancelDate != null and condition.cancelDate != ''">
+            AND t.close_date = #{condition.cancelDate,jdbcType=VARCHAR}
+        </if>
+        <if test="condition.lAmt != null and condition.lAmt != ''">
+            AND t.l_amt = #{condition.lAmt,jdbcType=VARCHAR}
+        </if>
+        <if test="condition.lBal != null and condition.lBal != ''">
+            AND t.l_bal = #{condition.lBal,jdbcType=VARCHAR}
+        </if>
+        <if test="condition.loanType != null and condition.loanType != ''">
+            AND t.loan_type = #{condition.loanType,jdbcType=VARCHAR}
+        </if>
+        <if test="condition.lPeriod != null and condition.lPeriod != ''">
+            AND t.l_period = #{condition.lPeriod,jdbcType=VARCHAR}
+        </if>
+        <if test="condition.claFive != null and condition.claFive != ''">
+            AND t.cla_five = #{condition.claFive,jdbcType=VARCHAR}
+        </if>
+        <if test="condition.orgId != null and condition.orgId != ''">
+            AND t.org_id = #{condition.orgId,jdbcType=VARCHAR}
+        </if>
+        <if test="condition.orgName != null and condition.orgName != ''">
+            AND t.org_name = #{condition.orgName,jdbcType=VARCHAR}
+        </if>
+        <if test="condition.dstrSts != null and condition.dstrSts != ''">
+            AND t.dstr_sts = #{condition.dstrSts,jdbcType=VARCHAR}
+        </if>
+        <if test="condition.managerId != null and condition.managerId != ''">
+            AND distribute.manager_id = #{condition.managerId,jdbcType=VARCHAR}
+        </if>
+    </select>
+</mapper>

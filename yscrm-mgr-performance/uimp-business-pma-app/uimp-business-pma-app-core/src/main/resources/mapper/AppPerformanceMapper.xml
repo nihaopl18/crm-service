@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.uimp.business.pma.app.repository.mapper.AppPerformanceMapper">
+	<select id="queryEtlDate" resultType="java.util.HashMap">
+		SELECT 
+			etl_type,
+			case when etl_state = '1' then 
+		    		TO_CHAR(TRUNC(to_date(etl_date, 'YYYYMMDD')-1), 'YYYYMMDD') 
+		    	when etl_state = '0' then 
+		    		TO_CHAR(TRUNC(to_date(etl_date, 'YYYYMMDD')-2), 'YYYYMMDD') 
+			end AS etl_date,
+			etl_state 
+		FROM PMA_F_ETL_DATE 
+		WHERE etl_type = 'PMA' 
+			<!-- 
+			           针对后台跑批时，ETL_DATE字段值获取不到情况，ETL_STATE查询条件删除，
+			           在前台获取数据日期时:ETL_STATE='0'表示正在跑批，ETL_DATE取当前值前一天; ETL_STATE='1'表示跑批成功，ETL_DATE取当前值
+            -->
+			<!-- AND etl_state = '1' -->
+	</select>
+	
+	<select id="queryIndexId" resultType="java.util.HashMap">
+		SELECT DISTINCT a.id,
+				a.index_id||'_'||a.bal_type||'_'||a.evl_obj_type||'_'||a.apply_type as key,
+				a.evl_obj_id,a.bal_type,a.evl_obj_type,a.apply_type,a.index_type,
+				<!-- b.index_name as value -->
+				b.index_name||'_'||balItem.LOOKUP_ITEM_NAME||'_'||objItem.LOOKUP_ITEM_NAME||'_'||appItem.LOOKUP_ITEM_NAME as value
+		FROM pma_f_display_index a
+			left join pma_f_base_index_info b on b.index_id =a.index_id
+			left join ADMIN_SM_LOOKUP_ITEM balItem on balItem.LOOKUP_CODE = 'YE_TYPE' and balItem.LOOKUP_ITEM_CODE = a.BAL_TYPE
+		    left join ADMIN_SM_LOOKUP_ITEM objItem on objItem.LOOKUP_CODE = 'OBJ' and objItem.LOOKUP_ITEM_CODE = a.evl_obj_type
+		    left join ADMIN_SM_LOOKUP_ITEM appItem on appItem.LOOKUP_CODE = 'INDEX_APPLY_TYPE' and appItem.LOOKUP_ITEM_CODE = a.apply_type
+		where a.index_type = #{indexType}
+		<if test="type != null and type !=''">
+			<if test='type == "1"'>		<!-- 员工维度 -->
+				and a.evl_obj_type = '01'
+			</if>
+			<if test='type == "2"'>		<!-- 机构维度 -->
+				and a.evl_obj_type in ('02', '03')
+			</if>	
+		</if>
+	</select>
+	
+	<select id="queryAllIndex" resultType="java.util.HashMap">
+		SELECT distinct a.index_id,a.evl_obj_id,a.bal_type,a.evl_obj_type,a.apply_type,a.index_type,b.index_name 
+		FROM pma_f_display_index a
+		left join pma_f_base_index_info b on b.index_id =a.index_id
+	</select>
+	
+	<select id="queryIndexMonth" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+		select a.id,a.index_id,a.evl_obj_id,
+		round(nvl(a.task_val, 0) / #{condition.unit,jdbcType=INTEGER}, 2) as task_val,
+		round(nvl(a.complete_val, 0) / #{condition.unit,jdbcType=INTEGER}, 2) as complete_val,
+		a.etl_date,
+		ROUND(to_number(complete_val) / to_number(task_val) * 100, 2) || '%' as PLAN_PER
+		from pma_f_display_month_res a
+		<where>
+		  <if test="condition.indexId != null and condition.indexId  != ''">
+	         AND a.index_id||'_'||a.bal_type||'_'||a.evl_obj_type||'_'||a.apply_type = #{condition.indexId,jdbcType=VARCHAR}
+		  </if>
+		  <if test="condition.evlObjId != null and condition.evlObjId  != ''">
+	         AND a.evl_obj_id = #{condition.evlObjId,jdbcType=VARCHAR}
+		  </if>
+		  AND a.etl_date in (select dat from 
+	 (select level as serio,to_char(add_months(sysdate, +1-level), 'yyyymm') as dat
+        from dual
+        connect by level &lt;= 6))
+		</where>
+		order by a.etl_date asc
+	</select>
+	
+	     <!-- app查询sql -->
+    <select id="queryScheme" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+    	select
+	    	ID,
+			ETL_DATE,
+			SCHEME_ID,
+			SCHEME_NAME,
+			EVL_OBJ_ID,
+			INDEX_ID_STR,
+			INDEX_NAME,
+			INDEX_VALUE,
+			IMP_VALUE,
+			WEIGHT,
+			SCORE,
+			ROUND(to_number(INDEX_VALUE) / to_number(IMP_VALUE) * 100, 2) || '%' as PLAN_PER
+    	from PMA_F_HOME_MY_INDEX mi
+    	where 1=1
+    		and mi.SCHEME_ID = #{condition.schemeId,jdbcType=VARCHAR}
+    		and mi.EVL_OBJ_ID = #{condition.evlObjId,jdbcType=VARCHAR}
+    		and mi.ETL_DATE = #{condition.etlDate,jdbcType=VARCHAR}
+		order by to_number(weight)  desc
+    </select>
+    	<!-- 考核方案查询sql -->
+    <select id="selectDrawSchemeInfo"  resultType="cn.com.yusys.yusp.uimp.business.pma.scheme.schememain.domain.PmaFScheme">
+		select SCHEME_ID,
+		SCHEME_NAME,
+		REMARK,
+		ORG_LEVEL,
+		MENU_ID,
+		ORG_ID,
+		START_DATE,
+		END_DATE,
+		CHECK_SCENE,
+		EVL_OBJ_TYPE,
+		SPE_RULE_TYPE,
+		STAT_FLAG
+		FROM PMA_F_SCHEME
+		where SCHEME_ID =  #{schemeId,jdbcType=VARCHAR}
+    </select>
+</mapper>

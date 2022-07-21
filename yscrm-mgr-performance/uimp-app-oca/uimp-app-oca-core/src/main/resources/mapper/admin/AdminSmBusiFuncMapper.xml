@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper
+	namespace="cn.com.yusys.yusp.admin.repository.mapper.AdminSmBusiFuncMapper">
+
+
+	<!--删除模块时查询是否有关联业务功能 -->
+	<select id="getFuncByModId" parameterType="String" resultType="java.lang.Integer">
+		select count(*) from admin_sm_busi_func where mod_id= #{modId}
+	</select>
+
+    <!--删除业务功能前查询业务功能是否关联控制点-->
+    <select id="getContrByFuncId" parameterType="String" resultType="java.lang.Integer">
+        select count(*) from admin_sm_res_contr  where func_id = #{funcId}
+    </select>
+
+    <!--删除业务功能前查询业务功能是否被菜单引用 -->
+    <select id="getMenuByFuncId" parameterType="String" resultType="java.lang.Integer">
+        select count(*) as relationId from admin_sm_menu  where func_id = #{funcId}
+    </select>
+
+</mapper>

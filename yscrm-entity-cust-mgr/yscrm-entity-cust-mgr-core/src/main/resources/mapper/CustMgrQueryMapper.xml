@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.custmgr.repository.mapper.CustMgrQueryMapper">
+	<!-- 客户经理列表查询 -->
+	<select id="queryCustMgrList" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+		resultType="java.util.Map">
+		SELECT  USR.LOGIN_CODE AS USER_CODE,
+				USR.USER_NAME,
+				ORG.ORG_NAME,
+				ORG.ORG_ID,
+				ATTR.BUSI_TYPE,
+				T4.DPT_NAME,
+				(nvl(D.CUST_NUM,0)) AS MGR_CUST_NUM,
+				TO_CHAR(MGR.BIRTHDAY,'yyyy-MM-dd') as BIRTHDAY,
+				TO_CHAR(MGR.ENTRANTS_DATE,'yyyy-MM-dd') as ENTRANTS_DATE,
+				MGR.EDUCATION
+				FROM ACRM_F_CM_CUST_MGR_INFO MGR
+				INNER JOIN ADMIN_SM_USER USR ON MGR.CUST_MANAGER_ID = USR.USER_CODE
+				LEFT JOIN ADMIN_SM_ORG ORG ON USR.ORG_ID = ORG.ORG_ID
+				LEFT JOIN ADMIN_SM_DPT T4 ON USR.DPT_ID = T4.DPT_ID
+				LEFT JOIN ADMIN_SM_USER_ATTR ATTR ON USR.LOGIN_CODE = ATTR.LOGIN_CODE
+				left join ADMIN_SM_USER_ROLE_REL sr on USR.user_id = sr.user_id 
+        		left join ADMIN_SM_ROLE ad on ad.role_id = sr.role_id
+				LEFT JOIN (SELECT TARGET_ID,SUM(CUST_NUM) AS CUST_NUM FROM ACRM_A_CM_BUSI_SUM GROUP BY TARGET_ID) D
+			    ON MGR.CUST_MANAGER_ID=D.TARGET_ID
+		<where>
+			ad.ROLE_CODE = '15'
+			<if  test="condition.userCode != null and condition.userCode != ''">
+	       		AND USR.LOGIN_CODE = #{condition.userCode,jdbcType=VARCHAR}
+		    </if>
+		    <if  test="condition.userName != null and condition.userName != ''">
+	       		AND USR.USER_NAME like CONCAT(CONCAT('%', #{condition.userName,jdbcType=VARCHAR}),'%')
+		    </if>
+		    <!-- <if  test="condition.orgId != null and condition.orgId != ''">
+	       		${condition.orgIds}
+		    </if> -->
+		    <!-- ${condition.uncertain} -->
+		    ${dataAuth}
+		</where>
+	</select>
+	
+	<select id="checkCustMgrApply" resultType="java.util.Map">
+		SELECT T.STATE,T.ID,T.CUST_MANAGER_ID,T.CUST_MANAGER_NAME,T.QUIT_REASON,TO_CHAR(T.QUIT_DATE,'yyyy-MM-dd') QUIT_DATE FROM OCRM_F_CM_CUST_MGR_QUIT_APPLY T
+		<where>
+			<if  test="mgrId != null and mgrId != ''">
+	       		AND T.CUST_MANAGER_ID = #{mgrId,jdbcType=VARCHAR}
+		    </if>
+		    AND T.STATE!='2'
+		</where>
+	</select>
+	
+	
+	<select id="queryOrgId" resultType="java.util.Map">
+		SELECT ORG_ID FROM ADMIN_SM_ORG START WITH ORG_ID=#{orgId,jdbcType=VARCHAR} CONNECT BY PRIOR ORG_ID=UP_ORG_ID
+	</select>
+	<select id="queryUserBusiType" parameterType="string" resultType="String">
+		SELECT ATTR.BUSI_TYPE FROM ADMIN_SM_USER USR LEFT JOIN
+		ADMIN_SM_USER_ATTR ATTR ON USR.LOGIN_CODE = ATTR.LOGIN_CODE
+		<where>
+			<if test="loginCode != null and loginCode != ''">
+				AND USR.LOGIN_CODE = #{loginCode,jdbcType=VARCHAR}
+			</if>
+		</where>
+	</select>
+	
+</mapper>

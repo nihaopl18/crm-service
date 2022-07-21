@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.cm.cust.repository.mapper.CimpCViewPubRelationMapper">
+
+    <select id="getListByModel" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+		resultType="java.util.HashMap">
+	select * from ACIM_F_CI_CUSTOMER a left join CIMP_C_VIEW_PUB_RELATION p on p.RELATION_ID = a.CUST_ID WHERE CUST_ID IN(
+       select RELATION_ID from CIMP_C_VIEW_PUB_RELATION where 
+		RELATION_NO = #{condition.relationId, jdbcType=VARCHAR}) AND RELATION_NO = #{condition.relationId, jdbcType=VARCHAR}
+    UNION 
+    select * from ACIM_F_CI_CUSTOMER a left join CIMP_C_VIEW_PUB_RELATION p on p.RELATION_NO = a.CUST_ID WHERE CUST_ID IN(
+    select RELATION_NO from CIMP_C_VIEW_PUB_RELATION where 
+		RELATION_ID = #{condition.relationId, jdbcType=VARCHAR}) AND RELATION_ID = #{condition.relationId, jdbcType=VARCHAR}
+	</select>
+    
+</mapper>

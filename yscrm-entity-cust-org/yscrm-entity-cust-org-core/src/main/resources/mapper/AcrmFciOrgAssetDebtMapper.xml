@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.cust.org.repository.mapper.AcrmFciOrgAssetDebtMapper">
+    <!-- 财务报表列表查询 -->
+	<select id="queryList" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+		resultType="java.util.Map">
+		SELECT DISTINCT T.FIN_REPORT_ID,T.FIN_STAT_TYPE_CD,T.FIN_STAT_CD,TO_CHAR(T.DATA_DT,'yyyy-MM-dd') AS DATA_DT FROM ACRM_F_CI_ORG_ASSET_DEBT T
+		<where>
+			<if  test="condition.custId != null and condition.custId != ''">
+	       		AND T.CUST_ID = #{condition.custId,jdbcType=VARCHAR}
+		    </if>
+		    <if  test="condition.finStatTypeCd != null and condition.finStatTypeCd != ''">
+	       		AND T.FIN_STAT_TYPE_CD = #{condition.finStatTypeCd,jdbcType=VARCHAR}
+		    </if>
+		    <if  test="condition.finStatCd != null and condition.finStatCd != ''">
+	       		AND T.FIN_STAT_CD = #{condition.finStatCd,jdbcType=VARCHAR}
+		    </if>
+		</where>
+		ORDER BY TO_CHAR(T.DATA_DT, 'yyyy-MM-dd') DESC
+	</select>
+</mapper>

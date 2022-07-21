@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.uimp.claim.repository.mapper.PmaFCdpInfoMapper">
+    <resultMap id="BaseResultMap" type="cn.com.yusys.yusp.uimp.claim.domain.PmaFCdpInfo">
+    	<id column="ID" jdbcType="VARCHAR" property="id" />
+		<result column="CDP_ID" jdbcType="VARCHAR" property="cdpId" />
+		<result column="ETL_DATE" jdbcType="VARCHAR" property="etlDate" />
+		<result column="ACCT_NO" jdbcType="VARCHAR" property="acctNo" />
+		<result column="DIP_ACCT_NO" jdbcType="VARCHAR" property="dipAcctNo" />
+		<result column="CARD_NO" jdbcType="VARCHAR" property="cardNo" />
+		<result column="SUB_ACCT_NO" jdbcType="VARCHAR" property="subAcctNo" />
+		<result column="INACCT_NO" jdbcType="VARCHAR" property="inacctNo" />
+		<result column="CUST_NO" jdbcType="VARCHAR" property="custNo" />
+		<result column="CUST_NAME" jdbcType="VARCHAR" property="custName" />
+		<result column="ORG_ID" jdbcType="VARCHAR" property="orgId" />
+		<result column="ORG_NAME" jdbcType="VARCHAR" property="orgName" />
+		<result column="LN_FLAG" jdbcType="VARCHAR" property="lnFlag" />
+		<result column="BUSS_NO" jdbcType="VARCHAR" property="bussNo" />
+		<result column="PROD_NO" jdbcType="VARCHAR" property="prodNo" />
+		<result column="PROD_NAME" jdbcType="VARCHAR" property="prodName" />
+		<result column="SUB_NO" jdbcType="VARCHAR" property="subNo" />
+		<result column="SUB_NAME" jdbcType="VARCHAR" property="subName" />
+		<result column="D_PERIOD" jdbcType="VARCHAR" property="dPeriod" />
+		<result column="D_TYPE" jdbcType="VARCHAR" property="dType" />
+		<result column="CU_NO" jdbcType="VARCHAR" property="cuNo" />
+		<result column="BASE_RATE" jdbcType="NUMERIC" property="baseRate" />
+		<result column="STR_RATE" jdbcType="NUMERIC" property="strRate" />
+		<result column="ACCT_ATTR" jdbcType="VARCHAR" property="acctAttr" />
+		<result column="ACCT_STATE" jdbcType="VARCHAR" property="acctState" />
+		<result column="PERIOD" jdbcType="VARCHAR" property="period" />
+		<result column="OPEN_DATE" jdbcType="VARCHAR" property="openDate" />
+		<result column="VALUE_DATE" jdbcType="VARCHAR" property="valueDate" />
+		<result column="DUE_DATE" jdbcType="VARCHAR" property="dueDate" />
+		<result column="CLOS_DATE" jdbcType="VARCHAR" property="closDate" />
+		<result column="MAN_A" jdbcType="VARCHAR" property="manA" />
+		<result column="MAN_B" jdbcType="VARCHAR" property="manB" />
+		<result column="MAN_C" jdbcType="VARCHAR" property="manC" />
+		<result column="MAN_D" jdbcType="VARCHAR" property="manD" />
+		<result column="MAN_E" jdbcType="VARCHAR" property="manE" />
+		<result column="BAL" jdbcType="NUMERIC" property="bal" />
+		<result column="M_AVG" jdbcType="NUMERIC" property="mAvg" />
+		<result column="Q_AVG" jdbcType="NUMERIC" property="qAvg" />
+		<result column="Y_AVG" jdbcType="NUMERIC" property="yAvg" />
+		<result column="D_EXP" jdbcType="NUMERIC" property="dExp" />
+		<result column="D_INT" jdbcType="NUMERIC" property="dInt" />
+		<result column="D_FTP" jdbcType="NUMERIC" property="dFtp" />
+		<result column="M_EXP" jdbcType="NUMERIC" property="mExp" />
+		<result column="M_INT" jdbcType="NUMERIC" property="mInt" />
+		<result column="M_FTP" jdbcType="NUMERIC" property="mFtp" />
+		<result column="Q_EXP" jdbcType="NUMERIC" property="qExp" />
+		<result column="Q_INT" jdbcType="NUMERIC" property="qInt" />
+		<result column="Q_FTP" jdbcType="NUMERIC" property="qFtp" />
+		<result column="Y_EXP" jdbcType="NUMERIC" property="yExp" />
+		<result column="Y_INT" jdbcType="NUMERIC" property="yInt" />
+		<result column="Y_FTP" jdbcType="NUMERIC" property="yFtp" />
+		<result column="THRESHOLD" jdbcType="NUMERIC" property="threshold" />
+    </resultMap>
+    <sql id="Base_Column_List">
+	    CDP_ID,ETL_DATE,ACCT_NO,DIP_ACCT_NO,CARD_NO,SUB_ACCT_NO,INACCT_NO,CUST_NO,CUST_NAME,ORG_ID,ORG_NAME,LN_FLAG,BUSS_NO,PROD_NO,PROD_NAME,SUB_NO,SUB_NAME,D_PERIOD,D_TYPE,CU_NO,BASE_RATE,STR_RATE,ACCT_ATTR,ACCT_STATE,PERIOD,OPEN_DATE,VALUE_DATE,DUE_DATE,CLOS_DATE,MAN_A,MAN_B,MAN_C,MAN_D,MAN_E,BAL,M_AVG,Q_AVG,Y_AVG,D_EXP,D_INT,D_FTP,M_EXP,M_INT,M_FTP,Q_EXP,Q_INT,Q_FTP,Y_EXP,Y_INT,Y_FTP,THRESHOLD,ID
+    </sql>
+            <!-- 查询接口 -->
+    <select id="querylist" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+    	SELECT CUST_NO,CUST_NAME,ACCT_NO,SUB_ACCT_NO,ACCT_ATTR,ORG_ID,ORG_NAME,OPEN_DATE,BAL ,CDP_ID  FROM PMA_F_CDP_INFO T
+    	<where>
+			<if test="condition.subAcctNo != null and condition.subAcctNo != ''">
+			AND T.SUB_ACCT_NO = #{condition.subAcctNo}
+			</if>
+			<if test="condition.custNo != null and condition.custNo != ''">
+			AND T.CUST_NO = #{condition.custNo}
+			</if>
+			<if test="condition.custName != null and condition.custName != ''">
+			AND T.CUST_NAME LIKE concat(concat('%',#{condition.custName,jdbcType=VARCHAR}),'%')
+			</if>
+			AND T.etl_date = (SELECT TO_CHAR(TO_DATE(ETL_DATE,'YYYYMMDD')-1,'YYYYMMDD') FROM PMA_F_ETL_DATE WHERE ETL_TYPE = 'PMA')
+		</where>
+    </select>
+    <insert id="executeInsertSql" parameterType="java.lang.String">
+    	:{sqlStr}
+    </insert>
+        <select id="executeQuerySql" parameterType="java.lang.String" resultType="java.util.Map">
+    	:{sqlStr}
+    </select>
+</mapper>

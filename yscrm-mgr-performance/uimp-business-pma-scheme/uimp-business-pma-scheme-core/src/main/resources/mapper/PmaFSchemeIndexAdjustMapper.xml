@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.uimp.business.pma.baseIndexUpdate.repository.mapper.PmaFSchemeIndexAdjustMapper">
+    	<!-- 查询基础指标原始值 -->
+	<select id="queryAdjustId" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="String">
+ 			select ID from  PMA_F_SCHEME_INDEX_ADJUST  
+		<where>
+			<!-- id -->
+			<if test="condition.indexId != null and condition.indexId  != ''">
+	      		AND INDEX_ID = #{condition.indexId}
+		    </if>
+		    			<if test="condition.applyType != null and condition.applyType  != ''">
+	      		AND APPLY_TYPE = #{condition.applyType}
+		    </if>
+		    			<if test="condition.balType != null and condition.balType  != ''">
+	      		AND BAL_TYPE = #{condition.balType}
+		    </if>
+		    			<if test="condition.evlObjId != null and condition.evlObjId  != ''">
+	      		AND EVL_OBJ_ID = #{condition.evlObjId}
+		    </if>
+		    			<if test="condition.evlObjType != null and condition.evlObjType  != ''">
+	      		AND EVL_OBJ_TYPE = #{condition.evlObjType}
+		    </if>		
+		    			<if test="condition.etlDate != null and condition.etlDate  != ''">
+	      		AND ETL_DATE = #{condition.etlDate}
+		    </if>
+		    
+	    </where>
+	</select>
+</mapper>

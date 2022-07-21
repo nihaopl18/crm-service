@@ -1,0 +1,432 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.custpub.repository.mapper.OcrmFciTrusteeshipMapper">
+	<!-- 客户托管历史查询 -->
+	<select id="trustList" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+		SELECT T.APPLY_ID,T.CORP_ORG_CODE,T.MGR_ID,T.MGR_NAME,COUNT(R.CUST_ID) AS CUST_NUM,
+        T.TRUST_MGR_ID,T.TRUST_MGR_NAME,T.SET_USER_ID,T.SET_USER_NAME,
+        T.TRUST_REASON,T.TRUST_STAT,TO_CHAR(T.DEAD_LINE,'YYYY-MM-DD') AS DEAD_LINE,B.ORG_ID,B.ORG_NAME,
+        TO_CHAR(T.SET_DATE,'YYYY-MM-DD') AS SET_DATE FROM OCRM_F_CI_TRUSTEESHIP_APPLY T
+        LEFT JOIN OCRM_F_CI_TRUSTEESHIP_LIST R ON T.APPLY_ID = R.APPLY_NO
+        LEFT JOIN ACRM_F_CI_CUST_ALL Y ON Y.CUST_ID = R.CUST_ID
+		INNER JOIN  OCRM_F_CI_ADMIT_BELONG B  ON B.CUST_ID = R.CUST_ID
+		<if test="condition.mgrType !='' and condition.mgrType != null">
+			AND B.MGR_TYPE = #{condition.mgrType,jdbcType=VARCHAR}
+		</if>
+WHERE 1=1
+		<if test="condition.trustStat !='' and condition.trustStat != null">
+        		AND T.TRUST_STAT = #{condition.trustStat,jdbcType=VARCHAR}
+        	</if>
+        	<if test="condition.custId !='' and condition.custId != null">
+				AND R.CUST_ID =#{condition.custId,jdbcType=VARCHAR}
+        	</if>
+        	<if test="condition.custName !='' and condition.custName != null">
+				AND R.CUST_NAME LIKE CONCAT('%',CONCAT(#{condition.custName,jdbcType=VARCHAR},'%'))
+        	</if>
+        	<if test="condition.custType !='' and condition.custType != null">
+				AND Y.CUST_TYPE = #{condition.custType,jdbcType=VARCHAR}
+        	</if>
+			<if test="condition.applyId != null">
+				AND T.APPLY_ID = #{condition.applyId,jdbcType=DECIMAL}
+			</if>
+             AND T.TRUST_STAT='04'
+        GROUP BY T.APPLY_ID,T.CORP_ORG_CODE,T.DEAD_LINE,T.MGR_ID,T.MGR_NAME,T.TRUST_MGR_ID,
+        T.TRUST_MGR_NAME,T.SET_USER_ID,T.SET_USER_NAME,T.SET_DATE,T.TRUST_REASON,T.TRUST_STAT,B.ORG_ID,B.ORG_NAME
+        ORDER BY T.APPLY_ID DESC
+	</select>
+
+	<select id="detailelist" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+        select
+        t.APPLY_ID,
+        listagg(t.CUST_NAME,',')within group (order by t.CUST_NAME) custName,
+        listagg(t.CUST_ID,',')within group (order by t.CUST_ID) custId,
+        t.CORP_ORG_CODE,t.MGR_ID,t.MGR_NAME,t.CUST_NUM,
+        t.TRUST_MGR_ID,t.TRUST_MGR_NAME,t.SET_USER_ID,t.SET_USER_NAME,
+        t.TRUST_REASON,t.TRUST_STAT,t.DEAD_LINE,t.ORG_ID,t.ORG_NAME,
+        t.SET_DATE
+        from(
+        SELECT T.APPLY_ID,T.CORP_ORG_CODE,T.MGR_ID,T.MGR_NAME,COUNT(R.CUST_ID) AS CUST_NUM,
+		T.TRUST_MGR_ID,T.TRUST_MGR_NAME,T.SET_USER_ID,T.SET_USER_NAME,R.CUST_ID,R.CUST_NAME,
+		T.TRUST_REASON,T.TRUST_STAT,TO_CHAR(T.DEAD_LINE,'YYYY-MM-DD') AS DEAD_LINE,ORG.ORG_ID,ORG.ORG_NAME,
+		TO_CHAR(T.SET_DATE,'YYYY-MM-DD') AS SET_DATE
+        FROM OCRM_F_CI_TRUSTEESHIP_APPLY T
+		LEFT JOIN OCRM_F_CI_TRUSTEESHIP_LIST R ON T.APPLY_ID = R.APPLY_NO
+		LEFT JOIN ACRM_F_CI_CUST_ALL Y ON Y.CUST_ID = R.CUST_ID
+		INNER JOIN  OCRM_F_CI_ADMIT_BELONG B  ON B.CUST_ID = R.CUST_ID
+        INNER JOIN ADMIN_SM_USER SS ON T.TRUST_MGR_ID=SS.LOGIN_CODE
+        INNER JOIN ADMIN_SM_ORG ORG ON SS.ORG_ID=ORG.ORG_ID
+		WHERE 1=1
+		AND T.APPLY_ID=#{applyId,jdbcType=VARCHAR}
+        <if test="mgrType !='' and mgrType != null">
+            AND B.MGR_TYPE = #{mgrType,jdbcType=VARCHAR}
+        </if>
+		GROUP BY T.APPLY_ID,T.CORP_ORG_CODE,T.DEAD_LINE,T.MGR_ID,T.MGR_NAME,T.TRUST_MGR_ID,R.CUST_ID,R.CUST_NAME,
+		T.TRUST_MGR_NAME,T.SET_USER_ID,T.SET_USER_NAME,T.SET_DATE,T.TRUST_REASON,T.TRUST_STAT,ORG.ORG_ID,ORG.ORG_NAME
+		)t  where rownum &lt;= 150 GROUP BY
+        t.APPLY_ID,
+        t.CORP_ORG_CODE,t.MGR_ID,t.MGR_NAME,t.CUST_NUM,
+        t.TRUST_MGR_ID,t.TRUST_MGR_NAME,t.SET_USER_ID,t.SET_USER_NAME,
+        t.TRUST_REASON,t.TRUST_STAT,t.DEAD_LINE,t.ORG_ID,t.ORG_NAME,
+        t.SET_DATE
+	</select>
+	<!-- 客户清单新增 -->
+	<insert id="trustInsertCust" parameterType="cn.com.yusys.yscrm.custpub.domain.OcrmFciTrusteeshipList">
+		INSERT INTO OCRM_F_CI_TRUSTEESHIP_LIST VALUES(
+		#{listId,jdbcType=DECIMAL},
+		#{applyId,jdbcType=DECIMAL},
+		#{custId,jdbcType=VARCHAR},
+		#{custName,jdbcType=VARCHAR})
+	</insert>
+	<select id="selectById" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+		SELECT R.CUST_ID custid,R.APPLY_NO applyno FROM OCRM_F_CI_TRUSTEESHIP_LIST R INNER JOIN
+		OCRM_F_CI_TRUSTEESHIP_APPLY T
+		 ON R.APPLY_NO = T.APPLY_ID
+		AND R.APPLY_NO ${strr}
+		and T.TRUST_STAT !='04'
+	</select>
+	<delete id="deleteByCustById" parameterType="java.util.HashMap">
+		delete from OCRM_F_CI_TRUSTEESHIP_LIST where 1=1
+		<if test="custid !='' and custid != null">
+			AND cust_id=#{custid, jdbcType=VARCHAR}
+		</if>
+		and APPLY_NO ${strt}
+	</delete>
+	<delete id="deleteByCustByIdl" parameterType="java.util.HashMap">
+		delete from OCRM_F_CI_TRUSTEESHIP_LIST where 1=1
+		<if test="custid !='' and custid != null">
+			AND cust_id=#{custid, jdbcType=VARCHAR}
+		</if>
+		and APPLY_NO=#{applyno,jdbcType=DECIMAL}
+	</delete>
+	<select id="selectCount" parameterType="java.util.HashMap" resultType="int">
+		SELECT COUNT(R.CUST_ID) FROM OCRM_F_CI_TRUSTEESHIP_LIST R
+		INNER JOIN
+		OCRM_F_CI_TRUSTEESHIP_APPLY T
+		 ON R.APPLY_NO = T.APPLY_ID
+		 and T.TRUST_STAT !='04'
+		WHERE 1=1
+		AND R.APPLY_NO=#{applyno,jdbcType=DECIMAL}
+
+	</select>
+	<select id="selectName"  parameterType="java.util.HashMap" resultType="java.util.HashMap">
+		 SELECT CUST_ID custid,CUST_NAME custname FROM  ACRM_F_CI_PER_ADMIT_INFO  where  ${custIds}
+	</select>
+	<!-- 客户托管清单列表 -->
+	<select id="custTrustList" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+	 	SELECT T.*,R.CUST_TYPE,R.CUST_STATUS,Y.GRADE_LEVEL,Y.SERVICE_LEVEL,R.CERT_TYPE,R.CERT_NO 
+	 	FROM OCRM_F_CI_TRUSTEESHIP_LIST T 
+        LEFT JOIN ACRM_F_CI_CUST_ALL R ON R.CUST_ID = T.CUST_ID
+        LEFT JOIN OCRM_F_CG_CPN_GRADE Y ON Y.CUST_ID = T.CUST_ID
+        WHERE T.APPLY_NO = #{condition.applyNo,jdbcType=INTEGER}
+	</select>
+	<!-- 客户托管回收 -->
+	<update id="trustRecover" parameterType="BigDecimal">
+		UPDATE OCRM_F_CI_TRUSTEESHIP_APPLY SET TRUST_STAT = '3' WHERE APPLY_ID = #{applyId,jdbcType=INTEGER} AND TRUST_STAT <![CDATA[!= ]]> '3'
+	</update>
+	<!-- 获取托管授权记录编号 -->
+	<select id="getId" resultType="BigDecimal">
+		SELECT decode(MAX(APPLY_ID + 1),null,1,MAX(APPLY_ID + 1)) FROM OCRM_F_CI_TRUSTEESHIP_APPLY
+	</select>
+	<!-- 获取托管清单记录编号 -->
+	<select id="getListId" resultType="BigDecimal">
+		SELECT decode(MAX(LIST_ID + 1),null,1,MAX(LIST_ID + 1)) FROM OCRM_F_CI_TRUSTEESHIP_LIST
+	</select>
+	<!-- 获取托管客户编号 -->
+	<select id="getTrustCustId" parameterType="String" resultType="int">
+		SELECT count(1) FROM OCRM_F_CI_TRUSTEESHIP_LIST WHERE CUST_ID = #{custId,jdbcType=VARCHAR}
+	</select>
+	<!-- 判断客户是否已经托管 -->
+	<select id="checkIs" parameterType="java.util.HashMap" resultType="int">
+		select count(*) from OCRM_F_CI_TRUSTEESHIP_APPLY A LEFT JOIN OCRM_F_CI_TRUSTEESHIP_LIST L ON A.APPLY_ID = L.APPLY_NO 
+		WHERE A.MGR_ID = #{userId, jdbcType=VARCHAR} AND L.CUST_ID = #{custId, jdbcType=VARCHAR} AND A.TRUST_STAT = '1' 
+	</select>
+	<!-- 所辖客户查询 -->
+	<select id="myCustListByModel" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"  resultType="java.util.HashMap">
+	SELECT DISTINCT  P.CUST_ID,
+		case when P.CUST_NAME is null then P.ENGLISH_NAME else P.CUST_NAME end CUST_NAME,
+		P.ECIF_CUST_ID,B.ORG_TYPE,TT.INSTANCE_ID instanceid,
+		B.ORG_ID,B.ORG_NAME,B.MGR_TYPE,B.MGR_ID,B.MGR_NAME,TT.APPLY_ID,
+		TT.TRUST_STAT,TT.TRUST_MGR_NAME trustmgrname,
+		TT.TRUST_MGR_ID trustmgrid,TT.TRUST_REASON,
+		TO_CHAR(TT.DEAD_LINE,'yyyy-mm-dd') deadLine
+				  FROM ACRM_F_CI_PER_ADMIT_INFO P
+	INNER JOIN  OCRM_F_CI_ADMIT_BELONG B
+    ON B.CUST_ID = P.CUST_ID
+		LEFT JOIN
+		(SELECT Y.INSTANCE_ID,
+		Y.APPLY_ID,
+		Y.TRUST_STAT,
+		Y.TRUST_MGR_NAME,
+		T.CUST_ID,
+		Y.TRUST_MGR_ID,
+		Y.TRUST_REASON,
+		Y.DEAD_LINE,
+		to_char(Y.SET_DATE, 'yyyy-mm-dd') SET_DATE,
+		row_number() over(partition by T.CUST_ID order by Y.SET_DATE desc) as rn
+		FROM OCRM_F_CI_TRUSTEESHIP_APPLY Y
+		INNER JOIN OCRM_F_CI_TRUSTEESHIP_LIST T
+		ON Y.APPLY_ID = T.APPLY_NO
+		AND Y.DEAD_LINE >=to_date(#{condition.datadate, jdbcType=VARCHAR},'yyyy-mm-dd')
+		) TT
+		ON B.CUST_ID = TT.CUST_ID
+		AND TT.rn = 1
+    WHERE 1 = 1
+        <if test="condition.mgrId != null and condition.mgrId !=''">
+            AND B.MGR_ID= #{condition.mgrId, jdbcType=VARCHAR}
+        </if>
+		<if test="condition.mgrType != null and condition.mgrType !=''">
+			AND B.MGR_TYPE= #{condition.mgrType, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.figureCode != null and condition.figureCode !=''">
+			AND P.APLIT_JOINT   LIKE CONCAT(CONCAT(CONCAT(CONCAT('%','|'), #{condition.figureCode, jdbcType=VARCHAR}),'|'),'%')
+		</if>
+		<if test="condition.characterCode != null and condition.characterCode !=''">
+			AND P.APLIT_JOINT  LIKE CONCAT(CONCAT('%', #{condition.characterCode, jdbcType=VARCHAR}),'%')
+		</if>
+		ORDER BY TT.TRUST_STAT
+	</select>
+	<select id="selectcust" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+		SELECT P.CUST_ID custid,TT.APPLY_ID applyid FROM ACRM_F_CI_PER_ADMIT_INFO P
+		INNER JOIN  OCRM_F_CI_ADMIT_BELONG B
+		ON B.CUST_ID = P.CUST_ID
+		LEFT JOIN
+		(SELECT max(SET_DATE) setDate,
+		Y.APPLY_ID,T.CUST_ID
+		FROM OCRM_F_CI_TRUSTEESHIP_APPLY Y
+		INNER JOIN OCRM_F_CI_TRUSTEESHIP_LIST T
+		ON Y.APPLY_ID = T.APPLY_NO
+		AND Y.DEAD_LINE >=to_date(#{datadate, jdbcType=VARCHAR},'yyyy-mm-dd')
+		group by Y.APPLY_ID,T.CUST_ID) TT
+		ON B.CUST_ID = TT.CUST_ID
+		WHERE 1 = 1
+		<if test="mgrId != null and mgrId !=''">
+			AND B.MGR_ID= #{mgrId, jdbcType=VARCHAR}
+		</if>
+		<if test="mgrType != null and mgrType !=''">
+			AND B.MGR_TYPE= #{mgrType, jdbcType=VARCHAR}
+		</if>
+		<if test="figureCode != null and figureCode !=''">
+			AND P.APLIT_JOINT   LIKE CONCAT(CONCAT(CONCAT(CONCAT('%','|'), #{figureCode, jdbcType=VARCHAR}),'|'),'%')
+		</if>
+		<if test="characterCode != null and characterCode !=''">
+			AND P.APLIT_JOINT  LIKE CONCAT(CONCAT('%', #{characterCode, jdbcType=VARCHAR}),'%')
+		</if>
+	</select>
+	<select id="selectcustmap" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+		SELECT P.CUST_ID custid FROM ACRM_F_CI_PER_ADMIT_INFO P
+		INNER JOIN  OCRM_F_CI_ADMIT_BELONG B
+		ON B.CUST_ID = P.CUST_ID
+		WHERE 1 = 1
+		<if test="mgrId != null and mgrId !=''">
+			AND B.MGR_ID= #{mgrId, jdbcType=VARCHAR}
+		</if>
+		<if test="mgrType != null and mgrType !=''">
+			AND B.MGR_TYPE= #{mgrType, jdbcType=VARCHAR}
+		</if>
+		<if test="figureCode != null and figureCode !=''">
+			AND P.APLIT_JOINT   LIKE CONCAT(CONCAT(CONCAT(CONCAT('%','|'), #{figureCode, jdbcType=VARCHAR}),'|'),'%')
+		</if>
+		<if test="characterCode != null and characterCode !=''">
+			AND P.APLIT_JOINT  LIKE CONCAT(CONCAT('%', #{characterCode, jdbcType=VARCHAR}),'%')
+		</if>
+		AND B.CUST_ID NOT IN (
+		SELECT
+		T.CUST_ID
+		FROM OCRM_F_CI_TRUSTEESHIP_APPLY Y
+		INNER JOIN OCRM_F_CI_TRUSTEESHIP_LIST T
+		ON Y.APPLY_ID = T.APPLY_NO
+		AND Y.DEAD_LINE >=to_date(#{datadate, jdbcType=VARCHAR},'yyyy-mm-dd')
+		<if test="mgrId != null and mgrId !=''">
+			AND Y.MGR_ID= #{mgrId, jdbcType=VARCHAR}
+		</if>
+		)
+	</select>
+	<select id="selectcustma" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+		SELECT
+		Y.APPLY_ID applyid,
+		T.CUST_ID custid,max(SET_DATE) setDate
+		FROM OCRM_F_CI_TRUSTEESHIP_APPLY Y
+		INNER JOIN OCRM_F_CI_TRUSTEESHIP_LIST T
+		ON Y.APPLY_ID = T.APPLY_NO
+		AND Y.DEAD_LINE >=to_date(#{datadate, jdbcType=VARCHAR},'yyyy-mm-dd')
+		AND Y.TRUST_STAT=#{trustStat, jdbcType=VARCHAR}
+		<if test="mgrId != null and mgrId !=''">
+			AND Y.MGR_ID= #{mgrId, jdbcType=VARCHAR}
+		</if>
+		<if test="figureCode != null and figureCode !=''">
+			AND T.CUST_ID =#{figureCode, jdbcType=VARCHAR}
+		</if>
+		<if test="characterCode != null and characterCode !=''">
+			AND T.CUST_NAME  LIKE CONCAT(CONCAT('%', #{characterCode, jdbcType=VARCHAR}),'%')
+		</if>
+        GROUP BY Y.APPLY_ID,
+		T.CUST_ID
+	</select>
+	<select id="myCustListByModelM" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+		SELECT DISTINCT  P.CUST_ID,
+		case when P.CUST_NAME is null then P.ENGLISH_NAME else P.CUST_NAME end CUST_NAME,
+		P.ECIF_CUST_ID,B.ORG_TYPE,
+		B.ORG_ID,B.ORG_NAME,B.MGR_TYPE,B.MGR_ID,B.MGR_NAME
+		FROM ACRM_F_CI_PER_ADMIT_INFO P
+		INNER JOIN  OCRM_F_CI_ADMIT_BELONG B
+		ON B.CUST_ID = P.CUST_ID
+		WHERE 1 = 1
+		<if test="condition.mgrId != null and condition.mgrId !=''">
+			AND B.MGR_ID= #{condition.mgrId, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.mgrType != null and condition.mgrType !=''">
+			AND B.MGR_TYPE= #{condition.mgrType, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.figureCode != null and condition.figureCode !=''">
+			AND P.APLIT_JOINT   LIKE CONCAT(CONCAT(CONCAT(CONCAT('%','|'), #{condition.figureCode, jdbcType=VARCHAR}),'|'),'%')
+		</if>
+		<if test="condition.characterCode != null and condition.characterCode !=''">
+			AND P.APLIT_JOINT  LIKE CONCAT(CONCAT('%', #{condition.characterCode, jdbcType=VARCHAR}),'%')
+		</if>
+		AND P.CUST_ID NOT IN (
+		SELECT
+		T.CUST_ID
+		FROM OCRM_F_CI_TRUSTEESHIP_APPLY Y
+		INNER JOIN OCRM_F_CI_TRUSTEESHIP_LIST T
+		ON Y.APPLY_ID = T.APPLY_NO
+		AND Y.DEAD_LINE >=to_date(#{condition.datadate, jdbcType=VARCHAR},'yyyy-mm-dd')
+		<if test="condition.mgrId != null and condition.mgrId !=''">
+			AND Y.MGR_ID= #{condition.mgrId, jdbcType=VARCHAR}
+		</if>
+		)
+		ORDER BY P.CUST_ID
+	</select>
+	<select id="myCustListByModelMS" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+		SELECT Y.INSTANCE_ID instanceid,
+		Y.APPLY_ID,
+		Y.TRUST_STAT,
+		Y.TRUST_MGR_NAME trustmgrname,
+		T.CUST_ID,
+		T.CUST_NAME,
+		Y.TRUST_MGR_ID trustmgrid,
+		Y.TRUST_REASON,B.ORG_TYPE,
+		B.ORG_ID,B.ORG_NAME,B.MGR_TYPE,B.MGR_ID,B.MGR_NAME,
+		TO_CHAR(Y.DEAD_LINE,'yyyy-mm-dd') deadLine,
+		to_char(Y.SET_DATE, 'yyyy-mm-dd') SET_DATE
+		FROM OCRM_F_CI_TRUSTEESHIP_APPLY Y
+		INNER JOIN OCRM_F_CI_TRUSTEESHIP_LIST T
+		ON Y.APPLY_ID = T.APPLY_NO
+		AND Y.DEAD_LINE >=to_date(#{condition.datadate, jdbcType=VARCHAR},'yyyy-mm-dd')
+		AND Y.TRUST_STAT=#{condition.trustStat, jdbcType=VARCHAR}
+		<if test="condition.mgrId != null and condition.mgrId !=''">
+			AND Y.MGR_ID= #{condition.mgrId, jdbcType=VARCHAR}
+		</if>
+		INNER JOIN  OCRM_F_CI_ADMIT_BELONG B
+		ON T.CUST_ID = B.CUST_ID
+		<if test="condition.mgrType != null and condition.mgrType !=''">
+			AND B.MGR_TYPE= #{condition.mgrType, jdbcType=VARCHAR}
+		</if>
+	</select>
+	<!-- 获取托管中列表 -->
+	<select id="getTrustList" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+		SELECT DISTINCT A.*,(SELECT COUNT(*) FROM OCRM_F_CI_TRUSTEESHIP_LIST L WHERE A.APPLY_ID = L.APPLY_NO) AS CUST_NUM 
+		FROM OCRM_F_CI_TRUSTEESHIP_APPLY A 
+		LEFT JOIN OCRM_F_CI_TRUSTEESHIP_LIST L
+            ON A.APPLY_ID = L.APPLY_NO
+          <!-- LEFT JOIN ACRM_F_CI_CUST_ADMIT_ALL C -->
+          LEFT JOIN ACRM_F_CI_CUST_ALL C
+            ON L.CUST_ID = C.CUST_ID
+            WHERE A.MGR_ID = #{condition.userId, jdbcType=VARCHAR}
+		AND A.TRUST_STAT = '1' and C.IS_ADMIT_ENTER='1'
+		 <if test="condition.trustMgrId != null and condition.trustMgrId !=''">
+				  and A.TRUST_MGR_ID = #{condition.trustMgrId, jdbcType=VARCHAR}
+		</if>
+        <if test="condition.custStatus != null and condition.custStatus !=''">
+				  and C.CUST_STATUS = #{condition.custStatus, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.custType != null and condition.custType !=''">
+				  and C.CUST_TYPE = #{condition.custType, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.custId != null and condition.custId !=''">
+				  and C.CUST_ID LIKE CONCAT(CONCAT('%', #{condition.custId, jdbcType=VARCHAR}),'%')
+		</if>
+		<if test="condition.custName != null and condition.custName !=''">
+				  and C.CUST_NAME LIKE CONCAT(CONCAT('%', #{condition.custName, jdbcType=VARCHAR}),'%')
+		</if>
+		<if test="condition.certType != null and condition.certType !=''">
+				  and C.CERT_TYPE = #{condition.certType, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.certNo != null and condition.certNo !=''">
+				  and C.CERT_NO LIKE CONCAT(CONCAT('%', #{condition.certNo, jdbcType=VARCHAR}),'%')
+		</if>
+		ORDER BY A.SET_DATE DESC
+	</select>
+	<!-- 获取托管中的客户 -->
+	<select id="getTrustCust" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+		SELECT A.*,
+               L.LIST_ID,
+               L.CUST_ID,
+               L.CUST_NAME,
+               C.CERT_TYPE,
+               C.CERT_NO,
+               C.CUST_TYPE,
+               C.CUST_STATUS
+          FROM OCRM_F_CI_TRUSTEESHIP_APPLY A
+          LEFT JOIN OCRM_F_CI_TRUSTEESHIP_LIST L
+            ON A.APPLY_ID = L.APPLY_NO
+          <!-- LEFT JOIN ACRM_F_CI_CUST_ADMIT_ALL C -->
+          LEFT JOIN ACRM_F_CI_CUST_ALL C
+            ON L.CUST_ID = C.CUST_ID
+            WHERE C.IS_ADMIT_ENTER='1' and A.APPLY_ID =  #{condition.applyId, jdbcType=VARCHAR}
+         <if test="condition.custStatus != null and condition.custStatus !=''">
+				  and C.CUST_STATUS = #{condition.custStatus, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.custType != null and condition.custType !=''">
+				  and C.CUST_TYPE = #{condition.custType, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.custId != null and condition.custId !=''">
+				  and C.CUST_ID LIKE CONCAT(CONCAT('%', #{condition.custId, jdbcType=VARCHAR}),'%')
+		</if>
+		<if test="condition.custName != null and condition.custName !=''">
+				  and C.CUST_NAME LIKE CONCAT(CONCAT('%', #{condition.custName, jdbcType=VARCHAR}),'%')
+		</if>
+		<if test="condition.certType != null and condition.certType !=''">
+				  and C.CERT_TYPE = #{condition.certType, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.certNo != null and condition.certNo !=''">
+				  and C.CERT_NO LIKE CONCAT(CONCAT('%', #{condition.certNo, jdbcType=VARCHAR}),'%')
+		</if>
+		<if test="condition.belongBrch != null and condition.belongBrch !=''">
+				  and C.BELONG_BRCH = #{condition.belongBrch, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.belongMgr != null and condition.belongMgr !=''">
+				  and C.BELONG_MGR = #{condition.belongMgr, jdbcType=VARCHAR}
+		</if>
+	</select>
+
+	<select id="selectcheck" parameterType="java.util.HashMap" resultType="java.util.List">
+       SELECT T.APPLY_ID FROM  OCRM_F_CI_TRUSTEESHIP_APPLY T
+		LEFT JOIN OCRM_F_CI_TRUSTEESHIP_LIST R ON T.APPLY_ID = R.APPLY_NO
+		AND R.CUST_ID ${custIds}
+	</select>
+
+	<delete id="deleteapp" parameterType="java.util.HashMap">
+		delete from  OCRM_F_CI_TRUSTEESHIP_APPLY where APPLY_ID=#{applyno,jdbcType=DECIMAL}
+	</delete>
+	<delete id="deleteappp" parameterType="java.util.HashMap">
+		delete from OCRM_F_CI_TRUSTEESHIP_LIST where APPLY_NO=#{applyId,jdbcType=DECIMAL}
+	</delete>
+	<insert id="insertList" parameterType="java.util.List">
+		insert ALL
+		<foreach collection="list" item="item" index="index" separator="">
+			into OCRM_F_CI_TRUSTEESHIP_LIST (
+			LIST_ID,
+			APPLY_NO,
+			CUST_ID,
+			CUST_NAME
+			) VALUES
+			(
+			#{item.listId,jdbcType=VARCHAR},
+			#{item.applyNo,jdbcType=VARCHAR},
+			#{item.custId,jdbcType=VARCHAR},
+			#{item.custName,jdbcType=VARCHAR}
+			)
+		</foreach>
+		SELECT 1 FROM DUAL
+	</insert>
+</mapper>

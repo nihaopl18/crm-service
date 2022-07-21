@@ -1,0 +1,976 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.custmgr.repository.mapper.AcrmFcmCustmgrPerfMapper">
+    <!-- 列表查询 -->
+	<select id="querylist" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+		resultType="java.util.Map">
+		SELECT TO_CHAR(TO_DATE(T.DATA_DT, 'YYYY-MM-DD'),'YYYY-MM-DD') AS DATA_DT,
+		       T.BRCH_ID,
+		       T.BRCH_NAME,
+		       T.EMP_ID,
+		       T.EMP_NAME,
+		       T.TARGET_ID,
+		       T.TARGET_NAME,
+		       T.TARGET_VALUE,
+		       T.SDBS,
+		       T.CURR_CD,
+		       T.TARGET_TYPE_ID
+		  FROM ACRM_F_CM_CUSTMGR_PERF T 
+		  LEFT JOIN ADMIN_SM_ORG ORG ON T.BRCH_ID = ORG.ORG_ID
+		  LEFT JOIN ACRM_F_CM_CUST_MGR_INFO MGR ON MGR.CUST_MANAGER_ID = T.EMP_ID
+		  LEFT JOIN ADMIN_SM_USER USR ON MGR.CUST_MANAGER_ID = USR.LOGIN_CODE
+  		  LEFT JOIN ADMIN_SM_USER_ATTR ATTR ON USR.LOGIN_CODE = ATTR.LOGIN_CODE
+  		  ${condition.busiTypeAuth}
+		<where>
+			<if  test="condition.dataDt != null and condition.dataDt != ''">
+	       		AND to_char(to_date(T.DATA_DT,'YYYY-MM-DD'),'yyyy-MM-dd') = #{condition.dataDt,jdbcType=VARCHAR}
+		    </if>
+		    <if  test="condition.brchId != null and condition.brchId != ''">
+	       		AND T.BRCH_ID = #{condition.brchId,jdbcType=VARCHAR}
+		    </if>
+		    <if  test="condition.empId != null and condition.empId != ''">
+	       		AND T.EMP_ID = #{condition.empId,jdbcType=VARCHAR}
+		    </if>
+		    <if  test="condition.sdbs != null and condition.sdbs != ''">
+	       		AND T.SDBS = #{condition.sdbs,jdbcType=VARCHAR}
+		    </if>
+		    <if  test="condition.currCd != null and condition.currCd != ''">
+	       		AND T.CURR_CD = #{condition.currCd,jdbcType=VARCHAR}
+		    </if>
+		    <if  test="condition.targetTypeId != null and condition.targetTypeId != ''">
+	       		AND T.TARGET_TYPE_ID = #{condition.targetTypeId,jdbcType=VARCHAR}
+		    </if>
+		    ${dataAuth}
+		</where>
+	</select>
+	<select id="selectmgrId" parameterType="String" resultType="String" >
+		select role_code from ADMIN_SM_ROLE where role_id=#{selectRole,jdbcType=VARCHAR}
+	</select>
+
+	<select id="getmktTeamId" parameterType="String" resultType="String" >
+		select MKT_TEAM_ID from OCRM_F_CM_MKT_TEAM where TEAM_LEADER_ID=#{loginCode,jdbcType=VARCHAR} and rownum=1
+	</select>
+	<select id="selectcrmFYyTriumphVO" parameterType="java.util.Map" resultType="cn.com.yusys.yscrm.custmgr.domain.CrmFYyTriumphVO">
+	SELECT distinct TRIUMPH_ID,
+	TRIUMPH_NAME,
+	TRIUMPH_LEVEL,
+	TARGET_ID,
+	TARGET_NAME,
+	AMOUNT,TRIUMPH_YEAR,
+	TRIUMPH_LINE,TRIUMPH_LEVEL FROM OCRM_F_YY_TRIUMPH WHERE 1=1
+	<if  test="loginCode != null and loginCode != ''">
+		AND TARGET_ID = #{loginCode,jdbcType=VARCHAR}
+	</if>
+	<if  test="triumphYear != null and triumphYear != ''">
+			AND TRIUMPH_YEAR = #{triumphYear,jdbcType=VARCHAR}
+	</if>
+	AND TRIUMPH_LEVEL = #{triumphLevel,jdbcType=INTEGER}
+        <if  test="triumphLine != null and triumphLine != '' or triumphLine!=0">
+            AND TRIUMPH_LINE = #{triumphLine,jdbcType=INTEGER}
+        </if>
+	ORDER BY AMOUNT
+</select>
+	<select id="crmTriuVOList" parameterType="java.util.Map"  resultType="cn.com.yusys.yscrm.custmgr.domain.CrmTriuVO">
+		SELECT distinct
+		S.ORG_ID targetId,
+		S.ROLE_NAME targetName,
+		T.AMOUNT amount,
+		T.TRIUMPH_LINE triumphLine ,T.TRIUMPH_LEVEL triumphLevel FROM ADMIN_SM_ROLE S LEFT JOIN OCRM_F_YY_TRIUMPH T ON
+		T.TARGET_ID=S.ORG_ID
+		AND S.ROLE_NAME=T.TARGET_NAME
+		<if  test="triumphId != null and triumphId != ''">
+			AND T.TRIUMPH_ID = #{triumphId,jdbcType=VARCHAR}
+		</if>
+			AND T.TRIUMPH_LINE in ('1','2')
+		<if  test="triumphYear != null and triumphYear != ''">
+			AND T.TRIUMPH_YEAR = #{triumphYear,jdbcType=VARCHAR}
+		</if>
+		AND T.TRIUMPH_LEVEL = #{triumphLevelup,jdbcType=INTEGER}
+        AND T.TARGET_ID='500'
+        WHERE 1=1
+		AND S.ROLE_CODE in ('R020','R021')
+		order by T.AMOUNT
+	</select>
+	<select id="crmTriuVOListb" parameterType="java.util.Map"  resultType="cn.com.yusys.yscrm.custmgr.domain.CrmTriuVO">
+		SELECT S.ORG_ID targetId,
+		S.ORG_NAME targetName,
+		T.AMOUNT amount,
+		T.TRIUMPH_LINE triumphLine ,T.TRIUMPH_LEVEL triumphLevel
+		FROM ADMIN_SM_ORG S LEFT JOIN OCRM_F_YY_TRIUMPH T ON
+		T.TARGET_ID=S.ORG_ID
+		AND S.ORG_NAME=T.TARGET_NAME
+        <if  test="triumphLine != null and triumphLine != '' or triumphLine!=0">
+            AND T.TRIUMPH_LINE = #{triumphLine,jdbcType=INTEGER}
+        </if>
+		<if  test="triumphId != null and triumphId != ''">
+			AND T.TRIUMPH_ID = #{triumphId,jdbcType=VARCHAR}
+		</if>
+		<if  test="triumphYear != null and triumphYear != ''">
+			AND T.TRIUMPH_YEAR = #{triumphYear,jdbcType=VARCHAR}
+		</if>
+        AND T.TRIUMPH_LEVEL = #{triumphLevelup,jdbcType=INTEGER}
+        WHERE 1=1
+        AND S.ORG_LEVEL =#{triumphLevelup,jdbcType=INTEGER}
+		<if  test="loginCode != null and loginCode != ''">
+			AND S.UP_ORG_ID = #{loginCode,jdbcType=VARCHAR}
+		</if>
+		order by T.AMOUNT
+	</select>
+	<select id="crmTriuVOListt" parameterType="java.util.Map"  resultType="cn.com.yusys.yscrm.custmgr.domain.CrmTriuVO">
+     SELECT S.MKT_TEAM_ID targetId,
+          S.MKT_TEAM_NAME targetName,
+		T.AMOUNT amount,
+		T.TRIUMPH_LINE triumphLine,T.TRIUMPH_LEVEL triumphLevel
+		FROM OCRM_F_CM_MKT_TEAM S LEFT JOIN  OCRM_F_YY_TRIUMPH T ON
+		T.TARGET_ID=S.MKT_TEAM_ID
+		AND S.MKT_TEAM_NAME=T.TARGET_NAME
+        <if  test="triumphLine != null and triumphLine != '' or triumphLine!=0">
+            AND T.TRIUMPH_LINE = #{triumphLine,jdbcType=INTEGER}
+        </if>
+		<if  test="triumphId != null and triumphId != ''">
+			AND T.TRIUMPH_ID = #{triumphId,jdbcType=VARCHAR}
+		</if>
+		<if  test="triumphYear != null and triumphYear != ''">
+			AND T.TRIUMPH_YEAR = #{triumphYear,jdbcType=VARCHAR}
+		</if>
+        AND T.TRIUMPH_LEVEL = #{triumphLevelup,jdbcType=INTEGER}
+        WHERE 1=1
+			AND S.ORG_ID LIKE '${loginCode}%'
+		order by T.AMOUNT
+	</select>
+	<select id="crmTriuVOListC" parameterType="java.util.Map"  resultType="cn.com.yusys.yscrm.custmgr.domain.CrmTriuVO">
+		SELECT S.USER_ID targetId,S.USER_NAME targetName,
+		T.AMOUNT amount,
+		T.TRIUMPH_LINE triumphLine,T.TRIUMPH_LEVEL triumphLevel
+		FROM ADMIN_SM_USER S INNER JOIN ADMIN_SM_USER_ROLE_REL A ON S.USER_ID=A.USER_ID
+		INNER JOIN ADMIN_SM_ROLE SS ON SS.ROLE_ID=A.ROLE_ID
+		LEFT JOIN  OCRM_F_YY_TRIUMPH T ON
+		T.TARGET_ID=S.USER_ID
+		AND S.USER_NAME=T.TARGET_NAME
+        AND T.TRIUMPH_LEVEL = #{triumphLevelup,jdbcType=INTEGER}
+        <if  test="triumphLine != null and triumphLine != '' or triumphLine!=0">
+            AND T.TRIUMPH_LINE = #{triumphLine,jdbcType=INTEGER}
+        </if>
+		<if  test="triumphId != null and triumphId != ''">
+			AND T.TRIUMPH_ID = #{triumphId,jdbcType=VARCHAR}
+		</if>
+		<if  test="triumphYear != null and triumphYear != ''">
+			AND T.TRIUMPH_YEAR = #{triumphYear,jdbcType=VARCHAR}
+		</if>
+
+        WHERE 1=1
+        AND SS.ROLE_CODE=#{code,jdbcType=VARCHAR}
+		AND S.ORG_ID = #{loginCode,jdbcType=VARCHAR}
+		AND S.USER_ID NOT IN (SELECT USER_ID FROM OCRM_F_CM_TEAM_CUST_MANAGER)
+		order by T.AMOUNT
+	</select>
+	<select id="crmTriuVOListtd" parameterType="java.util.Map"  resultType="cn.com.yusys.yscrm.custmgr.domain.CrmTriuVO">
+     SELECT  S.USER_ID targetId,S.CUST_MANAGER_NAME targetName,T.AMOUNT amount,
+		T.TRIUMPH_LINE triumphLine,T.TRIUMPH_LEVEL triumphLevel FROM OCRM_F_CM_TEAM_CUST_MANAGER S LEFT JOIN   OCRM_F_YY_TRIUMPH T ON
+		T.TARGET_ID=S.USER_ID
+		AND S.CUST_MANAGER_NAME=T.TARGET_NAME
+        <if  test="triumphLine != null and triumphLine != '' or triumphLine!=0">
+            AND T.TRIUMPH_LINE = #{triumphLine,jdbcType=INTEGER}
+        </if>
+		<if  test="triumphId != null and triumphId != ''">
+			AND T.TRIUMPH_ID = #{triumphId,jdbcType=VARCHAR}
+		</if>
+		<if  test="triumphYear != null and triumphYear != ''">
+			AND T.TRIUMPH_YEAR = #{triumphYear,jdbcType=VARCHAR}
+		</if>
+		AND T.TRIUMPH_LEVEL = #{triumphLevelup,jdbcType=INTEGER}
+        WHERE 1=1
+        <if  test="loginCode != null and loginCode != ''">
+            AND S.MKT_TEAM_ID = #{loginCode,jdbcType=VARCHAR}
+        </if>
+		order by T.AMOUNT
+	</select>
+	<select id="getcheck" parameterType="java.util.Map" resultType="int">
+		SELECT COUNT(TRIUMPH_ID) FROM OCRM_F_YY_TRIUMPH WHERE 1=1
+		<if  test="triumphId != null and triumphId != ''">
+			AND TRIUMPH_ID = #{triumphId,jdbcType=VARCHAR}
+		</if>
+		<if  test="triumphName != null and triumphName != ''">
+			AND TRIUMPH_NAME = #{triumphName,jdbcType=VARCHAR}
+		</if>
+		<if  test="targetId != null and targetId != ''">
+			AND TARGET_ID= #{targetId,jdbcType=VARCHAR}
+		</if>
+		<if  test="targetName != null and targetName != ''">
+			AND TARGET_NAME= #{targetName,jdbcType=VARCHAR}
+		</if>
+        <if  test="triumphLine != null and triumphLine != '' or triumphLine!=0">
+            AND TRIUMPH_LINE = #{triumphLine,jdbcType=INTEGER}
+        </if>
+		<if  test="triumphYear != null and triumphYear != ''">
+			AND TRIUMPH_YEAR = #{triumphYear,jdbcType=VARCHAR}
+		</if>
+	</select>
+	<insert id="inserttriumph" parameterType="java.util.Map">
+		insert into OCRM_F_YY_TRIUMPH
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="seqno != null and seqno !=''">
+				SEQNO,
+			</if>
+			<if test="triumphId != null and triumphId !=''">
+				TRIUMPH_ID,
+			</if>
+			<if test="triumphName != null and triumphName !=''">
+				TRIUMPH_NAME,
+			</if>
+			<if test="targetId != null and targetId !=''">
+				TARGET_ID,
+			</if>
+			<if test="targetName != null and targetName !=''">
+				TARGET_NAME,
+			</if>
+			<if test="amount != null and amount != '' or amount==0">
+				AMOUNT,
+			</if>
+				TRIUMPH_LINE,
+			    TRIUMPH_LEVEL,
+			<if test="triumphYear != null and triumphYear !=''">
+				TRIUMPH_YEAR,
+			</if>
+			<if test="createDate != null">
+				CREATE_DATE,
+			</if>
+			<if test="createUser != null and createUser !=''">
+				CREATE_USER
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="seqno != null and seqno !=''">
+				#{seqno,jdbcType=VARCHAR},
+			</if>
+			<if test="triumphId != null and triumphId !=''">
+				#{triumphId,jdbcType=VARCHAR},
+			</if>
+			<if test="triumphName != null and triumphName !=''">
+				#{triumphName,jdbcType=VARCHAR},
+			</if>
+			<if test="targetId != null and targetId !=''">
+				#{targetId,jdbcType=VARCHAR},
+			</if>
+			<if test="targetName != null and targetName !=''">
+				#{targetName,jdbcType=VARCHAR},
+			</if>
+			<if test="amount != null and amount != '' or amount==0">
+				#{amount,jdbcType=VARCHAR},
+			</if>
+				#{triumphLine,jdbcType=INTEGER},
+		     	#{triumphLevel,jdbcType=INTEGER},
+			<if test="triumphYear != null and triumphYear !=''">
+				#{triumphYear,jdbcType=VARCHAR},
+			</if>
+			<if test="createDate != null">
+				TO_DATE('${createDate}','YYYY-MM-DD HH24:MI:SS'),
+			</if>
+			<if test="createUser != null and createUser !=''">
+				#{createUser,jdbcType=VARCHAR}
+			</if>
+		</trim>
+	</insert>
+	<update id="updatetriumph"  parameterType="java.util.Map">
+		UPDATE OCRM_F_YY_TRIUMPH  SET
+		<if test="amount != null and amount != '' or amount==0">
+			AMOUNT =#{amount,jdbcType=VARCHAR},
+		</if>
+		<if test="updateDate !=null">
+            UPDATE_DATE=TO_DATE('${updateDate}','YYYY-MM-DD HH24:MI:SS')
+		</if>
+		WHERE 1=1
+		<if  test="triumphId != null and triumphId != ''">
+			AND TRIUMPH_ID = #{triumphId,jdbcType=VARCHAR}
+		</if>
+		<if  test="triumphName != null and triumphName != ''">
+			AND TRIUMPH_NAME = #{triumphName,jdbcType=VARCHAR}
+		</if>
+		<if  test="targetId != null and targetId != ''">
+			AND TARGET_ID= #{targetId,jdbcType=VARCHAR}
+		</if>
+		<if test="targetName != null and targetName != ''">
+			AND TARGET_NAME= #{targetName,jdbcType=VARCHAR}
+		</if>
+		<if  test="triumphYear != null and triumphYear != ''">
+			AND TRIUMPH_YEAR = #{triumphYear,jdbcType=VARCHAR}
+		</if>
+	</update>
+
+	<insert id="inserttriumphhictoric" parameterType="java.util.Map">
+		insert into OCRM_F_YY_TRIUMPH_HISTORIC
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="seqno != null and seqno !=''">
+				SEQNO,
+			</if>
+			<if test="triumphId != null and triumphId !=''">
+				TRIUMPH_ID,
+			</if>
+			<if test="triumphName != null and triumphName !=''">
+				TRIUMPH_NAME,
+			</if>
+			<if test="targetId != null and targetId !=''">
+				TARGET_ID,
+			</if>
+			<if test="targetName != null and targetName !=''">
+				TARGET_NAME,
+			</if>
+			<if test="amount != null and amount != '' or amount==0">
+				AMOUNT,
+			</if>
+				TRIUMPH_LINE,
+			    TRIUMPH_LEVEL,
+			<if test="triumphYear != null and triumphYear !=''">
+				TRIUMPH_YEAR,
+			</if>
+			<if test="updateDate != null">
+				UPDATE_DATE,
+			</if>
+			<if test="updateUser != null and updateUser !=''">
+				UPDATE_USER
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="seqno != null and seqno !=''">
+				#{seqno,jdbcType=VARCHAR},
+			</if>
+			<if test="triumphId != null and triumphId !=''">
+				#{triumphId,jdbcType=VARCHAR},
+			</if>
+			<if test="triumphName != null and triumphName !=''">
+				#{triumphName,jdbcType=VARCHAR},
+			</if>
+			<if test="targetId != null and targetId !=''">
+				#{targetId,jdbcType=VARCHAR},
+			</if>
+			<if test="targetName != null and targetName !=''">
+				#{targetName,jdbcType=VARCHAR},
+			</if>
+			<if test="amount != null and amount != '' or amount==0">
+				#{amount,jdbcType=VARCHAR},
+			</if>
+				#{triumphLine,jdbcType=INTEGER},
+			   #{triumphLevel,jdbcType=INTEGER},
+			<if test="triumphYear != null and triumphYear !=''">
+				#{triumphYear,jdbcType=VARCHAR},
+			</if>
+			<if test="updateDate != null">
+				TO_DATE('${updateDate}','YYYY-MM-DD HH24:MI:SS'),
+			</if>
+			<if test="updateUser != null and updateUser !=''">
+				#{updateUser,jdbcType=VARCHAR}
+			</if>
+		</trim>
+	</insert>
+	<select id="selectorg"   resultType="cn.com.yusys.yscrm.custmgr.domain.organdmgrVO">
+		select T.LOGIN_CODE loginCode,T.USER_NAME userName,G.ORG_ID orgId,G.ORG_NAME orgName
+		from ADMIN_SM_USER T INNER JOIN ADMIN_SM_ORG G ON T.ORG_ID=G.ORG_ID
+	</select>
+
+	<select id="selectorgId"  parameterType="String" resultType="String">
+		select ORG_ID
+		from ADMIN_SM_ORG WHERE ORG_NAME=#{cellValue0} AND rownum=1
+	</select>
+	<insert id="insertexcel" parameterType="cn.com.yusys.yscrm.custmgr.domain.CrmFYyTriumphPpopExcel">
+		INSERT INTO OCRM_F_YY_TRIUMPH_PPOP_EXCEL
+		(
+		SEQNO,
+		BRANCH,
+		BRANCH_CODE,
+		CUSTOMER_ID,
+		CUSTOMER_NAME,
+		CUSTOMER_RANK,
+		CUSTOMER_POST,
+		NET_INCOME_DEPOSITS,
+		SIMULATED_NET_INCOME,
+		MIDDLE_INCOME_REVENUE,
+		PPOP_MONTH,
+		CREATE_USER,
+		CREATE_DATE,
+		BUS_NO
+		)
+		VALUES
+		(
+		#{seqno, jdbcType=VARCHAR},
+		#{branch, jdbcType=VARCHAR},
+		#{branchCode, jdbcType=VARCHAR},
+		#{customerId, jdbcType=VARCHAR},
+		#{customerName, jdbcType=VARCHAR},
+		#{customerRank, jdbcType=VARCHAR},
+		#{customerPost, jdbcType=VARCHAR},
+		#{netIncomeDeposits, jdbcType=VARCHAR},
+		#{simulatedNetIncome, jdbcType=VARCHAR},
+		#{middleIncomeRevenue, jdbcType=VARCHAR},
+		#{ppopMonth, jdbcType=VARCHAR},
+		#{createUser, jdbcType=VARCHAR},
+		#{createDate, jdbcType=DATE},
+		#{busNo, jdbcType=VARCHAR}
+		)
+	</insert>
+	<select id="uploadlist" parameterType="java.util.Map" resultType="java.util.Map">
+		SELECT
+		S.FILE_NAME,
+		S.FILE_PATH,
+		S.FILE_SIZE,
+		S.BUS_NO,
+		S.UPLOAD_TIME,
+		T.PPOP_MONTH,
+		S.FILE_REMARK FROM OCRM_F_YY_TRIUMPH_PPOP_EXCEL T INNER JOIN ADMIN_FILE_UPLOAD_INFO S
+		ON T.BUS_NO=S.BUS_NO WHERE 1=1 AND T.CREATE_USER=#{loginCode, jdbcType=VARCHAR}
+		order by S.UPLOAD_TIME desc
+	</select>
+    <select id="selectcrmFYyTriumphLookUpListlist" parameterType="java.util.Map" resultType="cn.com.yusys.yscrm.custmgr.domain.CrmFYyTriumphLookUp">
+        SELECT    DATA_DATE,
+		DATA_UPDATE_DATE,
+        TRIUMPH_ID,
+        TRIUMPH_NAME,
+        TRIUMPH_LEVEL,
+        TARGET_ID,
+        TARGET_NAME,
+        TRIUMPH_LINE,
+        YEAR_ON_YEAR,
+        RING_RATIO,
+        COMPLETION_RATE,
+        BALANCE
+        FROM OCRM_F_YY_TRIUMPH_LOOK_UP
+        WHERE TRIUMPH_LEVEL=#{triumphLevel,jdbcType=INTEGER}
+        AND DATA_DATE=#{triumphYear,jdbcType=VARCHAR}
+            AND TRIUMPH_LINE = #{triumphLine,jdbcType=INTEGER}
+        <if test="loginCode != null and loginCode !=''">
+            AND TARGET_ID=#{loginCode,jdbcType=VARCHAR}
+        </if>
+    </select>
+
+	<select id="selectcrmFYyTriumphListlist" parameterType="java.util.Map" resultType="cn.com.yusys.yscrm.custmgr.domain.CrmFYyTriumphLookUp">
+		SELECT    DATA_DATE,
+		DATA_UPDATE_DATE,
+		TRIUMPH_ID,
+		TRIUMPH_NAME,
+		TRIUMPH_LEVEL,
+		TARGET_ID,
+		TARGET_NAME,
+		TRIUMPH_LINE,
+		YEAR_ON_YEAR,
+		RING_RATIO,
+		COMPLETION_RATE,
+		BALANCE
+		FROM OCRM_F_YY_TRIUMPH_LOOK_UP_T4
+		WHERE TRIUMPH_LEVEL=#{triumphLevel,jdbcType=INTEGER}
+		AND DATA_DATE=#{dataDate,jdbcType=VARCHAR}
+		AND TRIUMPH_LINE = #{triumphLine,jdbcType=INTEGER}
+		<if test="loginCode != null and loginCode !=''">
+			AND TARGET_ID=#{loginCode,jdbcType=VARCHAR}
+		</if>
+	</select>
+	<select id="selectcrmCrmTriuLookPpopList" parameterType="java.util.Map" resultType="cn.com.yusys.yscrm.custmgr.domain.CrmFYyTriumphLookPpop">
+      SELECT
+		DATA_DATE,
+		DATA_UPDATE_DATE,
+		TRIUMPH_LEVEL,
+		TARGET_ID,
+		TARGET_NAME,
+		TRIUMPH_LINE,
+		NET_INCOME_DEPOSITS,
+		NET_INCOME_DEPOSITS_RATIO,
+		SIMULATED_NET_INCOME,
+		SIMULATED_NET_INCOME_RATIO,
+		MIDDLE_INCOME_REVENUE,
+		MIDDLE_INCOME_REVENUE_RATIO FROM OCRM_F_YY_TRIUMPH_LOOK_PPOP
+		WHERE TRIUMPH_LEVEL=#{triumphLevel,jdbcType=INTEGER}
+		AND DATA_DATE=#{triumphYear,jdbcType=VARCHAR}
+		<if test="loginCode != null and loginCode !=''">
+			AND TARGET_ID=#{loginCode,jdbcType=VARCHAR}
+		</if>
+            AND TRIUMPH_LINE = #{triumphLine,jdbcType=INTEGER}
+	</select>
+	<select id="selectAumz" parameterType="java.util.Map" resultType="cn.com.yusys.yscrm.custmgr.domain.CrmFYyTriumphAumDetailed">
+	SELECT
+		T.DATA_DATE,
+		T.MGR_ID,
+		T.MGR_NAME,
+		T.CUST_ID ,
+		T.CUST_NAME ,
+		T.FINANCIAL_AUM,
+		T.FINANCIAL_AUM_NG,
+		T.INSURE_AUM ,
+		T.INSURE_AUM_NG,
+		T.DEPOSIT_AUM,
+		T.DEPOSIT_AUM_NG FROM OCRM_F_YY_TRIUMPH_AUM_DETAILED T INNER JOIN ADMIN_SM_USER S ON T.MGR_ID=S.USER_ID
+		INNER JOIN ADMIN_SM_USER_ROLE_REL T1 ON S.USER_ID=T1.USER_ID
+		INNER JOIN ADMIN_SM_ROLE SS ON SS.ROLE_ID=T1.ROLE_ID
+		WHERE 1=1
+		<if test="dataAuth != null and orgIdAuth =='500'">
+			${dataAuth}
+		</if>
+		<if test="dataAuth != null and orgIdAuth !='500'">
+			${dataAuth}
+		</if>
+		<if test="dataAuth == null">
+		</if>
+		AND T.DATA_DATE=#{dataDate,jdbcType=VARCHAR}
+        GROUP BY T.DATA_DATE,
+        T.MGR_ID,
+        T.MGR_NAME,
+        T.CUST_ID ,
+        T.CUST_NAME ,
+        T.FINANCIAL_AUM,
+        T.FINANCIAL_AUM_NG,
+        T.INSURE_AUM ,
+        T.INSURE_AUM_NG,
+        T.DEPOSIT_AUM,
+        T.DEPOSIT_AUM_NG
+	</select>
+	<select id="selectAum"  parameterType="java.util.Map" resultType="cn.com.yusys.yscrm.custmgr.domain.CrmFYyTriumphAumDetailed">
+		SELECT
+		T.DATA_DATE,
+		T.MGR_ID,
+		T.MGR_NAME,
+		T.CUST_ID ,
+		T.CUST_NAME ,
+		T.FINANCIAL_AUM,
+		T.FINANCIAL_AUM_NG,
+		T.INSURE_AUM ,
+		T.INSURE_AUM_NG,
+		T.DEPOSIT_AUM,
+		T.DEPOSIT_AUM_NG FROM OCRM_F_YY_TRIUMPH_AUM_DETAILED T INNER JOIN ADMIN_SM_USER S ON T.MGR_ID=S.USER_ID
+		INNER JOIN ADMIN_SM_USER_ROLE_REL T1 ON S.USER_ID=T1.USER_ID
+		INNER JOIN ADMIN_SM_ROLE SS ON SS.ROLE_ID=T1.ROLE_ID
+		WHERE 1=1 AND T.MGR_ID=#{mgrId,jdbcType=VARCHAR}
+		AND T.DATA_DATE=#{dataDate,jdbcType=VARCHAR}
+        GROUP BY T.DATA_DATE,
+        T.MGR_ID,
+        T.MGR_NAME,
+        T.CUST_ID ,
+        T.CUST_NAME ,
+        T.FINANCIAL_AUM,
+        T.FINANCIAL_AUM_NG,
+        T.INSURE_AUM ,
+        T.INSURE_AUM_NG,
+        T.DEPOSIT_AUM,
+        T.DEPOSIT_AUM_NG
+	</select>
+	<select id="selectdeposit" parameterType="java.util.Map" resultType="cn.com.yusys.yscrm.custmgr.domain.CrmFYyTriumphDepositDetailed">
+	SELECT
+		T.DATA_DATE,
+		T.TARGET_ID,
+		T.TARGET_NAME,
+		T.DETAILED_LEVEL,
+		T.DETAILED_UP_ID,
+		T.DETAILED_UP_NAME,
+		T.EXCHANGE_RATE_DEPOSIT,
+		T.EXCHANGE_RATE_DEPOSIT_NG,
+		T.NON_EXCHANGE_DEPOSIT,
+		T.NON_EXCHANGE_DEPOSIT_NG,
+		T.COMMONLY_DEPOSIT,
+		T.COMMONLY_DEPOSIT_NG
+		 FROM
+		OCRM_F_YY_TRIUMPH_DEPOSIT_DETAILED T
+		WHERE 1=1 AND T.DETAILED_LEVEL='2'
+		AND T.DETAILED_UP_ID=#{targetId,jdbcType=VARCHAR}
+		AND T.DATA_DATE=#{dataDate,jdbcType=VARCHAR}
+        GROUP BY T.DATA_DATE,
+        T.TARGET_ID,
+        T.TARGET_NAME,
+        T.DETAILED_LEVEL,
+        T.DETAILED_UP_ID,
+        T.DETAILED_UP_NAME,
+        T.EXCHANGE_RATE_DEPOSIT,
+        T.EXCHANGE_RATE_DEPOSIT_NG,
+        T.NON_EXCHANGE_DEPOSIT,
+        T.NON_EXCHANGE_DEPOSIT_NG,
+        T.COMMONLY_DEPOSIT,
+        T.COMMONLY_DEPOSIT_NG
+	</select>
+	<select id="selectdepositL" parameterType="java.util.Map" resultType="cn.com.yusys.yscrm.custmgr.domain.CrmFYyTriumphDepositDetailed">
+		SELECT
+		T.DATA_DATE,
+		T.TARGET_ID,
+		T.TARGET_NAME,
+		T.DETAILED_LEVEL,
+		T.DETAILED_UP_ID,
+		T.DETAILED_UP_NAME,
+		T.EXCHANGE_RATE_DEPOSIT,
+		T.EXCHANGE_RATE_DEPOSIT_NG,
+		T.NON_EXCHANGE_DEPOSIT,
+		T.NON_EXCHANGE_DEPOSIT_NG,
+		T.COMMONLY_DEPOSIT,
+		T.COMMONLY_DEPOSIT_NG FROM
+		OCRM_F_YY_TRIUMPH_DEPOSIT_DETAILED T
+		INNER JOIN ADMIN_SM_USER S ON T.TARGET_ID=S.USER_ID
+		INNER JOIN ADMIN_SM_USER_ROLE_REL T1 ON S.USER_ID=T1.USER_ID
+		INNER JOIN ADMIN_SM_ROLE SS ON SS.ROLE_ID=T1.ROLE_ID
+		WHERE 1=1 AND T.DETAILED_LEVEL='1'
+		<if test="dataAuth != null and orgIdAuth =='500'">
+			${dataAuth}
+		</if>
+		<if test="dataAuth != null and orgIdAuth !='500'">
+			${dataAuth}
+		</if>
+		<if test="dataAuth == null">
+		</if>
+		AND T.DATA_DATE=#{dataDate,jdbcType=VARCHAR}
+        GROUP BY T.DATA_DATE,
+        T.TARGET_ID,
+        T.TARGET_NAME,
+        T.DETAILED_LEVEL,
+        T.DETAILED_UP_ID,
+        T.DETAILED_UP_NAME,
+        T.EXCHANGE_RATE_DEPOSIT,
+        T.EXCHANGE_RATE_DEPOSIT_NG,
+        T.NON_EXCHANGE_DEPOSIT,
+        T.NON_EXCHANGE_DEPOSIT_NG,
+        T.COMMONLY_DEPOSIT,
+        T.COMMONLY_DEPOSIT_NG
+	</select>
+
+	<select id="selectloan" parameterType="java.util.Map" resultType="cn.com.yusys.yscrm.custmgr.domain.CrmFYyTriumphLoanDetailed">
+	SELECT
+		T.DATA_DATE,
+		T.TARGET_ID,
+		T.TARGET_NAME,
+		T.DETAILED_LEVEL,
+		T.DETAILED_UP_ID,
+		T.DETAILED_UP_NAME,
+		T.LOAN_TYPE,
+		T.LOAN_NAME,
+		T.LOAN_AMOUNT_M,
+		T.LOAN_COUNT_M FROM OCRM_F_YY_TRIUMPH_LOAN_DETAILED T WHERE 1=1 AND T.DETAILED_LEVEL='2'
+		 AND T.DETAILED_UP_ID=#{targetId,jdbcType=VARCHAR}
+		<if test="loanType != null and loanType !=''">
+			AND T.LOAN_TYPE=#{loanType,jdbcType=VARCHAR}
+		</if>
+		AND T.DATA_DATE=#{dataDate,jdbcType=VARCHAR}
+        GROUP BY T.DATA_DATE,
+        T.TARGET_ID,
+        T.TARGET_NAME,
+        T.DETAILED_LEVEL,
+        T.DETAILED_UP_ID,
+        T.DETAILED_UP_NAME,
+        T.LOAN_TYPE,
+        T.LOAN_NAME,
+        T.LOAN_AMOUNT_M,
+        T.LOAN_COUNT_M
+	</select>
+	<select id="selectselectloanL" parameterType="java.util.Map" resultType="cn.com.yusys.yscrm.custmgr.domain.CrmFYyTriumphLoanDetailed">
+		SELECT
+		T.DATA_DATE,
+		T.TARGET_ID,
+		T.TARGET_NAME,
+		T.DETAILED_LEVEL,
+		T.DETAILED_UP_ID,
+		T.DETAILED_UP_NAME,
+		T.LOAN_TYPE,
+		T.LOAN_NAME,
+		T.LOAN_AMOUNT_M,
+		T.LOAN_COUNT_M FROM OCRM_F_YY_TRIUMPH_LOAN_DETAILED T
+		INNER JOIN ADMIN_SM_USER S ON T.TARGET_ID=S.USER_ID
+		INNER JOIN ADMIN_SM_USER_ROLE_REL T1 ON S.USER_ID=T1.USER_ID
+		INNER JOIN ADMIN_SM_ROLE SS ON SS.ROLE_ID=T1.ROLE_ID
+		WHERE 1=1
+		<if test="dataAuth != null and orgIdAuth =='500'">
+			${dataAuth}
+		</if>
+		<if test="dataAuth != null and orgIdAuth !='500'">
+			${dataAuth}
+		</if>
+		<if test="dataAuth == null">
+		</if>
+		AND T.DETAILED_LEVEL='1'
+		<if test="loanType != null and loanType !=''">
+			AND T.LOAN_TYPE=#{loanType,jdbcType=VARCHAR}
+		</if>
+		AND T.DATA_DATE=#{dataDate,jdbcType=VARCHAR}
+        GROUP BY T.DATA_DATE,
+        T.TARGET_ID,
+        T.TARGET_NAME,
+        T.DETAILED_LEVEL,
+        T.DETAILED_UP_ID,
+        T.DETAILED_UP_NAME,
+        T.LOAN_TYPE,
+        T.LOAN_NAME,
+        T.LOAN_AMOUNT_M,
+        T.LOAN_COUNT_M
+	</select>
+	<select id="selectCharge" parameterType="java.util.Map" resultType="cn.com.yusys.yscrm.custmgr.domain.CrmFYyTriumphCharge">
+	SELECT   T.DATA_DATE,
+		T.TARGET_ID,
+		T.TARGET_NAME,
+		T.DETAILED_LEVEL,
+		T.DETAILED_UP_ID,
+		T.DETAILED_UP_NAME,
+		T.CHARGE_TYPE,
+		T.CHARGE_NAME,
+		T.COMMISSION_CHARGE_M,
+		T.COMMISSION_CHARGE_S,
+		T.COMMISSION_CHARGE_Y  FROM OCRM_F_YY_TRIUMPH_CHARGE T WHERE 1=1
+		AND T.DETAILED_LEVEL='2'
+		AND T.DETAILED_UP_ID=#{targetId,jdbcType=VARCHAR}
+		AND T.CHARGE_TYPE=#{chargeType,jdbcType=VARCHAR}
+		AND T.DATA_DATE=#{dataDate,jdbcType=VARCHAR}
+        GROUP BY T.DATA_DATE,
+        T.TARGET_ID,
+        T.TARGET_NAME,
+        T.DETAILED_LEVEL,
+        T.DETAILED_UP_ID,
+        T.DETAILED_UP_NAME,
+        T.CHARGE_TYPE,
+        T.CHARGE_NAME,
+        T.COMMISSION_CHARGE_M,
+        T.COMMISSION_CHARGE_S,
+        T.COMMISSION_CHARGE_Y
+    </select>
+	<select id="selectChargeL" parameterType="java.util.Map" resultType="cn.com.yusys.yscrm.custmgr.domain.CrmFYyTriumphCharge">
+		SELECT   T.DATA_DATE,
+		T.TARGET_ID,
+		T.TARGET_NAME,
+		T.DETAILED_LEVEL,
+		T.DETAILED_UP_ID,
+		T.DETAILED_UP_NAME,
+		T.CHARGE_TYPE,
+		T.CHARGE_NAME,
+		T.COMMISSION_CHARGE_M,
+		T.COMMISSION_CHARGE_S,
+		T.COMMISSION_CHARGE_Y  FROM OCRM_F_YY_TRIUMPH_CHARGE T
+		INNER JOIN ADMIN_SM_USER S ON T.TARGET_ID=S.USER_ID
+		INNER JOIN ADMIN_SM_USER_ROLE_REL T1 ON S.USER_ID=T1.USER_ID
+		INNER JOIN ADMIN_SM_ROLE SS ON SS.ROLE_ID=T1.ROLE_ID
+		WHERE 1=1
+		<if test="dataAuth != null and orgIdAuth =='500'">
+			${dataAuth}
+		</if>
+		<if test="dataAuth != null and orgIdAuth !='500'">
+			${dataAuth}
+		</if>
+		<if test="dataAuth == null">
+		</if>
+		AND T.DETAILED_LEVEL='1'
+		AND T.CHARGE_TYPE=#{chargeType,jdbcType=VARCHAR}
+		AND T.DATA_DATE=#{dataDate,jdbcType=VARCHAR}
+        GROUP BY T.DATA_DATE,
+        T.TARGET_ID,
+        T.TARGET_NAME,
+        T.DETAILED_LEVEL,
+        T.DETAILED_UP_ID,
+        T.DETAILED_UP_NAME,
+        T.CHARGE_TYPE,
+        T.CHARGE_NAME,
+        T.COMMISSION_CHARGE_M,
+        T.COMMISSION_CHARGE_S,
+        T.COMMISSION_CHARGE_Y
+	</select>
+    <select id="selectMaxDateD" parameterType="java.util.Map" resultType="String">
+        SELECT MAX(DATA_DATE) as dataDate FROM OCRM_F_YY_TRIUMPH_ANALYSE WHERE 1=1
+        and rownum = 1
+            AND TRIUMPH_LINE = #{triumphLine,jdbcType=INTEGER}
+        <if test="loginCode != null and loginCode !=''">
+            AND TARGET_ID=#{loginCode,jdbcType=VARCHAR}
+        </if>
+        AND TRIUMPH_LEVEL=#{triumphLevel,jdbcType=INTEGER}
+    </select>
+	<select id="CrmFYyTriumphLookUpList" parameterType="java.util.Map" resultType="cn.com.yusys.yscrm.custmgr.domain.CrmFYyTriumphLookUp">
+     SELECT   DATA_DATE,
+		TRIUMPH_ID ,
+		TRIUMPH_NAME,
+		TRIUMPH_LEVEL,
+		TARGET_ID,
+		TARGET_NAME,
+		TRIUMPH_LINE,
+		YEAR_ON_YEAR,
+		RING_RATIO,
+		BALANCE
+		FROM OCRM_F_YY_TRIUMPH_ANALYSE WHERE 1=1
+            AND TRIUMPH_LINE = #{triumphLine,jdbcType=INTEGER}
+		<if test="targetId != null and targetId !=''">
+			AND TARGET_ID=#{targetId}
+		</if>
+		<if test="triumphLevel != null and triumphLevel !=''">
+			AND TRIUMPH_LEVEL=#{triumphLevel,jdbcType=INTEGER}
+		</if>
+		<if test="triumphId != null and triumphId !=''">
+			AND TRIUMPH_ID=#{triumphId,jdbcType=VARCHAR}
+		</if>
+		<if test="startDate != null and startDate !='' and endDate != null and endDate !=''">
+			AND DATA_DATE BETWEEN '${startDate}' AND '${endDate}'
+		</if>
+	</select>
+	<select id="CrmFYyTriumphLookUpListt4" parameterType="java.util.Map" resultType="cn.com.yusys.yscrm.custmgr.domain.CrmFYyTriumphLookUp">
+		SELECT   DATA_DATE,
+		TRIUMPH_ID ,
+		TRIUMPH_NAME,
+		TRIUMPH_LEVEL,
+		TARGET_ID,
+		TARGET_NAME,
+		TRIUMPH_LINE,
+		YEAR_ON_YEAR,
+		RING_RATIO,
+		BALANCE
+		FROM OCRM_F_YY_TRIUMPH_ANALYSE_T4 WHERE 1=1
+		AND TRIUMPH_LINE = #{triumphLine,jdbcType=INTEGER}
+		<if test="targetId != null and targetId !=''">
+			AND TARGET_ID=#{targetId}
+		</if>
+		<if test="triumphLevel != null and triumphLevel !=''">
+			AND TRIUMPH_LEVEL=#{triumphLevel,jdbcType=INTEGER}
+		</if>
+		<if test="triumphId != null and triumphId !=''">
+			AND TRIUMPH_ID=#{triumphId,jdbcType=VARCHAR}
+		</if>
+		<if test="startDate != null and startDate !='' and endDate != null and endDate !=''">
+			AND DATA_DATE BETWEEN '${startDate}' AND '${endDate}'
+		</if>
+	</select>
+    <select id="Querydetappoplistl" parameterType="java.util.Map" resultType="cn.com.yusys.yscrm.custmgr.domain.CrmFYyTriumphLookUp">
+        SELECT * FROM (SELECT   DATA_DATE,DATA_UPDATE_DATE,
+        TRIUMPH_ID ,
+        TRIUMPH_NAME,
+        TRIUMPH_LEVEL,
+        TARGET_ID,
+        TARGET_NAME,
+        TRIUMPH_LINE,
+        YEAR_ON_YEAR,
+        RING_RATIO,
+        BALANCE
+        FROM OCRM_F_YY_TRIUMPH_ANALYSE WHERE 1=1
+            AND TRIUMPH_LINE = #{triumphLine,jdbcType=INTEGER}
+        AND TRIUMPH_LEVEL=#{triumphLevel,jdbcType=INTEGER}
+        AND TRIUMPH_ID='K007'
+        AND to_char(DATA_DATE,'yyyy-mm')=#{month,jdbcType=VARCHAR}
+        ORDER BY BALANCE desc)CC
+        where rownum =5
+    </select>
+    <select id="selectfileCheck" parameterType="String" resultType="int">
+        SELECT COUNT(PPOP_MONTH) FROM OCRM_F_YY_TRIUMPH_PPOP_EXCEL WHERE 1=1 AND PPOP_MONTH=#{month,jdbcType=VARCHAR}
+    </select>
+    <delete id="deletefile" parameterType="String">
+        delete from OCRM_F_YY_TRIUMPH_PPOP_EXCEL WHERE 1=1 AND PPOP_MONTH=#{month,jdbcType=VARCHAR}
+    </delete>
+	<select id="CrmFYyTriumphLookUpListlistExcel" parameterType="java.util.Map" resultType="cn.com.yusys.yscrm.custmgr.domain.CrmFYyTriumphLookUpEXCEL">
+		SELECT TRIUMPH_ID ,
+		TRIUMPH_NAME,
+		TRIUMPH_LEVEL,
+		TARGET_ID,
+		TARGET_NAME,
+		TRIUMPH_LINE,
+		SUM(CASE WHEN  to_char(to_date(DATA_DATE,'yyyy-mm'),'yyyy-mm')=#{month1,jdbcType=VARCHAR} THEN BALANCE ELSE 0 END) month1
+		<if test="month2 != null and month2 !=''">
+			,SUM(CASE WHEN  to_char(to_date(DATA_DATE,'yyyy-mm'),'yyyy-mm')=#{month2,jdbcType=VARCHAR} THEN BALANCE ELSE 0 END) month2
+		</if>
+		<if test="month3 != null and month3 !=''">
+			,SUM(CASE WHEN  to_char(to_date(DATA_DATE,'yyyy-mm'),'yyyy-mm')=#{month3,jdbcType=VARCHAR} THEN BALANCE ELSE 0 END) month3
+		</if>
+		<if test="month4 != null and month4 !=''">
+			,SUM(CASE WHEN  to_char(to_date(DATA_DATE,'yyyy-mm'),'yyyy-mm')=#{month4,jdbcType=VARCHAR} THEN BALANCE ELSE 0 END) month4
+		</if>
+		<if test="month5 != null and month5 !=''">
+			,SUM(CASE WHEN  to_char(to_date(DATA_DATE,'yyyy-mm'),'yyyy-mm')=#{month5,jdbcType=VARCHAR} THEN BALANCE ELSE 0 END) month5
+		</if>
+		<if test="month6 != null and month6 !=''">
+			,SUM(CASE WHEN  to_char(to_date(DATA_DATE,'yyyy-mm'),'yyyy-mm')=#{month6,jdbcType=VARCHAR} THEN BALANCE ELSE 0 END) month6
+		</if>
+		FROM OCRM_F_YY_TRIUMPH_ANALYSE  WHERE 1=1
+            AND TRIUMPH_LINE = #{triumphLine,jdbcType=INTEGER}
+		<if test="StartDate != null and StartDate !='' and endDate != null and endDate !=''">
+			AND to_char(to_date(DATA_DATE,'yyyy-mm'),'yyyy-mm') BETWEEN '${StartDate}' AND '${endDate}'
+		</if>
+		<if test="targetId != null and targetId !=''">
+			AND TARGET_ID=#{targetId}
+		</if>
+		AND TRIUMPH_LEVEL=#{triumphLevel,jdbcType=INTEGER}
+		<if test="triumphId != null and triumphId !=''">
+			AND TRIUMPH_ID=#{triumphId,jdbcType=VARCHAR}
+		</if>
+		GROUP BY
+        TRIUMPH_ID ,
+        TRIUMPH_NAME,
+        TRIUMPH_LEVEL,
+        TARGET_ID,
+        TARGET_NAME,
+        TRIUMPH_LINE
+	</select>
+	<select id="CrmFYyTriumphLookUpListlistExcelT4" parameterType="java.util.Map" resultType="cn.com.yusys.yscrm.custmgr.domain.CrmFYyTriumphLookUpEXCEL">
+		SELECT TRIUMPH_ID ,
+		TRIUMPH_NAME,
+		TRIUMPH_LEVEL,
+		TARGET_ID,
+		TARGET_NAME,
+		TRIUMPH_LINE,
+		SUM(CASE WHEN  to_char(to_date(DATA_DATE,'yyyy-mm'),'yyyy-mm')=#{month1,jdbcType=VARCHAR} THEN BALANCE ELSE 0 END) month1
+		<if test="month2 != null and month2 !=''">
+			,SUM(CASE WHEN  to_char(to_date(DATA_DATE,'yyyy-mm'),'yyyy-mm')=#{month2,jdbcType=VARCHAR} THEN BALANCE ELSE 0 END) month2
+		</if>
+		<if test="month3 != null and month3 !=''">
+			,SUM(CASE WHEN  to_char(to_date(DATA_DATE,'yyyy-mm'),'yyyy-mm')=#{month3,jdbcType=VARCHAR} THEN BALANCE ELSE 0 END) month3
+		</if>
+		<if test="month4 != null and month4 !=''">
+			,SUM(CASE WHEN  to_char(to_date(DATA_DATE,'yyyy-mm'),'yyyy-mm')=#{month4,jdbcType=VARCHAR} THEN BALANCE ELSE 0 END) month4
+		</if>
+		<if test="month5 != null and month5 !=''">
+			,SUM(CASE WHEN  to_char(to_date(DATA_DATE,'yyyy-mm'),'yyyy-mm')=#{month5,jdbcType=VARCHAR} THEN BALANCE ELSE 0 END) month5
+		</if>
+		<if test="month6 != null and month6 !=''">
+			,SUM(CASE WHEN  to_char(to_date(DATA_DATE,'yyyy-mm'),'yyyy-mm')=#{month6,jdbcType=VARCHAR} THEN BALANCE ELSE 0 END) month6
+		</if>
+		FROM OCRM_F_YY_TRIUMPH_ANALYSE_T4  WHERE 1=1
+		AND TRIUMPH_LINE = #{triumphLine,jdbcType=INTEGER}
+		<if test="StartDate != null and StartDate !='' and endDate != null and endDate !=''">
+			AND to_char(to_date(DATA_DATE,'yyyy-mm'),'yyyy-mm') BETWEEN '${StartDate}' AND '${endDate}'
+		</if>
+		<if test="targetId != null and targetId !=''">
+			AND TARGET_ID=#{targetId}
+		</if>
+		AND TRIUMPH_LEVEL=#{triumphLevel,jdbcType=INTEGER}
+		<if test="triumphId != null and triumphId !=''">
+			AND TRIUMPH_ID=#{triumphId,jdbcType=VARCHAR}
+		</if>
+		GROUP BY
+		TRIUMPH_ID ,
+		TRIUMPH_NAME,
+		TRIUMPH_LEVEL,
+		TARGET_ID,
+		TARGET_NAME,
+		TRIUMPH_LINE
+	</select>
+	<select id="selectppop" parameterType="java.util.Map" resultType="cn.com.yusys.yscrm.custmgr.domain.analyseVO">
+		SELECT
+		TRIUMPH_ID triumphId,
+		TRIUMPH_NAME triumphName,
+		YEAR_ON_YEAR yearOnYear,
+		RING_RATIO ringRatio,
+		BALANCE balance
+		FROM OCRM_F_YY_TRIUMPH_ANALYSE WHERE 1=1
+            AND TRIUMPH_LINE = #{triumphLine,jdbcType=INTEGER}
+		<if test="loginCode != null and loginCode !=''">
+			AND TARGET_ID=#{loginCode,jdbcType=VARCHAR}
+		</if>
+		AND TRIUMPH_LEVEL=#{triumphLevellevel,jdbcType=INTEGER}
+		AND TRIUMPH_ID='K024'
+		AND DATA_DATE=#{month,jdbcType=VARCHAR} and rownum=1
+	</select>
+	<select id="Querymonthdetalist" parameterType="java.util.Map" resultType="cn.com.yusys.yscrm.custmgr.domain.CrmFYyTriumphLookUp">
+		SELECT   DATA_DATE,
+		DATA_UPDATE_DATE,
+		TRIUMPH_ID ,
+		TRIUMPH_NAME,
+		TRIUMPH_LEVEL,
+		TARGET_ID,
+		TARGET_NAME,
+		TRIUMPH_LINE,
+		YEAR_ON_YEAR,
+		RING_RATIO,
+		BALANCE
+		FROM OCRM_F_YY_TRIUMPH_ANALYSE_T4 WHERE 1=1
+		AND TRIUMPH_LINE = #{triumphLine,jdbcType=INTEGER}
+		<if test="targetId != null and targetId !=''">
+			AND TARGET_ID=#{targetId}
+		</if>
+        <if test="triumphLevel != null">
+            AND TRIUMPH_LEVEL=#{triumphLevel,jdbcType=INTEGER}
+        </if>
+		<if test="triumphId != null and triumphId !=''">
+			AND TRIUMPH_ID=#{triumphId,jdbcType=VARCHAR}
+		</if>
+		<if test="endDate != null and endDate !=''">
+			AND DATA_DATE= #{endDate,jdbcType=VARCHAR}
+		</if>
+	</select>
+</mapper>

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper
+        namespace="com.yusys.streaminghub.rpc.repository.mapper.RpcOperLogMapper">
+
+    <insert id="saveLogByRealTime" parameterType="com.yusys.streaminghub.rpc.domain.TPSmOperLogInf">
+       <!-- <selectKey resultType="int" keyProperty="flowId" order="BEFORE">
+            select CG_CRM_MSG_LOG_SQE1.nextval as flowId from dual
+        </selectKey>-->
+        insert into ocrm_F_CL_OPER_LOG_INF(FLOW_ID,FLOW_NUM,SRC_FLOW_NO,FLOW_TYPE,MOULD_TYPE,MOULD_NAME,LAUNCH,RECEIVE,LAUNCH_TIME,BACK_TIME,IF_SUCCESS,OP_TYPE,BUS_OBJECT,OPERATE_DT,USER_NO,USER_NAME,OPERATE_YEAR,SRC_UPDATED_TS)
+        VALUES (#{flowId},#{flowNum},#{srcFlowNo},#{flowType},#{mouldType},#{mouldName},#{launch},#{receive},to_date(#{launchTime},'yyyy-MM-dd hh24:mi:ss'),to_date(#{backTime},'yyyy-MM-dd hh24:mi:ss'),#{ifSuccess},#{opType},#{busObject},to_date(#{operateDt},'yyyy-MM-dd hh24:mi:ss'),#{userNo},#{userName},#{operateYear},#{srcUpdatedTs})
+    </insert>
+    <insert id="saveLogByNonRealTime">
+        insert into ocrm_F_CL_OPER_LOG_INF(FLOW_ID,FLOW_NUM,FLOW_TYPE,MOULD_TYPE,MOULD_NAME,OP_TYPE,BUS_OBJECT,OPERATE_DT,USER_NO,USER_NAME,OPERATE_YEAR)
+        values (CG_CRM_MSG_LOG_SQE1.nextval,#{flowNum},#{srcFlowNo},#{flowType},#{mouldName},#{opType},#{busObject},#{operateDt},#{userNo},#{userName},#{operateYear})
+    </insert>
+</mapper>

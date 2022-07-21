@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.custgrade.repository.mapper.OcrmCiGradePrefeLevelMapper">
+    <sql id="Base_Column_List">
+	    CORP_ORG_CODE,ID,PREFERENT_ID,GRADE_LEVEL,PREFERENT_STR,CREATE_DATE,CREATE_USER_ID,CREATE_ORG_ID,LAST_UPDATE_DATE,LAST_UPDATE_USER_ID,LAST_UPDATE_ORG_ID
+    </sql>
+    
+</mapper>

@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.info.remind.repository.mapper.OcrmFwpRemindChlNexMapper">
+    <resultMap id="BaseResultMap" type="cn.com.yusys.yscrm.info.remind.domain.OcrmFwpRemindChlNex">
+		<result column="RULE_ID" jdbcType="VARCHAR" property="ruleId" />
+		<result column="CHL_ID" jdbcType="VARCHAR" property="chlId" />
+		<result column="MESSAGE_MODEL" jdbcType="VARCHAR" property="messageModel" />
+    </resultMap>
+    <sql id="Base_Column_List">
+	    RULE_ID,CHL_ID,MESSAGE_MODEL
+    </sql>
+    
+    <!-- 查询数据 -->
+    <select id="findData" parameterType="java.util.Map" resultType="java.util.HashMap">
+    	select <include refid="Base_Column_List"/> from OCRM_F_WP_REMIND_CHL_NEX
+    	<where>
+    		<if test="ruleId != null and ruleId != ''">
+    			and RULE_ID = #{ruleId,jdbcType=VARCHAR}
+    		</if>
+    		<if test="chlId != null and chlId != ''">
+    			and CHL_ID = #{chlId,jdbcType=VARCHAR}
+    		</if>
+    	</where>
+    </select>
+    
+    <!-- 新增数据 -->
+    <insert id="insertData" parameterType="java.util.Map">
+    	insert into OCRM_F_WP_REMIND_CHL_NEX(RULE_ID, CHL_ID, MESSAGE_MODEL) 
+	   		values(
+	   			#{ruleId,jdbcType=VARCHAR},
+	   			#{chlId,jdbcType=VARCHAR},
+	   			#{messageModel,jdbcType=VARCHAR}
+	   		)
+    </insert>
+    
+    <!-- 更新数据 -->
+    <update id="updateData" parameterType="java.util.Map">
+        update OCRM_F_WP_REMIND_CHL_NEX set 
+	        MESSAGE_MODEL = #{messageModel,jdbcType=VARCHAR}
+        where RULE_ID = #{ruleId,jdbcType=VARCHAR} and CHL_ID = #{chlId,jdbcType=VARCHAR}
+    </update>
+    
+    <!-- 删除数据 -->
+    <delete id="deleteData" parameterType="java.util.Map">
+    	delete from OCRM_F_WP_REMIND_CHL_NEX
+    	  where RULE_ID = #{ruleId,jdbcType=VARCHAR} and CHL_ID = #{chlId,jdbcType=VARCHAR}
+    </delete>
+</mapper>

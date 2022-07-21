@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.dycrm.realtimerpc.repository.mapper.RpcCustScoreQueryMapper">
+
+    <select id="queryCustScoreDetails" resultType="java.util.HashMap">
+        select t.SCORE_DEAL_TYPE,t.THIS_SUM_SCORE as SCORE,to_char(t.BUSN_DATE,'yyyy-mm-dd hh24:mi:ss') as DEAL_DT,t.LAST_SR_ACCUTE as LAST_SCORE,t.CURR_SR_ACCUTE as NEXT_SCORE,t.REMARK as SCD_FK_ID
+        from LOY_SR_SCORE_ACCUTE_SUM t
+        <where>
+            <if test="ecifCustNo != null and ecifCustNo != ''">
+                and t.CUST_NO = #{ecifCustNo}
+            </if>
+            <if test="beginDt != null and beginDt != ''">
+                and trunc(t.BUSN_DATE,'dd') >= to_date(#{beginDt},'yyyymmdd')
+            </if>
+            <if test="endDt != null and endDt!='' ">
+                and trunc(t.BUSN_DATE,'dd') &lt;= to_date(#{endDt},'yyyymmdd')
+            </if>
+        </where>
+    </select>
+    <select id="queryCustScore" resultType="java.lang.Integer">
+        select t.USEABLE_SCORE
+        FROM LOY_SR_CUST_SCORE_VIEW t where CUST_NO = #{ecifCustNo}
+    </select>
+    <select id="queryCustGrade" resultType="java.util.HashMap">
+        select aum_grade as AUM_EVN_GRADE
+        FROM V_APP_CUST_GRADE_INFO where ECIF_CUST_NO = #{ecifCustNo}
+    </select>
+    <select id="queryCustServiceInfo" resultType="java.util.Map">
+        select t.COMMODITY_CODE as SERVICE_NO,t.COMMODITY_NAME as SERVICE_NAME,t.COMMODITY_V_FLAG as SERVICE_EXCG_TYPE,t.COMMODITY_TYPE as SERVICE_CATEGORY,t.COMMODITY_STG_NUM as USABLE_COUNT,t.IF_RCD,(rownum-1) as SERVICE_ORDER
+        FROM LOY_QY_COMMODITY_INFO t
+        where nvl(t.COMMODITY_L_VALUE,0) &lt;= #{score}
+        and t.COMMODITY_V_FLAG IN ('10','20','30')
+        and t.EXCG_CHANNEL like '%20%'
+        and t.UP_DOWN_STATE = '20'
+        <if test="batchDate != null">
+            and trunc(t.ON_SHELF_BEGIN,'dd') &lt;= to_date(#{batchDate},'yyyymmdd')
+            and trunc(t.ON_SHELF_END,'dd') > to_date(#{batchDate},'yyyymmdd')
+        </if>
+        and (t.SUIT_CUST_TYPE like decode(t.SUIT_OBJ_TYPE,'10','%5%','20','%5%') OR t.SUIT_OBJ_TYPE = '99')
+        <if test="serviceCategory != ''">
+            and t.COMMODITY_TYPE = #{serviceCategory}
+        </if>
+
+        order by t.IF_RCD DESC,t.COMMODITY_L_VALUE ASC nulls first
+    </select>
+    <select id="queryCustServiceInfoAll" resultType="java.util.Map">
+        select t.COMMODITY_CODE as SERVICE_NO,COMMODITY_NAME as SERVICE_NAME,t.COMMODITY_V_FLAG as SERVICE_EXCG_TYPE,t.COMMODITY_TYPE as SERVICE_CATEGORY,t.COMMODITY_STG_NUM as USABLE_COUNT,t.IF_RCD ,(rownum-1) as SERVICE_ORDER
+        FROM LOY_QY_COMMODITY_INFO t
+        where t.EXCG_CHANNEL like '%20%'
+        and t.UP_DOWN_STATE = '20'
+        and trunc(t.ON_SHELF_BEGIN,'dd') &lt;= to_date(#{batchDate},'yyyymmdd')
+        and trunc(t.ON_SHELF_END,'dd') > to_date(#{batchDate},'yyyymmdd')
+        <if test="serviceCategory != ''">
+            and t.COMMODITY_TYPE = #{serviceCategory}
+        </if>
+        order by t.IF_RCD DESC,t.COMMODITY_L_VALUE ASC
+    </select>
+    <select id="queryCustMgr" resultType="java.util.Map">
+        select f.MGR_ID as CUST_MGR_NO,f.MGR_NAME as CUST_MGR_NAME,f.ORG_ID as MGR_ORG_NO,f.ORG_NAME as MGR_ORG_NAME,a.USER_MOBILEPHONE as MGR_EMAIL,a.USER_OFFICETEL as MGR_PHONENO
+        from OCRM_F_CI_ADMIT_BELONG f inner join  ADMIN_SM_USER  a on a.USER_ID  = f.MGR_ID
+        where f.CUST_ID = #{ecifCustNo}
+    </select>
+    <select id="queryCustGradeInfo" resultType="java.util.Map">
+        select AUM_GRADE,EXPIRED_DATE,AUM_GRADE_BASE_VAL as AUM_BAL_RMB,NEXT_GRD_AUM
+        FROM V_APP_CUST_GRADE_INFO where ECIF_CUST_NO = #{ecifCustNo}
+    </select>
+    <select id="queryCustScoreInfo" resultType="java.util.Map">
+        select t.USEABLE_SCORE,t.DONATE_SCORE,t.REDUCE_SCORE,t.INVALID_SCORE,t.INVALIDING_SCORE,t.INVALIDING_DT
+        from LOY_SR_CUST_SCORE_VIEW t
+        where t.CUST_NO = #{ecifCustNo}
+    </select>
+</mapper>

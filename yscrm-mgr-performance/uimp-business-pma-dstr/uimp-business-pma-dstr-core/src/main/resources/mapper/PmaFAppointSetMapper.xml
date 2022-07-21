@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.uimp.distribution.repository.mapper.PmaFAppointSetMapper">
+    <resultMap id="BaseResultMap" type="cn.com.yusys.yusp.uimp.distribution.domain.PmaFAppointSet">
+		<id column="ID" jdbcType="VARCHAR" property="id" />
+		<result column="BUS_TYPE" jdbcType="VARCHAR" property="busType" />
+		<result column="FIELD_EN_NAME" jdbcType="VARCHAR" property="fieldEnName" />
+		<result column="FIELD_CN_NAME" jdbcType="VARCHAR" property="fieldCnName" />
+		<result column="IF_SHOW" jdbcType="VARCHAR" property="ifShow" />
+		<result column="SHOW_SORT" jdbcType="VARCHAR" property="showSort" />
+		<result column="COLUMN_TYPE" jdbcType="VARCHAR" property="columnType" />
+		<result column="ALLOW_BLANK" jdbcType="VARCHAR" property="allowBlank" />
+		<result column="IF_LOOK_UP" jdbcType="VARCHAR" property="ifLookUp" />
+		<result column="END_RANK" jdbcType="VARCHAR" property="endRank" />
+		<result column="AMT_RANK" jdbcType="VARCHAR" property="amtRank" />
+    </resultMap>
+    <sql id="Base_Column_List">
+	    ID,BUS_TYPE,FIELD_EN_NAME,FIELD_CN_NAME,IF_SHOW,SHOW_SORT,COLUMN_TYPE,ALLOW_BLANK,IF_LOOK_UP,END_RANK,AMT_RANK
+    </sql>
+    
+    <select id="getBusType" resultType="java.util.HashMap">
+		select distinct A.lookup_item_code as key,A.lookup_item_name as value ,
+			case
+			   when B.ID is null THEN
+			    'false'
+			   else
+			    'true'
+			 end as checked
+		from admin_sm_lookup_item A 
+		left join pma_f_appoint_set B on B.BUS_TYPE = A.LOOKUP_ITEM_CODE
+		where A.lookup_code ='BUS_TYPE'
+    </select>
+    
+    <select id="getSetting" parameterType="java.lang.String" resultType="java.util.HashMap">
+		select BUS_TYPE,FIELD_EN_NAME,FIELD_CN_NAME,IF_SHOW,SHOW_SORT,COLUMN_TYPE,ALLOW_BLANK,IF_LOOK_UP,END_RANK,AMT_RANK,AMT_RANK_TYPE
+		from  pma_f_appoint_set 
+		where bus_type =#{busType}
+		order by SHOW_SORT asc
+    </select>
+    
+    <select id="getSettingModel" resultType="java.util.HashMap">
+		select C.COLUMN_NAME AS FIELD_EN_NAME,C.COMMENTS AS FIELD_CN_NAME,
+		'0' AS IF_SHOW, rownum + 10 as  SHOW_SORT,
+		'' as COLUMN_TYPE,'' as ALLOW_BLANK,'' as IF_LOOK_UP,'' as END_RANK,'' as AMT_RANK,'' AS AMT_RANK_TYPE
+		FROM  user_col_comments c
+		left join user_tab_columns t on c.TABLE_NAME=t.TABLE_NAME and c.COLUMN_NAME=t.COLUMN_NAME
+		where T.TABLE_NAME='PMA_F_APPOINT_AUDIT_INFO'
+		and C.COLUMN_NAME NOT IN ('ID','END_DATE','AMT_START','AMT_END','BUS_TYPE','APPOINT_ORG_ID','APPLY_TIME','AMT_FLOAT')
+    </select>
+    
+    <delete id="delAll">
+    	delete from pma_f_appoint_set
+    </delete>
+</mapper>

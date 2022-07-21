@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.cust.person.repository.mapper.AcrmFagGkChannelMapper">
+    <sql id="Base_Column_List">
+	    CORP_ORG_CODE,DATA_DATE,CUST_ID,CUST_NAME,CUST_TYPE,START_DT,END_DT,CHANNEL,BUSI_TYPE,SAVE_COUNT,SAVE_AMT,DRAW_COUNT,DRAW_AMT,TRAN_AMT,TRANS_NUM,INCOME
+    </sql>
+    
+    <select id="queryChannelByCustId" parameterType="java.util.Map"  resultType="java.util.HashMap">
+		  select t.CORP_ORG_CODE,
+		       to_char(to_date(t.DATA_DATE,'yyyy-MM-dd'),'yyyy-MM-dd') as DATA_DATE,
+		       t.CUST_ID,
+		       t.CUST_NAME,
+		       t.CUST_TYPE,
+		       to_char(t.START_DT,'yyyy-mm-dd') as START_DT,
+		       to_char(t.END_DT,'yyyy-mm-dd') as END_DT,
+		       t.CHANNEL,
+		       t.BUSI_TYPE,
+		       t.SAVE_COUNT,
+		       t.SAVE_AMT,
+		       t.DRAW_COUNT,
+		       t.DRAW_AMT,
+		       t.TRAN_AMT,
+		       t.TRANS_NUM,
+		       t.INCOME
+		  from ACRM_F_AG_GK_CHANNEL t
+		  where 1=1
+		  <if  test="custId != null and custId != ''">
+	       		and t.CUST_ID =#{custId,jdbcType=VARCHAR} 
+		  </if>
+	</select>
+	
+</mapper>

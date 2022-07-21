@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscimc.operation.repository.mapper.OcrmFCiFqScolMapper">
+    <select id="getScol" parameterType="string" resultType="java.util.HashMap">
+        select *
+        from CIMP_F_CI_FQ_SCOL
+        where ss_id = #{ssId, jdbcType=VARCHAR}
+        order by ss_col_gorder
+    </select>
+    <select id="deletebyssid" parameterType="string">
+        delete
+        from CIMP_F_CI_FQ_SCOL
+        where ss_id = #{ssId, jdbcType=VARCHAR}
+    </select>
+    <select id="getUuid" parameterType="string" resultType="java.util.HashMap">
+        select org_level
+        from admin_sm_org
+        where org_code = #{orgCode, jdbcType=VARCHAR}
+    </select>
+
+    <select id="getScolAndDbcol" resultType="java.util.HashMap">
+        select a.dbtable_name, a.alias, a.col_name_e, a.col_type, t.ss_col_gjoin, t.ss_col_value, t.ss_col_op
+        from CIMP_F_CI_FQ_SCOL t
+                 left join cimp_f_ci_fq_dbcol a on t.ss_col_item = a.id
+        where t.ss_id = #{ssId}
+        order by t.ss_col_gorder
+    </select>
+</mapper>

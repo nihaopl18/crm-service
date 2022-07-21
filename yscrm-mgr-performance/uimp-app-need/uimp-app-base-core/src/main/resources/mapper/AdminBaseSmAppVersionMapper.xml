@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.uimp.base.repository.mapper.AdminBaseSmAppVersionMapper">
+    <resultMap id="BaseResultMap" type="cn.com.yusys.yusp.uimp.base.domain.AdminBaseSmAppVersion">
+		<id column="ID" jdbcType="VARCHAR" property="id" />
+		<result column="VERSION_ID" jdbcType="VARCHAR" property="versionId" />
+		<result column="IS_MAST" jdbcType="VARCHAR" property="isMast" />
+		<result column="VERSION_BELONG" jdbcType="VARCHAR" property="versionBelong" />
+		<result column="DOWNLOAD_URL" jdbcType="VARCHAR" property="downloadUrl" />
+		<result column="CONTENT" jdbcType="VARCHAR" property="content" />
+		<result column="DOWNLOAD_NAME" jdbcType="VARCHAR" property="downloadName" />
+    </resultMap>
+    <sql id="Base_Column_List">
+	    ID,VERSION_ID,IS_MAST,VERSION_BELONG,DOWNLOAD_URL,CONTENT,DOWNLOAD_NAME
+    </sql>
+    
+    <select id="queryList" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.Map">
+		select ID,VERSION_ID,IS_MAST,VERSION_BELONG,DOWNLOAD_URL,CONTENT,DOWNLOAD_NAME
+		from ADMIN_BASE_SM_APP_VERSION
+		<where>
+			<if test="condition.id != null and condition.id != ''">
+				and id =#{condition.id}
+			</if>
+			<if test="condition.versionBelong!= null and condition.versionBelong != ''">
+				and VERSION_BELONG =#{condition.versionBelong}
+			</if>
+		</where>
+		order by version_id desc
+	</select>
+</mapper>

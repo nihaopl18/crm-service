@@ -1,0 +1,250 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.climp.qypool.repository.mapper.LoyAcOrderListMapper">
+	<resultMap id="BaseResultMap" type="cn.com.yusys.climp.qypool.domain.LoyAcOrderList">
+		<result column="ORDER_NUMBER" jdbcType="VARCHAR" property="orderNumber" />
+		<result column="ORDER_STATE" jdbcType="VARCHAR" property="orderState" />
+		<result column="ORDER_CUST_ID" jdbcType="VARCHAR" property="orderCustId" />
+		<result column="ORDER_START_DATE" jdbcType="DATE" property="orderStartDate" />
+		<result column="ORDER_END_DATE" jdbcType="DATE" property="orderEndDate" />
+		<result column="CONSIGNEE_NAME" jdbcType="VARCHAR" property="consigneeName" />
+		<result column="CONSIGNEE_NUMBER" jdbcType="VARCHAR" property="consigneeNumber" />
+		<result column="CONSIGNEE_ADDRESS" jdbcType="VARCHAR" property="consigneeAddress" />
+		<result column="TRACKING_NUMBER" jdbcType="VARCHAR" property="trackingNumber" />
+		<result column="LOGISTICS" jdbcType="VARCHAR" property="logistics" />
+		<result column="COMMODITY_CODE" jdbcType="VARCHAR" property="commodityCode" />
+		<result column="COMMODITY_NAME" jdbcType="VARCHAR" property="commodityName" />
+		<result column="COMMODITY_NUMBER" jdbcType="BIGINT" property="commodityNumber" />
+		<result column="COMMODITY_L_VALUE" jdbcType="BIGINT" property="commodityLValue" />
+		<result column="COMMODITY_T_VALUE" jdbcType="BIGINT" property="commodityTValue" />
+		<result column="COMMODITY_M_VALUE" jdbcType="BIGINT" property="commodityMValue" />
+		<result column="COMMODITY_TYPE" jdbcType="VARCHAR" property="commodityType" />
+		<result column="TRANSACTION_FLOW" jdbcType="VARCHAR" property="transactionFlow" />
+		<result column="STAND_FLOW_TABLE_NAME" jdbcType="VARCHAR" property="standFlowTableName" />
+		<result column="RULES_ID" jdbcType="VARCHAR" property="rulesId" />
+		<result column="MODEL_PARAM" jdbcType="VARCHAR" property="modelParam" />
+		<result column="ACTIVITY_NAME" jdbcType="VARCHAR" property="activityName" />
+		<result column="ACTIVITY_ID" jdbcType="VARCHAR" property="activityId" />
+		<result column="MAJOR_ORDER_NUMBER" jdbcType="VARCHAR" property="majorOrderNumber" />
+		<result column="ORDER_CITY" jdbcType="VARCHAR" property="orderCity" />
+		<result column="ORDER_EXC_REASON" jdbcType="VARCHAR" property="orderExcReason" />
+		<result column="ORDER_OFF_REASON" jdbcType="VARCHAR" property="orderOffReason" />
+		<result column="UPDATE_USER" jdbcType="VARCHAR" property="updateUser" />
+		<result column="UPDATE_ORG" jdbcType="VARCHAR" property="updateOrg" />
+		<result column="UPDATE_DATE" jdbcType="DATE" property="updateDate" />
+		<result column="ORDER_TYPE" jdbcType="VARCHAR" property="orderType" />
+    </resultMap>
+	<!--
+	<select id="orderListQuery" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+		SELECT T.ORDER_NUMBER,T.ORDER_STATE,T.ORDER_CUST_ID,T.MAJOR_ORDER_NUMBER,T.ORDER_CITY,
+		T.CONSIGNEE_NAME,T.CONSIGNEE_NUMBER,T.CONSIGNEE_ADDRESS,T.TRACKING_NUMBER,T.LOGISTICS,
+		T.COMMODITY_CODE,T.COMMODITY_NAME,T.COMMODITY_NUMBER,T.COMMODITY_L_VALUE,
+		T.COMMODITY_T_VALUE,T.COMMODITY_M_VALUE,T.COMMODITY_TYPE,T.TRANSACTION_FLOW,
+		T.STAND_FLOW_TABLE_NAME,T.RULES_ID,T.MODEL_PARAM,R.CUST_NAME,R.CUST_TYPE,
+		TO_CHAR(ORDER_START_DATE,'YYYY-MM-DD') AS ORDER_START_DATE,
+		TO_CHAR(ORDER_END_DATE,'YYYY-MM-DD') AS ORDER_END_DATE
+		FROM LOY_AC_ORDER_LIST T
+		LEFT JOIN LOY_CM_CUST_INFO R ON R.CUST_ID = T.ORDER_CUST_ID
+		left join LOY_QY_COMMODITY_INFO G on G.COMMODITY_CODE=T.COMMODITY_CODE
+		<where>
+		1=1
+			<if test="condition.orderNumber != '' and condition.orderNumber != null">
+				and T.ORDER_NUMBER LIKE '%' || #{condition.orderNumber,jdbcType=VARCHAR} || '%'
+			</if>
+			<if test="condition.majorOrderNumber != '' and condition.majorOrderNumber != null">
+				and T.MAJOR_ORDER_NUMBER LIKE '%' || #{condition.majorOrderNumber,jdbcType=VARCHAR} || '%'
+			</if>
+			<if test="condition.orderState != '' and condition.orderState != null">
+				and T.ORDER_STATE = #{condition.orderState,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.commodityCode != '' and condition.commodityCode != null">
+				and T.COMMODITY_CODE LIKE '%' || #{condition.commodityCode,jdbcType=VARCHAR} || '%'
+			</if>
+			<if test="condition.commodityName != '' and condition.commodityName != null">
+				and T.COMMODITY_NAME LIKE '%' || #{condition.commodityName,jdbcType=VARCHAR} || '%'
+			</if>
+			<if test="condition.orderCity != '' and condition.orderCity != null">
+				and T.ORDER_CITY LIKE '%' || #{condition.orderCity,jdbcType=VARCHAR} || '%'
+			</if>
+			<if test="condition.custType != '' and condition.custType != null">
+				and R.CUST_TYPE LIKE '%' || #{condition.custType,jdbcType=VARCHAR} || '%'
+			</if>
+			<if test="condition.orderCustId != '' and condition.orderCustId != null">
+				and t.order_cust_id LIKE '%' || #{condition.orderCustId,jdbcType=VARCHAR} || '%'
+			</if>
+			<if test="condition.custName != '' and condition.custName != null">
+				and R.CUST_NAME LIKE '%' || #{condition.custName,jdbcType=VARCHAR} || '%'
+			</if>
+			<if test="condition.merchantId != '' and condition.merchantId != null">
+				and G.BELONG_MERCHANT = #{condition.merchantId,jdbcType=VARCHAR} 
+			</if>
+		</where>
+	</select>
+	-->
+
+	<select id="orderListQuery" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+		SELECT E.ORDER_ID,E.ORDER_NO, E.ORDER_DT, E.CUST_NO, P.CUST_NAME, P.ENGLISH_NAME, E.ORDER_CHANNEL, C.COMMODITY_V_FLAG, E.ORDER_STATUS, E.APP_STATUS, E.OPERATOR_CODE
+		FROM LOY_SR_EXCH_SERIAL E
+		LEFT JOIN ACRM_F_CI_PER_ADMIT_INFO P ON E.CUST_NO = P.CUST_ID
+		<if test="condition.custType != null and condition.custType !=''">
+			<if test="condition.certNo != null and condition.certNo !=''">
+			INNER JOIN ACRM_F_CI_CUST_IDENT_INFO CR
+			    ON CR.CUST_ID=P.CUST_ID
+			    AND CR.CERT_TYPE=#{condition.custType,jdbcType=VARCHAR}
+			    AND CR.CERT_NO=#{condition.certNo,jdbcType=VARCHAR}
+		    	AND CR.ISSUE_COUNTRY = #{condition.issueCountry,jdbcType=VARCHAR}
+			</if>
+		</if>
+		LEFT JOIN LOY_AC_ORDER_LIST L ON E.ORDER_NO = L.ORDER_NO
+		LEFT JOIN LOY_QY_COMMODITY_INFO C ON C.ID = L.COMMODITY_ID
+		where 1=1
+		<if test="condition.custId != null and condition.custId != ''">
+			and E.CUST_NO = #{condition.custId,jdbcType=VARCHAR}
+		</if>
+		<if test="condition.custName != '' and condition.custName != null">
+			and P.CUST_NAME LIKE '%' || #{condition.custName,jdbcType=VARCHAR} || '%'
+		</if>
+		<if test="condition.englishName != '' and condition.englishName != null">
+			and P.ENGLISH_NAME LIKE '%' || #{condition.englishName,jdbcType=VARCHAR} || '%'
+		</if>
+		<if test="condition.startDate != '' and condition.startDate != null">
+			and E.ORDER_DT >= to_date(#{condition.startDate,,jdbcType=VARCHAR}, 'yyyy-mm-dd')
+		</if>
+		<if test="condition.endDate != '' and condition.endDate != null">
+			and E.ORDER_DT &lt;= to_date(#{condition.endDate,,jdbcType=VARCHAR}, 'yyyy-mm-dd')
+		</if>
+		order by E.ORDER_DT desc
+	</select>
+
+	<select id="getOrderDetail" parameterType="java.lang.String" resultType="java.util.Map">
+		select * from LOY_SR_EXCH_SERIAL
+		where ORDER_ID = #{orderId,jdbcType=VARCHAR}
+	</select>
+
+	<select id="getCustInfo" parameterType="java.lang.String" resultType="java.util.Map">
+		select PAI.CUST_ID, PAI.CUST_NAME, PAI.ENGLISH_NAME,CGI.aum_grade
+		from LOY_SR_EXCH_SERIAL E
+		left join ACRM_F_CI_PER_ADMIT_INFO PAI on E.CUST_NO = PAI.CUST_ID
+		left join V_APP_CUST_GRADE_INFO CGI on E.CUST_NO = CGI.ecif_cust_no
+		where E.ORDER_ID = #{orderId,jdbcType=VARCHAR}
+	</select>
+
+	<select id="getCommInfo" parameterType="java.lang.String" resultType="java.util.Map">
+		select CI.COMMODITY_CODE, CI.COMMODITY_NAME, CI.COMMODITY_DESC,CI.COMMODITY_V_FLAG,CI.ID
+		from LOY_SR_EXCH_SERIAL E
+		left join LOY_AC_ORDER_LIST OL on E.ORDER_NO = OL.ORDER_NO
+		left join LOY_QY_COMMODITY_INFO CI on OL.COMMODITY_ID = CI.ID
+		where E.ORDER_ID = #{orderId,jdbcType=VARCHAR}
+	</select>
+
+	<select id="getOrderId" parameterType="java.lang.String" resultType="java.lang.String">
+		select distinct ORDER_ID from LOY_SR_EXCH_SERIAL where ORDER_NO = #{orderCode,jdbcType=VARCHAR}
+	</select>
+
+	<select id="getTimes" parameterType="java.util.Map" resultType="java.lang.String">
+		select count(*) as tims
+		from LOY_SR_EXCH_SERIAL t1
+		left join LOY_AC_ORDER_LIST t2 on t1.ORDER_NO = t2.ORDER_NO
+		where t2.COMMODITY_ID = #{id,jdbcType=VARCHAR}
+		  and t1.CUST_NO = #{custNo,jdbcType=VARCHAR}
+		  and t1.ORDER_STATUS != '40'
+		  <if test="rate == '10'.toString()">
+			  and t1.ORDER_DT >= add_months(sysdate,-12)
+		  </if>
+		  <if test="rate == '20'.toString()">
+		  	and t1.ORDER_DT >= add_months(sysdate,-6)
+		  </if>
+		  <if test="rate == '30'.toString()">
+		  	and t1.ORDER_DT >= add_months(sysdate,-3)
+		  </if>
+		  <if test="rate == '40'.toString()">
+			and t1.ORDER_DT >= add_months(sysdate,-1)
+		  </if>
+	</select>
+
+	<!-- 获取出货虚拟识别码 -->
+	<select id="getVirtNo" resultType="java.util.HashMap">
+		SELECT T.TICKET_NO,T.VIRT_NO FROM LOY_QY_VIRT_STOCK T WHERE T.TICKET_NO = #{commodityCode} AND T.USED_STS = '0' AND ROWNUM <![CDATA[<]]> #{commodityNumber} + 1 
+	</select>
+	<!-- 更新票券使用状态 -->
+	<update id="updateUsedSts" parameterType="java.util.HashMap">
+		UPDATE LOY_QY_VIRT_STOCK SET USED_STS = '1' WHERE TICKET_NO = #{ticketNo}
+		AND VIRT_NO IN 
+		<foreach item="item" index="index" collection="virtNo" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</update>
+	<!-- 插入虚拟票券出货表 -->
+	<insert id="orderOutList" parameterType="java.util.HashMap">
+		INSERT INTO LOY_AC_ORDER_OUT_LIST SELECT #{orderNumber},TICKET_NO,VIRT_NO,#{createDate}
+		FROM LOY_QY_VIRT_STOCK WHERE TICKET_NO = #{ticketNo}
+		AND VIRT_NO IN
+		<foreach item="item" index="index" collection="virtNo" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</insert>
+	<!-- 删除虚拟票券出货表 -->
+	<delete id="delOutList">
+		DELETE FROM LOY_AC_ORDER_OUT_LIST WHERE ORDER_NUMBER IN 
+		<foreach item="item" index="index" collection="array" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</delete>
+	<!-- 更新订单出货状态 -->
+	<update id="editOutList" parameterType="cn.com.yusys.climp.qypool.domain.LoyAcOrderList">
+		UPDATE LOY_AC_ORDER_LIST SET 
+		CONSIGNEE_NAME = #{consigneeName,jdbcType=VARCHAR},
+		CONSIGNEE_NUMBER = #{consigneeNumber,jdbcType=VARCHAR},
+		CONSIGNEE_ADDRESS = #{consigneeAddress,jdbcType=VARCHAR},
+		LOGISTICS = #{logistics,jdbcType=VARCHAR},
+		TRACKING_NUMBER = #{trackingNumber,jdbcType=VARCHAR},
+		ORDER_STATE = #{orderState,jdbcType=VARCHAR}
+		WHERE ORDER_NUMBER = #{orderNumber,jdbcType=VARCHAR}
+	</update>
+	
+	<!-- 订单换货/关闭 -->
+	<update id="updatests" parameterType="cn.com.yusys.climp.qypool.domain.LoyAcOrderList">
+		UPDATE LOY_AC_ORDER_LIST SET 
+		ORDER_STATE = #{orderState,jdbcType=VARCHAR},
+		UPDATE_DATE = #{updateDate,jdbcType=DATE},
+		UPDATE_ORG = #{updateOrg,jdbcType=VARCHAR},
+		UPDATE_USER = #{updateUser,jdbcType=VARCHAR},
+		ORDER_EXC_REASON = #{orderExcReason,jdbcType=VARCHAR},
+		ORDER_OFF_REASON = #{orderOffReason,jdbcType=VARCHAR}
+		WHERE ORDER_NUMBER = #{orderNumber,jdbcType=VARCHAR}
+	</update>
+
+	<!-- 联机接口 -->
+	<!-- 根据NDS客户查询ECIF号 -->
+	<select id="getEcifNo" resultType="java.lang.String" parameterType="java.util.Map">
+		SELECT DISTINCT ECIF_CUST_NO FROM ACRM_F_CUST_SYSTEM_INDEX
+		WHERE SRC_SYSTEM_NO= #{SYSTEM_ID,jdbcType=VARCHAR}
+		  AND SRC_CUST_NO= #{CUST_ID,jdbcType=VARCHAR}
+	</select>
+	<select id="getOrderListByCustEcif" parameterType="java.util.Map" resultType="java.util.Map">
+		select
+		       T1.CUST_NO,to_char(T1.ORDER_DT,'yyyyMMdd') ORDER_DT,T1.ORDER_NO,T1.SUM_SCORE,T1.ORDER_STATUS,T2.COMMODITY_ID,T3.COMMODITY_NAME,
+		       T2.COMMODITY_NUMBER,T1.ORDER_CHANNEL,T2.ORDER_DESC,T1.EXTEND_DESC
+		FROM LOY_SR_EXCH_SERIAL T1
+		LEFT JOIN LOY_AC_ORDER_LIST T2 ON T1.ORDER_NO = T2.ORDER_NO
+		LEFT JOIN LOY_QY_COMMODITY_INFO T3 ON T2.COMMODITY_ID = T3.ID
+		WHERE T1.CUST_NO = #{custId,jdbcType=VARCHAR}
+			<if test="startDate != null and startDate != ''">
+				and trunc(T1.ORDER_DT,'dd') >= to_date(#{startDate,jdbcType=VARCHAR},'yyyyMMdd')
+			</if>
+			<if test="endDate != null and endDate != ''">
+				and trunc(T1.ORDER_DT,'dd') &lt;= to_date(#{endDate,jdbcType=VARCHAR},'yyyyMMdd')
+			</if>
+		order by T1.ORDER_DT desc
+	</select>
+	<select id="orderCheck" parameterType="java.lang.String" resultType="java.util.Map">
+		SELECT
+			T1.CUST_NO,to_char(T1.ORDER_DT,'yyyyMMdd') DATA_DT,T1.ORDER_NO,T1.SUM_SCORE,T1.ORDER_STATUS,
+			T3.commodity_code,T3.commodity_name,
+			T2.commodity_number,T1.ORDER_CHANNEL,T2.ORDER_DESC
+		FROM LOY_SR_EXCH_SERIAL T1
+		LEFT JOIN LOY_AC_ORDER_LIST T2 ON T1.ORDER_NO = T2.ORDER_NO
+		LEFT JOIN LOY_QY_COMMODITY_INFO T3 ON T2.COMMODITY_ID = T3.ID
+		WHERE T1.ORDER_NO = #{orderCode,jdbcType=VARCHAR}
+	</select>
+</mapper>

@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.uimp.excel.repository.mapper.PmaFschemeExcelgrantInfMapper">
+    <resultMap id="BaseResultMap" type="cn.com.yusys.yusp.uimp.excel.domain.PmaFschemeExcelgrantInf">
+		<id column="ID" jdbcType="VARCHAR" property="id" />
+		<result column="SCHEME_ID" jdbcType="VARCHAR" property="schemeId" />
+		<result column="SCHEME_NAME" jdbcType="VARCHAR" property="schemeName" />
+		<result column="GRANT_OBJ_TYPE" jdbcType="VARCHAR" property="grantObjType" />
+		<result column="GRANT_OBJ_ID" jdbcType="VARCHAR" property="grantObjId" />
+		<result column="GRANT_OBJ_NAME" jdbcType="VARCHAR" property="grantObjName" />
+		<result column="GRANT_OBJ_RANGE" jdbcType="VARCHAR" property="grantObjRange" />
+		<result column="CREATE_TIME" jdbcType="TIMESTAMP" property="createTime" />
+    </resultMap>
+    <sql id="Base_Column_List">
+	    ID,SCHEME_ID,SCHEME_NAME,GRANT_OBJ_TYPE,GRANT_OBJ_ID,GRANT_OBJ_NAME,GRANT_OBJ_RANGE,CREATE_TIME
+    </sql>
+    
+    <select id="getGrantInfBySchemeId" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultMap="BaseResultMap">
+    	select <include refid="Base_Column_List"/> from PMA_F_SCHEME_EXCELGRANT_INF 
+    	where SCHEME_ID = #{condition.schemeId, jdbcType=VARCHAR}
+    	order by CREATE_TIME desc
+    </select>
+    
+    <delete id="deleteData" parameterType="java.lang.String">
+		delete from PMA_F_SCHEME_EXCELGRANT_INF 
+		where ID in 
+			<foreach collection="ids" item="item" index="index" open="(" close=")" separator=",">
+        		#{item}
+        	</foreach>
+	</delete>
+	
+	<select id="checkData" parameterType="cn.com.yusys.yusp.uimp.excel.domain.PmaFschemeExcelgrantInf" resultType="java.lang.Integer">
+		select count(*) from PMA_F_SCHEME_EXCELGRANT_INF
+		<where>
+			<if test="schemeId != null and schemeId != ''">
+				and SCHEME_ID = #{schemeId, jdbcType=VARCHAR}
+			</if>
+			<if test="schemeName != null and schemeName != ''">
+				and SCHEME_NAME = #{schemeName, jdbcType=VARCHAR}
+			</if>
+			<if test="grantObjType != null and grantObjType != ''">
+				and GRANT_OBJ_TYPE = #{grantObjType, jdbcType=VARCHAR}
+			</if>
+			<if test="grantObjId != null and grantObjId != ''">
+				and GRANT_OBJ_ID = #{grantObjId, jdbcType=VARCHAR}
+			</if>
+			<if test="grantObjRange != null and grantObjRange != ''">
+				and GRANT_OBJ_RANGE = #{grantObjRange, jdbcType=VARCHAR}
+			</if>
+		</where>
+	</select>
+	
+	<select id="getQuoteSchemeInf" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultMap="BaseResultMap">
+		select * from PMA_F_SCHEME_EXCELGRANT_INF where GRANT_OBJ_ID = #{condition.orgCode}
+			<if test="condition.schemeId != null and condition.schemeId != ''">
+				and SCHEME_ID = #{condition.schemeId, jdbcType=VARCHAR}
+			</if>
+			<if test="condition.schemeName != null and condition.schemeName != ''">
+				and SCHEME_NAME LIKE concat(concat('%',#{condition.schemeName,jdbcType=VARCHAR}),'%')
+			</if>
+		order by CREATE_TIME desc
+	</select>
+</mapper>

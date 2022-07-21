@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.info.remind.repository.mapper.OcrmFwpRemindRuleMapper">
+    <resultMap id="BaseResultMap" type="cn.com.yusys.yscrm.info.remind.domain.OcrmFwpRemindRule">
+		<id column="RULE_ID" jdbcType="VARCHAR" property="ruleId" />
+		<result column="TYPE_ID" jdbcType="VARCHAR" property="typeId" />
+		<result column="RULE_NAME" jdbcType="VARCHAR" property="ruleName" />
+		<result column="RECE_ROLE_ID" jdbcType="VARCHAR" property="receRoleId" />
+		<result column="RECE_ROLE_NAME" jdbcType="VARCHAR" property="receRoleName" />
+		<result column="ADJUST_ORG_ID" jdbcType="VARCHAR" property="adjustOrgId" />
+		<result column="ADJUST_ORG_NAME" jdbcType="VARCHAR" property="adjustOrgName" />
+		<result column="ORG_CUST_LEVEL" jdbcType="VARCHAR" property="orgCustLevel" />
+		<result column="PER_CUST_LEVEL" jdbcType="VARCHAR" property="perCustLevel" />
+		<result column="CUST_TYPE" jdbcType="VARCHAR" property="custType" />
+		<result column="BEFORE_DAYS" jdbcType="NUMERIC" property="beforeDays" />
+		<result column="LAST_DAYS" jdbcType="NUMERIC" property="lastDays" />
+		<result column="ORG_THRESHHOLD" jdbcType="NUMERIC" property="orgThreshhold" />
+		<result column="PER_THRESHHOLD" jdbcType="NUMERIC" property="perThreshhold" />
+		<result column="REMIND_MODEL" jdbcType="VARCHAR" property="remindModel" />
+		<result column="IS_BATCH_MESS" jdbcType="VARCHAR" property="isBatchMess" />
+		<result column="CREATE_USER" jdbcType="VARCHAR" property="createUser" />
+		<result column="CREATE_ORG" jdbcType="VARCHAR" property="createOrg" />
+		<result column="CREATE_DATE" jdbcType="DATE" property="createDate" />
+		<result column="UPDATE_USER" jdbcType="VARCHAR" property="updateUser" />
+		<result column="UPDATE_ORG" jdbcType="VARCHAR" property="updateOrg" />
+		<result column="UPDATE_DATE" jdbcType="DATE" property="updateDate" />
+		<result column="IS_ENABLE" jdbcType="VARCHAR" property="isEnable" />
+		<result column="CORP_ORG_CODE" jdbcType="VARCHAR" property="corpOrgCode" />
+		<result column="ETL_DATE" jdbcType="DATE" property="etlDate" />
+    </resultMap>
+    <sql id="Base_Column_List">
+	    RULE_ID,TYPE_ID,RULE_NAME,RECE_ROLE_ID,RECE_ROLE_NAME,ADJUST_ORG_ID,ADJUST_ORG_NAME,ORG_CUST_LEVEL,PER_CUST_LEVEL,CUST_TYPE,BEFORE_DAYS,LAST_DAYS,ORG_THRESHHOLD,PER_THRESHHOLD,REMIND_MODEL,IS_BATCH_MESS,CREATE_USER,CREATE_ORG,CREATE_DATE,UPDATE_USER,UPDATE_ORG,UPDATE_DATE,IS_ENABLE,CORP_ORG_CODE,ETL_DATE
+    </sql>
+    
+    <!-- 列表查询 -->
+    <select id="queryList" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+	    select a.*, b.TYPE_NAME,
+		  case when c.CHL_ID = 'C01' then '1' 
+		       when c.CHL_ID is null then '0'
+		  end as IS_SEND_MES,
+		  case when c.CHL_ID = 'C01' and c.MESSAGE_MODEL is not null then c.MESSAGE_MODEL
+		       else ''
+		  end as MESSAGE_MODEL,
+		  case when a.ORG_THRESHHOLD is not null then ORG_THRESHHOLD 
+		       when a.PER_THRESHHOLD is not null then PER_THRESHHOLD
+		  end as THRESHHOLD
+		from OCRM_F_WP_REMIND_RULE a 
+		  left join OCRM_F_WP_REMIND_RULE_TYPE b on a.TYPE_ID = b.TYPE_ID
+		  left join OCRM_F_WP_REMIND_CHL_NEX c on a.RULE_ID = c.RULE_ID
+	 	<where>
+			<if test="condition.typeId != null and condition.typeId != ''">
+              AND a.TYPE_ID = #{condition.typeId,jdbcType=VARCHAR} 
+        	</if>
+        </where>
+	    <if test="sort != null"> order by ${sort} </if>
+    </select>
+</mapper>

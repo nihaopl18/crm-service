@@ -1,0 +1,224 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.dycrm.realtimerpc.repository.mapper.RpcCustViewQueryMapper">
+
+    <select id="queryCustMgr" resultType="java.util.concurrent.ConcurrentHashMap">
+        select t.mgr_id as CUST_MGR_NO,t.mgr_name as CUST_MGR_NM,t.org_id as CUST_MGR_ORG_NO,t.org_name as ORG_NAME
+        from OCRM_F_CI_ADMIT_BELONG t
+        where t.cust_id = #{ecif_cust_no} and t.mgr_type = '1'
+    </select>
+    <select id="queryCustGrade" resultType="java.util.concurrent.ConcurrentHashMap">
+        select t1.aum_grade as AUM_EVN_GRADE,t1.EXPIRED_DATE,t2.lookup_item_name  as  AUM_EVN_GRADE_NM,t1.aum_grade_base_val as AUM_AVG,t1.NEXT_GRD_AUM
+        from v_app_cust_grade_info t1
+        left join admin_sm_lookup_item t2
+            on t2.lookup_item_code = t1.aum_grade
+            and t2.lookup_code = 'CUST_GRADE'
+        where ecif_cust_no = #{ecif_cust_no}
+    </select>
+    <select id="queryCustAnalyse" resultType="java.util.concurrent.ConcurrentHashMap">
+        select IS_WAGES_PAYING AS IF_PAY_WAGE, IS_FIN_CUST as IF_FINANCE,IS_LOAN as IF_LOAN,CR_CARD_LIAB_CUST_FLAG as IF_CREDIT,IS_INSURRANCE_CUST as IF_BANK_ASSU,IS_SIGN_PER_ONLINE_BANK as IF_ELEC,TEL_BANK_SIGN_CUST_FLAG as IF_PHONE,IS_SIGN_WECHAT_BANK as IF_WEIXIN,IS_SIGN_MOBILE_BANK as IF_TELEPHONE,cust_classify as CUST_DESC,is_cust_grade_1 as IF_COMMON,is_cust_grade_4 as IF_HIGH_FINANCE,is_cust_grade_6 as IF_DIAMOND,is_cust_grade_5 as IF_VIP,is_cust_grade_3 as IF_MIDDLE_FINANCE,if_keep as IF_KEEP,if_head_bank as IF_HEAD_BANK,if_once as IF_ONCE,is_two_place_cust as IF_TWOPLACE,is_us_cust as IF_USA_RESID,is_hold_debit_card as HAVE_DCARD_FLAG
+        from ACRM_F_CUST_FLEXIBLE_INFO
+        WHERE CUST_NO = #{ecif_cust_no}
+    </select>
+    <select id="queryCustEva" resultType="java.util.concurrent.ConcurrentHashMap">
+
+
+        SELECT EVAL_SER_ID as flow_no,EVAL_SCOR as score,risk_lev as EVALUATE_GRADE,IS_HAVE_INVEST_EXP as if_experience,eva_date,EVALUATE_INVALID_DATE as EFF_DATE,eva_channel,RISK_STATUS as IF_EFFECT FROM ACRM_F_CI_RISK_WARN_FIN_INFO WHERE CUST_ID = #{ecif_cust_no} ORDER BY EVA_DATE DESC
+    </select>
+    <select id="querySumBusi" resultType="java.util.HashMap">
+        select  DEPOSIT_BALANCE_RMB as DEPOSIT_TERM_AMT,LOAN_BALANCE as LOAN_TERM_AMT,FIN_BALANCE_RMB as FINANCE_BALANCE_RMB,INSURRANCE_BALANCE as INSSRANCE_AMT,CR_CARD_BAL as CREDIT_BAL,AUM_BALANCE as AUM_BAL_RMB
+        from ACRM_F_PD_CUST_INDEXS
+        where cust_no = #{ecif_cust_no}
+    </select>
+    <select id="querySumAumBal" resultType="java.lang.String">
+        select AUM_BALANCE as AUM_BAL_RMB
+        from ACRM_F_PD_CUST_INDEXS
+        where cust_no = #{ecif_cust_no}
+    </select>
+    <select id="queryAumYearMax" resultType="java.lang.String">
+        select YEAR_MAX_AUM_BALANCE_MTH_AVG as AUM_YEAR_MAX from ACRM_F_CUST_FLEXIBLE_INFO WHERE CUST_NO = #{ecif_cust_no}
+    </select>
+    <select id="queryEcifNo" resultType="java.lang.String">
+        select distinct ECIF_CUST_NO FROM ACRM_F_CUST_SYSTEM_INDEX WHERE SRC_SYSTEM_NO = #{systemId} AND SRC_CUST_NO = #{custId}
+    </select>
+    <select id="queryEcifCustNo" resultType="java.lang.String">
+        select CUST_ID from ACRM_F_CI_CUST_IDENT_INFO WHERE CERT_TYPE = #{globalType} AND CERT_NO = #{globalId} and iss_country = #{globalCon}
+    </select>
+    <select id="querySumDepAcc" resultType="java.util.HashMap">
+        select PROD_CODE as CTLA_CODE,prod_code_nm as CTAL_NAME ,acct_balance_rmb as TERM_BALANCE
+        from ACRM_F_CUST_PROD_BALANCE_INFO
+        <where>
+            PROD_LEVEL = 4
+            <if test="ecifCustNo != null and ecifCustNo != ''">
+                and cust_no = #{ecifCustNo}
+            </if>
+            <if test="depCode != null">
+                and substr(prod_code,1,3) = #{depCode}
+            </if>
+
+
+        </where>
+    </select>
+    <select id="queryDepAccDetail" resultType="java.util.HashMap">
+        select distinct t.DATA_DATE as DATA_DT,t.SRC_CUST_NO,t.CUST_NO as ECIF_CUST_NO,t.CUST_TYPE as CUST_TYPE_CD,t.MAIN_ACCT as BASE_ACCT_NO,t.SUB_ACCT_NO as ACCT_NO,t.OPEN_ORG as OPEN_ORG_NO,t.ACCT_OPEN_DATE as OPEN_DATE,t.MAIN_ACCT_TYPE as BASE_ACCT_TYPE,t.SUB_ACCT_TYPE,t.SUBJECT_NO,t.PROD_CODE as PROD_TYPE,t.PROD_CODE_NM as PROD_NM,t.DEPOSIT_TD_FLAG as CD_TD_FLAG,RATE_TYPE,t.CCY as CURR_CD,t.CCY_NM as CURR_CD_NM,
+         t.ACCT_BALANCE as BALANCE,t.IS_FIXED_RATE as FIXED_RATE_FLAG,t.EXECUTE_RATE as EFFECT_RATE,t.BASE_RATE as INT_BASIS_RATE,t.FLOAT_RATE as SPREAD_RATE,t.INT_BEARING_DAYS as INT_NUM_DAYS,t.VALUE_DATE as INTEREST_BEG_DATE,t.EXPIRY_DATE as MATURE_DATE,t.TERM_YEAR as DEP_PERIOD_YEAR,t.TERM_MONTH as DEP_PERIOD_MTH,t.TERM_DAY as DEP_PERIOD_DAY,t.FREEZE_DATE as FROZEN_DT,t.FREEZE_AMT as FROZEN_AMT,t.INNER_ACCT_FLAG,t.ACCT_STATUS as ACCT_STAUTS,t.ACCT_STATUS_NM as ACCT_STATUS_NM,
+         t.ACCT_BALANCE_MONTH_AVG_RMB as MONTH_AVG_RMB,t.ACCT_BALANCE_YEAR_AVG_RMB as YEAR_AVG_RMB,t.ACCT_CLOSE_DATE as CLOSE_DATE,t.SRC_SYSTEM_NO as SRC_SYS_CD,t.DELETE_FLAG,t.END_DT
+         from ACRM_F_CUST_DEPOSIT_ACCT_INFO t
+         left join ACRM_F_CUST_PROD_BALANCE_INFO p on t.CUST_NO = p.CUST_NO
+         where t.CUST_NO = #{ecifCustNo} and t.acct_status != '1' and t.acct_status != '6'
+         <if test="BANK_RELA_FLAG == '2'">
+             and t.open_org = #{CUST_MGR_NO_ORG0}
+         </if>
+    </select>
+    <select id="queryEleAcc" resultType="java.util.HashMap">
+        select t.DATA_DATE as DATA_DT,t.CUST_NO as ECIF_CUST_NO,t.SRC_CUST_NO,t.MAIN_ACCT as INT_ACCT_NO,t.SUB_ACCT_NO,t.ACCT_OPEN_DATE as OPEN_DATE,t.ACCT_CLOSE_DATE as CLOSE_DATE,t.OPEN_ORG,t.ACCT_OPEN_TELLER as OPEN_TELLER,t.ACCT_TYPE,t.ACCT_TYPE_NM,t.PROD_CODE as PROD_TYPE,t.SRC_PROD_CODE as PROD_CD,t.SRC_PROD_CODE_NM as PROD_NM,t.ACCT_STATUS,t.ACTUAL_RATE as REAL_RATE,t.VALUE_DATE as EFFE_DATE,t.EXPIRY_DATE as MATURE_DATE,t.INNER_ACCT_FLAG,t.CCY as CURR_CD,t.CCY_NM as CURR_CD_NM,t.ACCT_BALANCE as BALANCE,t.ACCT_BALANCE_RMB as BALANCE_RMB,t.ACCT_BALANCE_MONTH_AVG as MONTH_AVG,t.ACCT_BALANCE_MONTH_AVG_RMB as MONTH_AVG_RMB,t.ACCT_BALANCE_QUARTER_AVG as QUARTER_AVG,t.ACCT_BALANCE_QUARTER_AVG_RMB as QUARTER_AVG_RMB,t.ACCT_BALANCE_YEAR_AVG as YEAR_AVG,t.ACCT_BALANCE_YEAR_AVG_RMB as YEAR_AVG_RMB,t.SRC_SYSTEM_NO as SRC_SYS_CD
+        from ACRM_F_CUST_ACCT_INFO t
+        where ACCT_TYPE = '2' and ACCT_STATUS != '1' and ACCT_STATUS != '6' and t.CUST_NO = #{ecifCustNo}
+        <if test="BANK_RELA_FLAG == '2'">
+            and t.open_org = #{CUST_MGR_NO_ORG0}
+        </if>
+    </select>
+    <select id="queryCreditCardOverDetail" resultType="java.util.HashMap">
+        select t.DATA_DATE as DATA_DT,t.CUST_NO as ECIF_CUST_NO,t.SRC_CUST_NO,t.MAIN_ACCT as INT_ACCT_NO,t.SUB_ACCT_NO,t.ACCT_OPEN_DATE as OPEN_DATE,t.ACCT_CLOSE_DATE as CLOSE_DATE,t.OPEN_ORG,t.ACCT_OPEN_TELLER as OPEN_TELLER,t.ACCT_TYPE,t.ACCT_TYPE_NM,t.PROD_CODE as PROD_TYPE,t.SRC_PROD_CODE as PROD_CD,t.ACCT_STATUS,t.ACTUAL_RATE as REAL_RATE,t.VALUE_DATE as EFFE_DATE,t.EXPIRY_DATE as MATURE_DATE,t.INNER_ACCT_FLAG,t.CCY as CURR_CD,t.CCY_NM as CURR_CD_NM,t.ACCT_BALANCE as BALANCE,t.ACCT_BALANCE_RMB as BALANCE_RMB,t.ACCT_BALANCE_MONTH_AVG as MONTH_AVG,t.ACCT_BALANCE_MONTH_AVG_RMB as MONTH_AVG_RMB,t.ACCT_BALANCE_QUARTER_AVG as QUARTER_AVG,t.ACCT_BALANCE_QUARTER_AVG_RMB as QUARTER_AVG_RMB,t.ACCT_BALANCE_YEAR_AVG as YEAR_AVG,t.ACCT_BALANCE_YEAR_AVG_RMB as YEAR_AVG_RMB,t.SRC_SYSTEM_NO as SRC_SYS_CD
+        from ACRM_F_CUST_ACCT_INFO t
+        where  acct_status != '1'
+        and acct_status != '6'
+        and PROD_CODE LIKE '1010601%'
+        AND SRC_SYSTEM_NO = 'YCC'
+        and t.CUST_NO = #{ecifCustNo}
+        <if test="BANK_RELA_FLAG == '2'">
+            and t.open_org = #{CUST_MGR_NO_ORG0}
+        </if>
+    </select>
+    <select id="queryFinanceTotal" resultType="java.lang.Integer">
+        select count(*) as TOTAL from ACRM_F_CUST_FIN_ACCT_INFO t
+        <where>
+            <if test="'2'== BANK_RELA_FLAG">
+                and t.open_org = #{CUST_MGR_NO_ORG}
+            </if>
+            <if test="ecif_cust_no !=null">
+                and cust_no = #{ecif_cust_no}
+            </if>
+        </where>
+    </select>
+    <select id="queryFinanceCurrNum" resultType="java.lang.Integer">
+        select count(*) as TOTAL from  ACRM_F_CUST_FIN_ACCT_INFO t
+        <where>
+            <if test="'2'== BANK_RELA_FLAG">
+                and t.open_org = #{CUST_MGR_NO_ORG}
+            </if>
+            <if test="ecif_cust_no !=null">
+                and cust_no = #{ecif_cust_no}
+            </if>
+        </where>
+    </select>
+    <select id="querySummaryFinAccounts" resultType="java.util.HashMap">
+        select PROD_CODE as CTLA_CODE,prod_code_nm as CTAL_NAME ,TOTAL_SHARE as TOTAL_VOL
+        from ACRM_F_CUST_PROD_BALANCE_INFO
+        <where>
+            PROD_LEVEL = 4
+            <if test="ecifCustNo != null and ecifCustNo != ''">
+                and cust_no = #{ecifCustNo}
+            </if>
+            <if test="depCode != null">
+                and substr(prod_code,1,3) = #{depCode}
+            </if>
+
+
+        </where>
+    </select>
+    <select id="queryFinAccounts" resultType="java.util.HashMap">
+        select t.DATA_DATE as DATA_DT,t.CUST_NO as ECIF_CUST_NO,t.SRC_CUST_NO as NDS_CUST_NO,t.CUST_TYPE,t.FINANCE_ACCT_NO as FINA_ACCT_NO,t.NDS_ACCT_NO,t.OPEN_ORG as OPEN_BRANCH,t.ACCT_OPEN_DATE as OPEN_DATE,t.ACCT_CLOSE_DATE as CLOSE_DATE,t.SUBJECT_NO,t.PROD_CODE as PROD_TYPE,t.SRC_PROD_CODE as SRC_PROD_CD,t.PROD_CODE_NM as PROD_NM,t.PROD_INNER_CODE as INTERNAL_CODE,t.PROD_TA_CODE as TA_CODE,t.PARTNER_CODE as SELLER_CODE,t.TRANS_PRINCIPAL as TRANS_AMT,t.TOTAL_SHARE as TOT_VOL,t.FREEZE_SHARE as FROZEN_VOL,t.LONG_TERM_FREEZE_SHARE as LONG_FROZEN_VOL,t.COMPOSE_INVEST_SHARE as GROUP_VOL,t.BOUNS_TYPE as DIV_MODE,t.BONUS_RATE as DIV_RATE,t.YESTERDAY_TOTAL_SHARE as YSTDY_TOT_VOL,t.CUST_CLASS as CLIENT_TYPE,t.APPEND_INVEST_FLAG as APPEND_FLAG,t.BANK_ACCT as BANK_ACC,t.PROD_CLASS as PRD_TYPE,t.PROD_PAR_VALUE as FACE_VALUE,t.PROD_NET_VALUE as BALANCE,t.MONTH_END_REEVAL_NET_VALUE as RE_NET_VALUE,t.MONTH_END_REEVAL_MARKET_VALUE as RE_MARKET_VALUE,t.FINANCE_ACCT_STATUS as ACCT_STAUTS,t.FINANCE_ACCT_STATUS_NM as ACCT_STATUS_NM,t.SRC_SYSTEM_NO as SRC_SYS_CD,t.DELETE_FLAG,t.END_DT
+        from ACRM_F_CUST_FIN_ACCT_INFO t
+        where t.CUST_NO = #{ecifCustNo} and t.FINANCE_ACCT_STATUS !='6'
+        <if test="BANK_RELA_FLAG == '2'">
+            and t.open_org = #{CUST_MGR_NO_ORG0}
+        </if>
+    </select>
+    <select id="queryTotalInfo" resultType="java.util.HashMap">
+        select PROD_CODE as CTLA_CODE,prod_code_nm as CTAL_NAME ,ACCT_BALANCE_RMB as TERM_BALANCE
+        from ACRM_F_CUST_PROD_BALANCE_INFO
+        <where>
+            PROD_LEVEL = 4
+            <if test="ecifCustNo != null and ecifCustNo != ''">
+                and cust_no = #{ecifCustNo}
+            </if>
+            <if test="depCode != null">
+                and substr(prod_code,1,3) = #{depCode}
+            </if>
+
+
+        </where>
+    </select>
+    <select id="queryTotalNum" resultType="java.lang.Integer">
+        select count(*) as total from ACRM_F_CUST_INSSURANCE_ACCT_INFO where cust_no = #{ecifCustNo}
+    </select>
+    <select id="queryDetailInfo" resultType="java.util.HashMap">
+        select  t.DATA_DATE as DATA_DT,t.ACCT_NO,t.CUST_NO as ECIF_CUST_NO,t.SRC_CUST_NO,t.CUST_TYPE,t.BIRTH_DATE as CUST_BIRTH_DATE,t.PROD_CODE as PROD_TYPE,t.SRC_PROD_CODE as SRC_PROD_CD,t.PROD_CODE_NM as PROD_NM,t.PROD_CLASS as PROD_KIND,t.CCY as CURR_CD,t.CCY_NM as CURR_CD_NM,t.INSURANCE_AMT as INSSRANCE_AMT,t.PAY_TYPE,t.PAY_TERM_TYPE,t.PAY_TERM,t.PAY_START_TIME as BEGIN_PAY_DATE,t.PAY_END_TIME as END_PAY_DT,t.INSURANCE_EXPIRY_DATE as INSS_MATUR_DT,t.INSURANCE_EXPIRY_DATE as FST_PAY_AMT,t.FIRST_PAY_INSURANCE_AMT as FST_PAY_FEE_AMT,t.TOTAL_PAID_INSURANCE_AMT as TOTAL_PAY_AMT,t.TOTAL_PAID_TIMES as TOTAL_PAY_CNT,t.ACCT_BALANCE as BALANCE_RMB,t.AUM_BALANCE as AUM_BAL,t.AUM_MONTH_AVG as AUM_BAL_MONTH_AVG,t.AUM_QUARTER_AVG as AUM_BAL_QUARTER_AVG,t.AUM_YEAR_AVG as AUM_BAL_YEAR_AVG,t.ACCT_STATUS as ACCT_STAT_CD,t.ACCT_STATUS_NM as ACCT_STAT_CD_NM,t.SRC_SYSTEM_NO as SRC_SYS_CD,t.DELETE_FLAG,t.OPEN_ORG as OPEN_ORG_NO,t.ACCT_OPEN_DATE as OPEN_DATE,t.END_DT
+        from ACRM_F_CUST_INSSURANCE_ACCT_INFO t
+        where t.CUST_NO = #{ecifCustNo}
+        <if test="BANK_RELA_FLAG == '2'">
+            and t.open_org = #{CUST_MGR_NO_ORG0}
+        </if>
+    </select>
+    <select id="queryLoanTotalInfo" resultType="java.util.HashMap">
+        select PROD_CODE as CTLA_CODE,prod_code_nm as CTAL_NAME ,ACCT_BALANCE_RMB as TERM_BALANCE
+        from ACRM_F_CUST_PROD_BALANCE_INFO
+        <where>
+            PROD_LEVEL = 4
+            <if test="ecifCustNo != null and ecifCustNo != ''">
+                and cust_no = #{ecifCustNo}
+            </if>
+            <if test="depCode != null">
+                and substr(prod_code,1,3) = #{depCode}
+            </if>
+        </where>
+    </select>
+    <select id="queryLoanDetailInfo" resultType="java.util.HashMap">
+        select t.DATA_DATE as DATA_DT,t.CUST_NO as ECIF_CUST_NO,t.SRC_CUST_NO,t.CUST_TYPE,t.CONTRACT_NO as CONTRACT_ID,t.SUBJECT_NO,t.SETTLE_ACCT as SETTLEMENT_ACCT_NO,t.LOAN_BILL_NO as DUE_BILL_NO,t.ENTRY_ORG as GET_ORG_NO,t.DEAL_ORG as OPT_ORG,t.PROD_CODE as PROD_TYPE,t.SRC_PROD_CODE as SRC_LOAN_PROD_CD,t.PROD_CODE_NM as PROD_NM,t.CCY as CURR_CD,t.CCY_NM as CURR_CD_NM,
+        t.LOAN_PRINCIPAL as LOAN_AMT,t.LOAN_BALANCE as LOAN_BAL,t.INT_BALANCE as REC_ABLE_INT_RMB,t.TOTAL_REPAY_AMT as SUM_PAY_MONEY,t.TOTAL_PAID_INT as SUM_PAID_UP_INT_RMB,t.LOAN_USE_PLACE as INLAND_FLAG,t.LOAN_PURPOSE_TYPE as LOAN_PURPOSE_CLASS,t.LOAN_PURPOSE,t.MAIN_GUARANTEE_TYPE as MAIN_VOUCH_TYPE,t.REPAY_PLAN_FORMULA_TYPE as SCHEDULE_TYPE,t.ORIGINAL_TERM_TYPE as ORI_TERM_TYPE,t.ORIGINAL_TERM_VALUE as ORI_TERM_VALUE,t.VALUE_DATE as EFFE_DATE,t.PRINCIPAL_EXPIRY_DATE as PRIN_MATURE_DT,t.INT_EXPIRY_DATE as INT_MATURE_DT,
+        t.RATE_TYPE as INTERESTRATE_TYPE,t.ACTUAL_RATE,t.BASE_RATE,t.FLOAT_TYPE,t.FLOAT_VALUE,t.PRINCIPAL_OVERDUE_FLAG as LOANAMT_OVERDUE_FLAG,t.INT_OVERDUE_FLAG,t.PRINCIPAL_OVERDUE_DAYS as PRCP_OVERDUE_DAYS,t.INT_OVERDUE_DAYS,t.PRINCIPAL_OVERDUE_AMT as PRCP_OVERDUE_AMT,t.INT_OVERDUE_AMT,t.PENALTY_INT_AMT as MULCT_AMT,t.FIVE_TIRE_CLASS as FIVE_CLASS,t.LOAN_STATUS,t.LOAN_STATUS_NM,t.SETTLE_DATE as SQUARE_DATE,t.SRC_SYSTEM_NO as SRC_SYS_CD,t.DELETE_FLAG,t.END_DT
+        from ACRM_F_CUST_LOAN_ACCT_INFO t
+        where t.CUST_NO = #{ecifCustNo}
+        <if test="BANK_RELA_FLAG == '2'">
+            and t.deal_org = #{CUST_MGR_NO_ORG0}
+        </if>
+    </select>
+    <select id="queryCreditClassInf" resultType="java.util.concurrent.ConcurrentHashMap">
+        select PROD_CODE as CTLA_CODE,prod_code_nm as CTAL_NAME ,ACCT_BALANCE_RMB as TERM_BALANCE
+        from ACRM_F_CUST_PROD_BALANCE_INFO
+        <where>
+            PROD_LEVEL = 4
+            <if test="ecifCustNo != null and ecifCustNo != ''">
+                and cust_no = #{ecifCustNo}
+            </if>
+            <if test="depCode != null">
+                and substr(prod_code,1,3) = #{depCode}
+            </if>
+        </where>
+    </select>
+    <select id="queryAcctDtlInf" resultType="java.util.concurrent.ConcurrentHashMap">
+        select t.DATA_DATE as DATA_DT,t.CUST_NO as ECIF_CUST_NO,t.SRC_CUST_NO,t.CUST_TYPE,t.BANK_NO,t.ACCT_NO,t.PROD_SEQUENCE as PROD_SEQ_NO,t.CCY as CUUR_CD,t.CCY_NM as CUUR_CD_NM,t.PROD_CODE as PROD_TYPE,t.SRC_PROD_CODE as SRC_PROD_CD,t.PROD_CODE_NM as PROD_NM,t.LOAN_BALANCE as LOAN_BAL,t.INT_BALANCE as INT_BAL,t.FEE_BALANCE as FEE_BAL,t.POINTS_BALANCE as POINT_BAL,t.REPAY_ACCT as REPAY_ACCT_NO,t.REPAY_TYPE as REPAY_TYPE_CD,t.INSTALLMENT_BALANCE as PAY_LOAN_BAL,t.CURRENT_SHOULD_REPAY_AMT as CURR_TERM_UNPAY_BAL,t.CURRENT_REPAY_AMT as CURR_TERM_PAID_BAL,
+        t.OVERFLOW_PAY_BALANCE as OVER_PAY_BAL,t.REPAY_DATE as PAY_DATE,t.BILL_DATE,t.TOTAL_INSTALMENT_MONTH as REPAY_TREM_CNT_TOTAL,t.BILL_ADDR_TYPE as BILL_ADDRESS_TYPE,t.BILL_ADDR as BILL_ADDRESS,t.FIXED_AMT as RECYCLE_ST_LIMIT_BAL,t.SURPLUS_FIXED_AMT as USABLE_ST_LIMIT_BAL,t.TEMP_AMT as RECYCLE_TMP_LIMIT_BAL,t.TEMP_AMT_EFFECT_DATE as RECYCLE_TMP_LMT_EFF_DT,t.TEMP_AMT_INVALID_DATE as RECYCLE_TMP_LMT_EXP_DT,SURPLUS_TEMP_AMT as USABLE_TMP_LIMIT_BAL,t.ACCT_STATUS as ACCT_STAT_CD,t.ACCT_STATUS_NM as ACCT_STAT_CD_NM,t.OVERDUE_STATUS as FIVE_LVL_TYPE_CD,t.OVERDUE_MONTH as OVERDUE_MTH_CNT,t.SRC_SYSTEM_NO as SRC_SYS_CD,t.DELETE_FLAG,t.END_DT
+        from ACRM_F_CUST_CREDITCARD_ACCT_INFO t
+        where t.CUST_NO = #{ecifCustNo}
+    </select>
+    <select id="queryLoanTotalNum" resultType="java.lang.Integer">
+         select count(*) as total from ACRM_F_CUST_LOAN_ACCT_INFO where cust_no = #{ecifCustNo}
+    </select>
+    <select id="queryCreditTotalNum" resultType="java.lang.Integer">
+        select count(*) as total from  ACRM_F_CUST_CREDITCARD_ACCT_INFO where cust_no = #{ecifCustNo}
+    </select>
+    <select id="relaAuthorityQuery" resultType="java.lang.Integer">
+        select COUNT(*) from OCRM_F_CI_ADMIT_BELONG where CUST_ID = #{ecif_cust_no} and mgr_id = #{cust_mgr_no}
+    </select>
+    <select id="queryCustAnalyseInfo" resultType="java.util.Map">
+        select IS_WAGES_PAYING AS IF_PAY_WAGE, IS_FIN_CUST as IF_FINANCE,IS_LOAN as IF_LOAN,CR_CARD_LIAB_CUST_FLAG as IF_CREDIT,IS_INSURRANCE_CUST as IF_BANK_ASSU,IS_SIGN_PER_ONLINE_BANK as IF_ELEC,TEL_BANK_SIGN_CUST_FLAG as IF_PHONE,IS_SIGN_WECHAT_BANK as IF_WEIXIN,IS_SIGN_MOBILE_BANK as IF_TELEPHONE,is_cust_grade_1 as IF_COMMON,is_cust_grade_4 as IF_HIGH_FINANCE,is_cust_grade_6 as IF_DIAMOND,is_cust_grade_5 as IF_VIP,is_cust_grade_3 as IF_MIDDLE_FINANCE,if_keep as IF_KEEP,if_head_bank as IF_HEAD_BANK,if_once as IF_ONCE,is_two_place_cust as IF_TWOPLACE,is_us_cust as IF_USA_RESID,is_hold_debit_card as HAVE_DCARD_FLAG
+        from ACRM_F_CUST_FLEXIBLE_INFO
+        WHERE CUST_NO = #{ecifCustNo}
+    </select>
+    <select id="querycustAumMthAvg" resultType="java.util.Map">
+        select last_mth_aum_balance_avg_rmb as UPMTH_AUM_MTHAVG from ACRM_F_CUST_FLEXIBLE_INFO
+        where CUST_NO = #{ecifCustNo}
+    </select>
+</mapper>

@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.cust.org.repository.mapper.OcrmFciOrgManageInfoMapper">
+    <sql id="Base_Column_List">
+	    DATA_DATE,LAST_CHG_SYS,LAST_CHG_USR,LAST_CHG_DT,CORP_ORG_CODE,CUST_ID,REG_CURR_CD,REG_CAPITAL,NET_ASSET,EMP_NUM,MAIN_RANGE,PREMIS_AREA,PREMIS_OWNERSHIP,MANAGE_STAT,TOTAL_ASSET,DEBT_TOTAL,INVEN_TOTAL,SALE_TOTAL,PROFIT_SCALE,RECE_BAL,PAYAB_BAL,INV_TYPE,PART_RANGE
+    </sql>
+     <!-- 对公客户经营信息查询 -->
+	<select id="querylist" parameterType="java.util.Map" resultType="java.util.Map">
+		select t.ID,
+			   t.DATA_DATE,
+		       t.LAST_CHG_SYS,
+		       t.LAST_CHG_USR,
+		       to_char(t.LAST_CHG_DT,'yyyy-mm-dd') as LAST_CHG_DT,
+		       t.CORP_ORG_CODE,
+		       t.CUST_ID,
+		       t.REG_CURR_CD,
+		       t.REG_CAPITAL,
+		       t.NET_ASSET,
+		       t.EMP_NUM,
+		       t.MAIN_RANGE,
+		       t.PREMIS_AREA,
+		       t.PREMIS_OWNERSHIP,
+		       t.MANAGE_STAT,
+		       t.TOTAL_ASSET,
+		       t.DEBT_TOTAL,
+		       t.INVEN_TOTAL,
+		       t.SALE_TOTAL,
+		       t.PROFIT_SCALE,
+		       t.RECE_BAL,
+		       t.PAYAB_BAL,
+		       t.INV_TYPE,
+		       t.PART_RANGE
+		  from OCRM_F_CI_ORG_MANAGE_INFO t
+		  where 1=1
+		  
+		  <if  test="condition.custId != null and condition.custId != ''">
+       			and  t.CUST_ID =#{condition.custId,jdbcType=VARCHAR} 
+	  	  </if>
+	</select>
+	
+</mapper>

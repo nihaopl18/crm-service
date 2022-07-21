@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.cust.org.repository.mapper.OcrmFciOrgHolderInfoMapper">
+    <sql id="Base_Column_List">
+	    DATA_DATE,CRAT_DT,CRAT_ORG_ID,CRAT_USR,LAST_CHG_SYS,LAST_CHG_USR,LAST_CHG_DT,CORP_ORG_CODE,CUST_ID,HOLDER_CUST_ID,HOLDER_TYPE,HOLDER_NAME,CERT_TYPE,CERT_NO,LEGAL_CUST_ID,LEGAL_NAME,LEGAL_CERT_TYPE,LEGAL_CERT_NO,INV_TYPE,INV_CURR_CD,STOCK_PERC,INV_AMT,ACT_STOCK_AMT,SPONSOR_DATE
+    </sql>
+    
+     <!-- 股东信息查询 -->
+	<select id="querylist" parameterType="java.util.Map" resultType="java.util.Map">
+		select id,
+			   t.DATA_DATE,
+			   to_char(t.CRAT_DT,'yyyy-mm-dd') as CRAT_DT,
+		       t.CRAT_ORG_ID,
+		       t.CRAT_USR,
+		       t.LAST_CHG_SYS,
+		       t.LAST_CHG_USR,
+		       t.LAST_CHG_ORG_ID,
+		       to_char(t.LAST_CHG_DT,'yyyy-mm-dd') as LAST_CHG_DT,
+		       t.CORP_ORG_CODE,
+		       t.CUST_ID,
+		       t.HOLDER_CUST_ID,
+		       t.HOLDER_TYPE,
+		       t.HOLDER_NAME,
+		       t.CERT_TYPE,
+		       t.CERT_NO,
+		       t.LEGAL_CUST_ID,
+		       t.LEGAL_NAME,
+		       t.LEGAL_CERT_TYPE,
+		       t.LEGAL_CERT_NO,
+		       t.INV_TYPE,
+		       t.INV_CURR_CD,
+		       t.STOCK_PERC,
+		       t.INV_AMT,
+		       t.ACT_STOCK_AMT,
+		       t.SPONSOR_DATE,
+		       org.org_name,
+		       cust.user_name
+		  from OCRM_F_CI_ORG_HOLDER_INFO t
+		  left join admin_sm_org org
+	      on org.org_id = t.LAST_CHG_ORG_ID
+	      left join admin_sm_user cust
+	      on cust.login_code = t.LAST_CHG_USR
+		  where 1=1
+		  
+		  <if  test="condition.custId != null and condition.custId != ''">
+       			and  t.CUST_ID =#{condition.custId,jdbcType=VARCHAR} 
+	  	  </if>
+	</select>
+	
+	<!-- 根据股东编号删除反馈信息 
+	<delete id="deleteByHolderCustId" parameterType="String">
+		DELETE FROM OCRM_F_CI_ORG_HOLDER_INFO A WHERE A.HOLDER_CUST_ID = #{condition.holderCustId,jdbcType=VARCHAR}
+	</delete> -->
+</mapper>

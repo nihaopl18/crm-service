@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.uimp.excel.repository.mapper.PmaFschemeExcelhideInfMapper">
+    <resultMap id="BaseResultMap" type="cn.com.yusys.yusp.uimp.excel.domain.PmaFschemeExcelhideInf">
+    	<result column="ID" jdbcType="VARCHAR" property="id" />
+		<result column="SCHEME_ID" jdbcType="VARCHAR" property="schemeId" />
+		<result column="ETL_DATE" jdbcType="VARCHAR" property="etlDate" />
+		<result column="HIDE_ROWS" jdbcType="VARCHAR" property="hideRows" />
+		<result column="HIDE_COLS" jdbcType="VARCHAR" property="hideCols" />
+		<result column="HIDE_COLS_INDEX" jdbcType="VARCHAR" property="hideColsIndex" />
+    </resultMap>
+    <sql id="Base_Column_List">
+	    ID,SCHEME_ID,ETL_DATE,HIDE_ROWS,HIDE_COLS,HIDE_COLS_INDEX
+    </sql>
+    
+	<select id="getHideInfoBySchemeIdAndEtlDate" parameterType="java.lang.String" resultType="cn.com.yusys.yusp.uimp.excel.domain.PmaFschemeExcelhideInf">
+    	select * from PMA_F_SCHEME_EXCELHIDE_INF where SCHEME_ID = #{schemeId, jdbcType=VARCHAR} and ETL_DATE = #{etlDate, jdbcType=VARCHAR}
+    </select>
+</mapper>

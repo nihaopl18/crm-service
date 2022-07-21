@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.cust.person.repository.mapper.OcrmFwpRemindInfoMapper">
+    <sql id="Base_Column_List">
+	    DATA_DATE,LAST_CHG_SYS,LAST_CHG_USR,LAST_CHG_DT,CORP_ORG_CODE,INFO_ID,RULE_ID,RULE_NAME,REMIND_TYPE,CUST_ID,CUST_NAME,CUST_TYPE,RECE_USER,REMIND_CRAT_DT,REMIND_EXPIRE_DATE,REMAIN_DAYS,REMIND_INFO,MESSAGE_INFO,SEND_TIME,RECE_NUM,HAVE_SEND,IS_SEND,IS_READ,CUST_VALUE_LEVEL,CUST_SERVICE_LEVEL
+    </sql>
+    
+     <select id="querylist" parameterType="java.util.Map"  resultType="java.util.HashMap">
+		select t.info_id,
+		       t.rule_id,
+		       t.rule_name,
+		       t.type_id,
+		       t.type_name,
+		       t.cust_id,
+		       t.cust_name,
+		       t.cust_type,
+		       t.serv_lev,
+		       t.value_lev,
+		       t.rece_user,
+		       to_char(t.REMIND_CREATE_DATE, 'yyyy-mm-dd') as REMIND_CREATE_DATE,
+		       to_char(t.REMIND_EXPIRE_DATE, 'yyyy-mm-dd') as REMIND_EXPIRE_DATE,
+		       t.remain_days,
+		       t.remind_info,
+		       t.message_info,
+		       to_char(t.SEND_TIME, 'yyyy-mm-dd') as SEND_TIME,
+		       t.rece_num,
+		       t.have_send,
+		       t.is_send,
+		       t.send_channel,
+		       to_char(t.DATA_DATE, 'yyyy-mm-dd') as DATA_DATE,
+		       t.last_chg_usr,
+		       to_char(t.LAST_CHG_DT, 'yyyy-mm-dd') as LAST_CHG_DT,
+		       t.corp_org_code
+		  from ACRM_F_WP_REMIND t
+		  where 1 = 1
+
+		  <if  test="condition.custId != null and condition.custId != ''">
+       			and  t.CUST_ID =#{condition.custId,jdbcType=VARCHAR} 
+	  	  </if>
+	  	  <if test="condition.typeId != null">
+				AND t.TYPE_ID in 	
+				<foreach collection="condition.typeId" item="id" index="index" open="(" close=")" separator=",">
+				  #{id}
+				</foreach>
+			</if>
+	  	  <if  test="condition.startTM != null and condition.startTM != ''">
+       			and  to_char(t.REMIND_CREATE_DATE,'yyyy-mm-dd') >= #{condition.startTM,jdbcType=VARCHAR} 
+		  </if>
+		  <if  test="condition.endTM != null and condition.endTM != ''">
+	       		and #{condition.endTM,jdbcType=VARCHAR} >=  to_char(t.REMIND_EXPIRE_DATE,'yyyy-mm-dd') 
+		  </if>
+	</select>
+</mapper>

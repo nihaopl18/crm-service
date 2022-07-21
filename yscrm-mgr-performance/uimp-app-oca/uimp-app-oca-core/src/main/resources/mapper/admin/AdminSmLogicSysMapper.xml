@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.admin.repository.mapper.AdminSmLogicSysMapper">
+	<!-- <select id="getLogicSysKeyValue" parameterType="java.util.Map" resultType="java.util.Map">
+	   SELECT SYS_ID AS KEY,SYS_NAME AS VALUE FROM ADMIN_SM_LOGIC_SYS WHERE SYS_STS='A'
+	</select> -->
+</mapper>

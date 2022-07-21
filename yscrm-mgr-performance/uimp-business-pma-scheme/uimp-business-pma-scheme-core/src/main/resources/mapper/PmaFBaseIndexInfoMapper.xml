@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.uimp.business.pma.scheme.baseIndex.repository.mapper.PmaFBaseIndexInfoMapper">
+     <!-- 查询基础指标列表数据 -->
+	<select id="querylist" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+		SELECT T.ID,T.INDEX_NAME,T.CREATE_ORG,T.CREATOR,T.CREATE_DATE,T.INDEX_ID,T.INDEX_TYPE,T.UPDATER_ID
+		,T.UPDATE_DATE,T.INDEX_BUSINESS_TYPE,T.UPDATE_ORG,T.INDEX_STATE,T.INDEX_CATALOG_ID,AU.USER_NAME,T.CURRENCY,ASU.USER_NAME UPDATE_USER_NAME
+		 FROM PMA_F_BASE_INDEX_INFO T
+		 LEFT JOIN ADMIN_SM_USER  AU ON AU.LOGIN_CODE=T.CREATOR
+        LEFT JOIN ADMIN_SM_USER ASU ON ASU.LOGIN_CODE=T.UPDATER_ID
+        <if test="condition.obj != null and condition.obj != ''">
+            LEFT JOIN PMA_F_INDEX_EVL_OBJ_INFO OBJ ON T.INDEX_ID = OBJ.INDEX_ID
+        </if>
+		<where>
+			<if test="condition.objType != null and condition.objType != ''">
+			    exists (select 1 from PMA_F_INDEX_EVL_OBJ_INFO a where t.index_id = a.index_id AND a.EVL_OBJ_TYPE=#{condition.objType,jdbcType=VARCHAR})
+			</if>
+			<!-- 指标编号 -->
+			<if test="condition.indexId != null and condition.indexId  != ''">
+	      		AND T.INDEX_ID LIKE concat(concat('%',#{condition.indexId,jdbcType=VARCHAR}),'%')
+		    </if>
+		    <!-- 指标名称-->
+			<if test="condition.indexName != null and condition.indexName  != ''">
+	      		AND T.INDEX_NAME LIKE concat(concat('%',#{condition.indexName,jdbcType=VARCHAR}),'%')
+		    </if>
+		     <!-- 目录编号-->
+			<if test="condition.indexTypeId != null and condition.indexTypeId  != ''">
+	      		AND T.INDEX_CATALOG_ID in ( select b.ID from PMA_F_BASE_INDEX_TYPE b start with id=#{condition.indexTypeId,jdbcType=VARCHAR} connect by prior id =PARENT_ID)
+		    </if>
+            <!-- 指标状态-->
+            <if test="condition.indexState != null and condition.indexState  != ''">
+                AND T.INDEX_STATE = #{condition.indexState,jdbcType=VARCHAR}
+            </if>
+            <!-- 考核对象-->
+            <if test="condition.obj != null and condition.obj  != ''">
+                AND OBJ.EVL_OBJ_TYPE = #{condition.obj,jdbcType=VARCHAR}
+            </if>
+		    <if  test="condition.sql != null and condition.sql  != ''">
+		        :{condition.sql}
+		    </if>
+	    </where>
+        ORDER BY T.UPDATE_DATE DESC NULLS LAST
+	</select>
+     <!-- 查询所有字段数据-->
+	<select id="querycolumnlist" parameterType="String" resultType="java.util.HashMap">
+		select t.table_name,t.column_name, t.data_type,t.data_length,t.nullable, t.column_id,c.comments
+		FROM user_tab_cols t,user_col_comments c
+		WHERE c.table_name = t.table_name and c.column_name = t.column_name 
+		and t.hidden_column = 'NO'
+		and t.table_name =upper(#{tableName})
+		order by t.column_id
+	</select>
+	 <!-- 查询表名称 -->
+    <select id="selTableName" parameterType="String"  resultType="String">
+        select t.LOOKUP_ITEM_NAME from admin_sm_lookup_item t       
+        where t.LOOKUP_CODE = 'BIZ_FLG_TABLE' and t.LOOKUP_ITEM_CODE =#{bizFlg}
+    </select>
+    <!-- 查询条件类型码值 -->
+    <select id="selConditionVal"   resultType="java.util.HashMap">
+       select t.lookup_item_code,t.lookup_item_name from admin_sm_lookup_item t       
+       where t.LOOKUP_CODE = 'CONDITION_TYPE' 
+    </select>
+    <!-- 查询数据字典的类型 -->
+    <select id="sellookup"   resultType="java.util.HashMap">
+        select   distinct t.lookup_code,t.lookup_name
+        from admin_sm_lookup t
+        inner join admin_sm_lookup_item t1 on t1.lookup_code = t.lookup_code
+    </select>
+     <!-- 查询数据字典的类型 -->
+    <select id="sellookupitem" parameterType="String"  resultType="java.util.HashMap">
+       select   t1.lookup_item_code,t1.lookup_item_name
+       from   admin_sm_lookup_item  t1 
+       where t1.lookup_code=#{lookupCode}
+    </select>
+    <!-- 根据指标编号查询考核对象维度 -->
+    <select id="selObjDim" parameterType="String"  resultType="java.util.HashMap">
+       select  EVL_OBJ_TYPE  from  PMA_F_INDEX_EVL_OBJ_INFO  where index_id=#{indexId}
+    </select>
+     <!-- 根据指标编号查询应用类型维度 -->
+    <select id="selApplyDim" parameterType="String"  resultType="java.util.HashMap">
+       select  APPLY_TYPE  from  PMA_F_INDEX_APPLY_INFO where index_id=#{indexId}
+    </select>
+     <!-- 根据指标编号查余额类型维度 -->
+    <select id="selYueDim" parameterType="String"  resultType="java.util.HashMap">
+       select  BAL_TYPE  from  PMA_F_INDEX_BAL_INFO where index_id=#{indexId}
+    </select>
+    <!-- 根据指标编号删除考核对象维度 -->
+    <delete id="delobj" parameterType="String"  >
+	   delete from   PMA_F_INDEX_EVL_OBJ_INFO  where index_id=#{indexId}
+	</delete>
+	 <!-- 根据指标编号删除应用类型维度 -->
+    <delete id="delapply" parameterType="String"  >
+	   delete from   PMA_F_INDEX_APPLY_INFO  where index_id=#{indexId}
+	</delete>
+	 <!-- 根据指标编号删除余额类型维度 -->
+    <delete id="delyue" parameterType="String"  >
+	   delete from   PMA_F_INDEX_BAL_INFO  where index_id=#{indexId}
+	</delete>
+	  <!-- 根据指标编号sql的info -->
+    <select id="querysqlinfo" parameterType="String"  resultType="java.util.HashMap">
+       select  SQL_CONTENT  from  PMA_F_BASE_INDEX_SQL where index_id=#{indexId}
+    </select>
+    <!-- 根据指标树删除指标-->
+    <delete id="deleInfo" parameterType="String"  >
+	   delete from  PMA_F_BASE_INDEX_INFO  where INDEX_CATALOG_ID=#{indexId}
+	</delete>
+	<update id="stopIndex" parameterType="java.util.HashMap">
+	   update PMA_F_BASE_INDEX_INFO set INDEX_STATE='0', UPDATER_ID = #{maintainManNo}, UPDATE_DATE = #{maintainDate} where id in
+	   <foreach collection="ids"  item="item" open="(" separator="," close=")">
+               #{item}
+          </foreach>
+	</update>
+	<update id="startIndex" parameterType="java.util.HashMap">
+	   update PMA_F_BASE_INDEX_INFO set INDEX_STATE='1', UPDATER_ID = #{maintainManNo}, UPDATE_DATE = #{maintainDate} where id in
+       <foreach collection="ids"  item="item" open="(" separator="," close=")">
+               #{item}
+       </foreach>
+	</update>
+	 <!-- 查询字段信息 -->
+    <select id="selColumnType"   resultType="java.util.HashMap">
+       select COLUMN_TYPE,CODE_NO
+       from PMA_F_TAB_COLUMN_INFO 
+       where TAB_NAME=#{tabname,jdbcType=VARCHAR} and COLUMN_NAME=#{column,jdbcType=VARCHAR}
+    </select>
+      <!-- 查询跑日定版日 -->
+    <select id="iseditIndex" parameterType="String"  resultType="java.util.HashMap">
+      select a.data from (select t.data,rownum as rown
+                          from PMA_F_TIME_STATE t
+                          where t.state ='02'
+                          order by t.data desc) a
+      where a.rown=1
+    </select>
+       <!-- 根据日期和指标编号查询基础指标结果事实表中是否有数 -->
+    <select id="selIsEditIndex" parameterType="java.util.HashMap"  resultType="java.util.HashMap">
+          select  count(*) as countnum  from pma_f_base_index_res
+          where INDEX_ID=#{indexId,jdbcType=VARCHAR} and ETL_DATE=#{dateStr,jdbcType=VARCHAR}
+    </select>
+      <!-- 根据日期和指标编号查询指标是否被引用 -->
+    <select id="queryIndexIsQuote" parameterType="String"  resultType="java.util.HashMap">
+         select  s.scheme_name as q_name,rel.scheme_id  as q_id,rel.index_id, '考核方案' as quote_name
+		from   pma_f_scheme_index_rel rel
+		left join pma_f_scheme  s on s.scheme_id=rel.scheme_id
+		
+		where rel.index_id=#{indexId,jdbcType=VARCHAR} 
+		union 
+		select evl.index_name as q_name,evl.index_id as q_id,#{indexId,jdbcType=VARCHAR}  as index_id, '派生指标' as quote_name
+		from  pma_f_evl_index_info  evl
+		where  evl.formula  LIKE concat(concat('%',#{indexId,jdbcType=VARCHAR}),'%')
+    </select>
+     <!-- 根据指标编号删除业务品种 -->
+    <delete id="delBuss" parameterType="String"  >
+	   delete from   PMA_F_INDEX_BUSS_INFO  where index_id=#{indexId}
+	</delete>
+	
+	<select id="executeQuerySql" parameterType="java.lang.String" resultType="java.util.Map">
+    	:{sqlStr}
+    </select>
+    <select id="selectByindexId" resultType="cn.com.yusys.yusp.uimp.business.pma.scheme.baseIndex.vo.PmaFBaseIndexInfoVO">
+        select * from PMA_F_BASE_INDEX_INFO where INDEX_ID=#{indexId,jdbcType=VARCHAR}
+    </select>
+    <select id="selectObjByIndexId" resultType="cn.com.yusys.yusp.uimp.business.pma.scheme.dimension.domain.PmaFIndexEvlObjInfo">
+        select * from PMA_F_INDEX_EVL_OBJ_INFO where INDEX_ID=#{indexId,jdbcType=VARCHAR}
+    </select>
+    <select id="selectApplyByIndexId"
+            resultType="cn.com.yusys.yusp.uimp.business.pma.scheme.dimension.domain.PmaFIndexApplyInfo">
+        select * from PMA_F_INDEX_APPLY_INFO where INDEX_ID=#{indexId,jdbcType=VARCHAR}
+    </select>
+    <select id="selectBalByIndexId"
+            resultType="cn.com.yusys.yusp.uimp.business.pma.scheme.dimension.domain.PmaFIndexBalInfo">
+        select * from PMA_F_INDEX_BAL_INFO where INDEX_ID=#{indexId,jdbcType=VARCHAR}
+    </select>
+
+    <select id="listByModel"  resultType="java.util.Map">
+        select * from PMA_F_BASE_INDEX_INFO
+        <where>
+            <if test="indexIdList !=null and indexIdList.size>0">
+                and index_id in
+                <foreach collection="indexIdList" item="indexId" index="index" open="(" close=")" separator=",">
+                    #{indexId,jdbcType=VARCHAR}
+                </foreach>
+            </if>
+            <if test="indexId !=null and indexId !=''">
+                and index_id  LIKE CONCAT(CONCAT('%', #{indexId, jdbcType=VARCHAR}),'%')
+            </if>
+            <if test="indexName !=null and indexName !=''">
+                and index_name  LIKE CONCAT(CONCAT('%', #{indexName, jdbcType=VARCHAR}),'%')
+            </if>
+        </where>
+
+    </select>
+
+    <select id="selectIndexId" resultType="java.lang.String">
+        select index_id from PMA_F_SCHEME_INDEX_REL where scheme_id=#{schemeId,jdbcType=VARCHAR}
+    </select>
+    <!-- 检查是否存在指标ID不同，名称相同的数据 -->
+    <select id="checkSameIndexName" resultType="java.util.Map">
+        SELECT * FROM PMA_F_BASE_INDEX_INFO
+        WHERE index_name = #{indexName}
+        <if test="id != null and id != ''">
+            AND id != #{id}
+        </if>
+    </select>
+</mapper>

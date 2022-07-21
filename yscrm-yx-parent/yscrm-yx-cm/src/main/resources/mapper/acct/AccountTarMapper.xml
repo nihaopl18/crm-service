@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.climp.acct.repository.mapper.AccountTarMapper">
+    <select id="getList" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.Map">
+	    select t.id,
+		       t.account_no,
+		       t.account_name,
+		       t.acct_type_id,
+		       t.update_content,
+		       t2.org_name,
+		       t3.user_name,
+		       to_char(t.update_date, 'yyyy-MM-dd')
+		  from LOY_AC_SCORE_ACCT_HIS t 
+		  left join admin_sm_org t2 on t.update_org = t2.org_id 
+		  left join admin_sm_user t3 on t.update_user = t3.login_code
+
+		<where>
+    		<if test="condition.accountNo != null and condition.accountNo !=''">
+				and t.account_no like '%'||#{condition.accountNo}||'%'
+			</if>		
+			<if test="condition.accountName != null and condition.accountName !=''">
+				and t.account_Name like '%'||#{condition.accountName}||'%'
+			</if>
+		</where>
+    </select>
+    <select id="delAcct" parameterType="String" >
+    	delete from LOY_AC_SCORE_ACCOUNT where ACCOUNT_ID in (#{id})
+    </select>
+</mapper>

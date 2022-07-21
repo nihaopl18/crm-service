@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.mktactivity.repository.mapper.OcrmFMkActiFedbackMapper">
+	<!-- 自增序列 -->
+	<select id="getSeq" resultType="BigDecimal">
+		SELECT mkt_seq.nextval FROM dual
+	</select>
+	<!-- 获取活动创建人 -->
+	<select id="getActUser" parameterType="BigDecimal" resultType="String">
+		SELECT CREATE_USER FROM OCRM_F_MK_ACTIVITY WHERE ACTI_ID = #{actiId,jdbcType=DECIMAL}
+	</select>
+	<!-- 返回活动状态 -->
+	<select id="getActiStat" parameterType="BigDecimal" resultType="String">
+		SELECT ACTI_STAT FROM  OCRM_F_MK_ACTIVITY WHERE ACTI_ID = #{actiId,jdbcType=DECIMAL}
+	</select>
+	<!-- 营销成效反馈查询 -->
+	<select id="actiFedBackList" parameterType = "cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+		SELECT * FROM OCRM_F_MK_ACTI_FEDBACK WHERE ACTI_ID = #{condition.actiId,jdbcType=DECIMAL} 
+		<if test="condition.userId != null and condition.userId != ''">
+        	 AND FD_USER = #{condition.userId,jdbcType=VARCHAR}
+        </if> 
+	</select>
+</mapper>

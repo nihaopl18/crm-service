@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.product.repository.mapper.AcrmApdBusiSumMapper">
+	<select id="getXaxisArray" resultType="java.lang.String">
+		SELECT TO_CHAR(T.DATA_DT,'yyyy-MM') AS DATA_DT FROM ACRM_A_PD_BUSI_SUM T
+		<where>
+			<if test="prodId != null and prodId != ''">
+	       		AND T.PROD_ID = #{prodId,jdbcType=VARCHAR}
+		    </if>
+		</where>
+		ORDER BY T.DATA_DT ASC
+	</select>
+	
+	<select id="getPerCustAum" resultType="java.util.Map">
+    	SELECT T.CUST_NUM_12 AS CUST_NUM, SALES_AMT_12 AS SALES_AMT FROM ACRM_A_PD_BUSI_SUM T
+		<where>
+			<if  test="prodId != null and prodId != ''">
+	       		AND T.PROD_ID = #{prodId,jdbcType=VARCHAR}
+		    </if>
+		</where>
+		ORDER BY T.DATA_DT ASC
+	</select>
+</mapper>

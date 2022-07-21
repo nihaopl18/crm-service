@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.cm.sysKeyWord.repository.mapper.CmFRcRiskMapper">
+	<!-- 查询关注风险表 -->
+	<select id="getList" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.Map">
+		SELECT * FROM CM_F_RC_RISK_INFO ORDER BY RISK_ID DESC
+	</select>
+	<!-- 删除关注风险表数据 -->
+	<delete id="deleteList" parameterType="java.util.Map">
+		DELETE FROM CM_F_RC_RISK_INFO WHERE RISK_ID = #{riskId, jdbcType=VARCHAR}
+	</delete>
+	<!-- 获取自增序列 -->
+	<select id="getSeq" resultType="String">
+		SELECT ysc_sequence.nextval FROM dual
+	</select>
+</mapper>

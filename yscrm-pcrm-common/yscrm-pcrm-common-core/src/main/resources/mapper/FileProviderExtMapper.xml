@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.pcrm.common.file.ext.repository.mapper.FileProviderExtMapper">
+    <!-- 附件列表查询 -->
+    <select id="annexInformationQuery" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.Map">
+        SELECT
+            FI.FILE_ID, FI.FILE_NAME, FI.FILE_PATH, FI.FILE_SIZE, FI.EXT_NAME, FI.PARENT_FOLDER, FI.BUS_NO, FI.UPLOAD_TIME, FI.FILE_REMARK,
+            FL1.DOWN_COUNT, FL2.OPER_TIME, FL2.USER_ID, FL2.USER_NAME
+        FROM ADMIN_FILE_UPLOAD_INFO FI
+                 LEFT JOIN (
+            SELECT
+                FL.OPER_OBJ_ID FILE_ID, COUNT(FL.LOG_ID) DOWN_COUNT FROM OCRM_F_WP_FILE_LOG FL
+            WHERE FL.OPER_BUSI_ID = #{condition.busNo,jdbcType=VARCHAR} AND FL.OPER_FLAG = '1'
+            GROUP BY FL.OPER_OBJ_ID ) FL1 ON FI.FILE_ID = FL1.FILE_ID
+                 LEFT JOIN (
+            SELECT FILE_ID, OPER_TIME,USER_ID,USER_NAME
+            FROM (
+                     SELECT
+                         ROW_NUMBER() OVER(PARTITION BY FL.OPER_OBJ_ID ORDER BY FL.OPER_TIME DESC) rn,
+                             FL.OPER_OBJ_ID FILE_ID, FL.OPER_TIME, FL.USER_ID, FL.USER_NAME
+                     FROM OCRM_F_WP_FILE_LOG FL
+                     WHERE FL.OPER_BUSI_ID = #{condition.busNo,jdbcType=VARCHAR} AND FL.OPER_FLAG = '1')
+            WHERE rn = 1 ) FL2 ON FI.FILE_ID = FL2.FILE_ID
+        WHERE FI.BUS_NO = #{condition.busNo,jdbcType=VARCHAR}
+    </select>
+</mapper>

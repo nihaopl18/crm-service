@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.climp.acty.repository.mapper.LoyRlScoreProjectMapper">
+    <resultMap id="BaseResultMap" type="cn.com.yusys.climp.acty.domain.LoyRlScoreProject">
+		<result column="PROJECT_ID" jdbcType="VARCHAR" property="projectId" />
+		<result column="PROJECT_NAME" jdbcType="VARCHAR" property="projectName" />
+		<result column="USE_FLAG" jdbcType="VARCHAR" property="useFlag" />
+		<result column="PARENT_PRO_ID" jdbcType="VARCHAR" property="parentProId" />
+		<result column="SEQ_NO" jdbcType="VARCHAR" property="seqNo" />
+		<result column="INSTITUTION_ID" jdbcType="VARCHAR" property="institutionId" />
+		<result column="INSTITUTION_NAME" jdbcType="VARCHAR" property="institutionName" />
+		<result column="REMARK" jdbcType="VARCHAR" property="remark" />
+		<result column="DELETE_SIGN" jdbcType="VARCHAR" property="deleteSign" />
+		<result column="CREATE_USER" jdbcType="VARCHAR" property="createUser" />
+		<result column="CREATE_DATE" jdbcType="DATE" property="createDate" />
+		<result column="CREATE_ORG" jdbcType="VARCHAR" property="createOrg" />
+		<result column="UPDATE_USER" jdbcType="VARCHAR" property="updateUser" />
+		<result column="UPDATE_DATE" jdbcType="DATE" property="updateDate" />
+		<result column="UPDATE_ORG" jdbcType="VARCHAR" property="updateOrg" />
+    </resultMap>
+    <sql id="Base_Column_List">
+	    PROJECT_ID,PROJECT_NAME,USE_FLAG,PARENT_PRO_ID,SEQ_NO,INSTITUTION_ID,INSTITUTION_NAME,REMARK,DELETE_SIGN,CREATE_USER,CREATE_DATE,CREATE_ORG,UPDATE_USER,UPDATE_DATE,UPDATE_ORG
+    </sql>
+    <!-- 查询积分活动分类信息 -->
+	<select id="getScoreProject" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+		resultType="java.util.Map">
+		SELECT t.*, T1.PROJECT_NAME AS PARENT_PROJECT_NAME
+      FROM LOY_RL_SCORE_PROJECT t
+      LEFT JOIN LOY_RL_SCORE_PROJECT t1
+        ON t1.PROJECT_ID = t.PARENT_PRO_ID
+      where (t.DELETE_SIGN is null or t.DELETE_SIGN != '1')
+      order by t.seq_no
+	</select>
+   <!-- 逻辑删除 积分活动分类-->
+   <update id="updataScoreProjectState" parameterType="java.util.Map">  
+         UPDATE LOY_RL_SCORE_PROJECT  
+            SET 
+			DELETE_SIGN = '1',
+			UPDATE_USER	= #{userCode,javaType=java.lang.String},
+			UPDATE_DATE	= sysdate,
+			UPDATE_ORG	= #{orgCode,javaType=java.lang.String}
+            WHERE PROJECT_ID = #{projectId,javaType=java.lang.String}
+   </update> 
+</mapper>

@@ -1,0 +1,249 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.com.yusys.yusp.uimp.business.pma.scheme.schememain.repository.mapper.PmaFAssessTargetMapper">
+
+    <select id="getList" resultType="cn.com.yusys.yusp.uimp.business.pma.scheme.schememain.domain.vo.PmaFAssessTargetVo">
+        select a.* from PMA_F_ASSESS_TARGET a
+        where a.scheme_id = #{model.condition.schemeId,jdbcType=VARCHAR}
+        <if test="model.condition.years != null and model.condition.years != ''">
+            and a.years = #{model.condition.years,jdbcType=VARCHAR}
+        </if>
+        <if test="objList != null">
+            and a.evl_Obj_Id in
+            <foreach collection="objList" item="item" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+        <if test="indexList != null">
+            and a.index_id in
+            <foreach collection="indexList" item="item" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+        order by a.years, a.evl_Obj_Id, a.index_id
+
+    </select>
+
+
+    <select id="getExportMgrBySchemeId" resultType="java.util.Map">
+        select b.login_code as evl_obj_id,b.user_name evl_obj_name
+        from PMA_F_SCHEME_MKT_REL a
+                 inner join admin_sm_user b
+                           on a.mkt_id = b.login_code
+        where a.scheme_id = #{schemeId}
+          and b.org_id in (SELECT ORG_ID FROM ADMIN_SM_ORG START WITH ORG_ID =#{orgId,jdbcType=VARCHAR} CONNECT BY PRIOR ORG_ID = UP_ORG_ID)
+        <if test="objList != null">
+            and b.login_code in
+            <foreach collection="objList" item="item" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+    </select>
+
+    <select id="getExportTeamBySchemeId" resultType="java.util.Map">
+        select b.mkt_team_id as evl_obj_id,b.mkt_team_name evl_obj_name
+        from Pma_f_Scheme_TEAM_REL a
+                 inner join OCRM_F_CM_MKT_TEAM b
+                           on a.mkt_team_id = b.mkt_team_id
+        where a.scheme_id = #{schemeId}
+        and b.org_id in (SELECT ORG_ID FROM ADMIN_SM_ORG START WITH ORG_ID =#{orgId,jdbcType=VARCHAR} CONNECT BY PRIOR ORG_ID = UP_ORG_ID)
+        <if test="objList != null">
+            and b.mkt_team_id in
+            <foreach collection="objList" item="item" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+    </select>
+
+    <select id="getExportOrgBySchemeId" resultType="java.util.Map">
+        select b.org_code as evl_obj_id,b.org_name evl_obj_name
+        from PMA_F_SCHEME_ORG_REL a
+                 inner join ADMIN_SM_ORG b
+                           on a.org_id = b.org_code
+        where a.scheme_id = #{schemeId}
+        and b.org_id in (SELECT ORG_ID FROM ADMIN_SM_ORG START WITH ORG_ID =#{orgId,jdbcType=VARCHAR} CONNECT BY PRIOR ORG_ID = UP_ORG_ID)
+        <if test="objList != null">
+            and b.org_code in
+            <foreach collection="objList" item="item" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+    </select>
+
+    <select id="getMgrBySchemeId" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.Map">
+        select b.user_id,b.login_code,b.user_name,c.org_id,c.org_code,c.org_name
+        from PMA_F_SCHEME_MKT_REL a
+                 inner join admin_sm_user b
+                            on a.mkt_id = b.login_code left join admin_sm_org c on b.org_id = c.org_id
+        where a.scheme_id = #{condition.schemeId,jdbcType=VARCHAR}
+        <if test="condition.orgCode != null and condition.orgCode != ''">
+            and b.org_id in (SELECT ORG_ID FROM ADMIN_SM_ORG START WITH ORG_ID =#{condition.orgCode,jdbcType=VARCHAR} CONNECT BY PRIOR ORG_ID = UP_ORG_ID)
+        </if>
+        and b.org_id in (SELECT ORG_ID FROM ADMIN_SM_ORG START WITH ORG_ID =#{condition.currentOrgId,jdbcType=VARCHAR} CONNECT BY PRIOR ORG_ID = UP_ORG_ID)
+        order by c.org_level,b.org_id
+    </select>
+
+    <select id="getTeamBySchemeId" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.Map">
+        select b.mkt_team_id, b.mkt_team_name
+        from Pma_f_Scheme_TEAM_REL a
+        inner join OCRM_F_CM_MKT_TEAM b
+        on a.mkt_team_id = b.mkt_team_id
+        where a.scheme_id = #{condition.schemeId,jdbcType=VARCHAR}
+        <if test="condition.orgId != null and condition.orgId != ''">
+            and b.org_id in (SELECT ORG_ID FROM ADMIN_SM_ORG START WITH ORG_ID =#{condition.orgId,jdbcType=VARCHAR} CONNECT BY PRIOR ORG_ID = UP_ORG_ID)
+        </if>
+    </select>
+
+    <insert id="upsert" parameterType="cn.com.yusys.yusp.uimp.business.pma.scheme.schememain.domain.PmaFAssessTargetEntity">
+        merge into PMA_F_ASSESS_TARGET a using
+        (
+        <foreach collection="list" index="index" item="item" open=""
+                 close="" separator="union all">
+            SELECT
+                #{item.id,jdbcType=VARCHAR} id,
+                #{item.years,jdbcType=VARCHAR} years,
+                #{item.schemeId,jdbcType=VARCHAR} scheme_id,
+                #{item.schemeName,jdbcType=VARCHAR} scheme_name,
+                #{item.evlObjId,jdbcType=VARCHAR} evl_obj_id,
+                #{item.evlObjName,jdbcType=VARCHAR} evl_obj_name,
+                #{item.indexId,jdbcType=VARCHAR} index_id,
+                #{item.indexName,jdbcType=VARCHAR} index_name,
+                #{item.schemeCycleType,jdbcType=VARCHAR} scheme_cycle_type,
+                #{item.evlObjType,jdbcType=VARCHAR} evl_obj_type,
+                #{item.yearValue,jdbcType=NUMERIC} year_value,
+                #{item.fhyValue,jdbcType=NUMERIC} fhy_value,
+                #{item.shyValue,jdbcType=NUMERIC} shy_value,
+                #{item.q1Value,jdbcType=NUMERIC} q1_value,
+                #{item.q2Value,jdbcType=NUMERIC} q2_value,
+                #{item.q3Value,jdbcType=NUMERIC} q3_value,
+                #{item.q4Value,jdbcType=NUMERIC} q4_value,
+                #{item.m1Value,jdbcType=NUMERIC} m1_value,
+                #{item.m2Value,jdbcType=NUMERIC} m2_value,
+                #{item.m3Value,jdbcType=NUMERIC} m3_value,
+                #{item.m4Value,jdbcType=NUMERIC} m4_value,
+                #{item.m5Value,jdbcType=NUMERIC} m5_value,
+                #{item.m6Value,jdbcType=NUMERIC} m6_value,
+                #{item.m7Value,jdbcType=NUMERIC} m7_value,
+                #{item.m8Value,jdbcType=NUMERIC} m8_value,
+                #{item.m9Value,jdbcType=NUMERIC} m9_value,
+                #{item.m10Value,jdbcType=NUMERIC} m10_value,
+                #{item.m11Value,jdbcType=NUMERIC} m11_value,
+                #{item.m12Value,jdbcType=NUMERIC} m12_value,
+                #{item.creator,jdbcType=NUMERIC} creator,
+                #{item.createDate,jdbcType=VARCHAR} create_date,
+                #{item.createOrg,jdbcType=VARCHAR} create_org,
+                #{item.updaterId,jdbcType=VARCHAR} updater_id,
+                #{item.updateDate,jdbcType=VARCHAR} update_date,
+                #{item.updateOrg,jdbcType=VARCHAR} update_org
+            from dual
+        </foreach>
+        ) b
+        on (
+        a.years = b.years and a.scheme_id = b.scheme_id and a.evl_obj_id = b.evl_obj_id and a.index_id = b.index_id
+        )
+        when matched then
+        UPDATE SET
+        a.evl_obj_name =  case when b.evl_obj_name is null then a.evl_obj_name else b.evl_obj_name end,
+        a.index_name =  case when b.index_name is null then a.index_name else b.index_name end,
+        a.scheme_cycle_type =  case when b.scheme_cycle_type is null then a.scheme_cycle_type else b.scheme_cycle_type end,
+        a.evl_obj_type =  case when b.evl_obj_type is null then a.evl_obj_type else b.evl_obj_type end,
+        a.year_value =  case when b.year_value is null then a.year_value else b.year_value end,
+        a.fhy_value =  case when b.fhy_value is null then a.fhy_value else b.fhy_value end,
+        a.shy_value =  case when b.shy_value is null then a.shy_value else b.shy_value end,
+        a.q1_value =  case when b.q1_value is null then a.q1_value else b.q1_value end,
+        a.q2_value =  case when b.q2_value is null then a.q2_value else b.q2_value end,
+        a.q3_value =  case when b.q3_value is null then a.q3_value else b.q3_value end,
+        a.q4_value =  case when b.q4_value is null then a.q4_value else b.q4_value end,
+        a.m1_value =  case when b.m1_value is null then a.m1_value else b.m1_value end,
+        a.m2_value =  case when b.m2_value is null then a.m2_value else b.m2_value end,
+        a.m3_value =  case when b.m3_value is null then a.m3_value else b.m3_value end,
+        a.m4_value =  case when b.m4_value is null then a.m4_value else b.m4_value end,
+        a.m5_value =  case when b.m5_value is null then a.m5_value else b.m5_value end,
+        a.m6_value =  case when b.m6_value is null then a.m6_value else b.m6_value end,
+        a.m7_value =  case when b.m7_value is null then a.m7_value else b.m7_value end,
+        a.m8_value =  case when b.m8_value is null then a.m8_value else b.m8_value end,
+        a.m9_value =  case when b.m9_value is null then a.m9_value else b.m9_value end,
+        a.m10_value =  case when b.m10_value is null then a.m10_value else b.m10_value end,
+        a.m11_value =  case when b.m11_value is null then a.m11_value else b.m11_value end,
+        a.m12_value =  case when b.m12_value is null then a.m12_value else b.m12_value end,
+        a.updater_id =  case when b.updater_id is null then a.updater_id else b.updater_id end,
+        a.update_date =  case when b.update_date is null then a.update_date else b.update_date end,
+        a.update_org =  case when b.update_org is null then a.update_org else b.update_org end
+        when not matched then
+        INSERT(
+        id,
+        years,
+        scheme_id,
+        scheme_name,
+        evl_obj_id,
+        evl_obj_name,
+        index_id,
+        index_name,
+        scheme_cycle_type,
+        evl_obj_type,
+        year_value,
+        fhy_value,
+        shy_value,
+        q1_value,
+        q2_value,
+        q3_value,
+        q4_value,
+        m1_value,
+        m2_value,
+        m3_value,
+        m4_value,
+        m5_value,
+        m6_value,
+        m7_value,
+        m8_value,
+        m9_value,
+        m10_value,
+        m11_value,
+        m12_value,
+        creator,
+        create_date,
+        create_org,
+        updater_id,
+        update_date,
+        update_org
+        ) VALUES(
+            b.id,
+            b.years,
+            b.scheme_id,
+            b.scheme_name,
+            b.evl_obj_id,
+            b.evl_obj_name,
+            b.index_id,
+            b.index_name,
+            b.scheme_cycle_type,
+            b.evl_obj_type,
+            b.year_value,
+            b.fhy_value,
+            b.shy_value,
+            b.q1_value,
+            b.q2_value,
+            b.q3_value,
+            b.q4_value,
+            b.m1_value,
+            b.m2_value,
+            b.m3_value,
+            b.m4_value,
+            b.m5_value,
+            b.m6_value,
+            b.m7_value,
+            b.m8_value,
+            b.m9_value,
+            b.m10_value,
+            b.m11_value,
+            b.m12_value,
+            b.creator,
+            b.create_date,
+            b.create_org,
+            b.updater_id,
+            b.update_date,
+            b.update_org
+        )
+    </insert>
+
+</mapper>

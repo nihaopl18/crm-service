@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper
+	namespace="cn.com.yusys.yscrm.custgrade.repository.mapper.OcrmFciGradeSchemeMapper">
+	<sql id="Base_Column_List">
+		CORP_ORG_CODE,SCHEME_ID,SCHEME_NAME,GRADE_TYPE,GRADE_USEAGE,IS_USED,GRADE_FREQUENCY,GRADE_BEGIN_DATE,GRADE_END_DATE,MEMO,CRAT_DT,CRAT_USR,CRAT_USER_NAME,CRAT_ORG_ID,CRAT_ORG_NAME,LAST_CHG_DT,LAST_CHG_USR,LAST_CHG_USR_NAME,LAST_CHG_ORG_ID,LAST_CHG_ORG_NAME
+	</sql>
+	<select id="querylist" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+		resultType="java.util.HashMap">
+		select T.* from OCRM_F_CI_GRADE_SCHEME T
+		<where>
+			<if test="condition.schemeName != null and condition.schemeName!= ''">
+				T.SCHEME_NAME= #{condition.schemeName,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.gradeType != null and condition.gradeType!= ''">
+				T.GRADE_TYPE= #{condition.gradeType,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.isUsed != null and condition.isUsed!= ''">
+				T.IS_USED= #{condition.isUsed,jdbcType=VARCHAR}
+			</if>
+		</where>
+	</select>
+
+	<select id="queryperiodlist" parameterType="String" resultType="java.util.HashMap">
+		select T.* from OCRM_F_CI_GRADE_STANDARD T Where
+		T.SCHEME_ID=#{schemeId,jdbcType=VARCHAR}
+	</select>
+	<select id="queryGradeLevel" parameterType="String" resultType="java.util.HashMap">
+		select T.* from OCRM_F_CI_GRADE_LEVEL T Where
+		T.SCHEME_ID=#{schemeId,jdbcType=VARCHAR}
+	</select>
+	<select id="queryDetail" parameterType="String" resultType="java.util.HashMap">
+		SELECT
+		T.MEMO,T2.STANDARD_NAME,T2.STANDARD_TYPE,T2.MINUS_LEVEL,T2.GRADE_FORMULA,T2.GRADE_FORMULA_EXPLAIN,
+		T3.GRADE_LEVEL,T3.LEVEL_LOWER,T3.LEVEL_UPPER,T3.LEVEL_CRITICAL FROM
+		OCRM_F_CI_GRADE_SCHEME T
+		LEFT JOIN OCRM_F_CI_GRADE_STANDARD T2 ON
+		T.SCHEME_ID =T2.SCHEME_ID
+		LEFT JOIN OCRM_F_CI_GRADE_LEVEL T3 ON
+		T2.STANDARD_ID=T3.STANDARD_ID
+		where
+		T.SCHEME_ID=#{schemeId,jdbcType=VARCHAR}
+		ORDER BY T2.STANDARD_NAME,T3.GRADE_LEVEL
+	</select>
+
+	<select id="queryEnable" parameterType="java.util.HashMap"
+		resultType="int">
+		SELECT COUNT(1) FROM OCRM_F_CI_GRADE_SCHEME T
+		WHERE
+		T.GRADE_USEAGE =#{gradeUseage}
+		AND T.GRADE_TYPE =#{gradeType}
+		AND
+		T.IS_USED =#{isUsed}
+	</select>
+	
+	<select id="queryBaseIndex" parameterType="String" resultType="java.util.HashMap">
+	SELECT * FROM OCRM_F_CI_INDEX_BASE  WHERE INDEX_USE=#{indexUse}
+	</select>
+	<delete id="deleteById" parameterType="String">
+		DELETE FROM
+		OCRM_F_CI_GRADE_SCHEME T WHERE T.SCHEME_ID=#{schemeId}
+	</delete>
+	<delete id="deleteStandard" parameterType="String">
+		DELETE FROM
+		OCRM_F_CI_GRADE_STANDARD T WHERE T.SCHEME_ID=#{schemeId}
+	</delete>
+	<delete id="deleteLevel" parameterType="String">
+		DELETE FROM
+		OCRM_F_CI_GRADE_LEVEL T WHERE T.SCHEME_ID=#{schemeId}
+	</delete>
+
+	<update id="enable" parameterType="java.util.HashMap">
+		UPDATE OCRM_F_CI_GRADE_SCHEME
+		T SET T.IS_USED='1',
+		T.LAST_CHG_DT=sysdate,T.LAST_CHG_USR
+		=#{lastChgUsr},
+		T.LAST_CHG_USR_NAME=#{lastChgUsrName},
+		T.LAST_CHG_ORG_ID =#{lastChgOrgId},T.LAST_CHG_ORG_NAME
+		=#{lastChgOrgName}
+		WHERE T.SCHEME_ID=#{schemeId}
+	</update>
+
+	<update id="disEnable" parameterType="java.util.HashMap">
+		UPDATE
+		OCRM_F_CI_GRADE_SCHEME T SET T.IS_USED='0',
+		T.LAST_CHG_DT=sysdate,T.LAST_CHG_USR =#{lastChgUsr},
+		T.LAST_CHG_USR_NAME=#{lastChgUsrName},
+		T.LAST_CHG_ORG_ID
+		=#{lastChgOrgId},T.LAST_CHG_ORG_NAME =#{lastChgOrgName}
+		WHERE
+		T.SCHEME_ID=#{schemeId}
+	</update>
+</mapper>

@@ -1,0 +1,122 @@
+# ===================================================================
+# Spring Boot configuration.
+#
+# This configuration will be overriden by the Spring profile you use,
+# for example application-dev.yml if you use the "dev" profile.
+#
+# More information on profiles: https://jhipster.github.io/profiles/
+# More information on configuration properties: https://jhipster.github.io/common-application-properties/
+# ===================================================================
+
+# ===================================================================
+# Standard Spring Boot properties.
+# Full reference is available at:
+# http://docs.spring.io/spring-boot/docs/current/reference/html/common-application-properties.html
+# ===================================================================
+
+management:
+    security:
+        roles: ADMIN
+        enabled: false
+    context-path: /actuator
+    endpoints:
+        web:
+            exposure:
+                include: "*"
+        enabled-by-default: true
+    health:
+        mail:
+            enabled: false
+spring:
+    security:
+        basic:
+            enabled: false
+        oauth2:
+            resource:
+                filter-order: 3
+    jackson:
+        serialization.write_dates_as_timestamps: false
+    jpa:
+        open-in-view: false
+        hibernate:
+            ddl-auto: none
+            naming:
+                physical-strategy: org.springframework.boot.orm.jpa.hibernate.SpringPhysicalNamingStrategy
+                implicit-strategy: org.springframework.boot.orm.jpa.hibernate.SpringImplicitNamingStrategy
+    messages:
+        basename: i18n/messages
+    mvc:
+        favicon:
+            enabled: false
+    thymeleaf:
+        mode: XHTML
+
+jhipster:
+    async:
+        core-pool-size: 2
+        max-pool-size: 50
+        queue-capacity: 10000
+    swagger:
+        default-include-pattern: /api/.*
+        title: yusp-crm-single API
+        description: yusp-crm-single API documentation
+        version: 0.0.1
+        terms-of-service-url:
+        contact-name:
+        contact-url:
+        contact-email:
+        license:
+        license-url:
+
+# ===================================================================
+# Application specific properties
+# Add your own application properties here, see the ApplicationProperties class
+# to have type-safe configuration, like in the JHipsterProperties above
+#
+# More documentation is available at:
+# https://jhipster.github.io/common-application-properties/
+# ===================================================================
+
+# Mybatis 相关配置
+mybatis:
+  mapperLocations: classpath*:mapper/**/*.xml
+  type-aliases-package: cn.com.yusys.yusp.uaa.domain,cn.com.yusys.yusp.admin.domain,cn.com.yusys.yusp.echain.server.repository
+  configuration:
+    map-underscore-to-camel-case: true
+mapper:
+  mappers:
+  - cn.com.yusys.yusp.commons.mapper.CommonMapper
+pagehelper:
+#  helperDialect: DB2
+  helperDialect: oracle
+  reasonable: true
+asynclog:
+  corePoolSize: 3
+  maxPoolSize: 5
+  queueSize: 2000
+  logProcessor: cn.com.yusys.yusp.admin.log.client.BusinessLogProcessor
+#token 有效时间
+token:
+  timeout: 30 #分钟
+echain:
+  message:
+    used: false
+    impl:
+      bean:
+      
+web:
+    ignore-resources: .css, .js, .html, .ttf, .woff, .svg, .eot, .png, .gif, .ico, .json
+    ignore-urls: /oauth/token, /api/codeImage, /api/adminsmlogicsys/logicsyskv, /api/server, /error,/echain/studio/eChainStudio.jar,/definitionservlet,/echain/studio/studio.properties,/swagger-resources,/api-doc,/v2/api-docs
+    
+# ===================================================================
+server:
+    port: 7089
+    servlet:
+        context-path: /yusp-crm-single
+        session:
+            cookie:
+                http-only: true
+# ===================================================================
+
+logback:
+    loglevel: DEBUG 

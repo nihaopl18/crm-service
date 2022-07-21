@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.info.workreport.repository.mapper.OcrmFwpWorkReportInfoMapper">
+    <resultMap id="BaseResultMap" type="cn.com.yusys.yscrm.info.workreport.domain.OcrmFwpWorkReportInfo">
+		<id column="ID" jdbcType="VARCHAR" property="id" />
+		<result column="WORK_REPORT_ID" jdbcType="VARCHAR" property="workReportId" />
+		<result column="MAINTEN_CUST_NUM" jdbcType="NUMERIC" property="maintenCustNum" />
+		<result column="ADD_CUST_NUM" jdbcType="NUMERIC" property="addCustNum" />
+		<result column="ADD_LATECUST_NUM" jdbcType="NUMERIC" property="addLatecustNum" />
+		<result column="PRORT_CUST_NUM" jdbcType="NUMERIC" property="prortCustNum" />
+		<result column="ADD_SALE_FIN_BAL" jdbcType="NUMERIC" property="addSaleFinBal" />
+		<result column="ADD_SALE_METAL_BAL" jdbcType="NUMERIC" property="addSaleMetalBal" />
+		<result column="WEEK_ADD_DEP_BAL" jdbcType="NUMERIC" property="weekAddDepBal" />
+		<result column="ADD_ASSETS_BAL" jdbcType="NUMERIC" property="addAssetsBal" />
+		<result column="SUB_REPORT_CONT" jdbcType="VARCHAR" property="subReportCont" />
+		<result column="CORP_ORG_CODE" jdbcType="VARCHAR" property="corpOrgCode" />
+    </resultMap>
+    <sql id="Base_Column_List">
+	    ID,WORK_REPORT_ID,MAINTEN_CUST_NUM,ADD_CUST_NUM,ADD_LATECUST_NUM,PRORT_CUST_NUM,ADD_SALE_FIN_BAL,ADD_SALE_METAL_BAL,WEEK_ADD_DEP_BAL,ADD_ASSETS_BAL,SUB_REPORT_CONT,CORP_ORG_CODE
+    </sql>
+    
+</mapper>

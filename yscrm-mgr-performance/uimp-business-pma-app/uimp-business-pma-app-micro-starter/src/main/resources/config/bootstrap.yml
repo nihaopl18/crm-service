@@ -1,0 +1,23 @@
+spring: 
+    application:
+        name: yusp-app-oca  #应用名称
+        
+server:
+    port: 7100 #应用启动端口
+
+#apollo配置
+app:
+    id: yusp-app-oca #apollo配置中心应用名
+apollo: 
+    meta: http://localhost:9001 #apollo地址
+    bootstrap:
+        enabled: true #是否启用apollo, 不使用apollo 请剔除该包
+        namespaces: application.yml
+
+#日志配置
+logging: 
+    path: ../logs #日志文件路径
+    file: ${spring.application.name}_${server.port}.log #日志文件名称
+    level: 
+        root: INFO
+        springfox.documentation.spring.web.readers.operation: OFF  #springfox日志关闭输出

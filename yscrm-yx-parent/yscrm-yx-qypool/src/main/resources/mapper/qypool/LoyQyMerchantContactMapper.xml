@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.climp.qypool.repository.mapper.LoyQyMerchantContactMapper">
+    <resultMap id="BaseResultMap" type="cn.com.yusys.climp.qypool.domain.LoyQyMerchantContact">
+		<id column="CONTACT_ID" jdbcType="VARCHAR" property="contactId" />
+		<result column="MERCHANT_ID" jdbcType="VARCHAR" property="merchantId" />
+		<result column="CONTACT_TYPE" jdbcType="VARCHAR" property="contactType" />
+		<result column="CONTACT_INFO" jdbcType="VARCHAR" property="contactInfo" />
+		<result column="IF_FIRST" jdbcType="VARCHAR" property="ifFirst" />
+		<result column="CONTACT_ORADER" jdbcType="VARCHAR" property="contactOrader" />
+		<result column="CREATE_USER" jdbcType="VARCHAR" property="createUser" />
+		<result column="CREATE_DATE" jdbcType="TIMESTAMP" property="createDate" />
+		<result column="UPDATE_USER" jdbcType="VARCHAR" property="updateUser" />
+		<result column="UPDATE_DATE" jdbcType="TIMESTAMP" property="updateDate" />
+    </resultMap>
+    <sql id="Base_Column_List">
+	    CONTACT_ID,MERCHANT_ID,CONTACT_TYPE,CONTACT_INFO,IF_FIRST,CONTACT_ORADER,CREATE_USER,CREATE_DATE,UPDATE_USER,UPDATE_DATE
+    </sql>
+    
+</mapper>

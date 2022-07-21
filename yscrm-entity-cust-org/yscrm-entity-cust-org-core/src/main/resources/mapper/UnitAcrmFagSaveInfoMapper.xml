@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.cust.org.repository.mapper.UnitAcrmFagSaveInfoMapper">
+    <sql id="Base_Column_List">
+	    CORP_ORG_CODE,ACCT_LEVEL,ACCT_ID,ACCT_NO,CARD_ID,CUST_ID,CUST_NAME,ACCT_TYPE,CURR_CD,OPEN_DATE,CLOSE_DATE,OPEN_BRCH_NO,TERM,OPEN_AMT,ACCT_BAL,FCTDEP_NUM,DRW_BEF_AMT,BASE_RATE,ACCT_STAT,ACCT_AVG_BAL_3,ACCT_AVG_BAL_6,YEAR_AVG_BAL,LY_YEAR_AVG_BAL,CONTRI_DEPOSIT,LY_CONTRI_DEPOSIT,PROFIT_DEPOSIT,DATA_DATE
+    </sql>
+    
+    <select id="querySaveInfoByCustId" parameterType="java.util.Map"  resultType="java.util.HashMap">
+		  select t.CORP_ORG_CODE,
+		       t.ACCT_ID,
+		       t.ACCT_NO,
+		       t.CARD_ID,
+		       t.CUST_ID,
+		       t.CUST_NAME,
+		       t.ACCT_TYPE,
+		       t.CURR_CD,
+		       to_char(t.OPEN_DATE,'yyyy-mm-dd') as OPEN_DATE,
+		       to_char(t.CLOSE_DATE,'yyyy-mm-dd') as CLOSE_DATE,
+		       to_char(t.STR_DT,'yyyy-mm-dd') as STR_DT,
+		       to_char(t.DUE_DT,'yyyy-mm-dd') as DUE_DT,
+		       t.OPEN_BRCH_NO,
+		       t.TERM,
+		       t.OPEN_AMT,
+		       t.ACCT_BAL,
+		       t.FCTDEP_NUM,
+		       t.DRW_BEF_AMT,
+		       t.BASE_RATE*100 as BASE_RATE,
+		       t.ACCT_STAT,
+		       t.ACCT_AVG_BAL_THREE,
+		       t.ACCT_AVG_BAL_SIX,
+		       t.YEAR_AVG_BAL,
+		       t.LY_YEAR_AVG_BAL,
+		       t.CONTRI_DEPOSIT,
+		       t.LY_CONTRI_DEPOSIT,
+		       t.PROFIT_DEPOSIT,
+		       t.ACCT_LEVEL,
+		       t.ACCT_PROP_CD,
+		       org.ORG_NAME,
+		       to_char(to_date(t.DATA_DATE,'yyyy-mm-dd'),'yyyy-mm-dd') as ETL_DATE,
+		       b.prod_name
+		  from ACRM_F_AG_SAVE_INFO t
+		  left join admin_sm_org org 
+		  on org.ORG_ID=t.OPEN_BRCH_NO 
+		  left join ACRM_F_PD_PROD_INFO b
+          on t.PRO_CD = b.SOURCE_PRD_NO
+		  where 1=1
+
+		  <if  test="custId != null and custId != ''">
+	       		and t.CUST_ID =#{custId,jdbcType=VARCHAR} 
+		  </if>
+		  <if  test="orgIdMgr != null and orgIdMgr != ''">
+	       		and t.OPEN_BRCH_NO =#{orgIdMgr,jdbcType=VARCHAR} 
+		  </if>
+		   order by t.ACCT_BAL desc
+	</select>
+	<select id="getMgrType" parameterType="java.util.Map"  resultType="java.util.HashMap">
+	select mgr_type from OCRM_F_CI_ADMIT_BELONG where cust_id=#{custId,jdbcType=VARCHAR} and mgr_id=#{loginCode,jdbcType=VARCHAR}
+	</select>
+</mapper>

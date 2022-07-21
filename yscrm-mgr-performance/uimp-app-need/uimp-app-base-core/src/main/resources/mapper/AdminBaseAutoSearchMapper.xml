@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.uimp.base.repository.mapper.AdminBaseAutoSearchMapper">
+    <resultMap id="BaseResultMap" type="cn.com.yusys.yusp.uimp.base.domain.AdminBaseAutoSearch">
+		<id column="ID" jdbcType="VARCHAR" property="id" />
+		<result column="FUN_NAME" jdbcType="VARCHAR" property="funName" />
+		<result column="TABLE_EN_NAME" jdbcType="VARCHAR" property="tableEnName" />
+		<result column="TABLE_CN_NAME" jdbcType="VARCHAR" property="tableCnName" />
+		<result column="IF_CONF" jdbcType="VARCHAR" property="ifConf" />
+		<result column="CONF_URL" jdbcType="VARCHAR" property="confUrl" />
+		<result column="DESCRIBE" jdbcType="VARCHAR" property="describe" />
+		<result column="ORG_DATA_AUTH" jdbcType="VARCHAR" property="orgDataAuth" />
+		<result column="TABLE_TYPE" jdbcType="VARCHAR" property="tableType" />
+    </resultMap>
+    <sql id="Base_Column_List">
+	    ID,FUN_NAME,TABLE_EN_NAME,TABLE_CN_NAME,IF_CONF,CONF_URL,DESCRIBE,ORG_DATA_AUTH,TABLE_TYPE
+    </sql>
+    <!-- 自动配置查询 查询-->
+    <select id="querylist" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+        select
+        <include refid="Base_Column_List"/>
+        from ADMIN_BASE_AUTO_SEARCH
+        <where>
+            <!-- 功能名称 -->
+            <if test="condition.funName != null and condition.funName  != ''">
+                AND FUN_NAME LIKE concat(concat('%',#{condition.funName,jdbcType=VARCHAR}),'%')
+            </if>
+            <!-- 英文表名 -->
+            <if test="condition.tableEnName != null and condition.tableEnName  != ''">
+                AND TABLE_EN_NAME LIKE concat(concat('%',#{condition.tableEnName,jdbcType=VARCHAR}),'%')
+            </if>
+            <!-- 中文表名 -->
+            <if test="condition.tableCnName != null and condition.tableCnName  != ''">
+                AND TABLE_CN_NAME LIKE concat(concat('%',#{condition.tableCnName,jdbcType=VARCHAR}),'%')
+            </if>
+            <!-- 描述 -->
+            <if test="condition.describe != null and condition.describe  != ''">
+                AND DESCRIBE LIKE concat(concat('%',#{condition.describe,jdbcType=VARCHAR}),'%')
+            </if>
+             <if test="condition.seacherId!= null and condition.seacherId  != ''">
+                AND ID = #{seacherId,jdbcType=VARCHAR}
+            </if>
+        </where>
+    </select>
+    <sql id="Base_Column_List_conf">
+	    ID,FIELD_EN_NAME,FIELD_CN_NAME,IF_COL_SHOW,IF_MONEY,IF_SEACHER,IF_LOOKUP,IF_BIG,BIG_GRANT,IF_ID,SEACHER_ID,IF_DATE_SEACHER,IF_COL_SORT,COL_SHOW_SORT,COL_GOING_DOWN,LOOKUP_MULTIPLE,COL_WIDTH,COL_GL_PROP
+    </sql>
+    <!-- 表配置查询 未配置-->
+    <select id="queryConfList" resultType="java.util.HashMap">
+        select
+        ''as ID,
+        c.COLUMN_NAME as FIELD_EN_NAME,
+        c.COMMENTS as FIELD_CN_NAME,
+        '1' as IF_COL_SHOW,
+        case when t.DATA_TYPE ='NUMBER' then '0' else '' end as
+        IF_MONEY,
+        '0' as IF_SEACHER,
+        '' as IF_LOOKUP,
+        '' as IF_BIG,
+        '' as BIG_GRANT,
+        case when C.COLUMN_NAME ='ID' then '1' else '0' end
+        as IF_ID,
+        #{seacherId,jdbcType=VARCHAR} as SEACHER_ID,
+         '' as IF_DATE_SEACHER,
+         '0' as IF_COL_SORT,
+          rownum + 10 as  COL_SHOW_SORT
+        from
+        user_col_comments c
+        left join user_tab_columns t on c.TABLE_NAME=t.TABLE_NAME and c.COLUMN_NAME=t.COLUMN_NAME
+        <where>
+            <!--  -->
+            <if test="tableName != null and tableName  != ''">
+                AND T.TABLE_NAME = #{tableName,jdbcType=VARCHAR}
+            </if>
+        </where>
+    </select>
+    <!-- 表配置查询 已配置-->
+    <select id="queryConfListYpz" resultType="java.util.HashMap">
+        select
+        <include refid="Base_Column_List_conf"/>
+        from ADMIN_BASE_AUTO_SEARCH_CONF
+        <where>
+            <if test="seacherId != null and seacherId  != ''">
+                AND  SEACHER_ID = #{seacherId,jdbcType=VARCHAR}
+            </if>
+        </where>
+        order by COL_SHOW_SORT nulls last
+    </select>
+   
+   <!-- 查询表名 PMA_M报表层表 -->
+    <select id="queryTablelist" resultType="java.util.HashMap">
+        select  a.TABLE_NAME as key , b.TABLE_NAME as value,b.COMMENTS
+        from user_tables A
+        JOIN user_tab_comments b ON A .table_name = b.table_name
+        
+    </select>
+    
+    <!-- where a.TABLE_NAME  like  'PMA_M%'  -->
+
+    <select id="queryDataCodeList" resultType="java.util.HashMap" >
+        select t0.LOOKUP_CODE as key , t0.LOOKUP_NAME as value from ADMIN_SM_LOOKUP t0
+    </select>
+
+    <!-- 更新是否配置 -->
+    <update id="updateIfConf">
+      update ADMIN_BASE_AUTO_SEARCH set IF_CONF='1' where id =#{id}
+	</update>
+	
+    <!-- 生成功能菜单 -->
+    <update id="updateFun">
+      update ADMIN_BASE_AUTO_SEARCH set CONF_URL=#{confUrl} where id =#{id}
+	</update>
+
+    <select id="queryUuid" resultType="String">
+        select sys_guid() from dual
+    </select>
+
+    <!-- 生成配置 信息-->
+    <insert id="insertModFun" parameterType="java.util.Map">
+	    insert into admin_sm_busi_func
+	            (FUNC_ID,
+	             MOD_ID,
+	             FUNC_NAME,
+	             FUNC_DESC,
+	             FUNC_URL,
+	             FUNC_ORDER,
+	             FUNC_ICON,
+	             LAST_CHG_USR,
+	             LAST_CHG_DT)
+	             values (
+	            #{funId,jdbcType=VARCHAR},#{modId,jdbcType=VARCHAR}
+	             ,#{funcName,jdbcType=VARCHAR},#{funDesc,jdbcType=VARCHAR},#{funcUrl,jdbcType=VARCHAR},'1','el-icon-yx-list2',
+	             '40',to_char(sysdate,'yyyy-MM-dd HH:mm:ss')
+	             )
+    </insert>
+
+    <!-- 生成控制点导出按钮信息 信息-->
+    <insert id="insertConFun" parameterType="java.util.Map">
+         insert into admin_sm_res_contr
+			  (CONTR_ID,
+			   FUNC_ID,
+			   CONTR_CODE,
+			   CONTR_NAME,
+			   CONTR_URL,
+			   CONTR_REMARK,
+			   LAST_CHG_USR,
+			   LAST_CHG_DT,
+			   METHOD_TYPE)
+			values
+			  (sys_guid(),
+			    #{funId,jdbcType=VARCHAR},
+			   'expExecl',
+			   '导出',
+			   #{expUrl,jdbcType=VARCHAR},
+			   '导出功能',
+			   '40',
+			   to_char(sysdate, 'yyyy-MM-dd HH:mm:ss'),
+			   #{expWay,jdbcType=VARCHAR})
+    </insert>
+
+    <delete id="deleteAutoConf">
+        delete from ADMIN_BASE_AUTO_SEARCH_CONF where SEACHER_ID = #{seacherId,jdbcType=VARCHAR}
+    </delete>
+</mapper>

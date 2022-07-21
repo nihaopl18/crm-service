@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.cust.person.repository.mapper.AcrmFciRiskWarnInfoMapper">
+    <sql id="Base_Column_List">
+	    DATA_DATE,LAST_CHG_SYS,LAST_CHG_USR,LAST_CHG_DT,CORP_ORG_CODE,CUST_ID,CUST_TYPE,RISK_TYPE,RISK_DESC,RISK_LEV,RISK_STATUS,RISK_TIP_DATE,RISK_SET_DATE,SRC_SYS_CD
+    </sql>
+    
+    <select id="queryList" parameterType="java.util.Map"  resultType="java.util.HashMap">
+		  select t.DATA_DATE,
+		       t.LAST_CHG_SYS,
+		       t.LAST_CHG_USR,
+		       to_char(t.LAST_CHG_DT,'yyyy-mm-dd') as LAST_CHG_DT,
+		       t.CORP_ORG_CODE,
+		       t.CUST_ID,
+		       t.ID,
+		       t.CUST_TYPE,
+		       t.RISK_TYPE,
+		       t.RISK_DESC,
+		       t.RISK_LEV,
+		       t.RISK_STATUS,
+		       to_char(t.RISK_TIP_DATE,'yyyy-mm-dd') as RISK_TIP_DATE,
+		       to_char(t.RISK_SET_DATE,'yyyy-mm-dd') as RISK_SET_DATE,
+		       t.SRC_SYS_CD
+		  from ACRM_F_CI_RISK_WARN_INFO t
+		  where 1=1
+		  
+		  <if  test="custId != null and custId != ''">
+	       		and t.CUST_ID =#{custId,jdbcType=VARCHAR} 
+		  </if>
+	</select>
+</mapper>

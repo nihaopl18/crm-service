@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.admin.repository.mapper.AdminSmFuncModMapper">
+	<!--保存数据前查询模块名称是否已经存在-->
+	<select id="checkName" parameterType="java.util.Map" resultType="java.util.HashMap">
+		select m.mod_id from admin_sm_func_mod m where m.mod_name = #{modName}
+		<if test=" modId!=null and modId!='' ">
+			and m.mod_id &lt;&gt; #{modId}
+		</if>
+	</select>
+</mapper>

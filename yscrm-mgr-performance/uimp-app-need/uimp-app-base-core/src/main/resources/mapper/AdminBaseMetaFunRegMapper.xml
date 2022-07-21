@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.uimp.base.repository.mapper.AdminBaseMetaFunRegMapper">
+    <resultMap id="BaseResultMap" type="cn.com.yusys.yusp.uimp.base.domain.AdminBaseMetaFunReg">
+		<id column="ID" jdbcType="VARCHAR" property="id" />
+		<result column="FUN_NAME" jdbcType="VARCHAR" property="funName" />
+		<result column="FUN_CODE" jdbcType="VARCHAR" property="funCode" />
+		<result column="FUN_TYPE" jdbcType="VARCHAR" property="funType" />
+		<result column="REMARK" jdbcType="VARCHAR" property="remark" />
+    </resultMap>
+    <sql id="Base_Column_List">
+	    ID,FUN_NAME,FUN_CODE,FUN_TYPE,REMARK
+    </sql>
+    
+    <!-- 查询业务功能注册列表数据 -->
+	<select id="querylist" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+		SELECT T.ID,T.FUN_NAME,T.FUN_CODE,T.FUN_TYPE,T.REMARK FROM ADMIN_BASE_META_FUN_REG T
+		<where>
+			<!-- 业务功能名称 -->
+			<if test="condition.funName != null and condition.funName  != ''">
+	      		AND T.FUN_NAME LIKE concat(concat('%',#{condition.funName,jdbcType=VARCHAR}),'%')
+		    </if>
+		    <!-- 业务功能编码 -->
+			<if test="condition.funCode != null and condition.funCode  != ''">
+	      		AND T.FUN_CODE LIKE concat(concat('%',#{condition.funCode,jdbcType=VARCHAR}),'%')
+		    </if>
+		    <!-- 业务功能类型 -->
+			<if test="condition.funType != null and condition.funType  != ''">
+	      		AND T.FUN_TYPE = #{condition.funType,jdbcType=VARCHAR}
+		    </if>
+	    </where>
+	</select>
+	
+	<select id="queryAll" resultMap="BaseResultMap">
+		select * from ADMIN_BASE_META_FUN_REG t
+	</select>
+	
+	<insert id="createbusifunc">
+		INSERT INTO ADMIN_SM_BUSI_FUNC
+          (FUNC_ID,
+           MOD_ID,
+           FUNC_NAME,
+           FUNC_DESC,
+           FUNC_URL,
+           FUNC_ORDER,
+           FUNC_ICON,
+           LAST_CHG_USR,
+           LAST_CHG_DT)
+           VALUES (
+                sys_guid(),
+                'e7b0ff1bbf3a49ec83904cdc8d04d463',
+                #{funcName,jdbcType=VARCHAR},
+                #{funcDesc,jdbcType=VARCHAR},
+                #{funcUrl,jdbcType=VARCHAR},
+                '1',
+                'el-icon-yx-list2',
+                '40',
+                to_char(sysdate,'yyyy-MM-dd HH:mm:ss')
+           )
+	</insert>
+	
+	<select id="getAdminBaseMetaFunReg" resultMap="BaseResultMap">
+		select * from ADMIN_BASE_META_FUN_REG t where t.FUN_CODE = #{funCode}
+	</select>
+	
+	<delete id="deletebusifunc">
+		DELETE FROM ADMIN_SM_BUSI_FUNC t WHERE T.FUNC_URL = #{funcUrl}
+	</delete>
+	
+	<delete id="delFuncode">
+		DELETE FROM ADMIN_BASE_META_FUN_REG t WHERE T.fun_code = #{funCode}
+	</delete>
+	
+	<delete id="delColumnTable">
+		DELETE FROM ADMIN_BASE_META_FUN_COLUMN t WHERE T.table_code like concat(#{funCode},'%')
+	</delete>
+	
+	<delete id="delColumnCfgTable">
+		DELETE FROM ADMIN_BASE_META_FUN_COLUMN_CFG t WHERE T.column_code like concat(#{funCode},'%')
+	</delete>
+	
+</mapper>

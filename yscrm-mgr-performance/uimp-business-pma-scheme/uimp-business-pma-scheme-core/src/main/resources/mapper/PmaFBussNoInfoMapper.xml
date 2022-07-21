@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.uimp.business.pma.scheme.repository.mapper.PmaFBussNoInfoMapper">
+    <select id="getBusstreeByParam" parameterType="java.util.Map" resultType="java.util.HashMap">
+		SELECT T.ID,T.BUSS_TYPE,T.BUSS_NO,T.BUSS_NAME,T.HGR_BUSS_NO,T.BUSS_NO_STATE FROM BUSS_UNITS T
+		<where>
+			<if test="bussType!=null and bussType!=''">
+				AND T.BUSS_TYPE=#{bussType}
+			</if>
+		</where>
+	</select>
+    <select id="queryNames" parameterType="String" resultType="String">
+        select BUSS_NAME from PMA_F_BUSS_NO_INFO
+        where BUSS_NO in 
+        <foreach collection="bussNo" item="bussNo" index="index" open="(" close=")" separator=",">
+        	#{bussNo}
+        </foreach>
+    </select>
+</mapper>

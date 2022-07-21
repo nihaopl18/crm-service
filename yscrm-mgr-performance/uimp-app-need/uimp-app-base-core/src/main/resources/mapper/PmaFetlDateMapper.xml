@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.uimp.base.repository.mapper.PmaFetlDateMapper">
+    
+    <select id="queryList" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.Map">
+    	select 
+    		ETL_TYPE, ETL_DATE, ETL_STATE
+    	from PMA_F_ETL_DATE
+    	<where>
+			<if test="condition.etlDate != null and condition.etlDate  != ''">
+      			AND ETL_DATE = #{condition.etlDate}
+		    </if>
+		</where> 
+    </select>
+    
+    <update id="updateMess" parameterType="java.lang.String">
+    	update PMA_F_ETL_DATE 
+    		set ETL_DATE = #{etlDate}, ETL_STATE = #{etlState}
+    	where ETL_TYPE = #{etlType}
+    </update>
+</mapper>

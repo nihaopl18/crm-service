@@ -1,0 +1,225 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.knowledge.repository.mapper.OcrmFwpInfoMapper">
+    <resultMap id="BaseResultMap" type="cn.com.yusys.yscrm.knowledge.domain.OcrmFwpInfo">
+		<id column="MESSAGE_ID" jdbcType="VARCHAR" property="messageId" />
+		<result column="SECTION_ID" jdbcType="VARCHAR" property="sectionId" />
+		<result column="MESSAGE_TITLE" jdbcType="VARCHAR" property="messageTitle" />
+		<result column="MESSAGE_INTRODUCE" jdbcType="VARCHAR" property="messageIntroduce" />
+		<result column="PUBLIC_TYPE" jdbcType="VARCHAR" property="publicType" />
+		<result column="PUBLISH_TYPE" jdbcType="VARCHAR" property="publishType" />
+		<result column="PUBLISH_DATE" jdbcType="VARCHAR" property="publishDate" />
+		<result column="PUBLISH_USER" jdbcType="VARCHAR" property="publishUser" />
+		<result column="PUBLISH_USER_NAME" jdbcType="VARCHAR" property="publishUserName" />
+		<result column="PUBLISH_ORG" jdbcType="VARCHAR" property="publishOrg" />
+		<result column="PUBLISH_ORG_NAME" jdbcType="VARCHAR" property="publishOrgName" />
+		<result column="CORP_ORG_CODE" jdbcType="VARCHAR" property="corpOrgCode" />
+		<result column="IS_DELETE" jdbcType="VARCHAR" property="isDelete" />
+    </resultMap>
+    <sql id="Base_Column_List">
+	    MESSAGE_ID,SECTION_ID,MESSAGE_TITLE,MESSAGE_INTRODUCE,PUBLIC_TYPE,PUBLISH_TYPE,PUBLISH_DATE,PUBLISH_USER,PUBLISH_USER_NAME,PUBLISH_ORG,PUBLISH_ORG_NAME,CORP_ORG_CODE,IS_DELETE
+    </sql>
+    
+    <!-- 知识库 数据查询 -->
+    <select id="listByModel" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+       select a.MESSAGE_ID, a.SECTION_ID, 
+              (select SECTION_NAME from OCRM_F_WP_INFO_SECTION where SECTION_ID = a.SECTION_ID) as SECTION_NAME,
+              a.MESSAGE_TITLE, a.MESSAGE_INTRODUCE, a.PUBLIC_TYPE,a.PUBLISH_TYPE,
+              a.PUBLISH_USER, a.PUBLISH_USER_NAME, 
+              a.PUBLISH_ORG, a.PUBLISH_ORG_NAME,a.INSTANCE_ID,
+              case when a.PUBLISH_DATE is not null then substr(a.PUBLISH_DATE, 0, 10)
+                   else '' end as PUBLISH_DATE
+		from OCRM_F_WP_INFO a
+		<where>
+	    	a.IS_DELETE = 'N'
+	    	and (
+	    	  a.SECTION_ID in (
+	    	    select SECTION_ID from OCRM_F_WP_INFO_SECTION 
+		          where IS_DELETE = 'N' 
+		          start with SECTION_ID = #{condition.sectionId,jdbcType=VARCHAR} 
+		          connect by prior SECTION_ID = PARENT_SECTION
+		        )
+		      or a.SECTION_ID = #{condition.sectionId,jdbcType=VARCHAR}
+		    )
+		    <if test="condition.searchScope != null and condition.searchScope != ''">
+		    	<if test="condition.searchScope == '2'.toString() and condition.messageTitle != null and condition.messageTitle != ''">
+		    		<choose>
+	                    <when test="@cn.com.yusys.yusp.commons.mapper.provider.OGNLUtil@like(condition.messageTitle)"> AND a.MESSAGE_TITLE like #{condition.messageTitle,jdbcType=VARCHAR }</when>
+	                    <otherwise> AND a.MESSAGE_TITLE = #{condition.messageTitle,jdbcType=VARCHAR} </otherwise>
+	                </choose>
+	        	</if>
+	        	<if test="condition.searchScope == '3'.toString() and condition.messageIntroduce != null and condition.messageIntroduce != ''">
+	            	<choose>
+	                    <when test="@cn.com.yusys.yusp.commons.mapper.provider.OGNLUtil@like(condition.messageIntroduce)"> AND a.MESSAGE_INTRODUCE like #{condition.messageIntroduce,jdbcType=VARCHAR }</when>
+	                    <otherwise> AND a.MESSAGE_INTRODUCE = #{condition.messageIntroduce,jdbcType=VARCHAR} </otherwise>
+	                </choose>
+	        	</if>
+	        	<if test="condition.searchScope == '1'.toString() and condition.messageTitle != null and condition.messageTitle != '' 
+	        				and condition.messageIntroduce != null and condition.messageIntroduce != ''">
+	            	<choose>
+	                    <when test="@cn.com.yusys.yusp.commons.mapper.provider.OGNLUtil@like(condition.messageTitle) and 
+	                                @cn.com.yusys.yusp.commons.mapper.provider.OGNLUtil@like(condition.messageIntroduce) "> 
+	                    	AND (a.MESSAGE_TITLE like #{condition.messageTitle,jdbcType=VARCHAR} or a.MESSAGE_INTRODUCE like #{condition.messageIntroduce,jdbcType=VARCHAR})</when>
+	                    <otherwise> AND (a.MESSAGE_TITLE = #{condition.messageTitle,jdbcType=VARCHAR} or a.MESSAGE_INTRODUCE = #{condition.messageIntroduce,jdbcType=VARCHAR}) </otherwise>
+	                </choose>
+	        	</if>
+        	</if>
+        	<if test="condition.searchScope == null">
+	        	<if test="condition.messageTitle != null and condition.messageTitle != ''">
+		            <choose>
+	                    <when test="@cn.com.yusys.yusp.commons.mapper.provider.OGNLUtil@like(condition.messageTitle)"> AND a.MESSAGE_TITLE like #{condition.messageTitle,jdbcType=VARCHAR }</when>
+	                    <otherwise> AND a.MESSAGE_TITLE = #{condition.messageTitle,jdbcType=VARCHAR} </otherwise>
+	                </choose>
+	            </if>
+            </if>
+        	<if test="condition.publishDate != null and condition.publishDate != ''">
+	            <![CDATA[
+	                AND TO_DATE(a.PUBLISH_DATE, 'yyyy-MM-dd hh24:mi:ss') >= TO_DATE(#{condition.publishDate,jdbcType=VARCHAR}, 'yyyy-MM-dd')
+	            ]]>
+            </if>
+            <if test="condition.publishDateTo != null and condition.publishDateTo != ''">
+	            <![CDATA[
+	                AND TO_DATE(a.PUBLISH_DATE, 'yyyy-MM-dd hh24:mi:ss') <= TO_DATE(#{condition.publishDateTo,jdbcType=VARCHAR}, 'yyyy-MM-dd')
+	            ]]>
+            </if>
+            <if test="condition.publishUser != null and condition.publishUser != ''">
+            	AND a.PUBLISH_USER = #{condition.publishUser,jdbcType=VARCHAR}
+        	</if>
+        	<if test="condition.publishOrg != null and condition.publishOrg != ''">
+            	AND a.PUBLISH_ORG = #{condition.publishOrg,jdbcType=VARCHAR}
+        	</if>
+        	${dataAuth}
+		</where>
+		<if test="sort != null"> order by ${sort} </if>
+    </select>
+	<select id="listByModel1" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+		SELECT I.MESSAGE_ID, I.SECTION_ID, S.SECTION_NAME, I.MESSAGE_TITLE, I.MESSAGE_INTRODUCE, I.PUBLIC_TYPE, I.PUBLISH_USER, I.PUBLISH_USER_NAME, I.PUBLISH_ORG,
+		       I.PUBLISH_ORG_NAME, I.PUBLISH_DATE, I.PUBLISH_TYPE,I.INSTANCE_ID
+		FROM OCRM_F_WP_INFO I
+		INNER JOIN OCRM_F_WP_INFO_SECTION S
+		    ON S.SECTION_ID = I.SECTION_ID
+		    <if test="condition.sectionId != null and condition.sectionId != ''">
+				AND S.SECTION_ID IN (
+					SELECT SECTION_ID
+					FROM OCRM_F_WP_INFO_SECTION
+					WHERE IS_DELETE = 'N'
+					START WITH SECTION_ID = #{condition.sectionId,jdbcType=VARCHAR} CONNECT BY PRIOR SECTION_ID = PARENT_SECTION)
+			</if>
+		<where> I.IS_DELETE = 'N'
+			<if test="condition.option == null">
+				AND (I.PUBLIC_TYPE = '1'
+				OR (I.PUBLIC_TYPE = '2' AND I.PUBLISH_USER = #{condition.userCode,jdbcType=VARCHAR})
+				OR (I.PUBLIC_TYPE = '3' AND I.PUBLISH_ORG IN (
+					SELECT ORG_ID FROM ADMIN_SM_ORG
+					START WITH ORG_ID = #{condition.orgCode,jdbcType=VARCHAR} CONNECT BY PRIOR UP_ORG_ID = ORG_ID ))
+				OR (I.PUBLIC_TYPE = '4' AND I.PUBLISH_ORG = #{condition.orgCode,jdbcType=VARCHAR})
+				OR (I.PUBLIC_TYPE = '5' AND I.PUBLISH_USER IN (
+					SELECT TEAM_LEADER_ID
+					FROM OCRM_F_CM_MKT_TEAM MT
+					INNER JOIN OCRM_F_CM_TEAM_CUST_MANAGER TM ON MT.MKT_TEAM_ID = TM.MKT_TEAM_ID AND TM.USER_ID = #{condition.userCode,jdbcType=VARCHAR}
+				) ))
+				AND I.PUBLISH_TYPE = 'N'
+			</if>
+			<if test="condition.option != null and condition.option == '1'.toString()">
+				AND I.PUBLISH_USER = #{condition.userCode,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.searchScope != null and condition.searchScope != ''">
+				<if test="condition.searchScope == '2'.toString() and condition.messageTitle != null and condition.messageTitle != ''">
+					<choose>
+						<when test="@cn.com.yusys.yusp.commons.mapper.provider.OGNLUtil@like(condition.messageTitle)"> AND I.MESSAGE_TITLE like #{condition.messageTitle,jdbcType=VARCHAR }</when>
+						<otherwise> AND I.MESSAGE_TITLE = #{condition.messageTitle,jdbcType=VARCHAR} </otherwise>
+					</choose>
+				</if>
+				<if test="condition.searchScope == '3'.toString() and condition.messageIntroduce != null and condition.messageIntroduce != ''">
+					<choose>
+						<when test="@cn.com.yusys.yusp.commons.mapper.provider.OGNLUtil@like(condition.messageIntroduce)"> AND I.MESSAGE_INTRODUCE like #{condition.messageIntroduce,jdbcType=VARCHAR }</when>
+						<otherwise> AND I.MESSAGE_INTRODUCE = #{condition.messageIntroduce,jdbcType=VARCHAR} </otherwise>
+					</choose>
+				</if>
+				<if test="condition.searchScope == '1'.toString() and condition.messageTitle != null and condition.messageTitle != ''
+	        				and condition.messageIntroduce != null and condition.messageIntroduce != ''">
+					<choose>
+						<when test="@cn.com.yusys.yusp.commons.mapper.provider.OGNLUtil@like(condition.messageTitle) and
+	                                @cn.com.yusys.yusp.commons.mapper.provider.OGNLUtil@like(condition.messageIntroduce) ">
+							AND (I.MESSAGE_TITLE like #{condition.messageTitle,jdbcType=VARCHAR} or I.MESSAGE_INTRODUCE like #{condition.messageIntroduce,jdbcType=VARCHAR})</when>
+						<otherwise> AND (I.MESSAGE_TITLE = #{condition.messageTitle,jdbcType=VARCHAR} or I.MESSAGE_INTRODUCE = #{condition.messageIntroduce,jdbcType=VARCHAR}) </otherwise>
+					</choose>
+				</if>
+			</if>
+			<if test="condition.searchScope == null">
+				<if test="condition.messageTitle != null and condition.messageTitle != ''">
+					<choose>
+						<when test="@cn.com.yusys.yusp.commons.mapper.provider.OGNLUtil@like(condition.messageTitle)"> AND I.MESSAGE_TITLE like #{condition.messageTitle,jdbcType=VARCHAR }</when>
+						<otherwise> AND I.MESSAGE_TITLE = #{condition.messageTitle,jdbcType=VARCHAR} </otherwise>
+					</choose>
+				</if>
+			</if>
+			<if test="condition.publishDate != null and condition.publishDate != ''">
+				<![CDATA[
+	                AND I.PUBLISH_DATE >= #{condition.publishDate,jdbcType=VARCHAR}
+	            ]]>
+			</if>
+			<if test="condition.publishDateTo != null and condition.publishDateTo != ''">
+				<![CDATA[
+	                AND I.PUBLISH_DATE <= #{condition.publishDateTo,jdbcType=VARCHAR}
+	            ]]>
+			</if>
+			<if test="condition.publishUser != null and condition.publishUser != ''">
+				AND I.PUBLISH_USER = #{condition.publishUser,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.publishOrg != null and condition.publishOrg != ''">
+				AND I.PUBLISH_ORG = #{condition.publishOrg,jdbcType=VARCHAR}
+			</if>
+		</where>
+		<if test="sort != null and sort != ''"> order by ${sort} </if>
+		<if test="sort == null or sort == ''"> order by I.PUBLISH_DATE desc </if>
+	</select>
+	<select id="queryById" parameterType="java.lang.String" resultType="java.util.Map">
+		SELECT I.MESSAGE_ID, I.SECTION_ID, S.SECTION_NAME, I.MESSAGE_TITLE, I.MESSAGE_INTRODUCE, I.PUBLIC_TYPE, I.PUBLISH_USER, I.PUBLISH_USER_NAME, I.PUBLISH_ORG,
+			   I.PUBLISH_ORG_NAME, I.PUBLISH_DATE, I.PUBLISH_TYPE,I.INSTANCE_ID
+		FROM OCRM_F_WP_INFO I
+		INNER JOIN OCRM_F_WP_INFO_SECTION S ON S.SECTION_ID = I.SECTION_ID
+		WHERE I.MESSAGE_ID = #{bizSeqNo,jdbcType=VARCHAR}
+	</select>
+	<select id="sameInfo" parameterType="java.util.Map" resultType="java.lang.Integer">
+		select
+			count(MESSAGE_ID)
+		from OCRM_F_WP_INFO
+		where IS_DELETE = 'N'
+		  and SECTION_ID = #{selectId,jdbcType=VARCHAR}
+		  and MESSAGE_TITLE = #{infoName,jdbcType=VARCHAR}
+		  and PUBLISH_USER = #{userCode,jdbcType=VARCHAR}
+		  <if test="messageId != null or messageId != ''">
+			and MESSAGE_ID != #{messageId,jdbcType=VARCHAR}
+		  </if>
+	</select>
+
+	<!-- 根据主键删除 逻辑删除 -->
+    <update id="deleteByMessageIds" parameterType="String">
+        update OCRM_F_WP_INFO set IS_DELETE = 'Y'
+        where MESSAGE_ID in 
+        <foreach collection="array" item="messageIds" index="index" open="(" close=")" separator=",">
+        	#{messageIds}
+        </foreach>
+    </update>
+
+	<!-- 根据 知识库编号字段 逻辑删除 -->
+	<delete id="deleteFilesByBusno" parameterType="String">
+		delete from ADMIN_FILE_UPLOAD_INFO where BUS_NO in 
+		<foreach collection="array" item="busno" index="index" open="(" close=")" separator=",">
+        	#{busno}
+        </foreach>
+	</delete>
+
+	<update id="updatePublishData" parameterType="cn.com.yusys.yscrm.knowledge.domain.OcrmFwpInfo">
+		update OCRM_F_WP_INFO set
+		PUBLISH_TYPE = #{publishType,jdbcType=VARCHAR}
+		<if test="publishType != null and publishType == 'N'.toString()">
+			, PUBLISH_DATE = #{publishDate,jdbcType=VARCHAR}
+		</if>
+		<if test="publishType != null and publishType == 'N-0'.toString()">
+			, INSTANCE_ID = #{instanceId,jdbcType=VARCHAR}
+		</if>
+		where MESSAGE_ID = #{messageId,jdbcType=VARCHAR}
+	</update>
+</mapper>

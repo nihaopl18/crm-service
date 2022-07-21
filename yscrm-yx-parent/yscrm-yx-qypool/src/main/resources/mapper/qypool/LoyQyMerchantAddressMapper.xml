@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.climp.qypool.repository.mapper.LoyQyMerchantAddressMapper">
+    <select id="getAddressProvince" resultType="java.util.Map">
+		select t.* from BS_PROVINCE t
+	</select>
+    <select id="getAddressCity" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.Map">
+		select t.* from BS_CITY t 
+		<where>
+		<if test="condition.provinceCode != null">
+				t.province_code = #{condition.provinceCode,jdbcType=VARCHAR}
+			</if>
+		</where> 
+	</select>
+	<select id="getAddressArea" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.Map">
+		select t.* from BS_AREA t
+		<where>
+		<if test="condition.cityCode != null">
+			 t.city_code = #{condition.cityCode,jdbcType=VARCHAR}
+		</if>
+		</where> 
+	</select>
+</mapper>

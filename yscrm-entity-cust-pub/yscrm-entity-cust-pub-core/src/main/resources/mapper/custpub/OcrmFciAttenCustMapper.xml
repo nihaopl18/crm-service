@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.custpub.repository.mapper.OcrmFciAttenCustMapper">
+    
+    <!-- 通过产品展示方ID获取方案表关系信息 -->
+    <select id="getListByModel" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"  resultType="java.util.HashMap">
+	 select A.*, B.AUM_BAL,B.DPS_BAL,B.LOAN_BAL,B.DPS_Y_AVG_BAL,
+          B.LOAN_Y_AVG_BAL FROM OCRM_F_CI_ATTEN_CUST  A 
+	 left join (select CUST_ID,AUM_BAL,DPS_BAL,LOAN_BAL,DPS_Y_AVG_BAL,LOAN_Y_AVG_BAL FROM ACRM_A_CI_PER_BUSI_SUM_D UNION ALL
+                 select CUST_ID,AUM_BAL,DPS_BAL,LOAN_BAL,DPS_Y_AVG_BAL,LOAN_Y_AVG_BAL FROM ACRM_A_CI_ORG_BUSI_SUM_D) B
+        on A.cust_id = B.cust_id
+	  <where>
+	  USER_ID = #{condition.userId,jdbcType=VARCHAR}
+		<if test="condition.custId != null and condition.custId !=''">
+				  and A.CUST_ID LIKE CONCAT(CONCAT('%', #{condition.custId, jdbcType=VARCHAR}),'%')
+		</if>
+		<if test="condition.custName != null and condition.custName !=''">
+				  and A.CUST_NAME LIKE CONCAT(CONCAT('%', #{condition.custName, jdbcType=VARCHAR}),'%')
+		</if>
+		<if test="condition.attentType != null and condition.attentType !=''">
+				  and A.ATTENT_TYPE = #{condition.attentType, jdbcType=VARCHAR}
+		</if>
+		
+    </where>
+	</select>
+    <select id="getCustsById" parameterType="java.util.List"  resultType="cn.com.yusys.yscrm.custpub.domain.AcrmFciCustAdmitAll">
+	 <!-- select t.* from ACRM_F_CI_CUST_ADMIT_ALL t where  cust_id in -->
+	 select t.* from ACRM_F_CI_CUST_ALL t where  cust_id in
+    <foreach item="item" index="index" collection="list" open="(" separator="," close=")">  
+			    #{item}  
+			</foreach> 
+	</select>
+	<delete id="deleteByCustIdAndUserId" parameterType="String">
+	 delete OCRM_F_CI_ATTEN_CUST WHERE CUST_ID = #{custId,jdbcType=VARCHAR} AND USER_ID = #{userId,jdbcType=VARCHAR}
+	</delete>
+</mapper>

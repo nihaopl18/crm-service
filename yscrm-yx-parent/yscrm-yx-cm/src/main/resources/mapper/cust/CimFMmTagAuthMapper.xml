@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.cm.cust.repository.mapper.MergeCimFMmTagAuthMapper">
+	<!-- 获取自增序列 -->
+	<select id="getSeq" resultType="String">
+		select ysc_sequence.nextval from dual
+	</select>
+	<!-- 查询授权信息 -->
+	<select id="getList" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+		select a.ID,a.AUTH_TYPE,a.AUTH_OBJ,a.OPERATE_TYPE,a.AUTH_USER,a.TAG_NO,a.AUTH_NAME, 
+		TO_CHAR(a.AVAILABLE_DATE,'yyyy-MM-DD') as AVAILABLE_DATE,
+		TO_CHAR(a.DISABLE_DATE,'yyyy-MM-DD') as DISABLE_DATE,
+		TO_CHAR(a.AUTH_DATE,'yyyy-MM-DD') as AUTH_DATE
+		from CIM_F_MM_TAG_AUTH a 
+		<where>
+			<if test="condition.tagNo !='null'">
+			and a.TAG_NO = #{condition.tagNo, jdbcType=VARCHAR}
+			</if>
+		</where>
+	</select>
+	<!-- 授权信息维护 -->
+	<update id="updateAuthList" parameterType="cn.com.yusys.yusp.cm.cust.domain.CimFMmTagAuthInfo">
+		update CIM_F_MM_TAG_AUTH set 
+		AUTH_TYPE = #{authType, jdbcType=VARCHAR},
+		AUTH_NAME = #{authName, jdbcType=VARCHAR},
+		AUTH_OBJ = #{authObj, jdbcType=VARCHAR},
+		AVAILABLE_DATE = #{availableDate},
+		DISABLE_DATE = #{disableDate},
+		AUTH_USER = #{authUser, jdbcType=VARCHAR},
+		AUTH_DATE = #{authDate} 
+		where ID = #{id}
+	</update>
+	<!-- 授权信息删除 -->
+	<delete id="deleteAuthList" parameterType="cn.com.yusys.yusp.cm.cust.domain.CimFMmTagAuthInfo">
+		delete from CIM_F_MM_TAG_AUTH where ID = #{id}
+	</delete>
+	<!-- 查询授权对象名称 -->
+	<select id="getAuthName" parameterType="String" resultType="java.util.HashMap">
+		select o.ORG_NAME from ADMIN_SM_ORG o where o.ORG_NAME = #{orgName, jdbcType=VARCHAR}
+	</select>
+	<!-- 查询人员表 -->
+	<select id="getUserList" resultType="java.util.HashMap">
+		select * from ADMIN_SM_USER
+	</select>
+	<!-- 查询角色表 -->
+	<select id="getRoleList" resultType="java.util.HashMap">
+		select * from ADMIN_SM_ROLE
+	</select>
+	<!-- 查询组织机构表 -->
+	<select id="getOrgList" resultType="java.util.HashMap">
+		select * from ADMIN_SM_ORG
+	</select>
+	<!-- 查询金融机构表 -->
+	<select id="getInstuList" resultType="java.util.HashMap">
+		select * from ADMIN_SM_INSTU where INSTU_STS = 'A'
+	</select>
+	<!-- 获取授权对象Id -->
+	<select id="getAuthObj" parameterType="cn.com.yusys.yusp.cm.cust.domain.CimFMmTagAuthInfo" resultType="java.util.Map">
+		<if test="authType == 'INSTU'">
+			select INSTU_CDE as OBJ,INSTU_NAME as NAME from ADMIN_SM_INSTU where INSTU_NAME = #{authName, jdbcType=VARCHAR}
+		</if>
+		<if test="authType == 'ORG'">
+			select ORG_ID as OBJ,ORG_NAME as NAME from ADMIN_SM_ORG where ORG_ID = #{authName, jdbcType=VARCHAR}
+		</if>
+		<if test="authType == 'ROLE'">
+			select ROLE_CODE as OBJ,ROLE_NAME as NAME from ADMIN_SM_ROLE where ROLE_CODE = #{authName, jdbcType=VARCHAR}
+		</if>
+		<if test="authType == 'MGR'">
+			select LOGIN_CODE as OBJ,USER_NAME as NAME from ADMIN_SM_USER where LOGIN_CODE = #{authName, jdbcType=VARCHAR}
+		</if>
+	</select>
+	<select id="getUpdateAuthName" parameterType="cn.com.yusys.yusp.cm.cust.domain.CimFMmTagAuthInfo" resultType="java.util.Map">
+		<if test="authType == 'INSTU'">
+			select INSTU_CDE as OBJ,INSTU_NAME as NAME from ADMIN_SM_INSTU where INSTU_NAME = #{authName, jdbcType=VARCHAR}
+		</if>
+		<if test="authType == 'ORG'">
+			select ORG_ID as OBJ,ORG_NAME as NAME from ADMIN_SM_ORG where ORG_NAME = #{authName, jdbcType=VARCHAR}
+		</if>
+		<if test="authType == 'ROLE'">
+			select ROLE_CODE as OBJ,ROLE_NAME as NAME from ADMIN_SM_ROLE where ROLE_NAME = #{authName, jdbcType=VARCHAR}
+		</if>
+		<if test="authType == 'MGR'">
+			select LOGIN_CODE as OBJ,USER_NAME as NAME from ADMIN_SM_USER where USER_NAME = #{authName, jdbcType=VARCHAR}
+		</if>
+	</select>
+	<!-- 检验授权对象重复 -->
+	<select id="getSameAuth" parameterType="cn.com.yusys.yusp.cm.cust.domain.CimFMmTagAuthInfo" resultType="java.util.Map">
+		select count(1) as num from CIM_F_MM_TAG_AUTH where AUTH_TYPE = #{authType, jdbcType=VARCHAR} 
+		and AUTH_OBJ = #{authObj, jdbcType=VARCHAR} and TAG_NO = #{tagNo, jdbcType=VARCHAR}
+	</select>
+	<!-- 删除标签的授权信息 -->
+	<delete id="delTagNo" parameterType="String">
+		DELETE FROM CIM_F_MM_TAG_AUTH WHERE TAG_NO = #{tagNo}
+	</delete>
+</mapper>

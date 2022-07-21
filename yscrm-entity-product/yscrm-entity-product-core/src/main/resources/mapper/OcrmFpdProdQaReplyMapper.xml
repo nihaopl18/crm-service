@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.product.repository.mapper.OcrmFpdProdQaReplyMapper">
+    <!-- 根据编号删除产品QA回复信息 -->
+	<delete id="delerteQuestionsAnswers" parameterType="String">
+		DELETE FROM OCRM_F_PD_PROD_QA_REPLY A WHERE A.QUESTION_ID = #{condition.questionId,jdbcType=VARCHAR}
+	</delete>
+</mapper>

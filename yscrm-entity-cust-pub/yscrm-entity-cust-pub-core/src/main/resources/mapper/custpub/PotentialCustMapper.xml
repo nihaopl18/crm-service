@@ -1,0 +1,310 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.custpub.repository.mapper.PotentialCustMapper">
+	
+	<!-- 查询潜在客户 -->
+	<select id="getListByModelPer" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"  resultType="java.util.HashMap">
+		SELECT A.CUST_ID,
+                 A.CUST_NAME,
+                 '1' AS CUST_TYPE,
+                 A.CUST_STATUS,
+                 A.BELONG_MGR,
+                 A.BELONG_BRCH,
+                 A.CERT_TYPE,
+                 A.CERT_NO,
+                 A.PHONE_NO,
+                 A.INDIV_OCC,
+                 A.WORK_UNIT,
+                 A.CONT_ADDR,
+                 U.USER_NAME,
+                 O.ORG_NAME,
+                 O.ORG_LEVEL,
+                 ADDR.ID AS ADDR_ID, 
+                 A.LAST_UPDATE_SYS AS SOURCE_CHANNEL
+<!--                  B.MGR_ID,
+                 B.ORG_ID -->
+            FROM ACRM_F_CI_PER_ADMIT_INFO A
+              <!-- LEFT JOIN OCRM_F_CI_ADMIT_BELONG B
+            ON B.CUST_ID = A.CUST_ID -->
+            LEFT JOIN ACRM_F_CI_ADDR_INFO ADDR
+              ON ADDR.CUST_ID = A.CUST_ID
+             AND ADDR.MAIN_ADDR_FLG = '1' 
+            LEFT JOIN ADMIN_SM_USER U
+              ON U.USER_ID = A.BELONG_MGR
+            LEFT JOIN ADMIN_SM_ORG O
+              ON O.ORG_CODE = A.BELONG_BRCH
+		<where>
+		A.CUST_STATUS = 'Q1'  
+				<if test="dataAuth != null and condition.orgIdAuth =='500'">
+				</if>
+				<if test="dataAuth != null and condition.orgIdAuth !='500'">
+				<!-- and (A.BELONG_MGR = #{condition.userId, jdbcType=VARCHAR}   
+				OR A.BELONG_BRCH IN
+                 (SELECT REGEXP_SUBSTR(#{condition.orgIdAuth, jdbcType=VARCHAR}, '[^,]+', 1, LEVEL, 'i') AS STR
+                    FROM DUAL
+                  CONNECT BY LEVEL &lt;=
+                             LENGTH(#{condition.orgIdAuth, jdbcType=VARCHAR}) -
+                             LENGTH(REGEXP_REPLACE(#{condition.orgIdAuth, jdbcType=VARCHAR}, ',', '')) + 1)  
+                             ) -->
+                             ${dataAuth}
+				</if>
+				<if test="dataAuth == null">
+				AND (A.BELONG_MGR = #{condition.userId, jdbcType=VARCHAR})  <!-- OR B.ORG_ID IS NULL -->
+				</if>
+		<if test="condition.certType != null and condition.certType !=''">
+				  and A.CERT_TYPE = #{condition.certType, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.custId != null and condition.custId !=''">
+				  and A.CUST_ID LIKE CONCAT(CONCAT('%', #{condition.custId, jdbcType=VARCHAR}),'%')
+		</if>
+		<if test="condition.custName != null and condition.custName !=''">
+				  and A.CUST_NAME LIKE CONCAT(CONCAT('%', #{condition.custName, jdbcType=VARCHAR}),'%')
+		</if>
+		<if test="condition.certNo != null and condition.certNo !=''">
+				  and A.CERT_NO LIKE CONCAT(CONCAT('%', #{condition.certNo, jdbcType=VARCHAR}),'%')
+		</if>
+		<if test="condition.belongMgr != null and condition.belongMgr !=''">
+				  and A.BELONG_MGR = #{condition.belongMgr, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.belongBrch != null and condition.belongBrch !=''">
+				  and A.BELONG_BRCH IN (select org_code from sys_org_view where sys_org_view.org_seq like '%'||#{condition.belongBrch, jdbcType=VARCHAR}||',%') 
+		</if>
+		</where>
+		ORDER BY A.LAST_UPDATE_TM DESC
+	</select>
+	<!-- 查询潜在客户 -->
+	<select id="getListByModelOrg" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"  resultType="java.util.HashMap">
+		SELECT A.CUST_ID,
+       A.CUST_NAME,
+       '2' as CUST_TYPE,
+       A.CUST_STATUS,
+       A.BELONG_MGR,
+       A.BELONG_BRCH,
+       A.CERT_TYPE,
+       A.CERT_NO,
+       A.CONT_TEL_NO,
+       A.INDUS_CD,
+       U.USER_NAME,
+       <!-- B.MGR_ID,
+       B.ORG_ID, -->
+       O.ORG_NAME,
+       O.ORG_LEVEL,
+      ADDR.ID            AS ADDR_ID,
+       ADDR.ADDR_COMM_ONE AS CONT_ADDR,
+       CONTACT.ID         AS CONTACT_ID,
+       CONTACT.CONT_NAME  AS CONT_MAN,
+       A.LAST_UPDATE_SYS AS SOURCE_CHANNEL,
+       KE.ID AS KE_ID,
+       KE.CERT_TYPE AS CONT_CERT_TYPE,
+       KE.CERT_NO AS CONT_CERT_NO
+       FROM ACRM_F_CI_ORG_CUST_INFO A
+       <!-- LEFT JOIN OCRM_F_CI_ADMIT_BELONG B
+       ON B.CUST_ID = A.CUST_ID -->
+  LEFT JOIN ACRM_F_CI_ADDR_INFO ADDR
+    ON ADDR.CUST_ID = A.CUST_ID AND ADDR.MAIN_ADDR_FLG = '1' 
+  LEFT JOIN ACRM_F_CI_CONTACT_INFO CONTACT
+    ON CONTACT.CUST_ID = A.CUST_ID AND CONTACT.MAIN_CONT_FLG = '1'   
+    LEFT JOIN ACRM_F_CI_ORG_KEY_MAN KE
+    ON KE.CUST_ID = A.CUST_ID
+     LEFT JOIN ADMIN_SM_USER U
+    ON U.USER_ID = A.BELONG_MGR
+  LEFT JOIN ADMIN_SM_ORG O
+    ON O.ORG_CODE = A.BELONG_BRCH
+    <where>
+    A.IS_ADMIT_ENTER = '1' AND
+		KE.CONT_PRIO = '1' AND
+		A.CUST_STATUS = 'Q1' 
+				<if test="dataAuth != null and condition.orgIdAuth =='500'">
+				</if>
+				<if test="dataAuth != null and condition.orgIdAuth !='500'">
+				<!-- and (A.BELONG_MGR = #{condition.userId, jdbcType=VARCHAR}   
+				OR A.BELONG_BRCH IN
+                 (SELECT REGEXP_SUBSTR(#{condition.orgIdAuth, jdbcType=VARCHAR}, '[^,]+', 1, LEVEL, 'i') AS STR
+                    FROM DUAL
+                  CONNECT BY LEVEL &lt;=
+                             LENGTH(#{condition.orgIdAuth, jdbcType=VARCHAR}) -
+                             LENGTH(REGEXP_REPLACE(#{condition.orgIdAuth, jdbcType=VARCHAR}, ',', '')) + 1)  
+                             	) -->
+                             	${dataAuth}
+				</if>
+				<if test="dataAuth == null">
+				AND (A.BELONG_MGR = #{condition.userId, jdbcType=VARCHAR})<!--  OR B.ORG_ID IS NULL -->
+				</if>
+		<if test="condition.certType != null and condition.certType !=''">
+				  and A.CERT_TYPE = #{condition.certType, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.custId != null and condition.custId !=''">
+				  and A.CUST_ID LIKE CONCAT(CONCAT('%', #{condition.custId, jdbcType=VARCHAR}),'%')
+		</if>
+		<if test="condition.custName != null and condition.custName !=''">
+				  and A.CUST_NAME LIKE CONCAT(CONCAT('%', #{condition.custName, jdbcType=VARCHAR}),'%')
+		</if>
+		<if test="condition.certNo != null and condition.certNo !=''">
+				  and A.CERT_NO LIKE CONCAT(CONCAT('%', #{condition.certNo, jdbcType=VARCHAR}),'%')
+		</if>
+		<if test="condition.belongMgr != null and condition.belongMgr !=''">
+				  and A.BELONG_MGR = #{condition.belongMgr, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.belongBrch != null and condition.belongBrch !=''">
+				  and A.BELONG_BRCH IN (select org_code from sys_org_view where sys_org_view.org_seq like '%'||#{condition.belongBrch, jdbcType=VARCHAR}||',%') 
+		</if>
+		</where>
+		ORDER BY A.LAST_UPDATE_TM DESC
+	</select>
+	<select id="checkIsOrg" parameterType="cn.com.yusys.yscrm.custpub.domain.AcrmFciOrgCustInfo"  resultType="int">
+		<!-- SELECT COUNT(*) FROM ACRM_F_CI_CUST_ADMIT_ALL A LEFT JOIN ACRM_F_CI_PER_ADMIT_INFO C ON A.CUST_ID = C.CUST_ID -->
+		SELECT COUNT(*) FROM ACRM_F_CI_CUST_ALL A LEFT JOIN ACRM_F_CI_PER_ADMIT_INFO C ON A.CUST_ID = C.CUST_ID
+		WHERE A.CUST_NAME = #{custName, jdbcType=VARCHAR}
+		and A.IS_ADMIT_ENTER='1'
+		and C.IS_ADMIT_ENTER='1'
+		and C.CERT_TYPE = #{certType, jdbcType=VARCHAR}
+		and C.CERT_NO = #{certNo, jdbcType=VARCHAR}
+		union
+		<!-- select COUNT(*) from ACRM_F_CI_CUST_ADMIT_ALL A LEFT JOIN  -->
+		select COUNT(*) from ACRM_F_CI_CUST_ALL A LEFT JOIN 
+		(SELECT 
+		O.CERT_TYPE,O.CERT_NO,O.CUST_ID FROM ACRM_F_CI_ORG_CUST_INFO O WHERE O.IS_ADMIT_ENTER = '1') C 
+		ON A.CUST_ID = C.CUST_ID
+		WHERE A.CUST_NAME = #{custName, jdbcType=VARCHAR}
+		and A.IS_ADMIT_ENTER='1'
+		and C.CERT_TYPE = #{certType, jdbcType=VARCHAR}
+		and C.CERT_NO = #{certNo, jdbcType=VARCHAR}
+	</select>
+	<select id="getSeq" resultType="String">
+		SELECT  POTENTIAL_CUST_SEQ.nextval FROM dual
+	</select>
+	    <select id="checkIsPer" parameterType="cn.com.yusys.yscrm.custpub.domain.AcrmFciPerAdmitInfo"  resultType="int">
+		<!-- SELECT COUNT(*) FROM ACRM_F_CI_CUST_ADMIT_ALL A LEFT JOIN ACRM_F_CI_PER_ADMIT_INFO C ON A.CUST_ID = C.CUST_ID -->
+		SELECT COUNT(*) FROM ACRM_F_CI_CUST_ALL A LEFT JOIN ACRM_F_CI_PER_ADMIT_INFO C ON A.CUST_ID = C.CUST_ID
+		WHERE A.CUST_NAME = #{custName, jdbcType=VARCHAR}
+		and A.IS_ADMIT_ENTER='1'
+		and C.IS_ADMIT_ENTER='1'
+		and C.CERT_TYPE = #{certType, jdbcType=VARCHAR}
+		and C.CERT_NO = #{certNo, jdbcType=VARCHAR}
+		union
+	<!-- 	select COUNT(*) from ACRM_F_CI_CUST_ADMIT_ALL A LEFT JOIN  -->
+	select COUNT(*) from ACRM_F_CI_CUST_ALL A LEFT JOIN 
+		(SELECT 
+		O.CERT_TYPE,O.CERT_NO,O.CUST_ID FROM ACRM_F_CI_ORG_CUST_INFO O WHERE O.IS_ADMIT_ENTER = '1') C 
+		ON A.CUST_ID = C.CUST_ID
+		WHERE A.CUST_NAME = #{custName, jdbcType=VARCHAR}
+		and A.IS_ADMIT_ENTER='1'
+		and C.CERT_TYPE = #{certType, jdbcType=VARCHAR}
+		and C.CERT_NO = #{certNo, jdbcType=VARCHAR}
+	</select>
+	<select id="checkIsOrgUp" parameterType="cn.com.yusys.yscrm.custpub.domain.AcrmFciOrgCustInfo"  resultType="int">
+		<!-- select COUNT(*) from ACRM_F_CI_CUST_ADMIT_ALL A LEFT JOIN  -->
+		select COUNT(*) from ACRM_F_CI_CUST_ALL A LEFT JOIN 
+		(SELECT 
+		O.CERT_TYPE,O.CERT_NO,O.CUST_ID FROM ACRM_F_CI_ORG_CUST_INFO O WHERE O.IS_ADMIT_ENTER = '1') C 
+		ON A.CUST_ID = C.CUST_ID
+		WHERE A.CUST_NAME = #{custName, jdbcType=VARCHAR}
+		and A.IS_ADMIT_ENTER='1'
+		and C.CERT_TYPE = #{certType, jdbcType=VARCHAR}
+		and C.CERT_NO = #{certNo, jdbcType=VARCHAR}
+		and C.CUST_ID != #{custId, jdbcType=VARCHAR}
+	</select>
+	    <select id="checkIsPerUp" parameterType="cn.com.yusys.yscrm.custpub.domain.AcrmFciPerAdmitInfo"  resultType="int">
+		<!-- SELECT COUNT(*) FROM ACRM_F_CI_CUST_ADMIT_ALL A LEFT JOIN ACRM_F_CI_PER_ADMIT_INFO C ON A.CUST_ID = C.CUST_ID -->
+		SELECT COUNT(*) FROM ACRM_F_CI_CUST_ALL A LEFT JOIN ACRM_F_CI_PER_ADMIT_INFO C ON A.CUST_ID = C.CUST_ID
+		WHERE A.CUST_NAME = #{custName, jdbcType=VARCHAR}
+		and A.IS_ADMIT_ENTER='1'
+		and C.IS_ADMIT_ENTER='1'
+		and C.CERT_TYPE = #{certType, jdbcType=VARCHAR}
+		and C.CERT_NO = #{certNo, jdbcType=VARCHAR}
+		and C.CUST_ID != #{custId, jdbcType=VARCHAR}
+	</select>
+	
+	<!-- 通过客户ID获取准入客户表全量表客户信息 -->
+	<select id="getCustAdminAllBycustId" parameterType="String"  resultType="cn.com.yusys.yscrm.custpub.domain.AcrmFciCustAdmitAll">
+		<!-- SELECT * FROM ACRM_F_CI_CUST_ADMIT_ALL A WHERE A.CUST_ID = #{custId, jdbcType=VARCHAR} -->
+		SELECT * FROM ACRM_F_CI_CUST_ALL A WHERE A.CUST_ID = #{custId, jdbcType=VARCHAR}
+	</select>
+	<!-- 通过用户ID判断是否是客户经理 -->
+	<select id="isCustMgr" parameterType="String"  resultType="java.util.HashMap">
+		select U.USER_ID,U.USER_NAME,O.ORG_CODE,O.ORG_NAME from ADMIN_SM_USER U LEFT JOIN ADMIN_SM_USER_ROLE_REL R ON U.USER_ID = R.USER_ID LEFT JOIN ADMIN_SM_ORG O ON O.ORG_CODE = U.ORG_ID  where U.USER_ID = #{userId, jdbcType=VARCHAR} and R.role_id ='7EEF1EE9D4D3D8EFE050A8C09EFB243B'
+	</select>
+	
+	<!-- 判断客户是否存在 -->
+	<select id="custExist" parameterType="java.util.HashMap"  resultType="java.util.HashMap">
+		SELECT * FROM ACRM_F_CI_CUST_ALL WHERE CUST_NAME = #{custName, jdbcType=VARCHAR}
+		AND CERT_TYPE = #{certType, jdbcType=VARCHAR} AND CERT_NO = #{certNo, jdbcType=VARCHAR}
+	</select>
+	<!-- 判断客户是否存在 -->
+	<select id="checkIsCust" parameterType="java.util.HashMap"  resultType="int">
+		SELECT COUNT(*) FROM ACRM_F_CI_CUST_ALL WHERE CUST_NAME = #{custName, jdbcType=VARCHAR}
+		AND CERT_TYPE = #{certType, jdbcType=VARCHAR} AND CERT_NO = #{certNo, jdbcType=VARCHAR}
+	</select>
+	<!-- 潜在个人客户导入其他表 -->
+	<insert id="insertPotenCustPer" statementType="CALLABLE">
+	{call potent_per}
+	</insert>
+	<!-- 清空潜在个人客户表 -->
+	<delete id = "cleanPotenCustPer">
+	delete from  POTEN_CUST_PER 
+	</delete>
+	<!-- 潜在个人客户导入其他表 -->
+	<insert id="insertPotenCustOrg" statementType="CALLABLE">
+	{call potent_org}
+	</insert>
+	<!-- 清空潜在个人客户表 -->
+	<delete id = "cleanPotenCustOrg">
+	delete from  POTEN_CUST_ORG 
+	</delete>
+	
+	<delete id="deleteBelong" parameterType="String">
+	delete from OCRM_F_CI_ADMIT_BELONG where CUST_ID in 
+	<foreach collection="array" item="id" index="index" open="(" close=")" separator=",">
+        	#{id}
+     </foreach>
+	</delete>
+	
+	<delete id="deleteAddr" parameterType="String">
+	delete from ACRM_F_CI_ADDR_INFO where CUST_ID in 
+	<foreach collection="array" item="id" index="index" open="(" close=")" separator=",">
+        	#{id}
+     </foreach>
+	</delete>
+	
+	<delete id="deleteIdent" parameterType="String">
+	delete from ACRM_F_CI_CUST_IDENT_INFO where CUST_ID in 
+	<foreach collection="array" item="id" index="index" open="(" close=")" separator=",">
+        	#{id}
+     </foreach>
+	</delete>
+	
+	<delete id="deleteContact" parameterType="String">
+	delete from ACRM_F_CI_CONTACT_INFO where CUST_ID in 
+	<foreach collection="array" item="id" index="index" open="(" close=")" separator=",">
+        	#{id}
+     </foreach>
+	</delete>
+	
+	<delete id="deleteCustAll" parameterType="String">
+	delete from ACRM_F_CI_CUST_ALL where CUST_ID in 
+	<foreach collection="array" item="id" index="index" open="(" close=")" separator=",">
+        	#{id}
+     </foreach>
+	</delete>
+	
+	<delete id="deletePerAdmit" parameterType="String">
+	delete from ACRM_F_CI_PER_ADMIT_INFO where CUST_ID in 
+	<foreach collection="array" item="id" index="index" open="(" close=")" separator=",">
+        	#{id}
+     </foreach>
+	</delete>
+	
+	<delete id="deleteOrgAdmit" parameterType="String">
+	delete from ACRM_F_CI_ORG_CUST_INFO where CUST_ID in 
+	<foreach collection="array" item="id" index="index" open="(" close=")" separator=",">
+        	#{id}
+     </foreach>
+	</delete>
+	
+	<delete id="deleteKeyMan" parameterType="String">
+	delete from ACRM_F_CI_ORG_KEY_MAN   where CUST_ID in 
+	<foreach collection="array" item="id" index="index" open="(" close=")" separator=",">
+        	#{id}
+     </foreach>
+	</delete>
+</mapper>

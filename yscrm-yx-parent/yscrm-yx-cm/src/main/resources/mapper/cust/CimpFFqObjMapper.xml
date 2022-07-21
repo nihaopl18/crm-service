@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.cm.cust.repository.mapper.CimpFFqObjMapper">
+	<select id="queryLeftTab" parameterType="string" resultType="cn.com.yusys.yusp.cm.cust.domain.CimpFFqObj">
+		${value} 
+	</select>
+	<select id="getObj" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"  resultType="cn.com.yusys.yusp.cm.cust.domain.CimpFFqObj">
+		select *from CIMP_F_FQ_OBJ 
+	</select>
+</mapper>

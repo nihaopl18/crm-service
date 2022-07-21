@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.cm.cust.repository.mapper.CimpFFqScolMapper">
+	<select id="getScol" parameterType="string"  resultType="java.util.HashMap">
+		select * from cimp_f_fq_scol where ss_id=#{ssId, jdbcType=VARCHAR} order by ss_col_gorder
+	</select>
+	<select id="deletebyssid" parameterType="string"  >
+		delete from cimp_f_fq_scol where ss_id=#{ssId, jdbcType=VARCHAR}
+	</select>
+	
+</mapper>

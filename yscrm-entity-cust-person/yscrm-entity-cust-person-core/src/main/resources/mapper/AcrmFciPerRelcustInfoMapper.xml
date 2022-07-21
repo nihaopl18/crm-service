@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.cust.person.repository.mapper.AcrmFciPerRelcustInfoMapper">
+    <select id="queryPerrelList" parameterType="java.util.Map"  resultType="java.util.HashMap">
+	  select  t.ID,t.DATA_DATE,t.CRAT_DT,t.CRAT_ORG_ID,t.CRAT_USR,t.LAST_CHG_SYS,t.LAST_CHG_USR,to_char(t.LAST_CHG_DT,'yyyy-mm-dd') as LAST_CHG_DT
+	  ,t.CORP_ORG_CODE,t.CUST_ID,t.CUST_NAME,t.RELA_CUST_ID,t.RELA_CUST_NAME,t.RELATIONSHIP,cust.USER_NAME as LAST_USER_NAME
+	  ,org.ORG_NAME as LAST_ORG_NAME
+	  from  ACRM_F_CI_PER_RELCUST_INFO t
+	
+	  left join admin_sm_user cust on cust.LOGIN_CODE=t.LAST_CHG_USR 
+	  left join admin_sm_org org on org.ORG_ID=cust.ORG_ID 
+	  where 1=1
+	   <if  test="custId != null and custId != ''">
+		       and 		 t.CUST_ID =#{custId,jdbcType=VARCHAR} 
+	   </if>
+	<!--    <if  test="custName != null and custName != ''">
+		       and		 t.CUST_NAME =#{custName,jdbcType=VARCHAR} 
+	   </if>--> 
+	   <if  test="relationship != null and relationship != ''">
+		       and	     t.RELATIONSHIP =#{relationship,jdbcType=VARCHAR} 
+	   </if>
+	   <if  test="relaCustName != null and relaCustName != ''">
+		       and       t.RELA_CUST_NAME =#{relaCustName,jdbcType=VARCHAR} 
+	   </if>
+	   <if  test="relaCustId != null and relaCustId != ''">
+		       and       t.RELA_CUST_ID =#{relaCustId,jdbcType=VARCHAR} 
+	   </if>
+	</select>
+	
+	<select id="getCustType" parameterType="java.util.Map"  resultType="java.util.HashMap">
+		SELECT CUST_TYPE,CUST_STATUS FROM ACRM_F_CI_CUST_ALL WHERE CUST_ID=#{custId,jdbcType=VARCHAR}
+	</select>
+    
+</mapper>

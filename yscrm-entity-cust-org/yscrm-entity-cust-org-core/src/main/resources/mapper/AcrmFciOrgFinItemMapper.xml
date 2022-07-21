@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.cust.org.repository.mapper.AcrmFciOrgFinItemMapper">
+    <!-- 财务报表指标列表查询 -->
+	<select id="queryList"  resultType="java.util.Map">
+		SELECT T1.ITEM_ID, T1.ITEM_NAME, T2.AMT
+		  FROM ACRM_F_CI_ORG_FIN_ITEM T1
+		  LEFT JOIN ACRM_F_CI_ORG_ASSET_DEBT T2 ON T1.ITEM_ID = T2.ITEM_ID
+		<where>
+			<if  test="reportId != null and reportId != ''">
+	       		AND T2.FIN_REPORT_ID = #{reportId,jdbcType=VARCHAR}
+		    </if>
+		</where>
+		ORDER BY T1.ITEM_SEQ
+	</select>
+</mapper>

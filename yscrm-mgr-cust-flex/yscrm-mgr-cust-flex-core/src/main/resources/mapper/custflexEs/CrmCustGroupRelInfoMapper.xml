@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.custflexEs.repository.mapper.CrmCustGroupRelInfoMapper">
+    <resultMap id="BaseResultMap" type="cn.com.yusys.yscrm.custflexEs.domain.CrmCustGroupRelInfo">
+		<result column="GROUP_ID" jdbcType="VARCHAR" property="groupId" />
+		<result column="CUST_ID" jdbcType="VARCHAR" property="custId" />
+		<result column="JOIN_DATE" jdbcType="TIMESTAMP" property="joinDate" />
+    </resultMap>
+    <sql id="Base_Column_List">
+        GROUP_ID,CUST_ID,JOIN_DATE
+    </sql>
+
+	<select id="selectByCustIdAndGroupId" parameterType="java.lang.String" resultType="cn.com.yusys.yscrm.custflexEs.domain.CrmCustGroupRelInfo">
+		select GROUP_ID,CUST_ID,JOIN_DATE from CRM_CUST_GROUP_REL_INFO
+		where GROUP_ID = #{groupId, jdbcType=VARCHAR} and CUST_ID = #{custId, jdbcType=VARCHAR}
+	</select>
+	
+	<insert id="insertRelInfo">
+		insert into CRM_CUST_GROUP_REL_INFO(GROUP_ID,CUST_ID,JOIN_DATE)
+		values (#{groupId, jdbcType=VARCHAR}, #{custId, jdbcType=VARCHAR}, #{joinDate, jdbcType=TIMESTAMP})
+	</insert>
+	
+	<delete id="deleteByGroupId" parameterType="java.lang.String">
+		delete from CRM_CUST_GROUP_REL_INFO where GROUP_ID=#{groupId, jdbcType=VARCHAR}
+	</delete>
+	
+	<select id="queryGroupMember" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.Map">
+		select a.GROUP_ID, a.CUST_ID, g.CUST_NAME, g.CUST_LEVEL, g.CRED_TYPE, g.CRED_NO 
+		from CRM_CUST_GROUP_REL_INFO a 
+			left join CRM_CUST_INFO_FOR_GROUP g on a.CUST_ID = g.CUST_ID
+		<where>
+			and a.GROUP_ID = #{condition.groupId, jdbcType=VARCHAR}
+		</where>
+		order by a.JOIN_DATE desc, a.CUST_ID asc
+	</select>
+	
+	<delete id="removeCustsFromCustGroup">
+		delete from CRM_CUST_GROUP_REL_INFO
+		where GROUP_ID = #{groupId, jdbcType=VARCHAR}
+			and CUST_ID in 
+    	<foreach collection="custIds" index="index" item="custId" open="(" separator="," close=")">
+    		#{custId, jdbcType=VARCHAR}
+    	</foreach>
+	</delete>
+</mapper>

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.cm.ruleConfig.repository.mapper.CmFRcEventTypeMapper">
+	<!-- 查询事件类型信息 -->
+	<select id="getEventType" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+		resultType="java.util.Map">
+		SELECT t.*, T1.EVENT_TYPE_NAME AS parent_Event_Type_Name
+      FROM cm_f_rc_event_type t
+      LEFT JOIN cm_f_rc_event_type t1
+        ON t1.event_type_id = t.parent_event_type_id
+      where (t.DELETE_SIGN is null or t.DELETE_SIGN != '1')
+	</select>
+   <!-- 逻辑删除 事件类型-->
+   <update id="updataEventTypeState" parameterType="java.util.Map">  
+         UPDATE cm_f_rc_event_type  
+            SET 
+			DELETE_SIGN = '1',
+			UPDATE_USER	= #{userCode,javaType=java.lang.String},
+			UPDATE_DATE	= #{upDate,javaType=java.lang.String},
+			UPDATE_ORG	= #{orgCode,javaType=java.lang.String}
+            WHERE event_type_id = #{eventTypeId,javaType=java.lang.String}
+   </update> 
+</mapper>

@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.cm.cust.repository.mapper.MergeCimFMmTagDataSourceMapper">
+ 	<!--查询数据来源 -->
+	<select id="getTagDataSourceList" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+		select D.ID, D.TAG_NO,D.SYS_NO,D.ENTITY_TYPE,D.ENTITY_NO,D.ENTITY_PROP,D.STAT_CALIBER,D.DATE_START,D.DATE_END
+        from CIM_F_MM_TAG_DATA_SOURCE D
+        WHERE 
+        TAG_NO =#{condition.tagNo, jdbcType=VARCHAR} 
+	</select>
+	
+	<!--新增数据来源 -->
+	<insert id="insertTagDataSource" parameterType="cn.com.yusys.yusp.cm.cust.domain.CimFMmTagDataSource">
+		INSERT INTO CIM_F_MM_TAG_DATA_SOURCE D 
+		(
+	     D.ID,D.TAG_NO,D.SYS_NO,D.ENTITY_TYPE,D.ENTITY_NO,D.ENTITY_PROP,D.STAT_CALIBER,D.DATE_START,D.DATE_END
+		)
+		VALUES 
+		(
+		#{id, jdbcType=VARCHAR},
+        #{tagNo, jdbcType=VARCHAR},
+		#{sysNo, jdbcType=VARCHAR},
+		#{entityType, jdbcType=VARCHAR},
+		#{entityNo, jdbcType=VARCHAR},
+		#{entityProp, jdbcType=VARCHAR},
+		#{statCaliber, jdbcType=VARCHAR},
+		#{dateStart, jdbcType=DATE},
+		#{dateEnd, jdbcType=DATE}
+		)
+	</insert> 
+	
+	<!--修改数据来源 -->
+	<update id="updateTagDataSource" parameterType="java.util.Map">
+		UPDATE CIM_F_MM_TAG_DATA_SOURCE D SET 
+		D.SYS_NO = #{sysNo, jdbcType=VARCHAR},
+		D.ENTITY_TYPE = #{entityType, jdbcType=VARCHAR},
+		D.ENTITY_NO = #{entityNo, jdbcType=VARCHAR},
+		D.ENTITY_PROP = #{entityProp, jdbcType=VARCHAR},
+		D.STAT_CALIBER = #{statCaliber, jdbcType=VARCHAR},
+		D.DATE_START = #{dateStart, jdbcType=DATE},
+		D.DATE_END = #{dateEnd, jdbcType=DATE}
+		WHERE
+	    ID = #{id, jdbcType=VARCHAR}
+		
+	</update>
+	
+	<!--删除数据来源 -->
+	<delete id="deleteTagDataSource" parameterType="String">
+		DELETE FROM CIM_F_MM_TAG_DATA_SOURCE 
+		WHERE 
+		ID = #{condition.id, jdbcType=VARCHAR}
+	</delete>
+	
+	<!--根据entityNo来查询表中的所有属性名  -->
+	<select id="getEntityNo" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+		select COLUMN_NAME from user_tab_columns A
+        where TABLE_NAME=#{condition.entityNo, jdbcType=VARCHAR} 
+	</select>
+	
+	<!--查询表中的所有表名  -->
+	<select id="getTableName" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+		select TABLE_NAME  
+		key,TABLE_NAME  value 
+		from all_tables where owner='YSCIMC'
+	<!--判断数据是否重复  -->
+	</select>
+		<select id="getDsRepeat" parameterType="cn.com.yusys.yusp.cm.cust.domain.CimFMmTagDataSource" resultType="java.util.HashMap">
+		SELECT * FROM CIM_F_MM_TAG_DATA_SOURCE WHERE SYS_NO = #{condition.sysNo, jdbcType=VARCHAR} AND ENTITY_TYPE = #{condition.entityType, jdbcType=VARCHAR} 
+		AND ENTITY_NO = #{condition.entityNo, jdbcType=VARCHAR} AND TAG_NO = #{condition.tagNo, jdbcType=VARCHAR}
+	</select>
+	<!--判断tagNo是否存在  -->
+	<select id="checkTagNo" parameterType="String" resultType="int">
+	SELECT count(*) FROM CIM_F_MM_TAG_TAGS WHERE TAG_NO = #{tagNo, jdbcType=VARCHAR}
+	</select>
+	<!-- 删除标签的数据来源信息 -->
+	<delete id="delTagNo" parameterType="String">
+		DELETE FROM CIM_F_MM_TAG_DATA_SOURCE WHERE TAG_NO = #{tagNo}
+	</delete>
+</mapper>

@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.custmgr.repository.mapper.OcrmFcmCustMgrQuitApplyMapper">
+	
+	<!-- 新增客户经理退出申请 -->
+	<insert id="insertCustMgrQuitApply" parameterType="cn.com.yusys.yscrm.custmgr.domain.OcrmFcmCustMgrQuitApply">
+		INSERT INTO OCRM_F_CM_CUST_MGR_QUIT_APPLY
+			  (ID,
+			   USER_ID,
+			   CUST_MANAGER_NAME,
+			   CUST_MANAGER_ID,
+			   EDUCATION,
+			   ENTRANTS_DATE,
+			   FINANCIAL_JOB_TIME,
+			   AWARD,
+			   CERTIFICATE,
+			   DUTY,
+			   BIRTHDAY,
+			   POSITION_TIME,
+			   CUST_MANAGER_LEVEL,
+			   STATE,
+			   QUIT_REASON,
+			   QUIT_DATE,
+			   CORP_ORG_CODE)
+			  SELECT #{id},
+			         T2.USER_ID,
+			         T1.CUST_MANAGER_NAME,
+			         T1.CUST_MANAGER_ID,
+			         T1.EDUCATION,
+			         T1.ENTRANTS_DATE,
+			         T1.FINANCIAL_JOB_TIME,
+			         T1.AWARD,
+			         T1.CERTIFICATE,
+			         T1.DUTY,
+			         T1.BIRTHDAY,
+			         T1.POSITION_TIME,
+			         T1.CUST_MANAGER_LEVEL,
+			         '0' AS STATE,
+			         #{quitReason} AS QUIT_REASON,
+			         SYSDATE AS QUIT_DATE,
+			         T1.CORP_ORG_CODE
+			    FROM ACRM_F_CM_CUST_MGR_INFO T1
+			   INNER JOIN ADMIN_SM_USER T2 ON T1.CUST_MANAGER_ID = T2.LOGIN_CODE
+		<where>
+			<if  test="custManagerId != null and custManagerId != '' ">
+	       		AND T1.CUST_MANAGER_ID = #{custManagerId,jdbcType=VARCHAR}
+		    </if>
+		</where>	  
+	</insert>
+	
+	<!-- 退出客户经理审批信息查询(审批中) -->
+	<select id="queryQuitCustMgrApply" resultType="java.util.Map">
+		SELECT T.CUST_MANAGER_ID,T.CUST_MANAGER_NAME,T.QUIT_REASON,TO_CHAR(T.QUIT_DATE,'YYYY-MM-DD') QUIT_DATE FROM OCRM_F_CM_CUST_MGR_QUIT_APPLY T
+		<where>
+			<if  test="id != null and id != ''">
+	       		AND T.ID = #{id,jdbcType=VARCHAR}
+		    </if>
+		    AND T.STATE in ('0','1')
+		</where>
+	</select>
+	
+	<!--    提交 state 0:未提交，1：已提交，2：审批通过；3:审批否决;   -->
+	<update id="custMgrQuitSubmit">
+		UPDATE OCRM_F_CM_CUST_MGR_QUIT_APPLY T  SET T.STATE = '1' WHERE T.ID=#{bizSeqNo,jdbcType=VARCHAR}
+	</update>
+	<!--    通过 state 0:未提交，1：已提交，2：审批通过；3:审批否决;   -->
+	<update id="custMgrQuitPass">
+		UPDATE OCRM_F_CM_CUST_MGR_QUIT_APPLY T  SET T.STATE = '2' WHERE T.ID=#{bizSeqNo,jdbcType=VARCHAR}
+	</update>
+	<!--    否决 state 0:未提交，1：已提交，2：审批通过；3:审批否决;   -->
+	<update id="custMgrQuitRefuse">
+		UPDATE OCRM_F_CM_CUST_MGR_QUIT_APPLY T  SET T.STATE = '3' WHERE T.ID=#{bizSeqNo,jdbcType=VARCHAR}
+	</update>
+	
+	<!-- 修改客户经理归属信息 -->
+	<update id="updateCustMgrBelongInfo">
+		UPDATE OCRM_F_CI_ADMIT_BELONG T  
+		SET T.LAST_UPDATE_USER = #{operId,jdbcType=VARCHAR},
+			T.LAST_UPDATE_TM=sysdate,
+			T.LAST_UPDATE_ORG=#{operOrgId,jdbcType=VARCHAR},
+			T.MGR_ID = #{vMgrId,jdbcType=VARCHAR},
+			T.MGR_NAME=#{vMgrName,jdbcType=VARCHAR} 
+		WHERE T.MGR_ID=#{mgrId,jdbcType=VARCHAR}
+	</update>
+	
+	<!-- 删除客户经理表 -->
+	<delete id="deleteCustMgrInfo">
+		DELETE FROM ACRM_F_CM_CUST_MGR_INFO T WHERE T.CUST_MANAGER_ID=#{mgrId,jdbcType=VARCHAR}
+	</delete>
+</mapper>

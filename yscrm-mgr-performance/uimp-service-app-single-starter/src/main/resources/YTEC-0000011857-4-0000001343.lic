@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<license build-time="Wed Oct 16 12:24:46 CST 2019" validate-code="39A982D783500BFCE77B1D49EDC387E1">
+  <element name="contract_code">YTEC-2019-1992-A</element>
+  <element name="customer_name">大连农商银行对公客户关系管理系统</element>
+  <element name="license_code">0000013755</element>
+  <element name="product_code">0000001122</element>
+  <element name="product_name_zh-cn">宇信科技基于微服务框架统一开发平台</element>
+  <element name="product_name_en-us">YUSP</element>
+  <element name="version_major">1</element>
+  <element name="version_sub">0</element>
+  <element name="version_publish">1</element>
+  <element name="complie_date">2018-03-20</element>
+  <element name="license_type">内部试用许可证</element>
+  <element name="license_start_time">2019-10-16</element>
+  <element name="license_end_time">2020-02-29</element>
+</license>

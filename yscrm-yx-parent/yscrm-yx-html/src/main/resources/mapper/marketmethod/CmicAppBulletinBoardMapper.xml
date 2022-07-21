@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscimc.marketmethod.repository.mapper.CmicAppBulletinBoardMapper">
+	<!-- 公告板查询  -->
+	<select id="bulletinBoardQuery" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" 
+			resultType="java.util.Map">
+		SELECT T.CT_NODE_ID,T.MKT_POSIT_CODE,CCN.ASSEMBLY_ID,T.ACTIVITY_ID,T.DISPLAY_TYPE,T.ACTIVITY_START_PIC
+		FROM CIMP_CM_NODEINFO CCN,CIMP_CM_MARKET_POSIT_CT T
+		LEFT JOIN CIMP_CM_MARKETPLAN M ON T.ACTIVITY_ID = M.TEMP_ID
+		WHERE T.CT_NODE_ID=CCN.NODE_ID AND T.ACTIVITY_ID=CCN.TEMP_ID
+		AND T.ASSAMLY_ID = '28'
+		AND T.MKT_POSIT_CODE in ('SIGN_1','SIGN_2','SIGN_3','SIGN_4')
+		AND T.VS_START_DATE &lt;= to_char(SYSDATE,'YYYY-MM-DD')
+		AND T.VS_END_DATE &gt;= to_char(SYSDATE,'YYYY-MM-DD')
+		AND T.CT_NODE_ID IS NOT NULL
+		AND T.STATUS=1
+		AND M.ACTIVITY_STS = '02'
+		ORDER BY T.CRAT_DT DESC
+	</select>
+
+	<!-- 根据活动id（节点id）获取活动信息 -->
+	<select id="getMarketActy" parameterType="String" 
+			resultType="cn.com.yusys.yscimc.marketmethod.domain.CimpCmNodesPresentation">
+		SELECT P.*
+		FROM CIMP_CM_NODES_PRESENTATION P
+		WHERE P.FORM_ID =
+			(SELECT D.FORM_ID 
+				FROM CIMP_CM_NODES_DISPLAY D
+				WHERE  D.NODE_ID = #{nodeId}
+			)
+	</select>
+
+	<!-- 获取富文本信息 -->
+	<select id="getDetailContentById" parameterType="String" resultType="String">
+		select DETAIL_CONTENT from LOY_QY_MATERIAL_LIST where ID=#{id,jdbcType=VARCHAR}
+	</select>
+</mapper>

@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper
+        namespace="cn.com.yusys.yscrm.fiexdstatement.repository.mapper.OcrmFClCustomerDetailsMapper">
+    <!-- 条件列表查询 -->
+
+    <select id="queryBranchList"  parameterType="java.util.Map" resultType="cn.com.yusys.yscrm.fiexdstatement.domain.OcrmFClCustomerDetails">
+        select ECIF_CUST_NO,NDS_CUST_NO,CUST_NAME,CUST_ENG_NAME,BELONG_BRCH,MANAGE_MGR,
+        AUM_BALANCE,AUM_DEPOSIT,AUM_DEPOSIT_SORT,AUM_RATE,AUM_RATE_SORT,AUM_NONRATE,AUM_NONRATE_SORT,CONSIGNMENT,CONSIGNMENT_SORT,DANAHARTA,DANAHARTA_SORT,QDII,QDII_SORT,RMBFUND,RMBFUND_SORT,
+        INSURRANCE,INSURRANCE_SORT
+        from OCRM_F_CL_CUSTOMER_DETAILS
+        <where>
+            <if test="dataDate != null and dataDate != ''">
+                and DATA_DATE=to_date(#{dataDate},'yyyy-MM-dd')
+            </if>
+            <if test="aumBalanceStart != null and aumBalanceStart != ''">
+                and AUM_BALANCE >= #{aumBalanceStart,jdbcType=VARCHAR}
+            </if>
+            <if test="aumBalanceEnd != null and aumBalanceEnd != ''">
+                and AUM_BALANCE &lt; #{aumBalanceEnd,jdbcType=VARCHAR}
+            </if>
+            <if test="isPeople != null and isPeople != '' ">
+                and PEOPLE = #{isPeople}
+            </if>
+        </where>
+    </select>
+    <select id="queryBranchListUnPeople" parameterType="java.util.Map" resultType="java.util.Map">
+
+
+        select CD.ECIF_CUST_NO,CD.NDS_CUST_NO,CD.CUST_NAME,CD.CUST_ENG_NAME,CD.BELONG_BRCH,CD.MANAGE_MGR,
+        round(CD.AUM_BALANCE/10000,4) as AUM_BALANCE,
+        round(CD.AUM_DEPOSIT/10000,4) as AUM_DEPOSIT,CD.AUM_DEPOSIT_SORT,
+        round(CD.AUM_RATE/10000,4) as AUM_RATE,CD.AUM_RATE_SORT,
+        round(CD.AUM_NONRATE/10000,4) as AUM_NONRATE,CD.AUM_NONRATE_SORT,
+        round(CD.CONSIGNMENT/10000,4) as CONSIGNMENT,CD.CONSIGNMENT_SORT,
+        round(CD.DANAHARTA/10000,4) as DANAHARTA,CD.DANAHARTA_SORT,
+        round(CD.QDII/10000,4) as QDII,CD.QDII_SORT,
+        round(CD.RMBFUND/10000,4) as RMBFUND,CD.RMBFUND_SORT,
+        round(CD.INSURRANCE/10000,4) as INSURRANCE,CD.INSURRANCE_SORT
+        from OCRM_F_CL_CUSTOMER_DETAILS CD
+        INNER JOIN OCRM_F_CG_CUST_GRADE_INFO PJ
+        ON PJ.ECIF_CUST_NO=CD.ECIF_CUST_NO
+        inner join OCRM_F_CI_ADMIT_BELONG S on CD.ECIF_CUST_NO = s.CUST_ID
+        <if test="sqlDataAuth != null and sqlDataAuth != ''">
+            ${sqlDataAuth}
+        </if>
+
+
+        <where>
+            <if test="dataDate != null and dataDate != ''">
+                and CD.DATA_DATE=to_date(#{dataDate},'yyyy-MM-dd')
+            </if>
+            <if test="aumBalanceStart != null and aumBalanceStart != ''">
+                and CD.AUM_BALANCE >= to_number(#{aumBalanceStart,jdbcType=VARCHAR}) * 10000
+            </if>
+            <if test="aumBalanceEnd != null and aumBalanceEnd != ''">
+                and CD.AUM_BALANCE &lt;= to_number(#{aumBalanceEnd,jdbcType=VARCHAR}) * 10000
+            </if>
+            <if test="mktRespPerson != null and mktRespPerson != ''">
+                and (CD.MANAGE_MGR_NO = #{mktRespPerson} or CD.BELONG_BRCH_NO like concat(#{mktRespPerson},'%')  )
+            </if>
+            <if test="isPeople != null and isPeople != '' ">
+                and CD.PEOPLE = #{isPeople}
+            </if>
+            <if test="custGrade != null and custGrade != '' ">
+                AND PJ.AUM_GRADE ${custGrade}
+            </if>
+            <if test="exportIds != null and exportIds !='' ">
+                and CD.ECIF_CUST_NO ${exportIds}
+            </if>
+
+
+        </where>
+    </select>
+
+
+</mapper>

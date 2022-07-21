@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.cust.person.repository.mapper.AcrmFagChlSignBaseInfoMapper">
+    <sql id="Base_Column_List">
+	    CORP_ORG_CODE,DATA_DT,CONTR_NO,CUST_ID,SIGN_BRANCH_NO,SIGN_TELLER_NO,SIGN_ACCT_NO,SIGN_CARD_NO,SIGN_TYPE,SIGN_KIND,SIGN_KIND_DESC,SIGN_DESC,SIGN_STAT,SIGN_STAT_DESC,SIGN_DT,SIGNOFF_DT,EFFECTIVE_DT,EXPIRED_DT,SIGN_EBANK_ACCT,LAST_UPDATE_SYS,LAST_UPDATE_USER,LAST_UPDATE_TM,TX_SEQ_NO,ID1,ID2,ID3,ID4,ID5
+    </sql>
+    
+    <select id="querylist" parameterType="java.util.Map"  resultType="java.util.HashMap">
+		 select t.CORP_ORG_CODE,
+		       to_char(to_date(t.DATA_DATE,'yyyy-MM-dd'),'yyyy-MM-dd') as DATA_DT,
+		       t.CONTR_NO,
+		       t.CUST_ID as cust_no,
+		       t.SIGN_BRANCH_NO,
+		       t.SIGN_TELLER_NO,
+		       t.SIGN_ACCT_NO,
+		       t.SIGN_CARD_NO,
+		       t.SIGN_TYPE,
+		       t.SIGN_KIND,
+		       t.SIGN_KIND_DESC,
+		       t.SIGN_DESC,
+		       t.SIGN_STAT,
+		       t.SIGN_STAT_DESC,
+		       to_char(t.SIGN_DT,'yyyy-MM-dd') as SIGN_DT,
+		       to_char(t.SIGNOFF_DT,'yyyy-MM-dd') as SIGNOFF_DT,
+		       to_char(t.EFFECTIVE_DT,'yyyy-MM-dd') as EFFECTIVE_DT,
+		       to_char(t.EXPIRED_DT,'yyyy-MM-dd') as EXPIRED_DT,
+		       t.SIGN_EBANK_ACCT,
+		       t.LAST_UPDATE_SYS,
+		       t.LAST_UPDATE_USER,
+		       to_char(t.LAST_UPDATE_TM,'yyyy-MM-dd') as LAST_UPDATE_TM,
+		       t.TX_SEQ_NO,
+		       t.ID1,
+		       t.ID2,
+		       t.ID3,
+		       t.ID4,
+		       t.ID5,
+		       org.org_name,
+           	   cust.user_name,
+               item.lookup_item_name
+		  from ACRM_F_AG_CHL_SIGN_BASE_INFO t
+	      left join admin_sm_user cust
+          on cust.LOGIN_CODE = t.SIGN_TELLER_NO
+          left join admin_sm_org org
+          on org.ORG_ID = t.SIGN_BRANCH_NO
+          left join admin_sm_lookup_item item
+          <!-- on item.lookup_item_code||'0000' = t.SIGN_TYPE -->
+          on item.lookup_item_code = t.SIGN_TYPE
+          and item.lookup_code='CD0216'
+		  where 1=1
+
+		  <if  test="custId != null and custId != ''">
+	       		and t.CUST_ID =#{custId,jdbcType=VARCHAR} 
+		  </if>
+	</select>
+</mapper>

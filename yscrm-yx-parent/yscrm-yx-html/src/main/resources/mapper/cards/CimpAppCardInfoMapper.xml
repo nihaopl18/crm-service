@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscimc.cards.repository.mapper.CimpAppCardInfoMapper">
+	<!-- 获取卡片父节点 -->
+	<select id="getParentCard" parameterType="String" resultType="String">
+		SELECT PARENT_ID FROM CIMP_APP_CARD_INFO WHERE ID = #{id,jdbcType=VARCHAR}
+	</select>
+	<!-- 卡片查询 -->
+	<select id="getCards" parameterType="String" resultType="java.util.HashMap">
+		SELECT T.* FROM CIMP_APP_CARD_INFO T
+		LEFT JOIN CIMP_CM_NODEINFO S ON S.TEMP_ID = T.ACTY_ID
+		LEFT JOIN CIMP_CM_NODES_DISPLAY Y ON Y.NODE_ID = S.NODE_ID
+		WHERE Y.NODE_ID = #{actyId,jdbcType=VARCHAR} AND T.PARENT_ID IS NOT NULL
+	</select>
+	<!-- 卡片删除 -->
+	<delete id="delCards" parameterType="String">
+		DELETE FROM CIMP_APP_CARD_INFO WHERE ID = #{id,jdbcType=VARCHAR}
+	</delete>
+	<!-- 根据actyId删除 -->
+	<delete id="delByActyId" parameterType="String">
+		DELETE FROM CIMP_APP_CARD_INFO WHERE ACTY_ID = #{actyId,jdbcType=VARCHAR}
+	</delete>
+	<!-- 获取活动合成卡信息 -->
+	<select id="getActyParentCard" parameterType="String" resultType="cn.com.yusys.yscimc.cards.domain.CimpAppCardInfo">
+		SELECT * FROM CIMP_APP_CARD_INFO WHERE ID = #{id,jdbcType=VARCHAR}
+	</select>
+</mapper>

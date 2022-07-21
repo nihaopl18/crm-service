@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.entity.cust.org.group.repository.mapper.OcrmFciGroupMemberMapper">
+   <select id="getListByModel" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"  resultType="java.util.HashMap">
+	 select t.*,t1.GROUP_NAME_MAIN as GROUP_NAME FROM OCRM_F_CI_GROUP_MEMBER t left join OCRM_F_CI_GROUP t1 on t1.GROUP_NO=t.GROUP_NO
+	 <where> 	 
+		<if test="condition.groupNo != null and condition.groupNo !=''">
+				  and t.GROUP_NO = #{condition.groupNo, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.custName != null and condition.custName !=''">
+				  and t.CUST_NAME LIKE CONCAT(CONCAT('%', #{condition.custName, jdbcType=VARCHAR}),'%')
+		</if>
+    </where>
+	</select>
+    
+</mapper>

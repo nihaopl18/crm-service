@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.cm.ruleConfig.repository.mapper.CmFRcCareActionMapper">
+	<!-- 查询规则比较 -->
+	<select id="getCareByEventId" parameterType="String"
+		resultType="cn.com.yusys.yusp.cm.ruleConfig.domain.CmFRcCareAction">
+		select t.* from CM_F_RC_CARE_ACTION t
+			where t.action_id in 
+			(select a.id from cm_f_rc_rule_action a where a.event_id = #{eventId, jdbcType=VARCHAR})
+	</select>
+</mapper>

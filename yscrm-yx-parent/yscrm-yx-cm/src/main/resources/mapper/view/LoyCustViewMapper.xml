@@ -1,0 +1,222 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.climp.view.repository.mapper.LoyCustViewMapper">
+
+	<!-- 查询客户基本信息 -->
+	<select id="getCustInfo" resultType="java.util.Map">
+		select t.*
+		from loy_cm_cust_info t
+		where t.cust_id =#{custId, jdbcType=VARCHAR}
+	</select>
+	<!-- 查询客户综合积分信息 -->
+	<select id="queryScoretByCust" resultType="java.util.Map">
+		select
+		t1.TOTAL_NUM,t1.SCORE_NUM,t1.FREEZE_NUM,t1.NEXT_INVALID_NUM,t1.NUNACC_NUM,t1.COST_NUM
+		from LOY_SR_CUST_SCORE_VIEW t1
+		where t1.cust_no =#{custId, jdbcType=VARCHAR}
+	</select>
+	<!-- 分页查询客户账户信息 -->
+	<select id="queryCustAccountByPage" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+		resultType="java.util.Map">
+		select t.*<!-- ,t1.no_acc_num as nunacc_num -->
+		from (select o.account_no,o.account_name,sum(l.total_num) total_num,
+		sum(nvl(l.score_num,0)) score_num,sum(nvl(l.freeze_num,0))
+		freeze_num,sum(nvl(l.COST_NUM,0)) as COST_NUM from
+		LOY_SR_SCORE_COLLECT l left join LOY_AC_SCORE_ACCOUNT o on
+		o.account_no = l.account_no where l.CUST_ID = #{condition.custId ,
+		jdbcType=VARCHAR} group by o.account_no,o.account_name) t
+		<!-- left join ( select sum(BALANCE) as no_acc_num,ACCOUNT_NO from LOY_SR_SCORE_CHANGE_BOOK 
+			where TRANS_STATE='0' and CUST_ID = #{condition.custId , jdbcType=VARCHAR} 
+			group by ACCOUNT_NO) t1 on t1.account_no=t.account_no -->
+		<where>
+			<if test="condition.accountNo != null and condition.accountNo!= ''">
+				and t.account_no LIKE CONCAT(CONCAT('%',
+				#{condition.accountNo, jdbcType=VARCHAR}),'%')
+			</if>
+			<if test="condition.accountName != null and condition.accountName != ''">
+				and o.account_name LIKE CONCAT(CONCAT('%',
+				#{condition.accountName, jdbcType=VARCHAR}),'%')
+			</if>
+			<if
+				test="condition.totalNumStart != null and condition.totalNumStart != ''">
+				and t.TOTAL_NUM &gt;= #{condition.totalNumStart}
+			</if>
+			<if test="condition.totalNumEnd != null and condition.totalNumEnd != ''">
+				and t.TOTAL_NUM &lt;= #{condition.totalNumEnd}
+			</if>
+			<if
+				test="condition.scoreNumStart != null and condition.scoreNumStart != ''">
+				and t.SCORE_NUM &gt;= #{condition.scoreNumStart}
+			</if>
+			<if test="condition.scoreNumEnd != null and condition.scoreNumEnd != ''">
+				and t.SCORE_NUM &lt;= #{condition.scoreNumEnd}
+			</if>
+			<if
+				test="condition.freezeNumStart != null and condition.freezeNumStart != ''">
+				and t.FREEZE_NUM &gt;= #{condition.freezeNumStart}
+			</if>
+			<if test="condition.freezeNumEnd != null and condition.freezeNumEnd != ''">
+				and t.FREEZE_NUM &lt;= #{condition.freezeNumEnd}
+			</if>
+			<if test="condition.costNumStart != null and condition.costNumStart != ''">
+				and t.cost_num &gt;= #{condition.costNumStart}
+			</if>
+			<if test="condition.costNumEnd != null and condition.costNumEnd != ''">
+				and t.COST_NUM &lt;= #{condition.costNumEnd}
+			</if>
+		</where>
+		<if test="sort != null">
+			order by t.${sort}
+		</if>
+	</select>
+	<!-- 分页查询客户账户交易明细信息 -->
+	<select id="queryAccountDetailByPage" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+		resultType="java.util.Map">
+		select sum(nvl(t.SCORE_NUM,0)) as score_num ,sum(nvl(t.FREEZE_NUM,0))
+		freeze_num ,t1.ACCOUNT_NO,t1.ACCOUNT_NAME,to_char(t.valid_date,
+		'yyyy-mm-dd') AS VALID
+		,sum(t.total_num) total_num from
+		LOY_SR_SCORE_COLLECT t
+		left join LOY_AC_SCORE_ACCOUNT t1 on
+		t1.account_no = t.account_no
+		<where>
+			<if test="condition.custId != null and condition.custId != ''">
+				and t.CUST_ID = #{condition.custId , jdbcType=VARCHAR}
+			</if>
+			<if test="condition.accountNo != null and condition.accountNo!= ''">
+				and t.account_no = #{condition.accountNo,
+				jdbcType=VARCHAR}
+			</if>
+
+		</where>
+		group by t.valid_date,t1.account_name,t1.account_no
+		<if test="sort != null">
+			order by t.${sort}
+		</if>
+	</select>
+	<!-- 分页查询客户加分信息 -->
+	<select id="queryAddScoreByPage" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+		resultType="java.util.Map">
+		select case
+		when t3.TRANS_TYPE = '0' then
+		t3.BALANCE
+		when t3.TRANS_TYPE = '1' then
+		-abs(t3.BALANCE)
+		end as balance,to_char(t3.VALID_DATE, 'yyyy-mm-dd') as VALID,t3.EX_SERIAL,to_char(t3.TRANS_DATE,
+		'yyyy-mm-dd') as JY_DATE,t3.TRANS_STATE,t3.ACCOUNT_NO,t4.ACCOUNT_NAME
+		from LOY_SR_SCORE_CHANGE_BOOK t3
+		left join LOY_AC_SCORE_ACCOUNT t4 on
+		t4.account_no = t3.account_no
+		where (t3.TRANS_TYPE='0' or t3.TRANS_TYPE = '1')
+		<if test="condition.custId != null and condition.custId != ''">
+			and t3.CUST_ID = #{condition.custId , jdbcType=VARCHAR}
+		</if>
+		<if test="condition.exSerial != null and condition.exSerial!= ''">
+			and t3.EX_SERIAL =#{condition.exSerial, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.accountNo != null and condition.accountNo!= ''">
+			and t3.account_no LIKE CONCAT(CONCAT('%',
+			#{condition.accountNo, jdbcType=VARCHAR}),'%')
+		</if>
+		<if test="condition.accountName != null and condition.accountName != ''">
+			and t4.account_name LIKE CONCAT(CONCAT('%',
+			#{condition.accountName, jdbcType=VARCHAR}),'%')
+		</if>
+		<if test="condition.jyDateStart != null and condition.jyDateStart != ''">
+			<![CDATA[ and to_date(to_char(t3.TRANS_DATE, 'yyyy-MM-dd'), 'yyyy-MM-dd') >= to_date(#{condition.jyDateStart,jdbcType=DATE},'yyyy-MM-dd')]]>
+		</if>
+		<if test="condition.jyDateEnd != null and condition.jyDateEnd != ''">
+			 <![CDATA[ and to_date(to_char(t3.TRANS_DATE, 'yyyy-MM-dd'), 'yyyy-MM-dd') <= to_date(#{condition.jyDateEnd,jdbcType=DATE},'yyyy-MM-dd')]]>
+		</if>
+	</select>
+	<!-- 分页查询客户减分信息 -->
+	<select id="querySubScoreByPage" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+		resultType="java.util.Map">
+		select t3.BALANCE,to_char(t3.VALID_DATE, 'yyyy-mm-dd') as
+		VALID,t3.EX_SERIAL,to_char(t3.TRANS_DATE, 'yyyy-mm-dd') as
+		JY_DATE,t3.TRANS_STATE,t3.ACCOUNT_NO,t4.ACCOUNT_NAME
+		from LOY_SR_SCORE_CHANGE_BOOK t3
+		left join LOY_AC_SCORE_ACCOUNT t4 on
+		t4.account_no = t3.account_no
+		where t3.TRANS_TYPE='1'
+		<if test="condition.custId != null and condition.custId != ''">
+			and t3.CUST_ID = #{condition.custId , jdbcType=VARCHAR}
+		</if>
+		<if test="condition.accountNo != null and condition.accountNo!= ''">
+			and t3.account_no LIKE CONCAT(CONCAT('%',
+			#{condition.accountNo, jdbcType=VARCHAR}),'%')
+		</if>
+		<if test="condition.accountName != null and condition.accountName != ''">
+			and t4.account_name LIKE CONCAT(CONCAT('%',
+			#{condition.accountName, jdbcType=VARCHAR}),'%')
+		</if>
+		<if test="condition.jyDateStart != null and condition.jyDateStart != ''">
+			<![CDATA[ and to_date(to_char(t3.TRANS_DATE, 'yyyy-mm-dd'), 'yyyy-MM-dd') >= to_date(#{condition.jyDateStart,jdbcType=DATE},'yyyy-MM-dd')]]>
+		</if>
+		<if test="condition.jyDateEnd != null and condition.jyDateEnd != ''">
+			 <![CDATA[ and to_date(to_char(t3.TRANS_DATE, 'yyyy-mm-dd'), 'yyyy-MM-dd') <= to_date(#{condition.jyDateEnd,jdbcType=DATE},'yyyy-MM-dd')]]>
+		</if>
+	</select>
+	<!-- 客户原始交易信息查询 -->
+	<select id="queryOrigTransByPage" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+		resultType="java.util.Map">
+		select
+		t.BALANCE,t.SOURCE_TABLE,t.CONSUMER_SEQ_NO,t.ACCOUNT_NO,to_char(t1.JY_DATE,
+		'yyyy-mm-dd') as JY_DATE,t1.TRANS_STATE,SA.ACCOUNT_NAME,
+		A.ACTIVITY_NAME,RULE_NAME from loy_sr_h_add_serial t
+		left join
+		LOY_SR_INTO_ACCOUNT t1 on t.CONSUMER_SEQ_NO = t1.SOURCE_ID
+		LEFT JOIN
+		LOY_AC_SCORE_ACCOUNT SA ON t.ACCOUNT_NO = SA.ACCOUNT_NO
+		LEFT JOIN
+		(SELECT INFO.ID,A.ACTIVITY_NAME,INFO.RULE_NAME FROM LOY_ENG_RULE_INFO
+		INFO JOIN LOY_RL_ACTIVITY A ON A.ACTIVITY_ID=INFO.RULE_SET_ID) A ON
+		A.ID=t.RULE_ID
+		<where>
+			<if test="condition.custId != null and condition.custId != ''">
+				and t.CUST_ID = #{condition.custId , jdbcType=VARCHAR}
+			</if>
+			<if test="condition.accountNo != null and condition.accountNo!= ''">
+				and t.account_no LIKE CONCAT(CONCAT('%',
+				#{condition.accountNo, jdbcType=VARCHAR}),'%')
+			</if>
+			<if test="condition.accountName != null and condition.accountName != ''">
+				and SA.account_name LIKE CONCAT(CONCAT('%',
+				#{condition.accountName, jdbcType=VARCHAR}),'%')
+			</if>
+			<if test="condition.jyDateStart != null and condition.jyDateStart != ''">
+				<![CDATA[ and t1.JY_DATE >= to_date(#{condition.jyDateStart,jdbcType=DATE},'yyyy-MM-dd')]]>
+			</if>
+			<if test="condition.jyDateEnd != null and condition.jyDateEnd != ''">
+				 <![CDATA[ and t1.JY_DATE <= to_date(#{condition.jyDateEnd,jdbcType=DATE},'yyyy-MM-dd')]]>
+			</if>
+		</where>
+		<if test="sort != null">
+			order by t.${sort}
+		</if>
+	</select>
+	<!-- 客户原始交易明细信息查询 -->
+	<select id="queryOrigTransDetail" parameterType="java.util.Map"
+		resultType="java.util.Map">
+		select * from ${sourceTable} where
+		ID=#{consumerSeqNo}
+	</select>
+	<!-- 查询待积流水表表名 -->
+	<select id="queryTableInfo" resultType="java.util.Map">
+		select
+		TABLE_ID,TABLE_E_NAME,TABLE_C_NAME,TYPE_ID,OBJECT_TYPE,TRANSACTION_CODE
+		from LOY_RL_TABLE_EC_NAME where DELETE_SIGN is null or DELETE_SIGN !=
+		'1'
+	</select>
+	<!-- 待积流水表字段汉化表查询 -->
+	<select id="queryColumnByTable" parameterType="java.util.Map"
+		resultType="java.util.Map">
+		select
+		FIELD_ID,lower(substr(FIELD_E_NAME,1,1)) ||
+		substr(REPLACE(INITCAP(FIELD_E_NAME),'_',''),2) AS
+		FIELD_E_NAME,FIELD_C_NAME,FIELD_TYPE,FIELD_LENGTH,IS_DISPLAY,FNAME,MAGNIFIER
+		from LOY_RL_FIELD_EC_NAME
+		where (DELETE_SIGN is null or DELETE_SIGN !=
+		'1') and TABLE_ID=#{tableId}
+	</select>
+</mapper>

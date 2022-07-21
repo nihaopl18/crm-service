@@ -1,0 +1,566 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>crm-service</artifactId>
+        <groupId>cn.com.yusys.yscrm</groupId>
+        <version>2.0.0-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+
+    <artifactId>yusp-crm-single-starter</artifactId>
+    <description>yusp-crm-single-starter的单体启动工程</description>
+    <properties>
+        <yusp-app-common-core.version>2.0.0-SNAPSHOT</yusp-app-common-core.version>
+        <yusp-app-message-core.version>2.0.0-SNAPSHOT</yusp-app-message-core.version>
+        <yusp-app-notice-core.version>2.0.0-SNAPSHOT</yusp-app-notice-core.version>
+        <yusp-app-crmOca-core.version>2.0.0</yusp-app-crmOca-core.version>
+        <yusp-file-core.version>2.0.0-SNAPSHOT</yusp-file-core.version>
+        <yusp-sequence-core.version>2.0.0-SNAPSHOT</yusp-sequence-core.version>
+        <yusp-job-admin-core.version>2.0.0-SNAPSHOT</yusp-job-admin-core.version>
+        <yusp-app-admin-web.version>2.0.0-SNAPSHOT</yusp-app-admin-web.version>
+        <yusp-uaa-core.version>2.0.0-SNAPSHOT</yusp-uaa-core.version>
+        <yusp-echain-server.version>1.2.0.20190128.RELEASE</yusp-echain-server.version>
+        <yscrm-entity-cust-person-core.version>2.0.0-SNAPSHOT</yscrm-entity-cust-person-core.version>
+        <yscrm-entity-cust-group-core.version>2.0.0-SNAPSHOT</yscrm-entity-cust-group-core.version>
+        <yscrm-mgr-cust-flex-core.version>2.0.0-SNAPSHOT</yscrm-mgr-cust-flex-core.version>
+        <yscrm-entity-cust-pub-core.version>2.0.0-SNAPSHOT</yscrm-entity-cust-pub-core.version>
+        <yscrm-mgr-sys-view-core.version>2.0.0-SNAPSHOT</yscrm-mgr-sys-view-core.version>
+        <yscrm-mgr-mkt-salesoppor-core.version>2.0.0-SNAPSHOT</yscrm-mgr-mkt-salesoppor-core.version>
+        <yscrm-mgr-sys-homepage-core.version>2.0.0-SNAPSHOT</yscrm-mgr-sys-homepage-core.version>
+        <yscrm-entity-cust-org-group-core.version>2.0.0-SNAPSHOT</yscrm-entity-cust-org-group-core.version>
+        <yscrm-entity-product-core.version>2.0.0-SNAPSHOT</yscrm-entity-product-core.version>
+        <yscrm-mgr-mkt-activity-core.version>2.0.0-SNAPSHOT</yscrm-mgr-mkt-activity-core.version>
+        <yscrm-mgr-cust-admit-core.version>2.0.0-SNAPSHOT</yscrm-mgr-cust-admit-core.version>
+        <yscrm-entity-cust-org-core.version>2.0.0-SNAPSHOT</yscrm-entity-cust-org-core.version>
+        <yscrm-mgr-cust-service-core.version>2.0.0-SNAPSHOT</yscrm-mgr-cust-service-core.version>
+        <yscrm-entity-cust-mgr-group-core.version>2.0.0-SNAPSHOT</yscrm-entity-cust-mgr-group-core.version>
+        <yscrm-entity-cust-mgr-core.version>2.0.0-SNAPSHOT</yscrm-entity-cust-mgr-core.version>
+        <yscrm-func-info-calculator-core.version>2.0.0-SNAPSHOT</yscrm-func-info-calculator-core.version>
+        <yscrm-mgr-sys-pdplan-core.version>2.0.0-SNAPSHOT</yscrm-mgr-sys-pdplan-core.version>
+        <yscrm-mgr-user-schedule-core.version>2.0.0-SNAPSHOT</yscrm-mgr-user-schedule-core.version>
+        <yscrm-business-cust-mgr-core.version>2.0.0-SNAPSHOT</yscrm-business-cust-mgr-core.version>
+        <yscrm-business-cust-pub-core.version>2.0.0-SNAPSHOT</yscrm-business-cust-pub-core.version>
+        <yscrm-business-cust-person-core.version>2.0.0-SNAPSHOT</yscrm-business-cust-person-core.version>
+        <yscrm-business-cust-org-core.version>2.0.0-SNAPSHOT</yscrm-business-cust-org-core.version>
+        <yscrm-business-acct-pub-core.version>2.0.0-SNAPSHOT</yscrm-business-acct-pub-core.version>
+        <yscrm-business-acct-person-core.version>2.0.0-SNAPSHOT</yscrm-business-acct-person-core.version>
+        <yscrm-pcrm-common-core.version>2.0.0-SNAPSHOT</yscrm-pcrm-common-core.version>
+
+        <yscrm-mgr-info-remind-core.version>2.0.0-SNAPSHOT</yscrm-mgr-info-remind-core.version>
+        <yscrm-mgr-info-custlosswarn-core.version>2.0.0-SNAPSHOT</yscrm-mgr-info-custlosswarn-core.version>
+        <yscrm-mgr-info-workreport-core.version>2.0.0-SNAPSHOT</yscrm-mgr-info-workreport-core.version>
+        <yscrm-mgr-exchange-core.version>2.0.0-SNAPSHOT</yscrm-mgr-exchange-core.version>
+        <yscrm-mgr-knowledge-base-core.version>2.0.0-SNAPSHOT</yscrm-mgr-knowledge-base-core.version>
+        <yscrm-mgr-cust-grade-core.version>2.0.0-SNAPSHOT</yscrm-mgr-cust-grade-core.version>
+        <yusys-streaminghub-app-core.version>0.0.1-SNAPSHOT</yusys-streaminghub-app-core.version>
+        <yusys-streaminghub-rpc-core.version>0.0.1-SNAPSHOT</yusys-streaminghub-rpc-core.version>
+        <uimp-business-pma-app-core.version>2.0.0-SNAPSHOT</uimp-business-pma-app-core.version>
+        <uimp-business-pma-scheme-core.version>2.0.0-SNAPSHOT</uimp-business-pma-scheme-core.version>
+        <uimp-business-pma-dstr-core.version>2.0.0-SNAPSHOT</uimp-business-pma-dstr-core.version>
+        <yusp-flow-server.version>V4.0.0.20200302.RELEASE</yusp-flow-server.version>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.springframework.security.oauth.boot</groupId>
+            <artifactId>spring-security-oauth2-autoconfigure</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-thymeleaf</artifactId>
+            <exclusions>
+                <exclusion>
+                    <artifactId>spring-boot-starter-tomcat</artifactId>
+                    <groupId>org.springframework.boot</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <dependency>
+            <groupId>cn.com.yusys.yusp</groupId>
+            <artifactId>yusp-app-admin-web</artifactId>
+            <version>${yusp-app-admin-web.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-starter-tomcat</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-tomcat</artifactId>
+            <!--打包的时候可以不用包进去，别的设施会提供。事实上该依赖理论上可以参与编译，测试，运行等周期。
+                相当于compile，但是打包阶段做了exclude操作-->
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>cn.com.yusys.yusp.uaa</groupId>
+            <artifactId>yusp-uaa-core</artifactId>
+            <version>${yusp-uaa-core.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>cn.com.yusys.yusp.uaa</groupId>
+                    <artifactId>yusp-uaa-client</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.springframework.cloud</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <dependency>
+            <groupId>cn.com.yusys.yusp</groupId>
+            <artifactId>yusp-app-common-core</artifactId>
+            <version>${yusp-app-common-core.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>javax.persistence</groupId>
+                    <artifactId>persistence-api</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.springframework.cloud</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <dependency>
+            <artifactId>yusp-app-notice-core</artifactId>
+            <groupId>cn.com.yusys.yusp</groupId>
+            <version>${yusp-app-notice-core.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>cn.com.yusys.yusp</groupId>
+                    <artifactId>yusp-app-oca-client</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>cn.com.yusys.yusp</groupId>
+                    <artifactId>yusp-app-common-client</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>cn.com.yusys.yusp</groupId>
+                    <artifactId>yusp-file-client</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <dependency>
+            <artifactId>yusp-app-crmOca-core</artifactId>
+            <groupId>cn.com.yusys.crm</groupId>
+            <version>${yusp-app-crmOca-core.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>cn.com.yusys.yusp</groupId>
+                    <artifactId>yusp-app-common-client</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>cn.com.yusys.yusp.uaa</groupId>
+                    <artifactId>yusp-uaa-client</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <dependency>
+            <groupId>cn.com.yusys.yusp</groupId>
+            <artifactId>yusp-file-core</artifactId>
+            <version>${yusp-file-core.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.ulisesbocchio</groupId>
+            <artifactId>jasypt-spring-boot-starter</artifactId>
+            <version>2.1.0</version>
+        </dependency>
+        <dependency>
+            <groupId>cn.com.yusys.yusp</groupId>
+            <artifactId>yusp-sequence-core</artifactId>
+            <version>${yusp-sequence-core.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>cn.com.yusys.yusp</groupId>
+            <artifactId>yusp-job-admin-core</artifactId>
+            <version>${yusp-job-admin-core.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.dropwizard.metrics</groupId>
+            <artifactId>metrics-servlet</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.dropwizard.metrics</groupId>
+            <artifactId>metrics-servlets</artifactId>
+        </dependency>
+        <!-- metrics end -->
+
+        <!-- apm监控 start -->
+        <dependency>
+            <groupId>co.elastic.apm</groupId>
+            <artifactId>apm-agent-java</artifactId>
+        </dependency>
+        <!-- apm监控 end -->
+        <dependency>
+            <groupId>io.swagger</groupId>
+            <artifactId>swagger-annotations</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.springfox</groupId>
+            <artifactId>springfox-swagger-ui</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>cn.com.yusys.yusp</groupId>
+            <artifactId>yusp-echain-server</artifactId>
+            <version>${yusp-echain-server.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>log4j</groupId>
+                    <artifactId>log4j</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.springframework.cloud</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.ryantenney.metrics</groupId>
+            <artifactId>metrics-spring</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>net.logstash.logback</groupId>
+            <artifactId>logstash-logback-encoder</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.zaxxer</groupId>
+            <artifactId>HikariCP</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.oracle</groupId>
+            <artifactId>ojdbc8</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.ibm.db2.jcc</groupId>
+            <artifactId>db2jcc4</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.quartz-scheduler</groupId>
+            <artifactId>quartz</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.zaxxer</groupId>
+                    <artifactId>HikariCP-java6</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <dependency>
+            <groupId>cn.com.yusys.yusp</groupId>
+            <artifactId>yusp-license</artifactId>
+            <version>2.1.2.RELEASE</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>cn.com.yusys.yscrm.entity</groupId>
+            <artifactId>yscrm-entity-cust-person-core</artifactId>
+            <version>${yscrm-entity-cust-person-core.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>cn.com.yusys.yscrm.entity</groupId>
+            <artifactId>yscrm-entity-cust-group-core</artifactId>
+            <version>${yscrm-entity-cust-group-core.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>cn.com.yusys.yscrm.mgr</groupId>
+            <artifactId>yscrm-mgr-cust-flex-core</artifactId>
+            <version>${yscrm-mgr-cust-flex-core.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>cn.com.yusys.yscrm.mgr</groupId>
+            <artifactId>yscrm-mgr-sys-view-core</artifactId>
+            <version>${yscrm-mgr-sys-view-core.version}</version>
+        </dependency>
+        <dependency> <!-- 商机服务 -->
+            <groupId>cn.com.yusys.yscrm.mgr</groupId>
+            <artifactId>yscrm-mgr-mkt-salesoppor-core</artifactId>
+            <version>${yscrm-mgr-mkt-salesoppor-core.version}</version>
+        </dependency>
+        <dependency>  <!-- 客户公共服务 -->
+            <groupId>cn.com.yusys.yscrm.entity</groupId>
+            <artifactId>yscrm-entity-cust-pub-core</artifactId>
+            <version>${yscrm-entity-cust-pub-core.version}</version>
+        </dependency>
+        <dependency>  <!-- 首页服务 -->
+            <groupId>cn.com.yusys.yscrm.mgr</groupId>
+            <artifactId>yscrm-mgr-sys-homepage-core</artifactId>
+            <version>${yscrm-mgr-sys-homepage-core.version}</version>
+        </dependency>
+        <dependency>  <!-- 集团服务 -->
+            <groupId>cn.com.yusys.yscrm.entity</groupId>
+            <artifactId>yscrm-entity-cust-org-group-core</artifactId>
+            <version>${yscrm-entity-cust-org-group-core.version}</version>
+        </dependency>
+        <dependency>  <!-- 产品服务 -->
+            <groupId>cn.com.yusys.yscrm.entity</groupId>
+            <artifactId>yscrm-entity-product-core</artifactId>
+            <version>${yscrm-entity-product-core.version}</version>
+        </dependency>
+        <dependency>  <!-- 营销活动服务 -->
+            <groupId>cn.com.yusys.yscrm.mgr</groupId>
+            <artifactId>yscrm-mgr-mkt-activity-core</artifactId>
+            <version>${yscrm-mgr-mkt-activity-core.version}</version>
+        </dependency>
+        <dependency>  <!-- 客户准入服务 -->
+            <groupId>cn.com.yusys.yscrm.mgr</groupId>
+            <artifactId>yscrm-mgr-cust-admit-core</artifactId>
+            <version>${yscrm-mgr-cust-admit-core.version}</version>
+        </dependency>
+        <dependency>  <!-- 对公客户服务 -->
+            <groupId>cn.com.yusys.yscrm.entity</groupId>
+            <artifactId>yscrm-entity-cust-org-core</artifactId>
+            <version>${yscrm-entity-cust-org-core.version}</version>
+        </dependency>
+        <dependency>  <!-- 客户反馈服务 -->
+            <groupId>cn.com.yusys.yscrm.mgr</groupId>
+            <artifactId>yscrm-mgr-cust-service-core</artifactId>
+            <version>${yscrm-mgr-cust-service-core.version}</version>
+        </dependency>
+        <dependency>  <!-- 客户经理团队服务 -->
+            <groupId>cn.com.yusys.yscrm.entity</groupId>
+            <artifactId>yscrm-entity-cust-mgr-group-core</artifactId>
+            <version>${yscrm-entity-cust-mgr-group-core.version}</version>
+        </dependency>
+        <dependency>  <!-- 客户经理服务 -->
+            <groupId>cn.com.yusys.yscrm.entity</groupId>
+            <artifactId>yscrm-entity-cust-mgr-core</artifactId>
+            <version>${yscrm-entity-cust-mgr-core.version}</version>
+        </dependency>
+        <dependency>  <!-- 金融小工具服务 -->
+            <groupId>cn.com.yusys.yscrm.func</groupId>
+            <artifactId>yscrm-func-info-calculator-core</artifactId>
+            <version>${yscrm-func-info-calculator-core.version}</version>
+        </dependency>
+        <dependency>  <!-- 产品方案服务 -->
+            <groupId>cn.com.yusys.yscrm.mgr</groupId>
+            <artifactId>yscrm-mgr-sys-pdplan-core</artifactId>
+            <version>${yscrm-mgr-sys-pdplan-core.version}</version>
+        </dependency>
+        <dependency>  <!-- 日程安排服务 -->
+            <groupId>cn.com.yusys.yscrm.mgr</groupId>
+            <artifactId>yscrm-mgr-user-schedule-core</artifactId>
+            <version>${yscrm-mgr-user-schedule-core.version}</version>
+        </dependency>
+        <dependency>  <!-- 客户经理业务指标服务 -->
+            <groupId>cn.com.yusys.yscrm.business</groupId>
+            <artifactId>yscrm-business-cust-mgr-core</artifactId>
+            <version>${yscrm-business-cust-mgr-core.version}</version>
+        </dependency>
+        <dependency>  <!-- 客户业务指标公共服务 -->
+            <groupId>cn.com.yusys.yscrm.business</groupId>
+            <artifactId>yscrm-business-cust-pub-core</artifactId>
+            <version>${yscrm-business-cust-pub-core.version}</version>
+        </dependency>
+        <dependency>  <!-- 客户业务指标个人服务 -->
+            <groupId>cn.com.yusys.yscrm.business</groupId>
+            <artifactId>yscrm-business-cust-person-core</artifactId>
+            <version>${yscrm-business-cust-person-core.version}</version>
+        </dependency>
+        <dependency>  <!-- 客户业务指标对公服务 -->
+            <groupId>cn.com.yusys.yscrm.business</groupId>
+            <artifactId>yscrm-business-cust-org-core</artifactId>
+            <version>${yscrm-business-cust-org-core.version}</version>
+        </dependency>
+        <dependency>  <!-- 账户指标公共服务 -->
+            <groupId>cn.com.yusys.yscrm.business</groupId>
+            <artifactId>yscrm-business-acct-pub-core</artifactId>
+            <version>${yscrm-business-acct-pub-core.version}</version>
+        </dependency>
+
+        <dependency>  <!--公共代码 -->
+            <groupId>cn.com.yusys.yscrm.pcrm</groupId>
+            <artifactId>yscrm-pcrm-common-core</artifactId>
+            <version>${yscrm-pcrm-common-core.version}</version>
+        </dependency>
+
+        <dependency>  <!-- 账户指标个人服务 -->
+            <groupId>cn.com.yusys.yscrm.business</groupId>
+            <artifactId>yscrm-business-acct-person-core</artifactId>
+            <version>${yscrm-business-acct-person-core.version}</version>
+        </dependency>
+
+        <dependency>  <!-- 工作平台提醒服务 -->
+            <groupId>cn.com.yusys.yscrm.mgr</groupId>
+            <artifactId>yscrm-mgr-info-remind-core</artifactId>
+            <version>${yscrm-mgr-info-remind-core.version}</version>
+        </dependency>
+
+        <dependency>  <!-- 工作平台流失预警服务 -->
+            <groupId>cn.com.yusys.yscrm.mgr</groupId>
+            <artifactId>yscrm-mgr-info-custlosswarn-core</artifactId>
+            <version>${yscrm-mgr-info-custlosswarn-core.version}</version>
+        </dependency>
+
+        <dependency>  <!-- 工作平台工作报告服务 -->
+            <groupId>cn.com.yusys.yscrm.mgr</groupId>
+            <artifactId>yscrm-mgr-info-workreport-core</artifactId>
+            <version>${yscrm-mgr-info-workreport-core.version}</version>
+        </dependency>
+
+        <dependency>  <!-- 工作平台交流区服务 -->
+            <groupId>cn.com.yusys.yscrm.mgr</groupId>
+            <artifactId>yscrm-mgr-exchange-core</artifactId>
+            <version>${yscrm-mgr-exchange-core.version}</version>
+        </dependency>
+
+        <dependency>  <!-- 工作平台知识库服务 -->
+            <groupId>cn.com.yusys.yscrm.mgr</groupId>
+            <artifactId>yscrm-mgr-knowledge-base-core</artifactId>
+            <version>${yscrm-mgr-knowledge-base-core.version}</version>
+        </dependency>
+
+        <dependency>  <!-- 客户评级服务 -->
+            <groupId>cn.com.yusys.yscrm.mgr</groupId>
+            <artifactId>yscrm-mgr-cust-grade-core</artifactId>
+            <version>${yscrm-mgr-cust-grade-core.version}</version>
+        </dependency>
+        <dependency>  <!-- 引用流应用 -->
+            <groupId>com.yusys.streaminghub</groupId>
+            <artifactId>com-yusys-streaminghub-app-starter</artifactId>
+            <version>${yusys-streaminghub-app-core.version}</version>
+        </dependency>
+        <dependency>  <!-- 引用rpc项目 -->
+            <groupId>com.yusys.streaminghub</groupId>
+            <artifactId>com-yusys-streaminghub-rpc-starter</artifactId>
+            <version>${yusys-streaminghub-rpc-core.version}</version>
+        </dependency>
+        <!-- 排除低版本的persistence-api -->
+        <dependency>
+            <groupId>tk.mybatis</groupId>
+            <artifactId>mapper-spring-boot-starter</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>javax.persistence</groupId>
+                    <artifactId>persistence-api</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>cn.com.yusys.yscrm</groupId>
+            <artifactId>yscrm-yx-operation</artifactId>
+            <version>2.0.0-SNAPSHOT</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>cn.com.yusys.crm</groupId>
+                    <artifactId>yusp-app-crmOca-core</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>cn.com.yusys.yusp</groupId>
+                    <artifactId>yusp-echain-server</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>cn.com.yusys.yusp.uaa</groupId>
+                    <artifactId>yusp-uaa-core</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>cn.com.yusys.yusp</groupId>
+                    <artifactId>yusp-sequence-core</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>cn.com.yusys.yscrm.mgr</groupId>
+                    <artifactId>yscrm-mgr-info-workreport-core</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.alibaba</groupId>
+                    <artifactId>fastjson</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>net.sf.json-lib</groupId>
+                    <artifactId>json-lib</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>cn.com.yusys.yusp</groupId>
+                    <artifactId>yusp-app-common-core</artifactId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>ojdbc6</artifactId>
+                    <groupId>com.jslsolucoes</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <!--绩效-->
+        <!--<dependency>
+            <artifactId>uimp-business-pma-dstr-core</artifactId>
+            <groupId>cn.com.yusys.yscrm.mgr</groupId>
+            <version>${uimp-business-pma-dstr-core.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.springframework.cloud</groupId>
+                    <artifactId>spring-cloud-starter-openfeign</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.springframework.cloud</groupId>
+                    <artifactId>spring-cloud-starter-netflix-hystrix</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>-->
+        <dependency>
+            <groupId>cn.com.yusys.yscrm.mgr</groupId>
+            <artifactId>uimp-service-app-single-starter</artifactId>
+            <version>2.0.0-SNAPSHOT</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.springframework.cloud</groupId>
+                    <artifactId>spring-cloud-starter-openfeign</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.springframework.cloud</groupId>
+                    <artifactId>spring-cloud-starter-netflix-hystrix</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <finalName>yusp-crm-single-starter</finalName>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <version>${spring-boot-maven-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>repackage</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-war-plugin</artifactId>
+                <version>2.6</version>
+                <configuration>
+                    <failOnMissingWebXml>false</failOnMissingWebXml>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>

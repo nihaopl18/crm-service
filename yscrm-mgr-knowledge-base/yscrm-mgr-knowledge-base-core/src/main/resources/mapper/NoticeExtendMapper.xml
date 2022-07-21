@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.notice.repository.mapper.NoticeExtendMapper">
+
+	<resultMap id="noticeIdMap" type="java.util.Map">
+		<result property="NOTICE_ID" column="NOTICE_ID"/>
+		<result property="NOTICE_TITLE" column="NOTICE_TITLE"/>
+		<result property="NOTICE_LEVEL" column="NOTICE_LEVEL"/>
+		<result property="ACTIVE_DATE" column="ACTIVE_DATE"/>
+		<result property="IS_TOP" column="IS_TOP"/>
+		<result property="TOP_ACTIVE_DATE" column="TOP_ACTIVE_DATE"/>
+		<result property="NOTICE_CONTENT" column="NOTICE_CONTENT"/>
+		<result property="PUB_STS" column="PUB_STS"/>
+		<result property="PUB_TIME" column="PUB_TIME"/>
+		<result property="PUB_USER_ID" column="PUB_USER_ID"/>
+		<result property="PUB_USER_NAME" column="PUB_USER_NAME"/>
+		<result property="PUB_ORG_ID" column="PUB_ORG_ID"/>
+		<result property="PUB_ORG_NAME" column="PUB_ORG_NAME"/>
+		<result property="CREATOR_ID" column="CREATOR_ID"/>
+		<result property="CREATOR_NAME" column="CREATOR_NAME"/>
+		<result property="CREATOR_TIME" column="CREATOR_TIME"/>
+		<result property="RICHEDIT_ID" column="RICHEDIT_ID"/>
+		<result property="detailContent" column="detailContent" javaType="java.lang.String" jdbcType="CLOB"/>
+		<result property="RECIVE_ROLE_ID" column="RECIVE_ROLE_ID" javaType="java.lang.String" />
+		<result property="RECIVE_ORG_ID" column="RECIVE_ORG_ID" javaType="java.lang.String" />
+		<result property="RECIVE_ROLE_NAME" column="RECIVE_ROLE_NAME" javaType="java.lang.String"/>
+	</resultMap>
+
+	<select id="getNoticeByNoticeId" parameterType="String" resultMap="noticeIdMap">
+		SELECT
+		info.NOTICE_ID,
+		info.NOTICE_TITLE,
+		info.NOTICE_LEVEL,
+		info.ACTIVE_DATE,
+		info.IS_TOP,
+		info.TOP_ACTIVE_DATE,
+		info.NOTICE_CONTENT,
+		info.PUB_STS,
+		info.PUB_TIME,
+		info.PUB_USER_ID,
+		info.PUB_USER_NAME,
+		info.PUB_ORG_ID,
+		info.PUB_ORG_NAME,
+		info.CREATOR_ID,
+		info.CREATOR_NAME,
+		info.CREATOR_TIME,
+		richcontent.RICHEDIT_ID,
+		richcontent.CONTENT AS detailContent,
+		(SELECT
+		    listagg(b.recive_ogj_id,',')within group (order by b.recive_ogj_id) recive_ogj_id
+		FROM (
+		SELECT a.RECIVE_OGJ_ID, b.role_name, a.notice_id, a.RECIVE_TYPE
+		FROM ADMIN_SM_NOTICE_RECIVE a
+		LEFT JOIN ADMIN_SM_ROLE b ON a.RECIVE_OGJ_ID = b.role_id
+		WHERE a.RECIVE_OGJ_ID != 'NA' ) b
+		WHERE info.notice_id = b.notice_id AND b.RECIVE_TYPE = 'ROLE') RECIVE_ROLE_ID,
+		(SELECT
+			listagg(b.role_name,',')within group (order by b.role_name) role_name
+		FROM (
+		SELECT a.RECIVE_OGJ_ID, b.role_name, a.notice_id, a.RECIVE_TYPE
+		FROM ADMIN_SM_NOTICE_RECIVE a
+		LEFT JOIN ADMIN_SM_ROLE b ON a.RECIVE_OGJ_ID = b.role_id
+		WHERE a.RECIVE_OGJ_ID != 'NA' )b
+		WHERE info.notice_id = b.notice_id AND b.RECIVE_TYPE = 'ROLE') RECIVE_ROLE_NAME,
+		(
+		SELECT
+			listagg(c.recive_ogj_id,',')within group (order by c.recive_ogj_id) recive_ogj_id
+		FROM ADMIN_SM_NOTICE_RECIVE c
+		WHERE info.notice_id = c.notice_id AND c.RECIVE_TYPE = 'ORG') RECIVE_ORG_ID
+		FROM admin_sm_notice info
+		left join (
+		select * from ADMIN_SM_RICHEDIT_INFO where REL_MOD = 'NOTICE') richcontent on info.NOTICE_ID = richcontent.REL_ID
+		<where>
+			<if test="noticeId != null and noticeId !=''">
+				and info.NOTICE_ID = #{noticeId, jdbcType=VARCHAR}
+			</if>
+		</where>
+	</select>
+</mapper>

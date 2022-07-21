@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.uimp.business.pma.scheme.schememain.repository.mapper.PmaFSchemeTeamRelMapper">
+
+    <delete id="deleteBySchemeId">
+        DELETE FROM PMA_F_SCHEME_TEAM_REL WHERE SCHEME_ID=#{schemeId}
+    </delete>
+
+    <select id="selectBySchemeId" resultType="java.util.Map">
+        SELECT MKT_TEAM_ID param_id ,MKT_TEAM_NAME param_name FROM PMA_F_SCHEME_TEAM_REL WHERE SCHEME_ID=#{schemeId}
+    </select>
+
+    <insert id="batchInsert" parameterType="List">
+        INSERT INTO PMA_F_SCHEME_TEAM_REL (ID,SCHEME_ID, MKT_TEAM_ID, MKT_TEAM_NAME)
+        <foreach collection="list" item="org" index="index" separator="union all" >
+            select #{org.id},#{org.schemeId},#{org.mktTeamId},#{org.mktTeamName}
+            from dual
+        </foreach>
+    </insert>
+</mapper>

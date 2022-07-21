@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.cm.sysKeyWord.repository.mapper.CmFRcSysKeyWordMapper">
+	<select id="getModelKeyWordList" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.Map">
+		SELECT * FROM cm_f_rc_sys_key_word
+		<where>
+			<if test="condition.sourceTabEname != null and condition.sourceTabEname !=''">
+				AND SOURCE_TAB_ENAME LIKE CONCAT('%', CONCAT(#{condition.sourceTabEname, jdbcType=VARCHAR}, '%'))
+			</if>
+			<if test="condition.sourceTabCname != null and condition.sourceTabCname !=''">
+				AND SOURCE_TAB_CNAME LIKE CONCAT('%', CONCAT(#{condition.sourceTabCname, jdbcType=VARCHAR}, '%'))
+			</if>
+			<if test="condition.sourceFieldEname != null and condition.sourceFieldEname !=''">
+				AND SOURCE_FIELD_ENAME LIKE CONCAT('%', CONCAT(#{condition.sourceFieldEname, jdbcType=VARCHAR}, '%'))
+			</if>
+			<if test="condition.sourceFieldCname != null and condition.sourceFieldCname !=''">
+				AND SOURCE_FIELD_CNAME LIKE CONCAT('%', CONCAT(#{condition.sourceFieldCname, jdbcType=VARCHAR}, '%'))
+			</if>
+		</where>
+		ORDER BY ID DESC
+	</select>
+	<update id="updateModelKeyWordList" parameterType="java.util.Map">
+		UPDATE cm_f_rc_sys_key_word SET 
+		SOURCE_TAB_ENAME = #{sourceTabEname, jdbcType=VARCHAR},
+		SOURCE_TAB_CNAME = #{sourceTabCname, jdbcType=VARCHAR},
+		SOURCE_FIELD_ENAME = #{sourceFieldEname, jdbcType=VARCHAR},
+		SOURCE_FIELD_CNAME = #{sourceFieldCname, jdbcType=VARCHAR},
+		ADESCRIBE = #{adescribe, jdbcType=VARCHAR},
+		ALIAS_NAME = #{aliasName, jdbcType=VARCHAR}
+		WHERE ID = #{id, jdbcType=VARCHAR}
+	</update>
+	<delete id="deleteModelKeyWordList" parameterType="String">
+		DELETE FROM cm_f_rc_sys_key_word WHERE ID = #{id}
+	</delete>
+	<select id="getSameAliasName" resultType="java.util.HashMap">
+		SELECT ALIAS_NAME FROM cm_f_rc_sys_key_word WHERE ALIAS_NAME IS NOT NULL
+	</select>
+	<select id="getTabEName" resultType="java.util.HashMap">
+		SELECT TABLE_NAME AS SOURCE_TAB_ENAME FROM user_tab_comments 
+		WHERE TABLE_TYPE = 'TABLE' ORDER BY TABLE_NAME
+	</select>
+	<select id="getTabCName" resultType="java.util.HashMap">
+		SELECT COMMENTS AS SOURCE_TAB_CNAME FROM user_tab_comments 
+		WHERE TABLE_TYPE = 'TABLE' ORDER BY TABLE_NAME
+	</select>
+	<select id="getField" parameterType="java.util.Map" resultType="java.util.HashMap">
+	    SELECT T.COLUMN_NAME AS SOURCE_FIELD_ENAME,T.COMMENTS AS SOURCE_FIELD_CNAME 
+	    FROM  user_col_comments T WHERE T.TABLE_NAME = #{sourceTabEname, jdbcType=VARCHAR}
+	</select>
+	<select id="getmainField" parameterType="java.util.Map" resultType="java.util.HashMap">
+		select col.column_name
+		from user_constraints con,user_cons_columns col
+		where con.constraint_name=col.constraint_name and con.constraint_type='P'
+		and col.table_name=#{sourceTabEname, jdbcType=VARCHAR}
+	</select>
+	<!-- 别名验重 -->
+	<select id="getSameName" parameterType="cn.com.yusys.yusp.cm.sysKeyWord.domain.CmFRcSysKeyWord" resultType="int">
+		SELECT COUNT(1) FROM cm_f_rc_sys_key_word WHERE ALIAS_NAME = #{aliasName} AND ID <![CDATA[!= ]]> #{id}
+	</select>
+</mapper>

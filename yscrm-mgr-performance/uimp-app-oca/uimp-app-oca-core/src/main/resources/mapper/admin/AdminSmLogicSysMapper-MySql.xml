@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.admin.repository.mapper.AdminSmLogicSysMapper">
+	<select id="getLogicSysKeyValue" parameterType="java.util.Map" resultType="java.util.Map" databaseId="mysql">
+	   SELECT SYS_ID AS "KEY",SYS_NAME AS "VALUE" FROM ADMIN_SM_LOGIC_SYS WHERE SYS_STS='A' ORDER BY SYS_ID
+	</select>
+
+    <select id="queryIndex" parameterType="java.util.Map" resultType="java.util.Map" databaseId="mysql">
+        SELECT M.MOD_NAME,F.FUNC_ID,F.FUNC_NAME,F.FUNC_URL FROM ADMIN_SM_BUSI_FUNC F
+        LEFT JOIN ADMIN_SM_FUNC_MOD M ON M.MOD_ID = F.MOD_ID
+        WHERE M.MOD_NAME = '首页'
+    </select>
+
+    <select id="getLogicSysInfo" parameterType="java.util.Map" resultType="java.util.Map" databaseId="mysql">
+        SELECT S.SYS_ID,S.AUTH_ID,S.IS_SSO,S.SYS_CODE,S.SYS_DESC,S.SYS_NAME,S.SYS_STS,S.SYS_VERSION,F.FUNC_ID,F.FUNC_NAME
+        FROM ADMIN_SM_LOGIC_SYS S
+        LEFT JOIN (SELECT M.FUNC_ID,B.FUNC_NAME,M.SYS_ID FROM ADMIN_SM_MENU M
+        LEFT JOIN ADMIN_SM_BUSI_FUNC B ON M.FUNC_ID = B.FUNC_ID
+        WHERE M.MENU_NAME='首页') F
+        ON S.SYS_ID = F.SYS_ID
+        <if test="condition.sysName != null and condition.sysName != ''">
+            WHERE S.SYS_NAME LIKE CONCAT(CONCAT('%',#{condition.sysName}),'%')
+        </if>
+    </select>
+
+    <update id="updateFuncId" parameterType="java.util.Map" databaseId="mysql">
+        UPDATE ADMIN_SM_MENU SET FUNC_ID = #{funcId,jdbcType=VARCHAR}
+        WHERE SYS_ID = #{sysId,jdbcType=VARCHAR} AND MENU_NAME='首页'
+    </update>
+</mapper>

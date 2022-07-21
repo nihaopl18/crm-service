@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.mktactivity.repository.mapper.OcrmFMkActiExobjMapper">
+
+	<!-- 删除上次关联执行对象信息-->
+	<delete id="lastExobjDel" parameterType="BigDecimal">
+		DELETE FROM OCRM_F_MK_ACTI_EXCOBJ WHERE ACTI_ID = #{actiId,jdbcType=DECIMAL}
+	</delete>
+	<!-- 查询执行对象信息 -->
+	<select id="ActiviObjInfo" parameterType="BigDecimal" resultType="java.util.HashMap">
+		SELECT T.* FROM OCRM_F_MK_ACTI_EXCOBJ T 
+        where  1=1
+        <if test="actiId != null and actiId != ''">
+       		and T.ACTI_ID =#{actiId,jdbcType=DECIMAL}
+        </if>
+	</select>
+</mapper>

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscimc.operation.repository.mapper.ActivityStatisticsMapper">
+
+    <select id="virifySignUp" parameterType="cn.com.yusys.yscimc.operation.domain.vo.StatisticsVo" resultType="int">
+        select count(*) from ACTIVITY_STATISTICS where NODE_ID = #{nodeId} and PHONE_NUM = #{phoneNum}
+    </select>
+
+
+    <select id="virifyFission" parameterType="cn.com.yusys.yscimc.operation.domain.vo.StatisticsVo" resultType="int">
+        select count(*) from ACTIVITY_STATISTICS where NODE_ID = #{nodeId} and RECEIVER = #{receiver}
+    </select>
+</mapper>

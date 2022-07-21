@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.exchange.repository.mapper.OcrmFwpShareInfoMapper">
+    <resultMap id="BaseResultMap" type="cn.com.yusys.yscrm.exchange.domain.OcrmFwpShareInfo">
+		<id column="SHARE_ID" jdbcType="VARCHAR" property="shareId" />
+		<result column="SHARE_NAME" jdbcType="VARCHAR" property="shareName" />
+		<result column="CREATE_USER_ID" jdbcType="VARCHAR" property="createUserId" />
+		<result column="CREATE_USER_NAME" jdbcType="VARCHAR" property="createUserName" />
+		<result column="CREATE_ORG_ID" jdbcType="VARCHAR" property="createOrgId" />
+		<result column="CREATE_ORG_NAME" jdbcType="VARCHAR" property="createOrgName" />
+		<result column="CREATE_TIME" jdbcType="DATE" property="createTime" />
+		<result column="UPDATE_TIME" jdbcType="DATE" property="updateTime" />
+		<result column="SHARE_CONTENT" jdbcType="CLOB" property="shareContent" />
+		<result column="IS_DELETE" jdbcType="VARCHAR" property="isDelete" />
+		<result column="CORP_ORG_CODE" jdbcType="VARCHAR" property="corpOrgCode" />
+    </resultMap>
+    <sql id="Base_Column_List">
+	    a.SHARE_ID,a.SHARE_NAME,a.CREATE_USER_ID,a.CREATE_USER_NAME,a.CREATE_ORG_ID,a.CREATE_ORG_NAME,a.CREATE_TIME,b.CREATE_TIME as UPDATE_TIME,a.SHARE_CONTENT,a.IS_DELETE,a.CORP_ORG_CODE
+    </sql>
+    
+    <!-- 列表查询 -->
+    <select id="queryList" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultMap="BaseResultMap">
+    	select <include refid="Base_Column_List"/> from OCRM_F_WP_SHARE_INFO a
+    	left join (select ROW_NUMBER() OVER (PARTITION BY share_id ORDER BY CREATE_TIME desc) AS RN,CREATE_TIME,share_id from OCRM_F_WP_SHARE_REPLY_INFO) b
+        on a.share_id=b.share_id and b.rn = 1
+		<where>
+		    a.IS_DELETE = 'N'
+			<if test="condition.createTime != null and condition.createTime != ''">
+				AND to_char(a.CREATE_TIME, 'yyyy-MM-dd') = #{condition.createTime,jdbcType=VARCHAR} 
+			</if>
+			<if test="condition.shareName != null and condition.shareName != ''">
+				<!-- <choose>
+                    <when test="@cn.com.yusys.yusp.commons.mapper.provider.OGNLUtil@like(condition.shareName)"> 
+                    	AND a.SHARE_NAME like #{condition.shareName,jdbcType=VARCHAR}
+                   	</when>
+                    <otherwise> AND a.SHARE_NAME = #{condition.shareName,jdbcType=VARCHAR} </otherwise>
+                </choose> -->
+                AND a.SHARE_NAME like #{condition.shareName,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.createUserId != null and condition.createUserId != ''">
+				AND a.CREATE_USER_ID = #{condition.createUserId,jdbcType=VARCHAR}
+			</if>
+		</where>
+<!-- 		<if test="sort != null"> order by ${sort} </if> -->
+	  	 order by a.CREATE_TIME desc
+    </select>
+    
+    
+    <!-- 根据主键删除 逻辑删除 -->
+    <update id="deleteByShareIds" parameterType="String">
+        update OCRM_F_WP_SHARE_INFO set IS_DELETE = 'Y'
+        where SHARE_ID in 
+        <foreach collection="array" item="shareId" index="index" open="(" close=")" separator=",">
+        	#{shareId}
+        </foreach>
+    </update>
+</mapper>

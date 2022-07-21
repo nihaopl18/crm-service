@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.uimp.business.pma.coefficient.repository.mapper.PmaFCoefficientAmtRangeMapper">
+    <resultMap id="BaseResultMap" type="cn.com.yusys.yusp.uimp.business.pma.coefficient.domain.PmaFCoefficientAmtRange">
+		<id column="ID" jdbcType="VARCHAR" property="id" />
+		<result column="ORG_ID" jdbcType="VARCHAR" property="orgId" />
+		<result column="TRANCODE" jdbcType="VARCHAR" property="trancode" />
+		<result column="TRAN_NAME" jdbcType="VARCHAR" property="tranName" />
+		<result column="START_AMT" jdbcType="NUMERIC" property="startAmt" />
+		<result column="END_AMT" jdbcType="NUMERIC" property="endAmt" />
+		<result column="AMT_COEFFICIENT" jdbcType="NUMERIC" property="amtCoefficient" />
+		<result column="CDFLAG" jdbcType="VARCHAR" property="cdflag" />
+    </resultMap>
+    <sql id="Base_Column_List">
+	    ID,ORG_ID,TRANCODE,TRAN_NAME,START_AMT,END_AMT,AMT_COEFFICIENT,CDFLAG
+    </sql>
+         <!-- 查询基础指标列表数据 -->
+    <select id="querylist" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+      SELECT COE.ID,COE.START_AMT AS START_AMT,COE.END_AMT AS END_AMT,COE.AMT_COEFFICIENT AS AMT_COEFFICIENT,COE.CDFLAG AS CDFLAG FROM PMA_F_COEFFICIENT_AMT_RANGE COE 
+      		<where>
+			<if test="condition.cdflag != null and condition.cdflag  != ''">
+	      		AND COE.CDFLAG=#{condition.cdflag,jdbcType=VARCHAR}
+		    </if>
+		    </where>
+	</select>
+	 <select id="amtObj" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="cn.com.yusys.yusp.uimp.business.pma.coefficient.domain.PmaFCoefficientAmtRange">
+      	select t.*  from PMA_F_COEFFICIENT_AMT_RANGE t 
+      		<where>
+			<if test="condition.cdflag != null and condition.cdflag  != ''">
+	      		AND t.CDFLAG=#{condition.cdflag}
+		    </if>
+			<if test="condition.amt != null and condition.amt  != ''">
+	      		AND t.START_AMT&lt;=#{condition.amt}
+	      		and t.END_AMT&gt;=#{condition.amt}
+		    </if>
+		    </where>
+	</select>
+    <delete id="deleteSql" >
+	    delete  from  PMA_F_COEFFICIENT_AMT_RANGE t 
+         where  t.START_AMT&gt;=#{startAmt}
+         and t.END_AMT&lt;=#{endAmt}
+         and t.CDFLAG=#{cdflag} 
+	</delete>
+
+</mapper>

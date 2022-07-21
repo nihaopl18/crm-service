@@ -1,0 +1,447 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper
+	namespace="cn.com.yusys.yscrm.custgrade.repository.mapper.CustGradeQueryMapper">
+	<!-- 非全条线查询 -->
+	<select id="querylist" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+		resultType="java.util.HashMap">
+		SELECT 
+       P.CUST_ID,
+       P.CUST_NAME,
+       P.CERT_TYPE,
+       P.CERT_NO,
+<!--        P.BELONG_BRCH, -->
+<!--        P.BELONG_MGR, -->
+       P.VALUE_LEV,
+       P.SERV_LEV,
+       C.EVALUATE_DATE,
+       SU.USER_NAME      BELONG_MGR_NAME,
+       ORG.ORG_NAME      BELONG_BRCH_NAME
+   <!-- 总行管理员查询零售或对公 -->
+    <if test="dataAuth != null and condition.orgIdAuth =='500'">
+    <if test="condition.custType ==1">
+       FROM	ACRM_F_CI_PER_ADMIT_INFO P
+    </if>
+		<if test="condition.custType ==2">
+       FROM	ACRM_F_CI_ORG_CUST_INFO P
+    </if>	
+	LEFT JOIN OCRM_F_CG_CPN_GRADE C
+    ON P.CUST_ID = C.CUST_ID
+	LEFT JOIN ADMIN_SM_USER SU
+    ON SU.LOGIN_CODE = P.BELONG_MGR
+    LEFT JOIN ADMIN_SM_ORG ORG
+    ON ORG.ORG_ID = P.BELONG_BRCH
+		<where>
+		(${condition.busiType}) and P.CUST_STATUS='1' 
+		<if test="condition.custId != null and condition.custId !=''">
+				  AND P.CUST_ID LIKE CONCAT(CONCAT('%', #{condition.custId, jdbcType=VARCHAR}),'%')
+		</if>
+			<if test="condition.custName != null and condition.custName != ''">
+				AND P.CUST_NAME= #{condition.custName,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.certType != null and condition.certType != ''">
+				AND P.CERT_TYPE= #{condition.certType,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.certNo != null and condition.certNo != ''">
+				AND P.CERT_NO= #{condition.certNo,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.servLev != null and condition.servLev != ''">
+				AND P.SERV_LEV= #{condition.servLev,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.valueLev != null and condition.valueLev != ''">
+				AND P.VALUE_LEV= #{condition.valueLev,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.orgId != null and condition.orgId != ''">
+				AND P.BELONG_BRCH = #{condition.orgId,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.mgrId != null and condition.mgrId != ''">
+				AND P.BELONG_MGR = #{condition.mgrId,jdbcType=VARCHAR}
+			</if>
+			
+		</where>
+
+			</if>
+			<!-- 支行管理员查询零售或对公 -->
+	<if test="dataAuth != null and condition.orgIdAuth !='500'">
+		<if test="condition.custType ==1">
+    		 FROM ACRM_F_CI_PER_ADMIT_INFO P
+    	</if>
+		<if test="condition.custType ==2">
+    		 FROM ACRM_F_CI_ORG_CUST_INFO P
+    	</if>	
+			INNER JOIN (
+		SELECT B.CUST_ID , '2' AS POWER_LEV
+               FROM OCRM_F_CI_ADMIT_BELONG B
+              WHERE B.MGR_ID = #{condition.userId, jdbcType = VARCHAR}
+             UNION ALL
+             SELECT L.CUST_ID , '3' AS POWER_LEV
+               FROM OCRM_F_CI_TRUSTEESHIP_APPLY A
+               LEFT JOIN OCRM_F_CI_TRUSTEESHIP_LIST L
+                 ON A.APPLY_ID = L.APPLY_NO
+              WHERE A.TRUST_STAT = '1'
+                AND A.TRUST_MGR_ID = #{condition.userId,
+              jdbcType = VARCHAR}
+             UNION ALL
+             SELECT L.CUST_ID, '4' AS POWER_LEV
+               FROM OCRM_F_CI_GRANT_APPLY A
+               LEFT JOIN OCRM_F_CI_GRANT_LIST L
+                 ON A.APPLY_ID = L.APPLY_NO
+              WHERE GRANT_STAT = '1'
+                AND GRANT_MGR_ID = #{condition.userId,
+              jdbcType = VARCHAR} 
+					${dataAuth} 
+				   ) PER
+    ON PER.CUST_ID = P.CUST_ID
+			 LEFT JOIN OCRM_F_CG_CPN_GRADE C
+    ON P.CUST_ID = C.CUST_ID
+  LEFT JOIN ADMIN_SM_USER SU
+    ON SU.LOGIN_CODE = P.BELONG_MGR
+  LEFT JOIN ADMIN_SM_ORG ORG
+    ON ORG.ORG_ID = P.BELONG_BRCH
+		<where>
+				(PER.POWER_LEV = '1' AND (${condition.busiType})  OR PER.POWER_LEV = '2' OR PER.POWER_LEV = '3' OR PER.POWER_LEV = '4') and P.CUST_STATUS='1' 
+		<if test="condition.custId != null and condition.custId !=''">
+				  AND P.CUST_ID LIKE CONCAT(CONCAT('%', #{condition.custId, jdbcType=VARCHAR}),'%')
+		</if>
+			<if test="condition.custName != null and condition.custName != ''">
+				AND P.CUST_NAME= #{condition.custName,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.certType != null and condition.certType != ''">
+				AND P.CERT_TYPE= #{condition.certType,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.certNo != null and condition.certNo != ''">
+				AND P.CERT_NO= #{condition.certNo,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.servLev != null and condition.servLev != ''">
+				AND P.SERV_LEV= #{condition.servLev,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.valueLev != null and condition.valueLev != ''">
+				AND P.VALUE_LEV= #{condition.valueLev,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.orgId != null and condition.orgId != ''">
+				AND P.BELONG_BRCH = #{condition.orgId,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.mgrId != null and condition.mgrId != ''">
+				AND P.BELONG_MGR = #{condition.mgrId,jdbcType=VARCHAR}
+			</if>
+			
+		</where>
+		GROUP BY 
+       P.CUST_ID,
+       P.CUST_NAME,
+       P.CERT_TYPE,
+       P.CERT_NO,
+<!--        P.BELONG_BRCH, -->
+<!--        P.BELONG_MGR, -->
+       P.VALUE_LEV,
+       P.SERV_LEV,
+       C.EVALUATE_DATE,
+       SU.USER_NAME,
+       ORG.ORG_NAME
+			</if>
+			<!-- 客户经理查询零售或对公 -->
+		<if test="dataAuth == null">
+<!-- 			,MIN(PER.POWER_LEV) AS POWER_LEV  -->
+			
+	<if test="condition.custType ==1">
+    	 FROM	 ACRM_F_CI_PER_ADMIT_INFO P
+    </if>
+		<if test="condition.custType ==2">
+    	 FROM	 ACRM_F_CI_ORG_CUST_INFO P
+    </if>	
+			INNER JOIN (
+		SELECT B.CUST_ID
+               FROM OCRM_F_CI_ADMIT_BELONG B
+              WHERE B.MGR_ID = #{condition.userId, jdbcType = VARCHAR}
+             UNION ALL
+             SELECT L.CUST_ID
+               FROM OCRM_F_CI_TRUSTEESHIP_APPLY A
+               LEFT JOIN OCRM_F_CI_TRUSTEESHIP_LIST L
+                 ON A.APPLY_ID = L.APPLY_NO
+              WHERE A.TRUST_STAT = '1'
+                AND A.TRUST_MGR_ID = #{condition.userId,
+              jdbcType = VARCHAR}
+             UNION ALL
+             SELECT L.CUST_ID
+               FROM OCRM_F_CI_GRANT_APPLY A
+               LEFT JOIN OCRM_F_CI_GRANT_LIST L
+                 ON A.APPLY_ID = L.APPLY_NO
+              WHERE GRANT_STAT = '1'
+                AND GRANT_MGR_ID = #{condition.userId,
+              jdbcType = VARCHAR} 
+				   ) PER
+    ON PER.CUST_ID = P.CUST_ID
+			 LEFT JOIN OCRM_F_CG_CPN_GRADE C
+    ON P.CUST_ID = C.CUST_ID
+<!--   LEFT JOIN OCRM_F_CI_ADMIT_BELONG B -->
+<!--     ON P.CUST_ID = B.CUST_ID -->
+  LEFT JOIN ADMIN_SM_USER SU
+    ON SU.LOGIN_CODE = P.BELONG_MGR
+  LEFT JOIN ADMIN_SM_ORG ORG
+    ON ORG.ORG_ID = P.BELONG_BRCH
+		<where>
+		P.CUST_STATUS='1' 
+		<if test="condition.custId != null and condition.custId !=''">
+				  AND P.CUST_ID LIKE CONCAT(CONCAT('%', #{condition.custId, jdbcType=VARCHAR}),'%')
+		</if>
+			<if test="condition.custName != null and condition.custName != ''">
+				AND P.CUST_NAME= #{condition.custName,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.certType != null and condition.certType != ''">
+				AND P.CERT_TYPE= #{condition.certType,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.certNo != null and condition.certNo != ''">
+				AND P.CERT_NO= #{condition.certNo,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.servLev != null and condition.servLev != ''">
+				AND P.SERV_LEV= #{condition.servLev,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.valueLev != null and condition.valueLev != ''">
+				AND P.VALUE_LEV= #{condition.valueLev,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.orgId != null and condition.orgId != ''">
+				AND P.BELONG_BRCH = #{condition.orgId,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.mgrId != null and condition.mgrId != ''">
+				AND P.BELONG_MGR = #{condition.mgrId,jdbcType=VARCHAR}
+			</if>
+			
+		</where>
+		GROUP BY 
+       P.CUST_ID,
+       P.CUST_NAME,
+       P.CERT_TYPE,
+       P.CERT_NO,
+<!--        P.BELONG_BRCH, -->
+<!--        P.BELONG_MGR, -->
+       P.VALUE_LEV,
+       P.SERV_LEV,
+       C.EVALUATE_DATE,
+       SU.USER_NAME,
+       ORG.ORG_NAME
+		
+		</if>
+	</select>
+	<!-- 全条线查询 -->
+	<select id="querylistAllBusi" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+		resultType="java.util.HashMap">
+		SELECT 
+       P.CUST_ID,
+       P.CUST_NAME,
+       P.CERT_TYPE,
+       P.CERT_NO,
+<!--        P.BELONG_BRCH, -->
+<!--        P.BELONG_MGR, -->
+       P.VALUE_LEV,
+       P.SERV_LEV,
+       C.EVALUATE_DATE,
+       SU.USER_NAME      BELONG_MGR_NAME,
+       ORG.ORG_NAME      BELONG_BRCH_NAME
+   <!-- 总行管理员查询零售或对公 -->
+    <if test="dataAuth != null and condition.orgIdAuth =='500'">
+    <if test="condition.custType ==1">
+     FROM	ACRM_F_CI_PER_ADMIT_INFO P
+    </if>
+		<if test="condition.custType ==2">
+     FROM	ACRM_F_CI_ORG_CUST_INFO P
+    </if>	
+			 LEFT JOIN OCRM_F_CG_CPN_GRADE C
+    ON P.CUST_ID = C.CUST_ID
+  LEFT JOIN ADMIN_SM_USER SU
+    ON SU.LOGIN_CODE = P.BELONG_MGR
+  LEFT JOIN ADMIN_SM_ORG ORG
+    ON ORG.ORG_ID = P.BELONG_BRCH
+		<where>
+		P.CUST_STATUS='1' 
+		<if test="condition.custId != null and condition.custId !=''">
+				  AND P.CUST_ID LIKE CONCAT(CONCAT('%', #{condition.custId, jdbcType=VARCHAR}),'%')
+		</if>
+			<if test="condition.custName != null and condition.custName != ''">
+				AND P.CUST_NAME= #{condition.custName,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.certType != null and condition.certType != ''">
+				AND P.CERT_TYPE= #{condition.certType,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.certNo != null and condition.certNo != ''">
+				AND P.CERT_NO= #{condition.certNo,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.servLev != null and condition.servLev != ''">
+				AND P.SERV_LEV= #{condition.servLev,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.valueLev != null and condition.valueLev != ''">
+				AND P.VALUE_LEV= #{condition.valueLev,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.orgId != null and condition.orgId != ''">
+				AND P.BELONG_BRCH = #{condition.orgId,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.mgrId != null and condition.mgrId != ''">
+				AND P.BELONG_MGR = #{condition.mgrId,jdbcType=VARCHAR}
+			</if>
+		</where>
+
+			</if>
+			<!-- 支行管理员查询零售或对公 -->
+	<if test="dataAuth != null and condition.orgIdAuth !='500'">
+<!-- 			,MIN(PER.POWER_LEV) AS POWER_LEV FROM	 -->
+			
+	<if test="condition.custType ==1">
+    FROM	ACRM_F_CI_PER_ADMIT_INFO P
+    </if>
+		<if test="condition.custType ==2">
+    FROM	ACRM_F_CI_ORG_CUST_INFO P
+    </if>	
+			INNER JOIN (
+		SELECT B.CUST_ID , '2' AS POWER_LEV
+               FROM OCRM_F_CI_ADMIT_BELONG B
+              WHERE B.MGR_ID = #{condition.userId, jdbcType = VARCHAR}
+             UNION ALL
+             SELECT L.CUST_ID , '3' AS POWER_LEV
+               FROM OCRM_F_CI_TRUSTEESHIP_APPLY A
+               LEFT JOIN OCRM_F_CI_TRUSTEESHIP_LIST L
+                 ON A.APPLY_ID = L.APPLY_NO
+              WHERE A.TRUST_STAT = '1'
+                AND A.TRUST_MGR_ID = #{condition.userId,
+              jdbcType = VARCHAR}
+             UNION ALL
+             SELECT L.CUST_ID , '4' AS POWER_LEV
+               FROM OCRM_F_CI_GRANT_APPLY A
+               LEFT JOIN OCRM_F_CI_GRANT_LIST L
+                 ON A.APPLY_ID = L.APPLY_NO
+              WHERE GRANT_STAT = '1'
+                AND GRANT_MGR_ID = #{condition.userId,
+              jdbcType = VARCHAR} 
+					${dataAuth} 
+				   ) PER
+    ON PER.CUST_ID = P.CUST_ID
+			 LEFT JOIN OCRM_F_CG_CPN_GRADE C
+    ON P.CUST_ID = C.CUST_ID
+  LEFT JOIN ADMIN_SM_USER SU
+    ON SU.LOGIN_CODE = P.BELONG_MGR
+  LEFT JOIN ADMIN_SM_ORG ORG
+    ON ORG.ORG_ID = P.BELONG_BRCH
+		<where>
+		P.CUST_STATUS='1' 
+		<if test="condition.custId != null and condition.custId !=''">
+				  AND P.CUST_ID LIKE CONCAT(CONCAT('%', #{condition.custId, jdbcType=VARCHAR}),'%')
+		</if>
+			<if test="condition.custName != null and condition.custName != ''">
+				AND P.CUST_NAME= #{condition.custName,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.certType != null and condition.certType != ''">
+				AND P.CERT_TYPE= #{condition.certType,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.certNo != null and condition.certNo != ''">
+				AND P.CERT_NO= #{condition.certNo,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.servLev != null and condition.servLev != ''">
+				AND P.SERV_LEV= #{condition.servLev,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.valueLev != null and condition.valueLev != ''">
+				AND P.VALUE_LEV= #{condition.valueLev,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.orgId != null and condition.orgId != ''">
+				AND P.BELONG_BRCH = #{condition.orgId,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.mgrId != null and condition.mgrId != ''">
+				AND P.BELONG_MGR = #{condition.mgrId,jdbcType=VARCHAR}
+			</if>
+			
+		</where>
+		GROUP BY 
+       P.CUST_ID,
+       P.CUST_NAME,
+       P.CERT_TYPE,
+       P.CERT_NO,
+<!--        P.BELONG_BRCH, -->
+<!--        P.BELONG_MGR, -->
+       P.VALUE_LEV,
+       P.SERV_LEV,
+       C.EVALUATE_DATE,
+       SU.USER_NAME,
+       ORG.ORG_NAME
+			</if>
+		<!-- 客户经理查询零售或对公 -->
+		<if test="dataAuth == null">
+<!-- 			,MIN(PER.POWER_LEV) AS POWER_LEV FROM	 -->
+			FROM
+	<if test="condition.custType ==1">
+     	ACRM_F_CI_PER_ADMIT_INFO P
+    </if>
+		<if test="condition.custType ==2">
+    	ACRM_F_CI_ORG_CUST_INFO P
+    </if>	
+			INNER JOIN (
+		SELECT B.CUST_ID 
+               FROM OCRM_F_CI_ADMIT_BELONG B
+              WHERE B.MGR_ID = #{condition.userId, jdbcType = VARCHAR}
+             UNION ALL
+             SELECT L.CUST_ID
+               FROM OCRM_F_CI_TRUSTEESHIP_APPLY A
+               LEFT JOIN OCRM_F_CI_TRUSTEESHIP_LIST L
+                 ON A.APPLY_ID = L.APPLY_NO
+              WHERE A.TRUST_STAT = '1'
+                AND A.TRUST_MGR_ID = #{condition.userId,
+              jdbcType = VARCHAR}
+             UNION ALL
+             SELECT L.CUST_ID
+               FROM OCRM_F_CI_GRANT_APPLY A
+               LEFT JOIN OCRM_F_CI_GRANT_LIST L
+                 ON A.APPLY_ID = L.APPLY_NO
+              WHERE GRANT_STAT = '1'
+                AND GRANT_MGR_ID = #{condition.userId,
+              jdbcType = VARCHAR} 
+				   ) PER
+    ON PER.CUST_ID = P.CUST_ID
+			 LEFT JOIN OCRM_F_CG_CPN_GRADE C
+    ON P.CUST_ID = C.CUST_ID
+<!--   LEFT JOIN OCRM_F_CI_ADMIT_BELONG B -->
+<!--     ON P.CUST_ID = B.CUST_ID -->
+  LEFT JOIN ADMIN_SM_USER SU
+    ON SU.LOGIN_CODE = P.BELONG_MGR
+  LEFT JOIN ADMIN_SM_ORG ORG
+    ON ORG.ORG_ID = P.BELONG_BRCH
+		<where>
+		P.CUST_STATUS='1' 
+		<if test="condition.custId != null and condition.custId !=''">
+				  AND P.CUST_ID LIKE CONCAT(CONCAT('%', #{condition.custId, jdbcType=VARCHAR}),'%')
+		</if>
+			<if test="condition.custName != null and condition.custName != ''">
+				AND P.CUST_NAME= #{condition.custName,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.certType != null and condition.certType != ''">
+				AND P.CERT_TYPE= #{condition.certType,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.certNo != null and condition.certNo != ''">
+				AND P.CERT_NO= #{condition.certNo,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.servLev != null and condition.servLev != ''">
+				AND P.SERV_LEV= #{condition.servLev,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.valueLev != null and condition.valueLev != ''">
+				AND P.VALUE_LEV= #{condition.valueLev,jdbcType=VARCHAR}
+			</if>
+
+			<if test="condition.orgId != null and condition.orgId != ''">
+				AND P.BELONG_BRCH = #{condition.orgId,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.mgrId != null and condition.mgrId != ''">
+				AND P.BELONG_MGR = #{condition.mgrId,jdbcType=VARCHAR}
+			</if>
+			
+		</where>
+		GROUP BY 
+       P.CUST_ID,
+       P.CUST_NAME,
+       P.CERT_TYPE,
+       P.CERT_NO,
+<!--        P.BELONG_BRCH, -->
+<!--        P.BELONG_MGR, -->
+       P.VALUE_LEV,
+       P.SERV_LEV,
+       C.EVALUATE_DATE,
+       SU.USER_NAME,
+       ORG.ORG_NAME
+		
+		</if>
+	</select>
+</mapper>

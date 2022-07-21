@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.uimp.business.pma.scheme.schememain.repository.mapper.PmaFSchemeOrgRelMapper">
+    <resultMap id="BaseResultMap" type="cn.com.yusys.yusp.uimp.business.pma.scheme.schememain.domain.PmaFSchemeOrgRel">
+		<id column="ID" jdbcType="VARCHAR" property="id" />
+		<result column="SCHEME_ID" jdbcType="VARCHAR" property="schemeId" />
+		<result column="ORG_ID" jdbcType="VARCHAR" property="orgId" />
+		<result column="ORG_NAME" jdbcType="VARCHAR" property="orgName" />
+    </resultMap>
+    <sql id="Base_Column_List">
+	    ID,SCHEME_ID,ORG_ID,ORG_NAME
+    </sql>
+            <select id="queryOrg" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+    	select ID,SCHEME_ID,ORG_ID
+    	FROM PMA_F_SCHEME_ORG_REL 
+       <where>
+			<!-- 考核方案编号 -->
+			<if test="condition.schemeId != null and condition.schemeId  != ''">
+	      		AND SCHEME_ID = #{condition.schemeId,jdbcType=VARCHAR}
+		    </if>
+		    
+	    </where>
+    </select>
+    <select id="selectDrawSchemeOrgRel" resultType="cn.com.yusys.yusp.uimp.business.pma.scheme.schememain.domain.PmaFSchemeOrgRel">
+		select SCHEME_ID,ORG_ID,ORG_NAME
+		FROM PMA_F_SCHEME_ORG_REL
+		where SCHEME_ID =  #{schemeId,jdbcType=VARCHAR}
+    </select>
+    
+    <insert id="copySchemeInf" parameterType="java.lang.String">
+    	insert into PMA_F_SCHEME_ORG_REL(ID, SCHEME_ID, ORG_ID, ORG_NAME)
+    	select sys_guid(), #{newSchemeId}, ORG_ID, ORG_NAME from PMA_F_SCHEME_ORG_REL where SCHEME_ID = #{schemeId}
+    </insert>
+
+
+	<insert id="batchInsert" parameterType="List">
+		INSERT INTO PMA_F_SCHEME_ORG_REL (ID,SCHEME_ID, ORG_ID, ORG_NAME)
+		<foreach collection="list" item="org" index="index" separator="union all" >
+			select #{org.id},#{org.schemeId},#{org.orgId},#{org.orgName}
+			from dual
+		</foreach>
+	</insert>
+
+
+	<select id="queryOrgList" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+		select ID,ORG_ID,ORG_NAME
+		FROM PMA_F_SCHEME_ORG_REL
+		<where>
+			<!-- 考核方案编号 -->
+			<if test="condition.schemeId != null and condition.schemeId  != ''">
+				AND SCHEME_ID = #{condition.schemeId,jdbcType=VARCHAR}
+			</if>
+
+		</where>
+	</select>
+</mapper>

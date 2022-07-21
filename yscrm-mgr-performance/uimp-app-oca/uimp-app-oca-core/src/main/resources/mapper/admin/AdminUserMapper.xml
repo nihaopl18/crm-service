@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.admin.repository.mapper.AdminUserMapper">
+ 
+  <select id="selectAllUser" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.Map">
+		select t.user_id as "USER_NO",t.user_name from ADMIN_SM_USER t where t.user_sts = 'A' order by t.user_id desc
+  </select>
+  <select id="selectAllDuty" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.Map">
+		select t.duty_id ,t.duty_cde,t.belong_org_id,t.duty_name from ADMIN_SM_DUTY t
+  </select>
+  <select id="selectAllOrg" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.Map">
+		select t.org_id, t.org_code,t.org_name,t.up_org_id from ADMIN_SM_ORG t where t.org_sts = 'A'
+  </select>
+  
+  <select id="selectAllRole" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.Map">
+		select t.role_id,t.role_code,t.role_name,t.org_id from ADMIN_SM_ROLE t where t.role_sts='A'
+  </select>
+  
+  <select id="selectUserInfo" parameterType="string" resultType="java.util.Map">
+		select t.user_id as "USER_NO",t.user_name as "USER_NAME", t.user_email as "EMAIL" ,t.user_mobilephone as "MOBILE" from ADMIN_SM_USER t where t.user_sts = 'A'	
+        and  t.user_id = #{userId}
+  </select>
+  
+  <select id="selectOrgUser" parameterType="string" resultType="string">
+		select t.user_id as "USER_NO" from ADMIN_SM_USER t where t.user_sts = 'A' and t.org_id = #{orgId}
+  </select>
+  
+  <select id="selectRoleUser" parameterType="string" resultType="string">
+		select distinct u.user_id as "USER_NO" from ADMIN_SM_USER_ROLE_REL t
+        left join admin_sm_user u
+  			on u.user_id = t.user_id
+  		left join admin_sm_role r
+    		on r.role_id = t.role_id 
+    	where r.role_id = #{roleId}
+  </select>
+  
+  <select id="selectDutyUser" parameterType="string" resultType="string">
+		select distinct u.user_id as "USER_NO" from ADMIN_SM_USER_DUTY_REL t
+        left join admin_sm_user u
+            on u.user_id = t.user_id
+        left join admin_sm_duty r
+            on r.duty_id = t.duty_id 
+        where r.duty_id = #{dutyId}
+  </select>
+  
+  <select id="selectUserOrg" parameterType="string" resultType="string">
+ 		  select t.org_id as "ORG_ID" from ADMIN_SM_USER t where t.user_sts = 'A'         
+          and  t.user_id = #{userId}
+  </select>
+  
+  <select id="selectOrgsUsers"  resultType="string">
+ 		  select distinct t.user_id as "USER_NO" from ADMIN_SM_USER t where t.user_sts = 'A'         
+          and t.org_id in  
+    	 <foreach collection="list" index="index" item="item" open="(" separator="," close=")">  
+        	#{item}  
+    	 </foreach>
+  </select>
+   
+  <select id="selectUpOrg" parameterType="String" resultType="string">
+		select t.up_org_id from ADMIN_SM_ORG t where t.org_id = #{orgId}    
+  </select> 
+  
+  <select id="selectUpOrgOrgs" parameterType="String" resultType="string">
+		select t.org_id from ADMIN_SM_ORG t where t.up_org_id = #{upOrgId}    
+  </select>   
+  
+  
+</mapper>

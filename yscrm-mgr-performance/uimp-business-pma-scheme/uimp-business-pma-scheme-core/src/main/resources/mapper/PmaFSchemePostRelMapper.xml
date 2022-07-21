@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.uimp.business.pma.scheme.schememain.repository.mapper.PmaFSchemePostRelMapper">
+    <resultMap id="BaseResultMap" type="cn.com.yusys.yusp.uimp.business.pma.scheme.schememain.domain.PmaFSchemePostRel">
+		<id column="ID" jdbcType="VARCHAR" property="id" />
+		<result column="SCHEME_ID" jdbcType="VARCHAR" property="schemeId" />
+		<result column="POST_ID" jdbcType="VARCHAR" property="postId" />
+		<result column="POST_NAME" jdbcType="VARCHAR" property="postName" />
+    </resultMap>
+    <sql id="Base_Column_List">
+	    ID,SCHEME_ID,POST_ID,POST_NAME
+    </sql>
+        <select id="queryPost" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+    	select ID,SCHEME_ID,POST_ID,POST_NAME
+    	FROM PMA_F_SCHEME_POST_REL 
+       <where>
+			<!-- 考核方案编号 -->
+			<if test="condition.schemeId != null and condition.schemeId  != ''">
+	      		AND SCHEME_ID = #{condition.schemeId,jdbcType=VARCHAR}
+		    </if>
+		    
+	    </where>
+    </select>
+    
+    <insert id="copySchemeInf" parameterType="java.lang.String">
+    	insert into PMA_F_SCHEME_POST_REL(ID, SCHEME_ID, POST_ID, POST_NAME)
+    	select sys_guid(), #{newSchemeId}, POST_ID, POST_NAME from PMA_F_SCHEME_POST_REL where SCHEME_ID = #{schemeId}
+    </insert>
+</mapper>

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.climp.qypool.repository.mapper.LoyAcOrderExAttrMapper">
+    <select id="getAttrByOrderNo" resultType="java.util.Map" parameterType="java.lang.String">
+        select EA.*,CA.ATTR_CODE,CA.ATTR_KIND
+        from LOY_AC_ORDER_EX_ATTR EA
+        left join LOY_QY_COMM_EX_ATTR CA on EA.ATTR_ID = CA.ATTR_ID
+        where EA.ORDER_NO = #{orderNo,jdbcType=VARCHAR}
+    </select>
+</mapper>

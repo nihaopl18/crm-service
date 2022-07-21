@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.climp.score.repository.mapper.ExcelImportMapper">
+    <update id="updateByImportCode" parameterType="cn.com.yusys.climp.score.domain.ExcelImport">
+        update LOY_SR_EXCLE_IMPORT set
+        IMPORT_DATE = #{importDate},
+        IMPORT_NUM = #{importNum}
+        where IMPORT_CODE = #{importCode}
+    </update>
+    <update id="updateStatus" parameterType="cn.com.yusys.climp.score.domain.ExcelImport">
+        update LOY_SR_EXCLE_IMPORT set
+        APP_STATUS = #{appStatus}
+        <if test="appUser != null and appUser != ''">
+            ,APP_USER = #{appUser}
+        </if>
+        <if test="appDate != null">
+            ,APP_DATE = #{appDate}
+        </if>
+        where IMPORT_CODE = #{importCode}
+    </update>
+    <delete id="deleteData" parameterType="java.lang.String">
+        delete
+        from LOY_SR_EXCLE_IMPORT
+        where IMPORT_CODE = #{importCode,jdbcType=VARCHAR}
+    </delete>
+</mapper>

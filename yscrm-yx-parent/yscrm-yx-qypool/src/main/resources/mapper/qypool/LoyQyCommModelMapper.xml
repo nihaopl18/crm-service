@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.climp.qypool.repository.mapper.LoyQyCommModelMapper">
+    <resultMap id="BaseResultMap" type="cn.com.yusys.climp.qypool.domain.LoyQyCommModel">
+		<result column="ID" jdbcType="VARCHAR" property="id" />
+		<result column="COMMODITY_CODE" jdbcType="VARCHAR" property="commodityCode" />
+		<result column="MODEL_PARAM" jdbcType="VARCHAR" property="modelParam" />
+		<result column="MODEL_STG_NUM" jdbcType="VARCHAR" property="modelStgNum" />
+		<result column="MODEL_M_VALUE" jdbcType="NUMERIC" property="modelMvalue" />
+		<result column="MODEL_L_VALUE" jdbcType="NUMERIC" property="modelLvalue" />
+		<result column="MODEL_SAL_NUM" jdbcType="NUMERIC" property="modelSalNum" />
+		<result column="STG_ALARM" jdbcType="NUMERIC" property="stgAlarm" />
+		<result column="DEFAULT_MODEL" jdbcType="VARCHAR" property="defaultModel" />
+		<result column="PURCHASE_LIMIT" jdbcType="VARCHAR" property="purchaseLimit" />
+		<result column="DELETE_STS" jdbcType="VARCHAR" property="deleteSts" />
+		<result column="CREATE_USER" jdbcType="VARCHAR" property="createUser" />
+		<result column="CREATE_DATE" jdbcType="VARCHAR" property="createDate" />
+		<result column="CREATE_ORG" jdbcType="VARCHAR" property="createOrg" />
+		<result column="UPDATE_USER" jdbcType="VARCHAR" property="updateUser" />
+		<result column="UPDATE_DATE" jdbcType="VARCHAR" property="updateDate" />
+		<result column="UPDATE_ORG" jdbcType="VARCHAR" property="updateOrg" />
+    </resultMap>
+    <sql id="Base_Column_List">
+	    ID,COMMODITY_CODE,MODEL_PARAM,MODEL_STG_NUM,MODEL_M_VALUE,MODEL_L_VALUE,MODEL_SAL_NUM,STG_ALARM,DEFAULT_MODEL,PURCHASE_LIMIT,DELETE_STS,CREATE_USER,CREATE_DATE,CREATE_ORG,UPDATE_USER,UPDATE_DATE,UPDATE_ORG
+    </sql>
+    <!-- 根据商品编号查询商品规格 -->
+	<select id="getModel" parameterType="String" resultType="java.util.HashMap">
+		SELECT T.* FROM LOY_QY_COMM_MODEL T
+		where 1=1
+			AND T.COMM_ID = #{commodityCode, jdbcType=VARCHAR} and DELETE_STS is null
+		ORDER BY T.CREATE_DATE DESC
+	</select>
+	<!-- 根据主键查询商品规格 -->
+	<select id="getStgNum" parameterType="java.util.Map" resultType="cn.com.yusys.climp.qypool.domain.LoyQyCommModel">
+		select *
+		from LOY_QY_COMM_MODEL
+		where 1=1
+		<if test="modelId != null and modelId != ''">
+			and id = #{modelId,jdbcType=VARCHAR}
+		</if>
+		<if test="modelId == null or modelId == ''">
+		  <if test="commodityId != null and commodityId != ''">
+		  	and COMM_ID = #{commodityId,jdbcType=VARCHAR}
+			and DEFAULT_MODEL = '1' and DELETE_STS is null
+		  </if>
+		</if>
+	</select>
+	<select id="getSalNum" parameterType="java.lang.String" resultType="cn.com.yusys.climp.qypool.domain.LoyQyCommModel">
+		select *
+		from LOY_QY_COMM_MODEL
+		where id = #{modelId,jdbcType=VARCHAR}
+	</select>
+	<!-- 根据商品id删除商品规格 -->
+	<delete id="delCommModel" parameterType="String">
+		DELETE FROM LOY_QY_COMM_MODEL 
+		WHERE COMM_ID = #{commId, jdbcType=VARCHAR}
+	</delete>
+	<!-- 修改商品库存数量 -->
+	<update id="updateCommodityStNum" parameterType="java.util.Map">
+		update loy_qy_commodity_info
+		set ID = ID
+		    <if test="storgeMgType != null and storgeMgType == '10'.toString()">
+				,COMMODITY_STG_NUM = COMMODITY_STG_NUM + #{mgCount}
+			</if>
+		  	<if test="storgeMgType != null and storgeMgType == '20'.toString()">
+				,COMMODITY_STG_NUM = COMMODITY_STG_NUM - #{mgCount}
+			</if>
+			<if test="storgeMgType != null and storgeMgType == '30'.toString()">
+				,COMMODITY_STG_NUM = COMMODITY_STG_NUM - #{mgCount}
+				,COMMODITY_SAL_NUM = COMMODITY_SAL_NUM + #{mgCount}
+			</if>
+	   	where ID= #{commId, jdbcType=VARCHAR}
+	</update>
+	<!-- 修改规格库存数量 -->
+	<update id="updateNum" parameterType="java.util.Map">
+		update LOY_QY_COMM_MODEL
+		set ID = ID
+		<if test="storgeMgType != null and storgeMgType == '10'.toString()">
+			,MODEL_STG_NUM = MODEL_STG_NUM + #{mgCount}
+		</if>
+		<if test="storgeMgType != null and storgeMgType == '20'.toString()">
+			,MODEL_STG_NUM = MODEL_STG_NUM - #{mgCount}
+		</if>
+		<if test="storgeMgType != null and storgeMgType == '30'.toString()">
+			,MODEL_STG_NUM = MODEL_STG_NUM - #{mgCount}
+		    ,MODEL_SAL_NUM = MODEL_SAL_NUM + #{mgCount}
+		</if>
+		where ID= #{modelId, jdbcType=VARCHAR}
+	</update>
+	<!-- 修改商品现金价值积分价值-->
+	<update id="updateCommMLValue" parameterType="java.util.Map">
+		update loy_qy_commodity_info 
+			set COMMODITY_M_VALUE = #{modelMvalue, jdbcType=VARCHAR},
+			COMMODITY_L_VALUE = #{modelLvalue, jdbcType=VARCHAR}
+	   	where COMMODITY_CODE= #{commodityCode, jdbcType=VARCHAR}
+	</update>
+	<!-- modelParamQuery -->
+	<select id="modelParamQuery" parameterType="String" resultType="java.util.HashMap">
+		SELECT ID AS KEY,MODEL_PARAM AS VALUE FROM LOY_QY_COMM_MODEL WHERE COMMODITY_CODE = #{commodity,jdbcType=VARCHAR}
+	</select>
+	<!-- 获取活动中使用的规格数量 -->
+	<select id="getModelInActyNum" parameterType="String" resultType="int">
+		SELECT count(1) FROM CIMP_CM_NODES_PRESENTATION X 
+		where X.FORM_OPERATION_FILED = 'modelId' AND X.FORM_OPERATION_VAL = #{modelId,jdbcType=VARCHAR}
+	</select>
+</mapper>

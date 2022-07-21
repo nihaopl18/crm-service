@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.product.repository.mapper.OcrmFpdDrumbeatingMapper">
+    <!-- 宣传资料查询 -->
+	<select id="publicityMaterialQuery" parameterType="java.util.Map" resultType="java.util.Map">
+		SELECT A.LAST_CHG_USR, A.LAST_CHG_DT, A.CORP_ORG_CODE, A.ID,
+		A.PROD_ID, A.ATTACH_ID, A.RELA_TYPE, A.DATA_TYPE, B.FILE_ID,
+       	B.FILE_NAME, B.FILE_PATH, B.FILE_SIZE, B.EXT_NAME,
+       	B.PARENT_FOLDER, B.BUS_NO, B.UPLOAD_TIME, B.FILE_REMARK
+  		FROM OCRM_F_PD_DRUMBEATING A
+  		LEFT JOIN ADMIN_FILE_UPLOAD_INFO B
+  		ON A.PROD_ID = B.BUS_NO
+ 		WHERE 1 = 1	
+ 		<!-- 关键字 -->
+		<if test="condition.prodId != null and condition.prodId !=''">
+			AND A.PROD_ID = #{condition.prodId, jdbcType=VARCHAR}
+		</if>
+	</select>
+	
+	<!-- 根据宣传资料主键删除宣传资料 -->
+	<delete id="deletePublicityAaterial" parameterType="String">
+		DELETE FROM OCRM_F_PD_DRUMBEATING A WHERE A.ID = #{condition.id,jdbcType=VARCHAR}
+	</delete>
+    
+    <!-- 根据宣传资料主键删除对应附件 -->
+	<delete id="deleteAttachmentInformation" parameterType="String">
+		DELETE FROM ADMIN_FILE_UPLOAD_INFO A WHERE A.BUS_NO = #{condition.id,jdbcType=VARCHAR}
+	</delete>
+    
+</mapper>

@@ -1,0 +1,287 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.uimp.business.pma.scheme.indexImp.repository.mapper.PmaFImpFillInfoMapper">   
+    <!-- 查询指标值补录 -->
+    <select id="querylist" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+        SELECT F.INDEX_ID || '[' || F.EVL_OBJ_TYPE || '.' ||
+               F.BAL_TYPE_ID || '.' || F.APPLY_TYPE_ID||']' AS INDEX_IDS,
+               F.ID,
+               F.INDEX_ID,
+               B.INDEX_NAME ,
+               F.EVL_OBJ_ID,
+               CASE WHEN U2.USER_NAME IS NOT NULL  THEN U2.USER_NAME ELSE U3.UNITNAME  end as EVL_OBJ_NAME,
+               F.BAL_TYPE_ID,
+               F.INDEX_VALUE,
+               F.EVL_OBJ_TYPE,
+               F.SCHEME_ID,
+               S.SCHEME_NAME ,
+               F.APPLY_TYPE_ID,
+               F.CREATOR,
+               F.CREATOR_ID,
+               F.CREATE_DATE,
+               F.MODIFY_USER,
+               F.MODIFY_USER_ID,
+               F.MODIFY_DATE,
+               F.STAT_DATE
+          FROM PMA_F_IMP_FILL_INFO F
+          LEFT JOIN PMA_F_SCHEME S ON S.SCHEME_ID = F.SCHEME_ID
+                                 
+         LEFT JOIN PMA_F_BASE_INDEX_INFO B ON B.INDEX_ID = F.INDEX_ID
+                                   
+        
+             LEFT JOIN admin_sm_user U2 ON F.EVL_OBJ_ID = U2.LOGIN_CODE  and S.EVL_OBJ_TYPE='01'
+         
+        
+            LEFT JOIN sys_units U3 ON F.EVL_OBJ_ID = U3.UNITID  and S.EVL_OBJ_TYPE='02'
+                               
+
+         WHERE 1=1
+        <if test="condition.schemeId != null and condition.schemeId != ''">
+             AND S.SCHEME_ID = #{condition.schemeId,jdbcType=VARCHAR}
+        </if>
+        <if test="condition.statDate != null and condition.statDate != ''">
+             AND F.STAT_DATE = #{condition.statDate,jdbcType=VARCHAR}
+        </if>
+        <if test="condition.indexId != null and condition.indexId != ''">
+             AND F.INDEX_ID in
+               <foreach collection="condition.indexId"  item="item" open="(" separator="," close=")">
+                    #{item}
+               </foreach>
+        </if>
+        <if test="condition.evlObjId != null and condition.evlObjId != ''">
+             AND F.EVL_OBJ_ID in
+               <foreach collection="condition.evlObjId"  item="item" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+        </if>
+        <if test="condition.sql != null and condition.sql != ''">
+            :{condition.sql}
+        </if>
+       
+    </select>
+<!--    <select id ="queryDatalist" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">-->
+<!--     	    SELECT SUBSTR(#{condition.startDate,jdbcType=VARCHAR},1,4)||ED.ETL_DATE||'01' as STAT_DATE,-->
+<!--				       IDX_REL.SCHEME_ID,-->
+<!--				       IDX_REL.EVL_OBJ_TYPE,-->
+<!--				       EVL_REL.EVL_OBJ_ID,-->
+<!--				       sinfo.scheme_name,-->
+<!--				       CASE WHEN sinfo.EVL_OBJ_TYPE = '01' THEN US.USER_NAME-->
+<!--				            WHEN sinfo.EVL_OBJ_TYPE IN ( '02','03') THEN ORG.ORG_NAME-->
+<!--				         END as EVL_OBJ_NAME-->
+<!--				       ,-->
+<!--				       AD.DUTY_NAME as EVL_OBJ_POST,-->
+<!--				       AO.ORG_NAME ,-->
+<!--				       IDX_REL.INDEX_ID,-->
+<!--				       INFO.INDEX_NAME,-->
+<!--				      NVL(FILL.INDEX_VALUE,0) AS INDEX_VALUE,-->
+<!--				       IDX_REL.APPLY_TYPE_ID,-->
+<!--				       IDX_REL.INDEX_ID || '['||IDX_REL.Evl_Obj_Type||'.'|| IDX_REL.APPLY_TYPE_ID  || '.' || IDX_REL.BAL_TYPE_ID|| ']' AS INDEX_DIM_ID-->
+<!--				FROM PMA_F_SCHEME_INDEX_SPLIT IDX_REL-->
+<!--				left join pma_f_scheme sinfo  on sinfo.scheme_id=IDX_REL.SCHEME_ID-->
+<!--				INNER JOIN PMA_F_SCHEME_EVLOBJ_REL EVL_REL-->
+<!--				   ON IDX_REL.SCHEME_ID = EVL_REL.SCHEME_ID-->
+<!--				INNER JOIN PMA_F_BASE_INDEX_INFO INFO-->
+<!--				   ON INFO.INDEX_ID = IDX_REL.INDEX_ID-->
+<!--				INNER JOIN (select lpad(level,2,0) ETL_DATE from dual connect by level &lt; 13)  ED-->
+<!--    ON ED.ETL_DATE &gt;= SUBSTR(#{condition.startDate,jdbcType=VARCHAR},5,2)-->
+<!--    AND ED.ETL_DATE &lt;= SUBSTR(#{condition.endDate,jdbcType=VARCHAR},5,2)-->
+<!--				LEFT JOIN PMA_F_IMP_FILL_INFO FILL-->
+<!--				  ON IDX_REL.INDEX_ID = FILL.INDEX_ID-->
+<!--				 AND FILL.STAT_DATE = SUBSTR(#{condition.startDate,jdbcType=VARCHAR},1,4)||ED.ETL_DATE||'01'-->
+<!--				 AND IDX_REL.BAL_TYPE_ID = FILL.BAL_TYPE_ID-->
+<!--				 AND IDX_REL.APPLY_TYPE_ID = FILL.APPLY_TYPE_ID-->
+<!--				 AND IDX_REL.EVL_OBJ_TYPE = FILL.EVL_OBJ_TYPE-->
+<!--				 AND EVL_REL.EVL_OBJ_ID = FILL.EVL_OBJ_ID-->
+<!--				LEFT JOIN ADMIN_SM_USER US-->
+<!--				  ON US.LOGIN_CODE = EVL_REL.EVL_OBJ_ID-->
+<!--				 AND sinfo.EVL_OBJ_TYPE = '01'-->
+<!--				LEFT JOIN ADMIN_SM_DUTY AD ON AD.DUTY_CDE=US.POST_NO-->
+<!--				LEFT JOIN ADMIN_SM_ORG  AO ON AO.ORG_CODE=US.ORG_ID-->
+<!--				LEFT JOIN ADMIN_SM_ORG ORG-->
+<!--				  ON ORG.ORG_CODE = EVL_REL.EVL_OBJ_ID-->
+<!--				 AND sinfo.EVL_OBJ_TYPE IN('02','03')-->
+<!--				WHERE IDX_REL.INDEX_TYPE = '01'-->
+<!--				 AND (INFO.INDEX_TYPE = '03' OR IDX_REL.APPLY_TYPE_ID='01' or IDX_REL.APPLY_TYPE_ID='05')&lt;!&ndash; 补录类指标或者任务 或者基数&ndash;&gt;-->
+<!--			 <if test="condition.schemeId != null and condition.schemeId != ''">-->
+<!--	      		AND IDX_REL.SCHEME_ID = #{condition.schemeId,jdbcType=VARCHAR}-->
+<!--		     </if>-->
+<!--		     <if test="condition.indexId != null and condition.indexId != ''">-->
+<!--		      AND IDX_REL.INDEX_ID || '['||IDX_REL.Evl_Obj_Type||'.'|| IDX_REL.APPLY_TYPE_ID || '.' || IDX_REL.BAL_TYPE_ID || ']' IN-->
+<!--	      		  <foreach collection="condition.indexId"  item="item" open="(" separator="," close=")">-->
+<!--                    #{item}-->
+<!--                  </foreach>-->
+<!--		     </if>-->
+<!--		      <if test="condition.evlObjIdStr != null and condition.evlObjIdStr != ''">-->
+<!--	      		AND  EVL_REL.EVL_OBJ_ID = #{condition.evlObjIdStr,jdbcType=VARCHAR}-->
+<!--		     </if>-->
+<!--		      <if test="condition.statDateStr != null and condition.statDateStr != ''">-->
+<!--	      		AND SUBSTR(#{condition.startDate,jdbcType=VARCHAR},1,4)||ED.ETL_DATE||'01' = #{condition.statDateStr,jdbcType=VARCHAR}-->
+<!--		     </if>-->
+<!--     </select>-->
+    <select id ="queryDatalist" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+        SELECT DISTINCT
+        sinfo.SCHEME_ID,
+        INDEX_REL.EVL_OBJ_TYPE,
+        INDEX_REL.INDEX_ID,
+        INDEX_REL.APPLY_TYPE_ID,
+        INDEX_REL.INDEX_ID || '[' || INDEX_REL.EVL_OBJ_TYPE || '.' || INDEX_REL.APPLY_TYPE_ID || '.' || INDEX_REL.BAL_TYPE_ID || ']' AS INDEX_DIM_ID,
+        INDEX_REL.EVL_OBJ_TYPE,
+        INDEX_REL.BAL_TYPE_ID,
+        sinfo.SCHEME_NAME,
+        AO.ORG_NAME,
+        INFO.INDEX_NAME,
+        EVL_REL.EVL_OBJ_ID,
+        CASE
+        WHEN sinfo.EVL_OBJ_TYPE = '01' THEN US.USER_NAME
+        WHEN sinfo.EVL_OBJ_TYPE IN ( '02', '03') THEN ORG.ORG_NAME
+        END AS EVL_OBJ_NAME
+        FROM PMA_F_SCHEME_INDEX_REL INDEX_REL
+        LEFT JOIN pma_f_scheme sinfo ON INDEX_REL.SCHEME_ID = sinfo.SCHEME_ID
+        INNER JOIN PMA_F_SCHEME_EVLOBJ_REL EVL_REL ON sinfo.SCHEME_ID = EVL_REL.SCHEME_ID
+        INNER JOIN PMA_F_BASE_INDEX_INFO INFO ON INFO.INDEX_ID = INDEX_REL.INDEX_ID
+        LEFT JOIN ADMIN_SM_ORG ORG ON ORG.ORG_CODE = EVL_REL.EVL_OBJ_ID AND sinfo.EVL_OBJ_TYPE IN('02', '03')
+        LEFT JOIN ADMIN_SM_USER US ON US.LOGIN_CODE = EVL_REL.EVL_OBJ_ID AND sinfo.EVL_OBJ_TYPE = '01'
+        LEFT JOIN ADMIN_SM_ORG AO ON AO.ORG_CODE = US.ORG_ID
+        WHERE
+        (INFO.INDEX_TYPE = '01'
+        OR (INFO.INDEX_TYPE = '02'
+        OR INDEX_REL.APPLY_TYPE_ID in ('00', '05')))
+        <if test="condition.schemeId != null and condition.schemeId != ''">
+            AND INDEX_REL.SCHEME_ID = #{condition.schemeId,jdbcType=VARCHAR}
+        </if>
+        <if test="condition.indexId != null and condition.indexId != ''">
+            AND INDEX_REL.INDEX_ID IN
+            <foreach collection="condition.indexId"  item="item" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+        <if test="condition.evlObjType != null and condition.evlObjType != ''">
+            and INDEX_REL.Evl_Obj_Type = #{condition.evlObjType,jdbcType=VARCHAR}
+        </if>
+        <if test="condition.evlObjIdStr != null and condition.evlObjIdStr.length > 0">
+            AND EVL_REL.EVL_OBJ_ID IN
+            <foreach collection="condition.evlObjIdStr" item="objId" separator="," index="index" open="(" close=")">
+                #{objId}
+            </foreach>
+        </if>
+        ORDER BY INDEX_REL.EVL_OBJ_TYPE ASC, EVL_REL.EVL_OBJ_ID ASC, INDEX_REL.APPLY_TYPE_ID ASC, INDEX_REL.BAL_TYPE_ID ASC
+    </select>
+    <delete id="delImpInfo" parameterType="java.util.HashMap">
+         delete from  PMA_F_IMP_FILL_INFO where STAT_DATE=#{statDate,jdbcType=VARCHAR}
+         and EVL_OBJ_ID=#{evlObjId,jdbcType=VARCHAR} and INDEX_ID=#{indexId,jdbcType=VARCHAR}
+         and EVL_OBJ_TYPE=#{evlObjType,jdbcType=VARCHAR}  and BAL_TYPE_ID=#{balTypeId,jdbcType=VARCHAR}  
+         and APPLY_TYPE_ID=#{applyTypeId,jdbcType=VARCHAR}
+    </delete>
+     <select id ="datelist" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+     	  select  SUBSTR(#{condition.startDate,jdbcType=VARCHAR}, 1, 4) || '-' || ED.ETL_DATE as STAT_DATE  from    (select lpad(level, 2, 0) ETL_DATE
+               from dual
+             connect by level &lt; 13) ED where  ED.ETL_DATE &gt;=SUBSTR(#{condition.startDate,jdbcType=VARCHAR}, 5, 2)
+                                      AND ED.ETL_DATE &lt;= SUBSTR(#{condition.endDate,jdbcType=VARCHAR}, 5, 2)
+
+     </select>
+    <select id="queryIndexList" resultType="java.util.Map">
+        SELECT F.INDEX_ID || '[' || F.EVL_OBJ_TYPE || '.' ||
+        F.BAL_TYPE_ID || '.' || F.APPLY_TYPE_ID||']' AS INDEX_IDS,
+        F.ID,
+        F.INDEX_ID,
+        B.INDEX_NAME ,
+        F.EVL_OBJ_ID,
+        CASE WHEN U2.USER_NAME IS NOT NULL  THEN U2.USER_NAME ELSE U3.UNITNAME  end as EVL_OBJ_NAME,
+        F.BAL_TYPE_ID,
+        F.INDEX_VALUE,
+        F.EVL_OBJ_TYPE,
+        F.SCHEME_ID,
+        S.SCHEME_NAME ,
+        F.APPLY_TYPE_ID,
+        F.CREATOR,
+        F.CREATOR_ID,
+        F.CREATE_DATE,
+        F.MODIFY_USER,
+        F.MODIFY_USER_ID,
+        F.MODIFY_DATE,
+        F.STAT_DATE
+        FROM PMA_F_IMP_FILL_INFO F
+        LEFT JOIN PMA_F_SCHEME S ON S.SCHEME_ID = F.SCHEME_ID
+        LEFT JOIN PMA_F_BASE_INDEX_INFO B ON B.INDEX_ID = F.INDEX_ID
+        LEFT JOIN admin_sm_user U2 ON F.EVL_OBJ_ID = U2.LOGIN_CODE  and S.EVL_OBJ_TYPE='01'
+        LEFT JOIN sys_units U3 ON F.EVL_OBJ_ID = U3.UNITID  and S.EVL_OBJ_TYPE='02'
+        WHERE 1=1
+        <if test="condition.schemeId != null and condition.schemeId != ''">
+            AND S.SCHEME_ID = #{condition.schemeId,jdbcType=VARCHAR}
+        </if>
+        AND F.STAT_DATE >='2022-01-01'
+        AND F.EVL_OBJ_ID in ('admin02')
+        AND F.INDEX_ID  in ('B20220509094','B20220509095')
+
+        SELECT F.INDEX_ID || '[' || F.EVL_OBJ_TYPE || '.' ||
+        F.BAL_TYPE_ID || '.' || F.APPLY_TYPE_ID||']' AS INDEX_IDS,
+        F.ID,
+        F.INDEX_ID,
+        B.INDEX_NAME ,
+        F.EVL_OBJ_ID,
+        CASE WHEN U2.USER_NAME IS NOT NULL  THEN U2.USER_NAME ELSE U3.UNITNAME  end as EVL_OBJ_NAME,
+        F.BAL_TYPE_ID,
+        F.INDEX_VALUE,
+        F.EVL_OBJ_TYPE,
+        F.SCHEME_ID,
+        S.SCHEME_NAME ,
+        F.APPLY_TYPE_ID,
+        F.CREATOR,
+        F.CREATOR_ID,
+        F.CREATE_DATE,
+        F.MODIFY_USER,
+        F.MODIFY_USER_ID,
+        F.MODIFY_DATE,
+        F.STAT_DATE
+        FROM PMA_F_IMP_FILL_INFO F
+        LEFT JOIN PMA_F_SCHEME S ON S.SCHEME_ID = F.SCHEME_ID
+        LEFT JOIN PMA_F_BASE_INDEX_INFO B ON B.INDEX_ID = F.INDEX_ID
+        LEFT JOIN admin_sm_user U2 ON F.EVL_OBJ_ID = U2.LOGIN_CODE  and S.EVL_OBJ_TYPE='01'
+        LEFT JOIN sys_units U3 ON F.EVL_OBJ_ID = U3.UNITID  and S.EVL_OBJ_TYPE='02'
+        WHERE 1=1
+
+        <if test="condition.statDate != null and condition.statDate != ''">
+            AND F.STAT_DATE = #{condition.statDate,jdbcType=VARCHAR}
+        </if>
+        <if test="condition.indexId != null and condition.indexId != ''">
+            AND F.INDEX_ID || '[' || F.EVL_OBJ_TYPE || '.' ||F.APPLY_TYPE_ID || '.' || F.BAL_TYPE_ID||']' in
+            <foreach collection="condition.indexId"  item="item" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+        <if test="condition.evlObjId != null and condition.evlObjId != ''">
+            AND F.EVL_OBJ_ID in
+            <foreach collection="condition.evlObjId"  item="item" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+    </select>
+    <select id="queryExistData" resultType="java.util.Map">
+        SELECT *
+        FROM PMA_F_IMP_FILL_INFO
+        <where>
+            <if test="statDate != null and statDate != ''">
+                AND stat_date = SUBSTR(#{statDate, jdbcType=VARCHAR}, 0, 7)
+            </if>
+            <if test="indexId != null and indexId != ''">
+                AND index_id = #{indexId, jdbcType=VARCHAR}
+            </if>
+            <if test="evlObjId != null and evlObjId != ''">
+                AND evl_obj_id = #{evlObjId, jdbcType=VARCHAR}
+            </if>
+            <if test="evlObjType != null and evlObjType != ''">
+                AND evl_obj_type = #{evlObjType, jdbcType=VARCHAR}
+            </if>
+            <if test="schemeId != null and schemeId != ''">
+                AND scheme_id = #{schemeId, jdbcType=VARCHAR}
+            </if>
+            <if test="applyTypeId != null and applyTypeId != ''">
+                AND apply_type_id = #{applyTypeId, jdbcType=VARCHAR}
+            </if>
+            <if test="balTypeId != null and balTypeId != ''">
+                AND bal_type_id = #{balTypeId, jdbcType=VARCHAR}
+            </if>
+
+        </where>
+    </select>
+</mapper>

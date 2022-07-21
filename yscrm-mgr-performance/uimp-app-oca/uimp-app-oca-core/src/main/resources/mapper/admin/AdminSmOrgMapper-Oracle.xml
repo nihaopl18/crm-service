@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.admin.repository.mapper.AdminSmOrgMapper">
+	<!-- 分页查询 -->
+	<select id="queryOrgByPage" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+		resultType="java.util.Map" databaseId="oracle">
+		  select a.org_id, a.instu_id, a.org_code, a.org_name,
+	       a.up_org_id, a.org_level,a.org_addr, a.zip_cde,
+	       a.cont_tel, a.cont_usr,a.org_sts,a.last_chg_usr,A.CARD_ORG_ID,
+	       substr(a.LAST_CHG_DT, 0, 10) as LAST_CHG_DT,
+	       u.user_name as last_chg_name, i.INSTU_NAME,i.instu_sts,
+	       g.org_name as up_org_name,a.org_type,a.sort_no,a.province,a.city,a.county
+		  from admin_sm_org a
+		  left join sys_org_view s
+		    on s.org_Code = a.org_Code
+		  inner join admin_sm_instu i
+		    on i.INSTU_ID = a.INSTU_ID and i.instu_sts ='A'
+		  left join admin_sm_user u on u.USER_ID=a.last_chg_usr
+		  left join admin_sm_org g on g.org_ID=a.up_org_id
+    	<where>
+			
+			<if test="condition.orgCode != null and condition.orgCode != ''">
+					and s.org_Code  LIKE CONCAT(CONCAT('%', #{condition.orgCode, jdbcType=VARCHAR}),'%') 
+			</if>
+			<if test="condition.unitOrgId != null and condition.unitOrgId != ''">
+                and s.ORG_SEQ  LIKE (CONCAT(CONCAT('%', CONCAT(CONCAT(',',#{condition.unitOrgId, jdbcType=VARCHAR}),',')),'%'))
+			</if>
+			<if test="condition.orgName != null and condition.orgName != ''">
+				and a.ORG_NAME LIKE CONCAT(CONCAT('%', #{condition.orgName, jdbcType=VARCHAR}),'%') 
+			</if>
+			<if test="condition.orgSts != null and condition.orgSts != ''">
+				and a.ORG_STS = #{condition.orgSts , jdbcType=VARCHAR}
+			</if>
+		</where>
+		<if test="sort != null">
+			order by ${sort}
+		</if>
+	</select>
+
+	<!-- 查询机构树信息 -->
+	<select id="queryOrgTreeInfo"  resultType="java.util.Map"  databaseId="oracle">
+		select
+			o.ORG_ID,
+			o.ORG_NAME,
+			o.UP_ORG_ID,
+			o.ORG_CODE,
+			o.INSTU_ID,
+			o.ORG_LEVEL,
+			'G' as ORG_TYPE
+		from
+			admin_sm_org o
+		left join
+			admin_sm_instu i
+		on i.INSTU_ID = o.INSTU_ID
+		<where>
+			<if test="orgSts !=null and orgSts !=''">
+				 o.ORG_STS= #{orgSts, jdbcType=VARCHAR}
+			</if>
+		</where>
+		<!-- 以orgId为根的机构树 -->
+		<if test="orgId !=null and orgId !=''"> 
+				start with o.ORG_ID=#{orgId, jdbcType=VARCHAR}
+				connect by prior o.ORG_ID = o.UP_ORG_ID
+		</if>
+        order by o.ORG_ID
+	</select>
+
+</mapper>

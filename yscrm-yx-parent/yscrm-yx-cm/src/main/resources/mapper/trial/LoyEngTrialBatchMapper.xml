@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.climp.trial.repository.mapper.LoyEngTrialBatchMapper">
+    	<!-- 试算批次信息查询 -->
+	<select id="queryTrialBatchByPage" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+		resultType="java.util.Map" >
+		SELECT T.ID,T.BNO,T.STATUS,NVL(T.SCORE, 0) AS SCORE,T.UPDATE_TIME,
+		T.ACTIVITY_ID,T.ACTIVITY_NAME,T.TRIAL_WAIT_TABLE,T.TRANSACTION_CODE,NVL(t.ALL_DATA_NUM, 0) AS ALL_DATA_NUM ,NVL(t.HIT_DATA_NUM, 0) AS HIT_DATA_NUM,
+		NVL(t.CUST_NUM, 0) AS CUST_NUM  FROM LOY_ENG_TRIAL_BATCH t
+		<where>
+			<if test="condition.bno != null and condition.bno != ''">
+				and t.BNO LIKE CONCAT(CONCAT('%', #{condition.bno , jdbcType=VARCHAR}),'%')
+			</if>
+			<if test="condition.status != null and condition.status != ''">
+				and t.STATUS = #{condition.status , jdbcType=VARCHAR}
+			</if>
+			<if test="condition.trialWaitTable != null and condition.trialWaitTable!= ''">
+				and t.TRIAL_WAIT_TABLE  LIKE CONCAT(CONCAT('%', #{condition.trialWaitTable, jdbcType=VARCHAR}),'%')
+			</if>
+			
+		</where>
+		order by UPDATE_TIME desc
+	</select>
+	   <!-- 根据批次号查询试算批次信息查询 -->
+	<select id="queryTrialBatchByBno" parameterType="java.util.Map"
+		resultType="cn.com.yusys.climp.trial.domain.LoyEngTrialBatch" >
+		SELECT * FROM LOY_ENG_TRIAL_BATCH  WHERE 1=1
+		and BNO = #{bno , jdbcType=VARCHAR}
+	</select>
+	 <!-- 查询正在计算中或者排队中的批次信息-->
+	<select id="queryTrialBatchNow" resultType="java.util.Map">
+		SELECT * FROM LOY_ENG_TRIAL_BATCH  WHERE STATUS ='1' or STATUS ='0'
+	</select>
+	<!-- 更新试算批次状态信息-->
+	<update id="updateTrialBatchByBno" parameterType="java.util.Map">
+		update LOY_ENG_TRIAL_BATCH t set t.STATUS = '1' where BNO = #{bno , jdbcType=VARCHAR}
+	</update>
+		<!-- 更新试算批次状态信息-->
+	<delete id="deleteTrialRount" >
+		delete from LOY_ENG_TRIAL_TRANS_ROUTING
+	</delete>
+		<!-- 删除试算批次信息-->
+	<delete id="deleteTrialBatch" parameterType="java.util.Map">
+		delete from LOY_ENG_TRIAL_BATCH where BNO = #{bno , jdbcType=VARCHAR}
+	</delete>
+	<!-- 新增试算路由信息-->
+	<update id="addTrialRount" parameterType="java.util.Map">
+		INSERT INTO LOY_ENG_TRIAL_TRANS_ROUTING(RULE_SET_ID,TRANSACTION_CODE,PROCESS_PRIORITY,PROCESS_ORDER) 
+		SELECT  T.ACTIVITY_ID,T.TRANSACTION_CODE,T.ACTIVITY_PRIORITY,T.ACTIVITY_ID FROM LOY_RL_ACTIVITY T WHERE T.ACTIVITY_ID = #{activityId , jdbcType=VARCHAR}
+	</update>
+	 <!-- 查询机构汇总表 -->
+	<select id="queryOrgReport" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+		resultType="java.util.Map" >
+		SELECT t.BNO,NVL(T.ORG_ID, '-1') as ORG_ID,NVL(T.ORG_NAME, '未分摊至具体机构') as ORG_NAME,
+		t.BALANCE FROM LOY_ENG_TRIAL_RPT_ORG T 
+		<where>
+			<if test="condition.bno != null and condition.bno != ''">
+				and t.BNO = #{condition.bno , jdbcType=VARCHAR}
+			</if>
+		</where>
+	</select>
+	<!-- 查询产品汇总表 -->
+	<select id="queryProdReport" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+		resultType="java.util.Map" >
+		SELECT t.BNO,NVL(T.PROD_ID, '-1') as PROD_ID,NVL(T.PROD_NAME, '未分摊至具体产品') as PROD_NAME,
+		t.BALANCE FROM LOY_ENG_TRIAL_RPT_PRD T 
+		<where>
+			<if test="condition.bno != null and condition.bno != ''">
+				and t.BNO = #{condition.bno , jdbcType=VARCHAR}
+			</if>
+		</where>
+	</select>
+	<!-- 查询机构和产品汇总表 -->
+	<select id="queryOrgProdReport" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+		resultType="java.util.Map" >
+		SELECT t.BNO,NVL(T.PROD_ID, '-1') as PROD_ID,NVL(T.PROD_NAME, '未分摊至具体产品') as PROD_NAME,
+		NVL(T.ORG_ID, '-1') as ORG_ID,NVL(T.ORG_NAME, '未分摊至具体机构') as ORG_NAME,
+		t.BALANCE FROM LOY_ENG_TRIAL_RPT_ORGPRD T 
+		<where>
+			<if test="condition.bno != null and condition.bno != ''">
+				and t.BNO = #{condition.bno , jdbcType=VARCHAR}
+			</if>
+		</where>
+	</select>
+	<!-- 查询交易类型数据 -->
+	<select id="queryTransactionCode" resultType="java.util.Map" >
+		SELECT T.TRANSACTION_CODE as key,T.TRANSACTION_NAME as value FROM LOY_ENG_TRANSACTION_CATEGORY T order by T.TRANSACTION_CODE ASC
+	</select>
+		<!-- 查询系统参数信息-->
+	<select id="queryPropInfo" resultType="java.util.Map" parameterType="java.util.Map">
+		SELECT PROP_NAME,PROP_VALUE FROM ADMIN_SM_PROP WHERE PROP_NAME= #{propName, jdbcType=VARCHAR}
+	</select>
+</mapper>

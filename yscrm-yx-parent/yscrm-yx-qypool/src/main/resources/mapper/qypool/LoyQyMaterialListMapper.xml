@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.climp.qypool.repository.mapper.LoyQyMaterialListMapper">
+	<resultMap id="BaseResultMap" type="cn.com.yusys.climp.qypool.domain.LoyQyMaterialList">
+		<result column="ID" jdbcType="VARCHAR" property="id" />
+		<result column="MATERIAL_NAME" jdbcType="VARCHAR" property="materialName" />
+		<result column="APPLY_PORT" jdbcType="VARCHAR" property="applyPort" />
+		<result column="MATERIAL_TYPE" jdbcType="VARCHAR" property="materialType" />
+		<result column="UPLOAD_FILE" jdbcType="VARCHAR" property="uploadFile" />
+		<result column="UPLOAD_LINK" jdbcType="VARCHAR" property="uploadLink" />
+		<result column="UPLOAD_APPROAL" jdbcType="VARCHAR" property="uploadApproal" />
+		<result column="APPLY_FIELD" jdbcType="VARCHAR" property="applyField" />
+		<result column="APPLY_SIZE" jdbcType="VARCHAR" property="applySize" />
+		<result column="VISIABLE_RANG" jdbcType="VARCHAR" property="visiableRang" />
+		<result column="APPLY_ORG" jdbcType="VARCHAR" property="applyOrg" />
+		<result column="APPLY_DPT" jdbcType="VARCHAR" property="applyDpt" />
+		<result column="CREATE_USER" jdbcType="VARCHAR" property="createUser" />
+		<result column="CREATE_DATE" jdbcType="DATE" property="createDate" />
+		<result column="CREATE_ORG" jdbcType="VARCHAR" property="createOrg" />
+		<result column="UPDATE_USER" jdbcType="VARCHAR" property="updateUser" />
+		<result column="UPDATE_DATE" jdbcType="DATE" property="updateDate" />
+		<result column="UPDATE_ORG" jdbcType="VARCHAR" property="updateOrg" />
+		<result column="UPLOAD_FILE_ID" jdbcType="VARCHAR" property="uploadFileId" />
+		<result column="UPLOAD_APPROAL_ID" jdbcType="VARCHAR" property="uploadApproalId" />
+		<result column="NATURAL_SIZE" jdbcType="VARCHAR" property="naturalSize" />
+		<result column="IMG_THUMBNAIL" jdbcType="VARCHAR" property="imgThumbNail" />
+		<result column="IMG_THUMBNAIL_ID" jdbcType="VARCHAR" property="imgThumbNailId" />
+		<result column="MATERIAL_STS" jdbcType="VARCHAR" property="materialSts" />
+		<result column="DETAIL_CONTENT" jdbcType="CLOB" property="detailContent"/>
+	</resultMap>
+	<select id="materialQuery" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultMap="BaseResultMap">
+		SELECT * FROM LOY_QY_MATERIAL_LIST 
+		<where>
+			(APPLY_DPT = #{condition.applyDpt,jdbcType=VARCHAR} 
+			or APPLY_ORG = #{condition.applyOrg,jdbcType=VARCHAR}
+			or VISIABLE_RANG = '1')
+			<if test="condition.materialName != null and condition.materialName != ''">
+			AND	MATERIAL_NAME LIKE CONCAT('%', CONCAT(#{condition.materialName, jdbcType=VARCHAR}, '%'))
+			</if>
+			<if test="condition.materialType != null and condition.materialType != ''">
+			AND	MATERIAL_TYPE = #{condition.materialType,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.applyPort != null and condition.applyPort != ''">
+			AND	APPLY_PORT = #{condition.applyPort,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.applyField != null and condition.applyField !=''">
+			AND	APPLY_FIELD = #{condition.applyField,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.applySize != null and condition.applySize != ''">
+			AND	APPLY_SIZE = #{condition.applySize,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.naturalSize != null and condition.naturalSize != ''">
+			AND NATURAL_SIZE = #{condition.naturalSize,jdbcType=VARCHAR}
+			</if>
+		</where>
+	</select>
+	<!-- 新增验重 -->
+	<select id="getSameName" parameterType="String" resultType="int">
+		SELECT COUNT(0) FROM LOY_QY_MATERIAL_LIST WHERE MATERIAL_NAME = #{materialName,jdbcType=VARCHAR}
+	</select>
+	<!-- 修改验重 -->
+	<select id="getSameNameEdit" parameterType="java.util.Map" resultType="int">
+		SELECT COUNT(0) FROM LOY_QY_MATERIAL_LIST WHERE MATERIAL_NAME = #{materialName,jdbcType=VARCHAR} AND ID <![CDATA[!=]]> #{id,jdbcType=VARCHAR}
+	</select>
+	<!-- 修改素材审批状态 -->
+	<update id="setMaterialSts" parameterType="java.util.Map">
+		UPDATE LOY_QY_MATERIAL_LIST SET
+		MATERIAL_STS = #{materialSts,jdbcType=VARCHAR},
+		UPDATE_USER = #{updateUser,jdbcType=VARCHAR},
+		UPDATE_DATE = #{updateDate,jdbcType=DATE},
+		UPDATE_ORG = #{updateOrg,jdbcType=VARCHAR} WHERE ID = #{id,jdbcType=VARCHAR}
+	</update>
+	<!-- 获取文件id -->
+	<select id="getFileId" parameterType="String" resultType="java.util.Map">
+		SELECT UPLOAD_FILE_ID,IMG_THUMBNAIL_ID FROM LOY_QY_MATERIAL_LIST WHERE ID = #{id,jdbcType=VARCHAR}
+	</select>
+
+	<update id="updateByPrimaryKeySelective" parameterType="cn.com.yusys.climp.qypool.domain.LoyQyMaterialList">
+		update LOY_QY_MATERIAL_LIST
+		<set>
+			<if test="materialName != null">
+				MATERIAL_NAME = #{materialName,jdbcType=VARCHAR},
+			</if>
+			<if test="applyPort != null">
+				APPLY_PORT = #{applyPort,jdbcType=VARCHAR},
+			</if>
+			<if test="materialType != null">
+				MATERIAL_TYPE = #{materialType,jdbcType=VARCHAR},
+			</if>
+			<if test="materialSts != null">
+				MATERIAL_STS = #{materialSts,jdbcType=VARCHAR},
+			</if>
+			<if test="uploadFile != null">
+				UPLOAD_FILE = #{uploadFile,jdbcType=VARCHAR},
+			</if>
+
+			<if test="uploadFileId != null">
+				UPLOAD_FILE_ID = #{uploadFileId,jdbcType=VARCHAR},
+			</if>
+			<if test="uploadLink != null">
+				UPLOAD_LINK = #{uploadLink,jdbcType=VARCHAR},
+			</if>
+			<if test="uploadApproal != null">
+				UPLOAD_APPROAL = #{uploadApproal,jdbcType=VARCHAR},
+			</if>
+			<if test="uploadApproalId != null">
+				UPLOAD_APPROAL_ID = #{uploadApproalId,jdbcType=VARCHAR},
+			</if>
+			<if test="applyField != null">
+				APPLY_FIELD = #{applyField,jdbcType=VARCHAR},
+			</if>
+
+			<if test="applySize != null">
+				APPLY_SIZE = #{applySize,jdbcType=VARCHAR},
+			</if>
+			<if test="visiableRang != null">
+				VISIABLE_RANG = #{visiableRang,jdbcType=VARCHAR},
+			</if>
+			<if test="applyOrg != null">
+				APPLY_ORG = #{applyOrg,jdbcType=VARCHAR},
+			</if>
+			<if test="applyDpt != null">
+				APPLY_DPT = #{applyDpt,jdbcType=VARCHAR},
+			</if>
+
+			<if test="updateUser != null">
+				UPDATE_USER = #{updateUser,jdbcType=VARCHAR},
+			</if>
+			<if test="updateDate != null">
+				UPDATE_DATE = #{updateDate,jdbcType=DATE},
+			</if>
+			<if test="updateOrg != null">
+				UPDATE_ORG = #{updateOrg,jdbcType=VARCHAR},
+			</if>
+			<if test="naturalSize != null">
+				NATURAL_SIZE = #{naturalSize,jdbcType=VARCHAR},
+			</if>
+			<if test="detailContent != null">
+				DETAIL_CONTENT = #{detailContent,jdbcType=CLOB},
+			</if>
+			<if test="imgThumbNailId != null">
+				IMG_THUMBNAIL_ID = #{imgThumbNailId,jdbcType=VARCHAR},
+			</if>
+			<if test="imgThumbNail != null">
+				IMG_THUMBNAIL = #{imgThumbNail,jdbcType=VARCHAR},
+			</if>
+		</set>
+		WHERE ID = #{id,jdbcType=VARCHAR}
+	</update>
+	<!-- 查询机构下归属部门 -->
+	<select id="getDptByOrgId" parameterType="String" resultType="java.util.HashMap">
+		SELECT DPT_CDE AS KEY,DPT_NAME AS VALUE FROM ADMIN_SM_DPT 
+		WHERE DPT_STS = 'A' AND BELONG_ORG_ID = #{orgId,jdbcType=VARCHAR}
+	</select>
+
+	<!-- 查询所有的栏位信息-->
+	<select id="getfieldsChannel" parameterType="java.util.Map"
+			resultType="java.util.HashMap">
+		SELECT m.id,
+			   m.channel_id,
+			   m.mkt_set,
+			   m.mkt_set_size,
+			   c.channel_name,
+			   m.mkt_set || '-' || c.channel_name mkt_set_name
+		FROM cm_f_rc_market_position m
+	    left join cm_f_rc_channel_mgr c
+			on m.channel_id = c.channel_id
+	</select>
+</mapper>

@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.custpub.repository.mapper.AllCustMapper">
+	<select id="getList" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"  resultType="java.util.HashMap">
+	 SELECT u.user_name,o.org_name,C.CUST_ID,C.CUST_NAME,C.CUST_STATUS,C.CERT_TYPE,C.CERT_NO,C.BELONG_MGR,C.BELONG_BRCH,C.SERV_LEV,C.VALUE_LEV 
+	  <if test="condition.custType == 1">
+				,'1' as CUST_TYPE  FROM ACRM_F_CI_PER_ADMIT_INFO C
+		</if>
+		<if test="condition.custType == 2">
+				 ,'2' as CUST_TYPE FROM ACRM_F_CI_ORG_CUST_INFO C
+		</if>
+  left join admin_sm_user u
+    on u.user_id = C.BELONG_MGR
+  left join admin_sm_org o
+    on o.org_code = C.BELONG_BRCH
+    
+    <where>
+		<if test="condition.custStatus != null and condition.custStatus !=''">
+				  and c.CUST_STATUS = #{condition.custStatus, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.custId != null and condition.custId !=''">
+				  and c.CUST_ID = #{condition.custId, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.custName != null and condition.custName !=''">
+				  and C.CUST_NAME = #{condition.custName, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.certType != null and condition.certType !=''">
+				  and C.CERT_TYPE = #{condition.certType, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.certNo != null and condition.certNo !=''">
+				  and C.CERT_NO = #{condition.certNo, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.belongBrch != null and condition.belongBrch !=''">
+				  and C.BELONG_BRCH = #{condition.belongBrch, jdbcType=VARCHAR}
+		</if>
+		<if test="condition.belongMgr != null and condition.belongMgr !=''">
+				  and C.BELONG_MGR = #{condition.belongMgr, jdbcType=VARCHAR}
+		</if>
+    </where>
+	</select>
+	<!-- 获取机构层级 -->
+	<select id="getOrgLev" parameterType="String"  resultType="int">
+	 SELECT COUNT(*) FROM (select org_code from sys_org_view where sys_org_view.org_seq like '%'||#{myOrgId, jdbcType=VARCHAR}||',%') O  WHERE O.org_code IN (#{orgId, jdbcType=VARCHAR}) 
+	</select>
+	
+	<!-- 查询客户群成员存款信息 -->
+     <select id="getMemberDeposit" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+		resultType="java.util.HashMap">
+		SELECT I.*,org_name FROM OCRM_F_CI_CG_MEMBER M RIGHT JOIN ACRM_F_AG_SAVE_INFO I ON 
+		M.CUST_ID = I.CUST_ID left join admin_sm_org org on org.org_id=I.open_brch_no  WHERE M.CUST_GROUP_ID = #{condition.groupId,jdbcType=VARCHAR}
+	</select>
+	<!-- 查询客户群成员贷款信息 -->
+     <select id="getMemberLoan" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+		resultType="java.util.HashMap">
+		SELECT * FROM OCRM_F_CI_CG_MEMBER M RIGHT JOIN ACRM_F_AG_LOAN_DEBENT_INFO I ON 
+		M.CUST_ID = I.CUST_ID WHERE M.CUST_GROUP_ID = #{condition.groupId,jdbcType=VARCHAR}
+	</select>
+	<!-- 查询客户群成员产品信息 -->
+     <select id="getMemberPro" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+		resultType="java.util.HashMap">
+		 SELECT PROD.*,M.* FROM ACRM_F_AG_AGREEMENT AG LEFT JOIN OCRM_F_CI_CG_MEMBER M ON M.CUST_ID = AG.CUST_ID LEFT JOIN ACRM_F_PD_PROD_INFO PROD ON AG.PRODUCT_ID = PROD.PRODUCT_ID
+         WHERE M.CUST_GROUP_ID  = #{condition.groupId,jdbcType=VARCHAR} AND PROD.PROD_ID = #{condition.prodId,jdbcType=VARCHAR}
+		
+	</select>
+	<!-- 查询客户群成员贡献度信息 -->
+     <select id="getMemberContribution" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+		resultType="java.util.HashMap">
+		SELECT M.CUST_ID,A.CUST_NAME,I.DATA_DT,I.REPORT_SUM FROM OCRM_F_CI_CG_MEMBER M RIGHT JOIN 
+		(SELECT S.CUST_ID,S.DATA_DATE,S.REPORT_SUM FROM ACRM_A_CI_PER_BUSI_SUM_M S
+    	UNION
+    	SELECT S.CUST_ID,S.DATA_DT,S.REPORT_SUM FROM ACRM_A_CI_ORG_BUSI_SUM_M S) I ON M.CUST_ID = I.CUST_ID 
+    	LEFT JOIN ACRM_F_CI_CUST_ALL A ON A.CUST_ID = M.CUST_ID WHERE M.CUST_GROUP_ID = #{condition.groupId,jdbcType=VARCHAR}
+	</select>
+	<!-- 查询客户群成员适合的产品 -->
+     <select id="getFitProduct" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+		resultType="java.util.HashMap">
+		 SELECT PROD.PROD_NAME,PROD.Product_Id,custAll.Cust_Name,M.* FROM ACRM_F_AG_AGREEMENT AG LEFT JOIN OCRM_F_CI_CG_MEMBER M ON M.CUST_ID = AG.CUST_ID 
+		  left join ACRM_F_CI_CUST_ALL custAll
+           on custAll.Cust_Id=M.CUST_ID
+		 LEFT JOIN ACRM_F_PD_PROD_INFO PROD ON AG.PRODUCT_ID = PROD.PRODUCT_ID
+         WHERE M.CUST_GROUP_ID = #{condition.groupId,jdbcType=VARCHAR}
+	</select>
+	<select id="getOrgLevel" parameterType="String"  resultType="java.util.HashMap">
+	SELECT * FROM ADMIN_SM_ORG WHERE ORG_CODE = #{getOrgLevel, jdbcType=VARCHAR}
+	</select>
+	
+	<select id="getOneOrg" parameterType="String"  resultType="java.util.HashMap">
+	${sql}
+	</select>
+	<select id="getOrgIdBySql" parameterType="java.util.HashMap"  resultType="java.util.HashMap">
+	${sql}
+	</select>
+	<select id="getOrgIdByUserId" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"  resultType="java.util.HashMap">
+	SELECT DISTINCT ORG_ID FROM ADMIN_SM_USER_MGR_ORG WHERE USER_ID = #{condition.userId, jdbcType=VARCHAR}
+	
+	</select>
+	<select id="getBusiTypeByUserId" parameterType="String"  resultType="java.util.HashMap">
+	select busi_type from ADMIN_SM_USER_ATTR where login_code = #{loginCode, jdbcType=VARCHAR}
+	</select>
+	<select id="getUserNameByUserId" parameterType="String"  resultType="java.util.HashMap">
+	select USER_NAME from ADMIN_SM_USER where login_code = #{lastUser, jdbcType=VARCHAR}
+	</select>
+	
+	<select id="getorgtree" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"  resultType="java.util.HashMap">
+	SELECT T_ORG.ORG_ID,T_ORG.ORG_NAME, T_ORG.UP_ORG_ID FROM SYS_ORG_VIEW T_ORG WHERE T_ORG.ORG_STS = 'A' AND (T_ORG.ORG_SEQ LIKE CONCAT(CONCAT('%,',#{condition.orgCode, jdbcType=VARCHAR}),',%') OR T_ORG.ORG_CODE=#{condition.orgCode, jdbcType=VARCHAR}) 
+	</select>
+</mapper>

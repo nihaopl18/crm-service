@@ -1,0 +1,10 @@
+rpc:
+  service:
+    keywords:
+      - SERVICE_CODE
+      - FunctionId
+  server:
+    port: 9933
+    nThreads:
+      boss: 1
+      work: 4

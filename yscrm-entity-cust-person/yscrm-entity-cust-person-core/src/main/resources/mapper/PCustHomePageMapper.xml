@@ -1,0 +1,257 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.cust.person.repository.mapper.PCustHomePageMapper">
+	<select id="queryPerAumContriList"  parameterType="java.util.Map"  resultType="java.util.HashMap">
+		select '存款' as NAME,DPS_BAL as value
+		from ACRM_A_CI_PER_BUSI_SUM_D
+		where 1=1
+		 <if  test="custId != null and custId != ''">
+	       		AND CUST_ID = #{custId,jdbcType=VARCHAR}
+		    </if>
+		union all
+		select '理财' as NAME,FIN_BAL as value
+		from ACRM_A_CI_PER_BUSI_SUM_D
+		where 1=1
+		    <if  test="custId != null and custId != ''">
+	       		AND CUST_ID = #{custId,jdbcType=VARCHAR}
+		    </if>
+		union all
+		select '基金' as NAME,FUND_BAL as value
+		from ACRM_A_CI_PER_BUSI_SUM_D
+		where 1=1
+		    <if  test="custId != null and custId != ''">
+	       		AND CUST_ID = #{custId,jdbcType=VARCHAR}
+		    </if>
+		union all
+		select '保险' as NAME,INSU_BAL as value
+		from ACRM_A_CI_PER_BUSI_SUM_D
+		where 1=1
+		<if  test="custId != null and custId != ''">
+	       		AND CUST_ID = #{custId,jdbcType=VARCHAR}
+		    </if>
+		union all
+		select '贵金属' as NAME,GOLD_BAL as value
+		from ACRM_A_CI_PER_BUSI_SUM_D
+		where 1=1
+		<if  test="custId != null and custId != ''">
+	       		AND CUST_ID = #{custId,jdbcType=VARCHAR}
+		    </if>
+		union all
+		select '信用卡溢缴款' as NAME,CCD_BAL as value
+		from ACRM_A_CI_PER_BUSI_SUM_D
+		where 1=1
+		<if  test="custId != null and custId != ''">
+	       		AND CUST_ID = #{custId,jdbcType=VARCHAR}
+		    </if>
+
+		
+	</select>   
+	 <select id="queryPerReportList" parameterType="java.util.Map" resultType="java.util.HashMap">
+		select  '存款'  as NAME ,a.REPORT_DPS AS VALUE
+				from (select  *  from ACRM_A_CI_PER_BUSI_SUM_M where 1=1 
+				<if  test="custId != null and custId != ''">
+	       		AND CUST_ID = #{custId,jdbcType=VARCHAR}
+	       		
+		    </if> ORDER BY DATA_DATE desc) a
+				WHERE 1=1
+	       		AND ROWNUM = 1
+	  
+				union all
+				select  '贷款'  as NAME ,b.REPORT_LOAN AS VALUE
+				from (select  *  from ACRM_A_CI_PER_BUSI_SUM_M  where 1=1 
+				<if  test="custId != null and custId != ''">
+	       		AND CUST_ID = #{custId,jdbcType=VARCHAR}
+	       		
+		    </if> ORDER BY DATA_DATE desc) b
+				WHERE 1=1
+	       		AND ROWNUM = 1
+        union all
+        select  '中间业务'  as NAME ,c.REPORT_MID AS VALUE
+        from (select  *  from ACRM_A_CI_PER_BUSI_SUM_M  where 1=1 
+				<if  test="custId != null and custId != ''">
+	       		AND CUST_ID = #{custId,jdbcType=VARCHAR}
+	       		
+		    </if> ORDER BY DATA_DATE desc) c
+        WHERE 1=1
+      
+             AND ROWNUM = 1
+	</select> 
+	<!-- 系统首页优惠信息查询 -->
+	<select id="queryDiscountList" parameterType="java.util.Map" resultType="java.util.HashMap">
+	SELECT    t.PREFERENT_CONTENT       
+	    FROM OCRM_CI_GRADE_PREFERENT t
+	    left join OCRM_CI_GRADE_PREFE_LEVEL a on a.PREFERENT_ID=t.PREFERENT_ID
+	    left join ACRM_F_CI_PER_ADMIT_INFO b on b.SERV_LEV=a.GRADE_LEVEL
+
+		where  ROWNUM &lt;=5
+			<if  test="custId != null and custId != ''">
+	       		AND b.CUST_ID = #{custId,jdbcType=VARCHAR}
+	       		
+		    </if>
+		   
+		
+	</select>   
+	<select id="queryProductList" parameterType="java.util.Map" resultType="java.util.HashMap">
+	    SELECT    t.PROD_NAME       
+	    FROM OCRM_F_PD_CUST_FIT_PROD t
+	  
+
+		where  ROWNUM &lt;=5
+			<if  test="custId != null and custId != ''">
+	       		AND t.CUST_ID = #{custId,jdbcType=VARCHAR}
+	       		
+		    </if>
+		   
+		
+	</select>   
+		<select id="queryVisitlist" parameterType="java.util.Map" resultType="java.util.HashMap">
+	    SELECT    t.VISIT_TYPE,t.VISIT_START_DATE,t.VISITOR_NAME  ,lt.LOOKUP_ITEM_NAME  as   VISIT_TYPE_NAME   
+	    FROM OCRM_F_WP_SCHEDULE_VISIT t
+	    left join admin_sm_lookup_item  lt on lt.LOOKUP_ITEM_CODE=t.VISIT_TYPE  and lt.LOOKUP_CODE='CD0332'
+
+		where  ROWNUM &lt;=1  and IS_DELETE='N'  and VISIT_STAT='3'
+			<if  test="custId != null and custId != ''">
+	       		AND t.CUST_ID = #{custId,jdbcType=VARCHAR}
+	       		
+		    </if>
+		order by   VISIT_START_DATE  desc 
+		
+	</select>   
+	<select id="queryProductTagList" parameterType="java.util.Map" resultType="java.util.HashMap">
+	    SELECT      <!--  t.ID                      ,  -->     
+					 t.CUST_ID                 ,      
+					 t.DATA_DATE                ,      
+					 t.CURRE                   ,      
+					 t.REGULAR                 ,      
+					 t.LOAN                    ,      
+					 t.FINANCIAL               ,      
+					 t.INSURANCE               ,      
+					 t.NOBLE_METAL             ,      
+					 t.FUND                    ,      
+					 t.ONLINE_BANK             ,      
+					 t.MOBILE_BANK             ,      
+					 t.WECHAT_BANK             ,      
+					 t.QUICK_PAY               ,      
+					 t.TEL_BANK                ,      
+					 t.TEL_BANK_TRANS          ,      
+					 t.MESSAGE                 ,      
+					 t.CREDIT_CARD             ,      
+					 t.SOCIAL_SECURITY_CARD    ,      
+					 t.IC_GOLD_CARD            ,      
+					 t.HOUSE_PRO_FUND_CARD     ,      
+					 t.THIRD_DARTY_DEP         ,      
+					 t.LEDO_TREASURE           ,      
+					 t.CERTIFICATE_DEPOSIT     ,      
+					 t.CORP_ORG_CODE                  
+	      
+	    FROM ACRM_F_CI_PER_HOLD_PRO t
+	  
+
+		where 1=1
+			<if  test="custId != null and custId != ''">
+	       		AND t.CUST_ID = #{custId,jdbcType=VARCHAR}
+	       		
+		    </if>
+	
+		
+	</select>   
+	
+	 <select id="getXaxisMonArray" resultType="java.lang.String">
+    	SELECT T.DATA_DATE AS DATA_DT FROM ACRM_A_CI_PER_BUSI_SUM_M T
+		where 1=1
+			
+			<if  test="custId != null and custId != ''">
+	       		AND T.CUST_ID = #{custId,jdbcType=VARCHAR}
+		    </if>
+		
+		ORDER BY T.DATA_DATE ASC
+	</select>
+	 <select id="getXaxisArray" resultType="java.lang.String">
+    	SELECT T.DATA_DATE FROM ACRM_A_CI_PER_BUSI_SUM_D T
+		where 1=1
+			
+			<if  test="custId != null and custId != ''">
+	       		AND T.CUST_ID = #{custId,jdbcType=VARCHAR}
+		    </if>
+		
+		ORDER BY T.DATA_DATE ASC
+	</select>
+	<select id="queryPerBussMonSum" resultType="java.util.Map">
+    	SELECT t.CORP_ORG_CODE,
+	       t.DATA_DATE,
+         t.CUST_ID,
+         round(t.AUM_M_AVG_BAL,2) AS AUM_M_AVG,
+         round(t.DPS_BAL,2) AS DPS_BAL,
+         round(t.DPS_CUR_BAL,2) AS DPS_CUR_BAL,
+         round(t.DPS_FIX_BAL,2) AS DPS_FIX_BAL,
+         round(t.DPS_M_AVG_BAL,2) AS DPS_M_AVG,
+         round(t.REPORT_DPS,2) AS REPORT_DPS,
+         round(t.REPORT_LOAN,2) AS REPORT_LOAN,
+         round(t.REPORT_MID,2) AS REPORT_MID,
+         round(t.LOAN_BAL,2) AS LOAN_BAL,
+         round(t.BAD_LOAN_BAL,2) AS BAD_LOAN_BAL,
+         round(t.FLOW_INTO_BAL,2) AS FLOW_INTO_BAL,
+         round(t.FLUENCY_BAL,2) AS FLUENCY_BAL,
+         round(t.REPORT_SUM,2) AS REPORT_SUM
+	  FROM ACRM_A_CI_PER_BUSI_SUM_M t
+		<where>
+			<if  test="custId != null and custId != ''">
+	       		AND t.CUST_ID = #{custId,jdbcType=VARCHAR}
+		    </if>
+		    
+		</where>
+		ORDER BY t.DATA_DATE asc
+	</select>
+	<select id="queryPerBussSum" resultType="java.util.Map">
+    	SELECT    t.CORP_ORG_CODE             ,             
+				 t.DATA_DATE                   ,             
+				 t.CUST_ID                   ,             
+				 round(t.DPS_BAL,2) AS DPS_BAL                   ,             
+				 t.DPS_M_AVG_BAL             ,             
+				 t.DPS_Q_AVG_BAL             ,             
+				 round(t.DPS_Y_AVG_BAL,2) AS DPS_Y_AVG_BAL             ,             
+				 round(t.DPS_Y_AVG_BAL_LY,2) AS DPS_Y_AVG_BAL_LY          ,             
+				 round(t.LOAN_BAL,2) AS LOAN_BAL                 ,             
+				 t.LOAN_M_AVG_BAL            ,             
+         t.LOAN_Q_AVG_BAL            ,             
+         round(t.LOAN_Y_AVG_BAL,2) AS LOAN_Y_AVG_BAL            ,             
+				 round(t.LOAN_Y_AVG_BAL_LY,2) AS LOAN_Y_AVG_BAL_LY         ,             
+				 t.AUM_BAL                   ,             
+				 t.AUM_M_AVG_BAL             ,             
+				 t.AUM_Q_AVG_BAL             ,             
+				 t.AUM_Y_AVG_BAL             ,             
+				 t.AUM_Y_AVG_BAL_LY          ,             
+				 round(t.FIN_BAL,2) AS FIN_BAL                   ,             
+				 t.FUND_BAL                  ,             
+				 t.INSU_BAL                  ,             
+				 t.GOLD_BAL                  ,             
+				 t.CCD_BAL                   ,             
+				          
+				 round(t.FIN_Y_AVG_BAL_LY,2) AS FIN_Y_AVG_BAL_LY          ,             
+				 round(t.FIN_Y_AVG_BAL,2) AS FIN_Y_AVG_BAL              
+				    	
+    	
+  		FROM ACRM_A_CI_PER_BUSI_SUM_D t
+		<where>
+			<if  test="custId != null and custId != ''">
+	       		AND t.CUST_ID = #{custId,jdbcType=VARCHAR}
+		    </if>
+		    
+		</where>
+		ORDER BY t.DATA_DATE asc
+	</select>
+		<select id="queryDepLoanFin"  parameterType="java.util.Map"  resultType="java.util.Map">
+    	select t.ID,t.CUST_ID,t.ORG_ID,t.ETL_DATE,t.BUS_TYPE,t.TIME_BAL,t.FIR_HALY_YEAR_DAY_BAL,t.CUR_YEAR_DAY_BAL,t.CORP_ORG_CODE  
+    	from ACRM_F_CI_PRE_BUS_INFO t
+		<where>
+			<if  test="custId != null and custId != ''">
+	       		AND t.CUST_ID = #{custId,jdbcType=VARCHAR}
+		    </if>
+		    <if  test="busType != null and busType != ''">
+	       		AND t.BUS_TYPE = #{busType,jdbcType=VARCHAR}
+		    </if>
+		    
+		</where>
+		
+	</select>
+</mapper>

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.admin.repository.mapper.AdminSmInstuMapper">
+	<!-- 分页查询金融机构参数数据 -->
+	<select id="queryInstuByPage" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+		resultType="java.util.Map" databaseId="mysql">
+		select a.instu_id,a.sys_id,a.instu_cde,a.instu_name,a.join_dt ,
+		a.instu_addr,a.zip_cde,a.cont_tel,a.cont_usr,a.instu_sts,a.last_chg_usr,
+		substr(a.last_chg_dt,1,10) as last_chg_dt,u.user_name  from admin_sm_instu a 
+		left join admin_sm_user u on u.user_id=a.last_chg_usr
+		<where>
+			<if test="condition.instuCde != null and condition.instuCde !=''">
+				and a.INSTU_CDE  LIKE CONCAT(CONCAT('%', #{condition.instuCde, jdbcType=VARCHAR}),'%') 
+			</if>
+			<if test="condition.instuName != null and condition.instuName !=''">
+				and a.INSTU_NAME  LIKE CONCAT(CONCAT('%', #{condition.instuName, jdbcType=VARCHAR}),'%') 
+			</if>
+			<if test="condition.sysId != null and condition.sysId !=''">
+				and a.SYS_ID = #{condition.sysId, jdbcType=VARCHAR}
+			</if>
+			<if test="condition.instuSts != null and condition.instuSts !=''">
+				and a.INSTU_STS = #{condition.instuSts, jdbcType=VARCHAR}
+			</if>
+		</where>
+		<if test="sort != null">
+			order by ${sort}
+		</if>
+	</select>
+
+</mapper>

@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yusys.streaminghub.app.repository.mapper.ShubAppMapper">
+  <resultMap id="BaseResultMap" type="com.yusys.streaminghub.app.domain.ShubApp">
+    <!-- @mbg.generated: generated automatically, do not modify! -->
+    <id column="APP_ID" jdbcType="VARCHAR" property="appId" />
+    <result column="APP_SECRET" jdbcType="VARCHAR" property="appSecret" />
+    <result column="APP_NAME" jdbcType="VARCHAR" property="appName" />
+    <result column="ISSUER" jdbcType="VARCHAR" property="issuer" />
+    <result column="DEVELOPER" jdbcType="VARCHAR" property="developer" />
+    <result column="CTIME" jdbcType="VARCHAR" property="ctime" />
+    <result column="EXPIRE" jdbcType="VARCHAR" property="expire" />
+    <result column="VALID" jdbcType="NUMERIC" property="valid" />
+    <result column="NOTE" jdbcType="VARCHAR" property="note" />
+  </resultMap>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String">
+    <!-- @mbg.generated: generated automatically, do not modify! -->
+    delete from SHUB_APP
+    where APP_ID = #{appId,jdbcType=VARCHAR}
+  </delete>
+  <insert id="insert" parameterType="com.yusys.streaminghub.app.domain.ShubApp">
+    <!-- @mbg.generated: generated automatically, do not modify! -->
+    insert into SHUB_APP (APP_ID, APP_SECRET, APP_NAME, 
+      ISSUER, DEVELOPER, CTIME, 
+      EXPIRE, VALID, NOTE
+      )
+    values (#{appId,jdbcType=VARCHAR}, #{appSecret,jdbcType=VARCHAR}, #{appName,jdbcType=VARCHAR}, 
+      #{issuer,jdbcType=VARCHAR}, #{developer,jdbcType=VARCHAR}, #{ctime,jdbcType=VARCHAR}, 
+      #{expire,jdbcType=VARCHAR}, #{valid,jdbcType=NUMERIC}, #{note,jdbcType=VARCHAR}
+      )
+  </insert>
+  <update id="updateByPrimaryKey" parameterType="com.yusys.streaminghub.app.domain.ShubApp">
+    <!-- @mbg.generated: generated automatically, do not modify! -->
+    update SHUB_APP
+    set APP_SECRET = #{appSecret,jdbcType=VARCHAR},
+      APP_NAME = #{appName,jdbcType=VARCHAR},
+      ISSUER = #{issuer,jdbcType=VARCHAR},
+      DEVELOPER = #{developer,jdbcType=VARCHAR},
+      CTIME = #{ctime,jdbcType=VARCHAR},
+      EXPIRE = #{expire,jdbcType=VARCHAR},
+      VALID = #{valid,jdbcType=NUMERIC},
+      NOTE = #{note,jdbcType=VARCHAR}
+    where APP_ID = #{appId,jdbcType=VARCHAR}
+  </update>
+  <select id="selectByPrimaryKey" parameterType="java.lang.String" resultMap="BaseResultMap">
+    <!-- @mbg.generated: generated automatically, do not modify! -->
+    select APP_ID, APP_SECRET, APP_NAME, ISSUER, DEVELOPER, CTIME, EXPIRE, VALID, NOTE
+    from SHUB_APP
+    where APP_ID = #{appId,jdbcType=VARCHAR}
+  </select>
+  <select id="selectAll" resultMap="BaseResultMap">
+    <!-- @mbg.generated: generated automatically, do not modify! -->
+    select APP_ID, APP_SECRET, APP_NAME, ISSUER, DEVELOPER, CTIME, EXPIRE, VALID, NOTE
+    from SHUB_APP
+  </select>
+</mapper>

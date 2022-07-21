@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.cm.market.repository.mapper.DmpTaskInfoMapper">
+	<select id="getTaskInfo" parameterType="long"
+		resultType="cn.com.yusys.yusp.cm.market.domain.DmpTaskInfo">
+		select T.* from dmp_task_info T
+		where T.ID = #{tempId, jdbcType=BIGINT}
+	</select>
+	<!-- 流程生成任务 -->
+	<insert id="taskInsert" parameterType="String">
+		INSERT INTO DMP_TASK_INFO
+      	SELECT TO_NUMBER(T.TEMP_ID),T.ACTIVITY_NAME,'1D1',1,
+      	TO_NUMBER(TO_CHAR(T.START_DATE,'yyyyMMdd')),
+      	TO_NUMBER(TO_CHAR(T.END_DATE,'yyyyMMdd')),
+      	T.ACTIVITY_NAME FROM CIMP_CM_MARKETPLAN T
+      	WHERE T.TEMP_ID = #{tempId}
+	</insert>
+	<!-- 流程删除任务 -->
+	<delete id="delTask" parameterType="long">
+		DELETE FROM DMP_TASK_INFO WHERE ID = #{tempId}
+	</delete>
+	<!-- 判断活动类型 -->
+	<select id="getActivityType" parameterType="String" resultType="String">
+		SELECT ACTIVITY_TYPE FROM CIMP_CM_MARKETPLAN WHERE TEMP_ID = #{tempId}
+	</select>
+</mapper>

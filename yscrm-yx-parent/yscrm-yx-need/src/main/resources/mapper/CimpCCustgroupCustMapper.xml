@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscimc.cust.group.repository.mapper.CimpCCustgroupCustMapper">
+
+
+    <select id="checkBe" parameterType="cn.com.yusys.yscimc.cust.group.domain.CimpCCgBaseinfo" resultType="int">
+        select count(*)
+        from cimp_c_custgroup_cust c
+        where c.cust_group_id = #{custGroupId,jdbcType=VARCHAR}
+          AND c.cust_id = #{custId,jdbcType=VARCHAR}
+    </select>
+    <delete id="outGroup" parameterType="cn.com.yusys.yscimc.cust.group.domain.CimpCCgBaseinfo">
+
+        　　
+        DELETE
+        FROM cimp_c_custgroup_cust
+        WHERE cust_group_id = #{custGroupId,jdbcType=VARCHAR}
+          and cust_id = #{custId,jdbcType=VARCHAR}
+
+    </delete>
+    <select id="getCustNums" parameterType="String" resultType="int">
+        SELECT COUNT(*)
+        FROM cimp_c_custgroup_cust
+        where CUST_GROUP_ID = #{custGroupId,jdbcType=VARCHAR}
+    </select>
+    <update id="setCustNums" parameterType="String">
+        update CIMP_C_CG_BASEINFO
+        SET CUST_NUM = #{custNum,jdbcType=VARCHAR}
+        WHERE CUST_GROUP_ID = #{custGroupId,jdbcType=VARCHAR}
+    </update>
+    <update id="updPro" parameterType="cn.com.yusys.yscimc.cust.group.domain.CimpCCgBaseinfo">
+        update cimp_c_custgroup_cust
+        SET MARKE_PRO_PRI = #{markeProPri,jdbcType=VARCHAR},
+            LAST_CHG_USR  = #{lastChgUsr,jdbcType=VARCHAR},
+            LAST_CHG_DT   = #{lastChgDt,jdbcType=DATE}
+        WHERE ID = #{id,jdbcType=VARCHAR}
+    </update>
+    <update id="updProd" parameterType="cn.com.yusys.yscimc.cust.group.domain.CimpCCgBaseinfo">
+        update cimp_c_custgroup_cust
+        SET MARKE_PRO_PRI = #{markeProPri,jdbcType=VARCHAR},
+            LAST_CHG_USR  = #{lastChgUsr,jdbcType=VARCHAR},
+            LAST_CHG_DT   = #{lastChgDt,jdbcType=DATE}
+        WHERE CUST_ID = #{custId,jdbcType=VARCHAR}
+          AND CUST_GROUP_ID = #{custGroupId,jdbcType=VARCHAR}
+    </update>
+    <delete id="delCustAll" parameterType="String">
+        　　
+        DELETE
+        FROM cimp_c_custgroup_cust
+        WHERE cust_group_id = #{id,jdbcType=VARCHAR}
+    </delete>
+    <select id="getCustIdsByGroupId" resultType="String">
+        select t.cust_id
+        from cimp_c_custgroup_cust t
+        where t.cust_group_id = #{custGroupId}
+    </select>
+
+    <select id="insertAll" parameterType="java.lang.String">
+        ${sql}
+    </select>
+
+</mapper>

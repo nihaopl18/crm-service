@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.cm.cust.repository.mapper.MergeCimFMmFTagGroupMapper">
+	<select id="getGroupTree" resultType="java.util.HashMap" >
+		select* from CIM_F_MM_TAG_GROUP
+	</select>
+	
+	<select id="getSeq" resultType="String">
+		select ysc_sequence.nextval from dual
+	</select>
+	
+	<delete id="deleteTagGroup" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" >
+		delete from CIM_F_MM_TAG_GROUP where GROUP_NO = #{condition.groupNo, jdbcType=VARCHAR}
+	</delete>
+	
+	<update id="modifyTagGroup" parameterType="cn.com.yusys.yusp.cm.cust.domain.CimFMmFTagGroup">
+		UPDATE	CIM_F_MM_TAG_GROUP g SET g.GROUP_NAME = #{groupName,jdbcType=VARCHAR},
+		g.PARENT_NO = #{parentNo,jdbcType=VARCHAR},g.GROUP_DESC = #{groupDesc,jdbcType=VARCHAR},
+		g.MODIFY_USER = #{modifyUser,jdbcType=VARCHAR},
+		g.MODIFY_TIME = #{modifyTime,jdbcType=VARCHAR} where g.GROUP_NO = #{groupNo,jdbcType=VARCHAR}
+	</update>
+	
+	<select id="getByParentNo" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap"> 
+		Select * from CIM_F_MM_TAG_GROUP where PARENT_NO = #{condition.parentNo, jdbcType=VARCHAR}
+	</select>
+	
+	<select id="getChild" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+		SELECT * FROM CIM_F_MM_TAG_GROUP START WITH GROUP_NAME = #{condition.groupName,jdbcType=VARCHAR} CONNECT BY PRIOR GROUP_NO = PARENT_NO
+	</select>
+	
+</mapper>

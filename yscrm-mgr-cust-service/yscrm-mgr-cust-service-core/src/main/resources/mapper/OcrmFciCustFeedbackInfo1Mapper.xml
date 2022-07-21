@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.custservice.repository.mapper.OcrmFciCustFeedbackInfo1Mapper">
+    <!-- <resultMap id="BaseResultMap" type="cn.com.yusys.yscrm.custservice.domain.OcrmFciCustFeedbackInfo">
+    	<id column="FEEDBACK_ID" jdbcType="VARCHAR" property="feedbackId" />
+		<result column="CORP_ORG_CODE" jdbcType="VARCHAR" property="corpOrgCode" />
+		<result column="CUST_ID" jdbcType="VARCHAR" property="custId" />
+		<result column="CUST_NAME" jdbcType="VARCHAR" property="custName" />
+		<result column="FEEDBACK_TYPE" jdbcType="VARCHAR" property="feedbackType" />
+		<result column="FEEDBACK_CHG" jdbcType="VARCHAR" property="feedbackChg" />
+		<result column="WORK_ORDER_SOURCE" jdbcType="VARCHAR" property="workOrderSource" />
+		<result column="FEEDBACK_CONTENT" jdbcType="VARCHAR" property="feedbackContent" />
+		<result column="EMERGENCY_LEVEL" jdbcType="VARCHAR" property="emergencyLevel" />
+		<result column="EXPIRY_DATE" jdbcType="DATE" property="expiryDate" />
+		<result column="CONDUCTOR_ID" jdbcType="VARCHAR" property="conductorId" />
+		<result column="CONDUCTOR_NAME" jdbcType="VARCHAR" property="conductorName" />
+		<result column="CONDUCTOR_ORG_ID" jdbcType="VARCHAR" property="conductorOrgId" />
+		<result column="CONDUCTOR_ORG_NAME" jdbcType="VARCHAR" property="conductorOrgName" />
+		<result column="NEED_RESOURCE" jdbcType="VARCHAR" property="needResource" />
+		<result column="ACCT_NO" jdbcType="VARCHAR" property="acctNo" />
+		<result column="CUST_PHONE_NO" jdbcType="VARCHAR" property="custPhoneNo" />
+		<result column="CUST_SEX" jdbcType="CHAR" property="custSex" />
+		<result column="COMPLAIN_EMP_ID" jdbcType="VARCHAR" property="complainEmpId" />
+		<result column="COMPLAIN_EMP_NAME" jdbcType="VARCHAR" property="complainEmpName" />
+		<result column="COMPLAIN_CONTENT" jdbcType="VARCHAR" property="complainContent" />
+		<result column="CHECK_RESULT" jdbcType="VxARCHAR" property="checkResult" />
+		<result column="CONDUCT_TM" jdbcType="TIMESTAMP" property="conductTm" />
+		<result column="ADJUNCT" jdbcType="CLOB" property="adjunct" />
+		<result column="IS_PROCESSED" jdbcType="CHAR" property="isProcessed" />
+		<result column="FEEDBACK_TITLE" jdbcType="VARCHAR" property="feedbackTitle" />
+		<result column="FEEDBACK_DATE" jdbcType="DATE" property="feedbackDate" />
+		<result column="IS_PEANUTS" jdbcType="CHAR" property="isPeanuts" />
+		<result column="OWNERSHIP" jdbcType="VARCHAR" property="ownership" />
+		<result column="PROCESSED_NUM" jdbcType="VARCHAR" property="processedNum" />
+		<result column="UNPROCESSED_NUM" jdbcType="VARCHAR" property="unprocessedNum" />
+    	<result column="FEEDBACK_PER" jdbcType="VARCHAR" property="feedbackPer" />
+    </resultMap> 
+
+     <sql id="Base_Column_List">
+        CORP_ORG_CODE,CUST_ID,CUST_NAME,FEEDBACK_TYPE,FEEDBACK_CHG,FEEDBACK_ID,WORK_ORDER_SOURCE,FEEDBACK_CONTENT,EMERGENCY_LEVEL,EXPIRY_DATE,CONDUCTOR_ID,CONDUCTOR_NAME,CONDUCTOR_ORG_ID,CONDUCTOR_ORG_NAME,NEED_RESOURCE,ACCT_NO,CUST_PHONE_NO,CUST_SEX,COMPLAIN_EMP_ID,COMPLAIN_EMP_NAME,COMPLAIN_CONTENT,CHECK_RESULT,CONDUCT_TM,ADJUNCT,IS_PROCESSED,FEEDBACK_TITLE,FEEDBACK_DATE,IS_PEANUTS,OWNERSHIP,PROCESSED_NUM,UNPROCESSED_NUM,FEEDBACK_PER
+    </sql> -->
+    
+       
+    <!-- 条件列表查询 -->
+    <select id="queryAll" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+        select A.*,B.CUST_NAME,
+        B.CUST_STATUS,
+        B.CUST_TYPE,
+        C.GRADE_LEVEL AS CUST_LEVEL,
+        ORG.ORG_NAME,
+        USR.USER_NAME as MGR_NAME,
+         ROW_NUMBER() OVER(ORDER BY A.CUST_ID) ROW_ID1 
+   from (select CUST_ID,
+                SUM(DECODE(IS_PROCESSED,'3',1,0)) AS PROCESSED_Num,
+                SUM(DECODE(IS_PROCESSED,'3',0,1)) AS UNPROCESSED_Num,
+                IS_PEANUTS
+           from Ocrm_f_Ci_Cust_Feedback_Info
+          group by  CUST_ID,IS_PEANUTS) A
+   LEFT JOIN ACRM_F_CI_CUST_ALL B
+     ON A.CUST_ID = B.CUST_ID
+   LEFT JOIN OCRM_F_CG_CPN_GRADE C
+     ON B.CUST_ID = C.CUST_ID
+   LEFT JOIN ADMIN_SM_ORG org 
+   	 ON ORG.ORG_ID=B.BELONG_BRCH
+   LEFT JOIN ADMIN_SM_USER USR 
+     ON USR.USER_ID=B.BELONG_MGR 
+	<where>
+    	<if test="condition.custType !=null and condition.custType !=''">
+    		and CUST_TYPE =#{condition.custType,jdbcType=VARCHAR}
+    	</if>
+    	<if test="condition.custStatus !=null and condition.custStatus!=''">
+    		and CUST_STATUS =#{condition.custStatus,jdbcType=VARCHAR}
+    	</if>
+    	<if test="condition.custId !=null and condition.custId!=''">
+    		and A.CUST_ID=#{condition.custId,jdbcType=VARCHAR}
+    	</if>
+    	<if test="condition.custName !=null and condition.custName!=''">
+    		and B.CUST_NAME like #{condition.custName,jdbcType=VARCHAR}
+    	</if>
+    	<if test="condition.orgId !=null and condition.orgId!=''">
+    		and B.BELONG_BRCH = #{condition.orgId,jdbcType=VARCHAR}
+    	</if>
+    	<if test="condition.mgrId !=null and condition.mgrId!=''">
+    		and B.BELONG_MGR = #{condition.mgrId,jdbcType=VARCHAR}
+    	</if>
+<!--     	${condition.uncertain} --> ${dataAuth}
+    </where>
+    </select>
+    
+    <select id="queryPer" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+    	    select CORP_ORG_CODE,CUST_ID,CUST_NAME,FEEDBACK_TYPE,FEEDBACK_CHG,FEEDBACK_ID,WORK_ORDER_SOURCE,FEEDBACK_CONTENT,EMERGENCY_LEVEL,to_char(EXPIRY_DATE,'yyyy-MM-dd') AS EXPIRY_DATE,CONDUCTOR_ID,CONDUCTOR_ORG_ID,CONDUCTOR_ORG_NAME,NEED_RESOURCE,ACCT_NO,CUST_PHONE_NO,CUST_SEX,COMPLAIN_EMP_ID,COMPLAIN_EMP_NAME,COMPLAIN_CONTENT,CHECK_RESULT,CONDUCT_TM,ADJUNCT,IS_PROCESSED,FEEDBACK_TITLE,to_char(FEEDBACK_DATE,'yyyy-MM-dd') AS FEEDBACK_DATE,IS_PEANUTS,C.USER_NAME AS FEEDBACK_PER,FEEDBACK_PER_ID,U.USER_NAME AS CONDUCTOR_NAME 
+    	    from (select A.*,B.user_name from ocrm_f_ci_cust_feedback_info A left join admin_sm_user B on A.feedback_per_id=B.User_Id) C  
+    	    left join  admin_sm_user  U on C.conductor_id=U.user_id
+    	<where>
+    		<if test="condition.feedbackType!=null and condition.feedbackType!=''">
+    		and FEEDBACK_TYPE = #{condition.feedbackType,jdbcType=VARCHAR}
+    	</if>
+    	<if test="condition.isProcessed!=null and condition.isProcessed!=''">
+    		and IS_PROCESSED = #{condition.isProcessed,jdbcType=VARCHAR}
+    	</if>
+    	<if test="condition.feedbackChg!=null and condition.feedbackChg!=''">
+    		and FEEDBACK_CHG in 
+    		<foreach collection="condition.feedbackChg" item="feedbackChgitem" index="index" open="(" close=")" separator=",">
+        		#{feedbackChgitem}
+        	</foreach>
+    	</if>
+    	<if test="condition.feedbackDate!=null and condition.feedbackDate!=''">
+    		and to_char(FEEDBACK_DATE,'yyyy-MM-dd') >= #{condition.feedbackDate,jdbcType=DATE}
+    	</if>
+    	<if test="condition.feedbackDateEnd!=null and condition.feedbackDateEnd!=''">
+    		and #{condition.feedbackDateEnd,jdbcType=DATE} >=  to_char(FEEDBACK_DATE,'yyyy-MM-dd')
+    	</if>
+    	<if test="condition.custId!=null and condition.custId!=''">
+    	  	and CUST_ID= #{condition.custId,jdbcType=VARCHAR}
+    	</if>
+    	</where>
+    </select>
+    
+    <select id="queryOrgId" resultType="java.util.Map">
+		SELECT ORG_ID FROM ADMIN_SM_ORG START WITH ORG_ID=#{orgId,jdbcType=VARCHAR} CONNECT BY PRIOR ORG_ID=UP_ORG_ID
+	</select>
+	
+	<select id="queryProp" parameterType="String" resultType="String">
+		SELECT PROP_VALUE FROM ADMIN_SM_PROP WHERE PROP_ID=#{value}
+	</select>
+</mapper>

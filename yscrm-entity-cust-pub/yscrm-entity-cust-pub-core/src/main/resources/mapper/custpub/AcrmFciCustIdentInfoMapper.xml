@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.custpub.repository.mapper.AcrmFciCustIdentInfoMapper">
+  <!-- 根据客户id查询数据 -->
+	<select id="queryIdentList" parameterType="java.util.Map"
+		resultType="java.util.Map">
+	     select t.ID,t.DATA_DT,to_char(t.CRAT_DT,'yyyy-mm-dd') as CRAT_DT,t.CRAT_ORG_ID,t.CRAT_USR,t.LAST_CHG_SYS,t.LAST_CHG_USR,to_char(t.LAST_CHG_DT,'yyyy-mm-dd') as LAST_CHG_DT ,t.CORP_ORG_CODE
+	     ,t.CUST_ID,t.CERT_TYPE,t.CERT_NO,t.CUST_TYPE,t.CUST_NAME,t.CHECK_FLG,t.CHK_DUE_DATE
+	     ,to_char(to_date(t.EFFECT_DATE,'yyyymmdd'),'yyyy-mm-dd') as EFFECT_DATE ,
+	     to_char(to_date(t.EXPIRED_DATE,'yyyymmdd'),'yyyy-mm-dd') as EXPIRED_DATE
+	   
+	     ,t.ORGAN_NAME
+	     ,t.IDENT_REG_ADDR,t.EFFECT_FLG,t.MAIN_IDENT_FLG,t.FLG_SET_SYS,t.IDENT_SCAN_ID,cust.USER_NAME
+         from ACRM_F_CI_CUST_IDENT_INFO t
+         left join  ADMIN_SM_USER cust on cust.LOGIN_CODE =t.CRAT_USR
+		    <if  test="custId != null and custId != ''">
+		       		where t.CUST_ID =#{custId,jdbcType=VARCHAR} 
+		    </if>
+		   
+	</select>
+ 		<!--主证件标识 -->
+  <update id="updateMainIdentFlag" parameterType="java.util.Map">
+			UPDATE ACRM_F_CI_CUST_IDENT_INFO t SET 
+			
+			t.MAIN_IDENT_FLG=#{mainIdentFlg,jdbcType=VARCHAR}
+		
+			WHERE t.CUST_ID = #{custId,jdbcType=VARCHAR}
+	</update>
+	<!--潜在客户修改证件信息 -->
+	<update id="updatePoten" parameterType="cn.com.yusys.yscrm.custpub.domain.AcrmFciCustIdentInfo">
+			UPDATE ACRM_F_CI_CUST_IDENT_INFO t SET t.CERT_NO = #{certNo,jdbcType=VARCHAR},
+			
+			t.CERT_TYPE=#{certType,jdbcType=VARCHAR},T.CUST_NAME = #{custName,jdbcType=VARCHAR}
+		
+			WHERE t.CUST_ID = #{custId,jdbcType=VARCHAR} AND t.MAIN_IDENT_FLG='1'
+	</update>
+    
+</mapper>

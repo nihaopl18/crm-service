@@ -1,0 +1,261 @@
+
+# ===================================================================
+# Spring Boot configuration for the "dev" profile.
+#
+# This configuration overrides the application.yml file.
+#
+# More information on profiles: https://jhipster.github.io/profiles/
+# More information on configuration properties: https://jhipster.github.io/common-application-properties/
+# ===================================================================
+
+# ===================================================================
+# Standard Spring Boot properties.
+# Full reference is available at:
+# http://docs.spring.io/spring-boot/docs/current/reference/html/common-application-properties.html
+# ===================================================================
+spring:
+    servlet:
+        multipart:
+            max-file-size: 100MB
+            max-request-size: 100MB
+    profiles:
+        active: uat
+        include: swagger
+    devtools:
+        restart:
+            enabled: false
+        livereload:
+            enabled: false # we use gulp + BrowserSync for livereload
+    jackson:
+        serialization.indent_output: true
+    datasource:
+        type: com.zaxxer.hikari.HikariDataSource
+        driver: oracle.jdbc.driver.OracleDriver
+        ip: localhost
+        #oracle测试url#
+        validation-query: SELECT 1 FROM DUAL   #根据数据源进行配置
+        url: jdbc:oracle:thin:@10.192.86.25:1521:pcrm #jdbc:oracle:thin:@22.1.0.61:1521:crmdb
+        #url: jdbc:oracle:thin:@(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=22.1.0.62)(PORT=1521))(ADDRESS=(PROTOCOL=TCP)(HOST=22.1.0.64)(PORT=1521))(LOAD_BALANCE=yes)(failover=yes)(failover_mode=(type=select)(method=basic))(CONNECT_DATA=(SERVER=DEDICATED)(SERVICE_NAME=crmdb)))
+
+        #db2 链接信息#
+        #        validation-query: SELECT 1 from SYSIBM.SYSDUMMY1
+        #        url: jdbc:db2://172.16.20.21:50000/YSYCOR
+        username: ENC(UmtWsUPjnRs0uc/DXquoDU+GB0TroEAw)
+        password: ENC(UmtWsUPjnRs0uc/DXquoDU+GB0TroEAw)
+        hikari:
+            minimum-idle: 2
+            maximum-pool-size: 30
+            data-source-properties:
+                cachePrepStmts: true
+                prepStmtCacheSize: 250
+                prepStmtCacheSqlLimit: 2048
+                useServerPrepStmts: true
+    jpa:
+        ##oracle JPA配置
+        database-platform: org.hibernate.dialect.Oracle10gDialect
+        database: ORACLE
+        #        database-platform: org.hibernate.dialect.DB2Dialect
+        #        database: DB2
+        show-sql: true
+        properties:
+            hibernate.id.new_generator_mappings: true
+            hibernate.cache.use_second_level_cache: false
+            hibernate.cache.use_query_cache: false
+            hibernate.generate_statistics: true
+    data:
+        elasticsearch:
+            corePoolSize: 5
+            cluster-name: elasticsearch
+            cluster-nodes: 10.192.86.22:9300,10.192.86.22:9300,10.192.86.22:9300
+            properties:
+                path:
+                    logs: opt/elasticsearch/log
+                    data: opt/elasticsearch/data
+    mail:
+        host: localhost
+        port: 25
+        username:
+        password:
+    messages:
+        cache-duration: 1
+    thymeleaf:
+        cache: false
+    smsPlatform:
+        host: 10.192.68.185
+        port: 10275
+
+    redis:                  #redis配置
+        database: 5           #redis使用的数据库（0~15）
+        host: 10.192.86.21     #22.1.64.29 #redis服务器 IP
+        port: 6379            #redis服务器端口
+        password: 123456            #redis密码
+        jedis:
+            pool:
+                max-active: 20     # 在给定的时间，连接池中分配的最大连接数
+                max-wait: 20000    # 连接阻塞最大等待时间(以毫秒为单位)，连接池耗尽时抛出异常。使用负值无限期地阻塞
+                min-idle: 1        # 连接池最小的空闲连接数
+        timeout: 60000       # 连接超时时间(以毫秒为单位)
+    cache:                 # 配置Spring Cache
+        type: redis        # 缓存类型
+
+# ===================================================================
+# To enable SSL, generate a certificate using:
+# keytool -genkey -alias yuspadmin -storetype PKCS12 -keyalg RSA -keysize 2048 -keystore keystore.p12 -validity 3650
+#
+# You can also use Let's Encrypt:
+# https://maximilian-boehm.com/hp2121/Create-a-Java-Keystore-JKS-from-Let-s-Encrypt-Certificates.htm
+#
+# Then, modify the server.ssl properties so your "server" configuration looks like:
+#
+# server:
+#    port: 8443
+#    ssl:
+#        key-store: keystore.p12
+#        key-store-password: <your-password>
+#        keyStoreType: PKCS12
+#        keyAlias: yuspadmin
+# JHipster specific properties
+#
+# Full reference is available at: https://jhipster.github.io/common-application-properties/
+# ===================================================================
+jasypt:
+    encryptor:
+        password: 123456
+jhipster:
+    http:
+        version: V_1_1 # To use HTTP/2 you will need SSL support (see above the "server.ssl" configuration)
+    cors:
+        allowed-origins: "*"
+        allowed-methods: GET, PUT, POST, DELETE, OPTIONS
+        allowed-headers: "*"
+        exposed-headers:
+        allow-credentials: true
+        max-age: 1800
+    security:
+        client-authorization:
+            access-token-uri: http://uaa/oauth/token
+            token-service-id: uaa
+            client-id: internal
+            client-secret: internal
+    metrics: # DropWizard Metrics configuration, used by MetricsConfiguration
+        jmx.enabled: false
+        graphite: # Use the "graphite" Maven profile to have the Graphite dependencies
+            enabled: false
+            host: localhost
+            port: 2003
+            prefix: yusp-crm-single
+        prometheus: # Use the "prometheus" Maven profile to have the Prometheus dependencies
+            enabled: false
+            endpoint: /prometheusMetrics
+        logs: # Reports Dropwizard metrics in the logs
+            enabled: false
+            report-frequency: 60 # in seconds
+    logging:
+        logstash: # Forward logs to logstash over a socket, used by LoggingConfiguration
+            enabled: false
+            host: localhost
+            port: 5000
+            queue-size: 512
+            #        spectator-metrics: # Reports Spectator Circuit Breaker metrics in the logs
+            #            enabled: false
+            # edit spring.metrics.export.delay-millis to set report frequency
+
+# ===================================================================
+# Application specific properties
+# Add your own application properties here, see the ApplicationProperties class
+# to have type-safe configuration, like in the JHipsterProperties above
+#
+# More documentation is available at:
+# https://jhipster.github.io/common-application-properties/
+# ===================================================================
+
+application:
+    fileStorageType: localdisk ##fastdfs使用FastDFS存储文件， localdisk使用磁盘存储文件
+    fastdfsTrackIp: 22.1.64.29:22122
+    localDiskPath: /opt/pcrm/crmFiles/upload # localdisk setting
+    excel:
+        tempFileDir: /opt/pcrm/crmFiles/export
+        batchSize: 100
+
+SSO:
+    keyStorePath: /opt/pcrm/saml-idp.keystore
+    idpId: isprint
+    password: passphrase
+    alias: idp
+    expiratioTime: 0
+    localPath: http://10.192.86.21:8080
+
+email:
+    host: smtp.163.com
+    port: 25
+    username: 123@163.com
+    password: 123
+    sendNick: 《任务调度平台XXL-JOB》
+
+endpoints:
+    shutdown:
+        enabled: true     ##启用shutdown
+        sensitive: false  ##禁用密码验证
+    restart:
+        enabled: true     ##启用restart
+        sensitive: false  ##禁用密码验证
+emp:
+    seqconfig:
+        default-seq-type: redis
+
+xxl:
+    job:
+        admin:
+            addresses: http://127.0.0.1:${server.port}/yusp-crm-single
+        executor:
+            appname: message  #执行器名称
+            ip:
+            port: 9097
+            logpath: /home/docker/app/temp    #执行器日志文件路径
+            logretentiondays: 3  # 本地日志保存天数，-1为永远保存
+
+uaa:
+    default:
+        auth: uaaWebLocationAuthVerify
+echain:
+    message:
+        used: false
+        impl:
+            bean:
+
+#license配置
+license:
+    license-model: PRO
+    license-file: YTEC-0000023318-4-0000001402.lic
+
+#访问ESB的ip地址
+wsdl:
+    address: 22.1.32.54
+
+logback:
+    loglevel: INFO
+
+
+role:
+    headOffice: R006,R007,R008,R009,R010,R011,R012,R001,R022
+    headOfficeB: R020,R021
+    branch: R005,R013,R014,R015,R016
+    subbranch: R017
+    patrolLeader: R018,R019,R004
+    customerManage: R002,R003
+
+
+prodType:
+    trust: 10202
+    contrust: 10206
+    struct: 10201
+    qdii: 10203
+    agent: 10204
+    fund: 10205
+    manag: 10207
+    deposit: 101
+    insurance: 103
+    loan: 201
+    creditcard: 202
+    fin: 102
+

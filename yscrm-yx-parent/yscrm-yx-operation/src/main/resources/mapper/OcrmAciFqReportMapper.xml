@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscimc.operation.repository.mapper.OcrmAciFqReportMapper">
+    <resultMap id="BaseResultMap" type="cn.com.yusys.yscimc.operation.domain.OcrmAciFqReport">
+        <id column="REPORT_ID" jdbcType="NUMERIC" property="reportId"/>
+        <result column="REPORT_NAME" jdbcType="VARCHAR" property="reportName"/>
+        <result column="REPORT_SQL" jdbcType="VARCHAR" property="reportSql"/>
+        <result column="SS_RESULT" jdbcType="VARCHAR" property="ssResult"/>
+        <result column="SS_SORT" jdbcType="VARCHAR" property="ssSort"/>
+        <result column="SS_TYPE" jdbcType="VARCHAR" property="ssType"/>
+        <result column="CREATER" jdbcType="VARCHAR" property="creater"/>
+        <result column="CREATE_ORG" jdbcType="VARCHAR" property="createOrg"/>
+        <result column="CREATE_DATE" jdbcType="DATE" property="createDate"/>
+        <result column="DATA_PROCESSING_TABLE" jdbcType="VARCHAR" property="dataProcessingTable"/>
+        <result column="TOP_NUM" jdbcType="NUMERIC" property="topNum"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+        REPORT_ID
+        ,REPORT_NAME,REPORT_SQL,SS_RESULT,SS_SORT,SS_TYPE,CREATER,CREATE_ORG,CREATE_DATE,DATA_PROCESSING_TABLE,TOP_NUM
+    </sql>
+    <!--查询报表列表信息 -->
+    <select id="getList" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+        select b.org_name,a.user_name,r.REPORT_ID,r.REPORT_NAME,r.SS_RESULT,r.SS_SORT,r.TOP_NUM from CIMP_A_CI_FQ_REPORT
+        r
+        left join admin_sm_user a on r.creater=a.login_code
+        left join admin_sm_org b on r.create_org=b.org_code
+        where r.SS_TYPE= #{objType, jdbcType=VARCHAR} AND r.REPORT_ID in (select ra.REPORT_ID from
+        CIMP_A_CI_FQ_REPORT_AUTH ra where ra.ROLE_CODE
+        in
+        <foreach collection="rolecodes" item="id" index="index" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+        )
+    </select>
+</mapper>

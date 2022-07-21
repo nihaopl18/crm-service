@@ -1,0 +1,273 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.cm.market.repository.mapper.ChannelProcessMapper">
+<!-- 营销组件相关操作 hujun3 2018-11-15 -->
+
+	<!-- 查询组件信息 -->
+	<select id="getItemsByFlowId" parameterType="java.util.Map"
+		resultType="java.util.HashMap">
+		select t.node_id,t.assembly_id,t.temp_id,t.node_name,t1.class_id,t1.ASSEMBLY_NAME
+		,t2.ACTIVITY_NAME,t2.START_DATE,t2.END_DATE,t2.customer_type from cimp_cm_nodeinfo t 
+		left join cimp_cm_asseminfo t1 on t1.assembly_id=t.assembly_id
+		left join cimp_cm_marketplan t2 on t2.temp_id=t.temp_id
+		WHERE  t.temp_id = #{flowId,jdbcType=VARCHAR} 
+	</select>
+	<!-- 根据组件输出信息-->
+	<select id="getItemOutInfo" parameterType="java.util.List"
+		resultType="java.util.HashMap">
+		select T.* from cimp_cm_nodes_display_output T 
+		left join CIMP_CM_NODES_DISPLAY t1 on t1.FORM_ID = t.FORM_ID
+		WHERE 1=1
+		<choose>
+		    <when test="list !=null and list.size() > 0">
+		        and t1.node_id in
+				<foreach item="item" index="index" collection="list" open="(" separator="," close=")">  
+					    #{item}  
+				</foreach> 
+		    </when>
+		    <otherwise>
+		        and t1.node_id=''
+		    </otherwise>
+		</choose>
+	</select>
+	<!-- 查询组件操作信息-->
+	<select id="getOperaByItem" parameterType="java.util.Map"
+		resultType="java.util.HashMap">
+		 select t.form_operation_id,t.form_id,t.FORM_OPERATION_TABLE,t.form_operation_filed,t.form_operation_name,
+ 		(case when t.form_operation_filed = 'beginTime' or t.form_operation_filed = 'endTime' then 
+        substr(t.form_operation_val, 12, 12) else t.form_operation_val end) as form_operation_val,t.form_operation_type 
+       from cimp_cm_nodes_presentation t 
+		left join CIMP_CM_NODES_DISPLAY t1 on t1.FORM_ID = t.FORM_ID
+		where t1.NODE_ID =#{id,jdbcType=VARCHAR} 
+	</select>
+	<!-- 营销动作组件查询模板信息-->
+	<select id="getModelListByNodeId" parameterType="java.util.List" resultType="java.util.Map">
+		SELECT t.* FROM cm_f_rc_sys_type t where 1=1
+			<choose>
+		    <when test="list !=null and list.size() > 0">
+		        and t.id in 
+				<foreach item="item" index="index" collection="list" open="(" separator="," close=")">  
+					    #{item}  
+				</foreach> 
+		    </when>
+		    <otherwise>
+		        and t.id ='' 
+		    </otherwise>
+		</choose>
+	</select>
+		<!-- 查询产品适用模板信息-->
+	<select id="getModelByProd" parameterType="java.util.Map"
+		resultType="java.util.HashMap">
+		SELECT T.PRODUCT_ID,Y.MODEL_NAME,Y.MODEL_INFO,R.CHANNEL_NAME
+        FROM CM_F_RC_PROD_INFO T 
+        LEFT JOIN CM_F_RC_PROD_CATL A ON A.CATL_CODE = T.CATL_CODE
+        LEFT JOIN CM_F_RC_SYS_TYPE Y ON (TO_char(T.CATL_CODE) = Y.APPLY_OBJECT AND Y.APPLY_TYPE='PRODCATL') 
+           OR (Y.APPLY_TYPE IN ('PRODUCT','RISK') AND T.PRODUCT_ID=Y.APPLY_OBJECT)
+        LEFT JOIN CM_F_RC_CHANNEL_MGR R ON instr(Y.APPLY_CHANNEL_NAME,  R.CHANNEL_NAME)>0         
+        WHERE Y.IS_ENABLE='Y' and T.PRODUCT_ID =#{id,jdbcType=VARCHAR} 
+	</select>
+	<!-- 根据客户群信息-->
+	<select id="getItemCustGroupinfo" parameterType="java.util.List"
+		resultType="java.util.HashMap">
+		 select * from cimp_c_cg_baseinfo where 1=1
+		 <choose>
+		    <when test="list !=null  and list.size() > 0">
+				and CUST_GROUP_ID in 		
+				<foreach item="item" index="index" collection="list" open="(" separator="," close=")">  
+					    #{item}  
+				</foreach>
+		    </when>
+		    <otherwise>
+		        and CUST_GROUP_ID=''
+		    </otherwise>
+		</choose>
+
+	</select>
+	<!-- 根据SQL查询客户信息+灵活查询-->
+	<select id="getItemCustinfoBySql" parameterType="java.util.Map"
+		resultType="java.util.HashMap">
+		select t.*,t1.user_name  from ACIM_F_CI_CUSTOMER t 
+		left join admin_sm_user t1 on t1.login_code=t.belong_mgr 
+		where t.CUST_ID in(select CUST_ID from (${value}) )
+	</select>
+		<!-- 根据SQL查询客户信息+标签客户查询-->
+	<select id="getItemCustinfoBySqlBQ" parameterType="java.util.Map"
+		resultType="java.util.HashMap">
+		select t.*,t1.user_name  from ACIM_F_CI_CUSTOMER t 
+		left join admin_sm_user t1 on t1.login_code=t.belong_mgr 
+		where t.CUST_ID in(select CUST_ID from (${value}) )
+	</select>
+	<!-- 根据客户群ID查询客户信息-->
+	<select id="getItemCustinfoByGroupId" parameterType="java.util.List"
+		resultType="java.util.HashMap">
+		select t.*,t1.user_name  from ACIM_F_CI_CUSTOMER t 
+		left join admin_sm_user t1 on t1.login_code=t.belong_mgr 
+		where t.CUST_ID in(select CUST_ID from cimp_c_custgroup_cust where 1=1
+		<choose>
+		    <when test="list !=null and list.size() > 0">
+				and CUST_GROUP_ID in 		
+				<foreach item="item" index="index" collection="list" open="(" separator="," close=")">  
+					    #{item}  
+				</foreach>
+		    </when>
+		    <otherwise>
+		        and CUST_GROUP_ID=''
+		    </otherwise>
+		</choose>
+		 ) 
+	</select>
+		<!-- 客户渠道偏好根据SQL查询客户信息-->
+	<select id="getCustChPerinfoBySql" parameterType="java.util.Map"
+		resultType="java.util.HashMap">
+		select t.*,t1.user_name,t2.channel_value from ACIM_F_CI_CUSTOMER t 
+		left join admin_sm_user t1 on t1.login_code=t.belong_mgr
+		left join (select t.cust_id,wm_concat(t1.channel_name)as channel_value from cimp_cm_cust_channel_pre t
+		left join cm_f_rc_channel_mgr t1 on  
+		instr(t.channel_id ,  t1.channel_id )>0 
+		GROUP BY t.CUST_ID) t2 on t2.cust_id=t.cust_id  
+		where t.CUST_ID in(select CUST_ID_BASE from (${value}) )
+	</select>
+			<!-- 客户渠道偏好根据SQL查询客户信息-->
+	<select id="getCustChPerinfoBySqlBQ" parameterType="java.util.Map"
+		resultType="java.util.HashMap">
+		select t.*,t1.user_name,t2.channel_value from ACIM_F_CI_CUSTOMER t 
+		left join admin_sm_user t1 on t1.login_code=t.belong_mgr
+		left join (select t.cust_id,wm_concat(t1.channel_name)as channel_value from cimp_cm_cust_channel_pre t
+		left join cm_f_rc_channel_mgr t1 on  
+		instr(t.channel_id ,  t1.channel_id )>0 
+		GROUP BY t.CUST_ID) t2 on t2.cust_id=t.cust_id  
+		where t.CUST_ID in(select CUST_ID from (${value}) )
+	</select>
+	<!-- 客户渠道偏好根据客户群ID查询客户信息-->
+	<select id="getCustChPerinfoByGroupId" parameterType="java.util.List"
+		resultType="java.util.HashMap">
+		select t.*,t1.user_name,t2.channel_value from ACIM_F_CI_CUSTOMER t 
+		left join admin_sm_user t1 on t1.login_code=t.belong_mgr
+		left join (select t.cust_id,wm_concat(t1.channel_name)as channel_value from cimp_cm_cust_channel_pre t
+		left join cm_f_rc_channel_mgr t1 on  
+		instr(t.channel_id ,  t1.channel_id )>0 
+		GROUP BY t.CUST_ID) t2 on t2.cust_id=t.cust_id 
+		where t.CUST_ID in(select CUST_ID from cimp_c_custgroup_cust where 1=1
+		<choose>
+		    <when test="list !=null and list.size() > 0">
+				and CUST_GROUP_ID in 		
+				<foreach item="item" index="index" collection="list" open="(" separator="," close=")">  
+					    #{item}  
+				</foreach>
+		    </when>
+		    <otherwise>
+		        and CUST_GROUP_ID=''
+		    </otherwise>
+		</choose>
+		 ) 
+	</select>
+	<!-- 查询产品信息-->
+	<select id="getItemProdInfo" parameterType="java.util.List"
+		resultType="java.util.HashMap">
+		select PRODUCT_ID,PROD_NAME,CATL_CODE,PROD_TYPE_ID,DISPLAY_FLAG,to_char(PROD_START_DATE,'yyyy-MM-dd') as PROD_START_DATE,
+		to_char(PROD_END_DATE,'yyyy-MM-dd') as PROD_END_DATE,PROD_STATE,PROD_CREATOR,CREATE_DATE,PROD_DEPT,RATE,COST_RATE,LIMIT_TIME,
+ 		PROD_CHARACT,CHANNEL_DISC,PROD_SWITCH,RISK_LEVEL,PROD_BUS_ID,TYPE_FIT_CUST,PROD_MAG,PROD_LEVEL,PROD_ESTMAT,TRADE_CONDI,
+ 		TRADE_FLOW,TRADE_CHN,MONEY,PROD_PRIORITY,IS_COMBINATION,PROD_LINE_CD,SAME_COMP from cm_f_rc_prod_info    
+		where 1=1
+		<choose>
+		    <when test="list !=null and list.size() > 0">
+				and PRODUCT_ID in 
+					<foreach item="item" index="index" collection="list" open="(" separator="," close=")">  
+					    #{item}  
+					</foreach> 
+		    </when>
+		    <otherwise>
+		        and PRODUCT_ID=''
+		    </otherwise>
+		</choose>
+
+	</select>
+		<!-- 查询产品和对应的使用渠道和模板信息-->
+	<select id="getItemProdAndchannelInfo" parameterType="java.util.List"
+		resultType="java.util.HashMap">
+		SELECT T.*,Y.MODEL_NAME,Y.MODEL_INFO,R.CHANNEL_NAME,A.CATL_NAME
+        FROM CM_F_RC_PROD_INFO T 
+        LEFT JOIN CM_F_RC_PROD_CATL A ON A.CATL_CODE = T.CATL_CODE
+        LEFT JOIN CM_F_RC_SYS_TYPE Y ON to_char(T.CATL_CODE) = Y.APPLY_OBJECT
+        LEFT JOIN CM_F_RC_CHANNEL_MGR R ON instr(Y.APPLY_CHANNEL_NAME,  R.CHANNEL_NAME)>0 
+        WHERE 1=1
+        <choose>
+		    <when test="list !=null and list.size() > 0">
+		         and T.PRODUCT_ID in 
+					<foreach item="item" index="index" collection="list" open="(" separator="," close=")">  
+					    #{item,jdbcType=VARCHAR}  
+					</foreach> 
+		    </when>
+		    <otherwise>
+		        and T.PRODUCT_ID=''
+		    </otherwise>
+		</choose>        
+
+	</select>
+	<!-- 查询渠道组件输出信息-->
+	<select id="getChannelItemOutInfo" parameterType="java.util.HashMap"
+		resultType="java.util.HashMap">
+		select t.*,t3.CATL_NAME,t4.cust_type from CIMP_CM_CHANNEL_RESULT_INFO t
+   		 left join CM_F_RC_PROD_INFO t2 on t2.PRODUCT_ID=t.PRODUCT_ID 
+   		 left join ACIM_F_CI_CUSTOMER t4 on t4.cust_id=t.cust_id
+   		 left join cm_f_rc_prod_catl t3 on t3.catl_code=t2.catl_code
+		where t.FORM_ID = #{id,jdbcType=VARCHAR} and t.MARKET_TYPE=#{type,jdbcType=VARCHAR}
+	</select>
+		<!-- 查询系统配置参数-->
+	<select id="getConfigByName" parameterType="java.util.HashMap"
+		resultType="java.util.HashMap">
+		select PROP_VALUE from ADMIN_SM_PROP 
+		where PROP_NAME=#{propName,jdbcType=VARCHAR}
+	</select>
+		<!-- 删除结果表数据 -->
+	<update id="deleteInfoByNode" parameterType="java.lang.String">
+		delete from CIMP_CM_CHANNEL_RESULT_INFO  where FORM_ID=#{nodeId}
+	</update>
+		<!-- 查询模板关键字信息-->
+	<select id="getModelKey" resultType="java.util.HashMap">
+		select SOURCE_TAB_ENAME,SOURCE_FIELD_ENAME,ALIAS_NAME,KEYWORD_SOURCE,KEYWORD_CONNECT 
+		from cm_f_rc_sys_key_word 
+	</select>
+		<!-- 查询活动清单整合后 的客户信息 -->
+	<select id="getInvetByFlowId" parameterType="java.util.Map" resultType="java.util.HashMap">
+		select t.*,t1.user_name from ACIM_F_CI_CUSTOMER t 
+		left join admin_sm_user t1 on t1.login_code=t.belong_mgr 
+		where t.CUST_ID in (
+			SELECT cust_id FROM cm_f_rc_process_result 
+			WHERE  1=1
+			<choose>
+			    <when test="flowId !=null and flowId !=''">
+			        and action = #{flowId,jdbcType=VARCHAR}
+			    </when>
+			    <otherwise>
+			        and action=''
+			    </otherwise>
+			</choose> 
+		)
+	</select>
+			<!-- 查询活动清单整合后 的客户和客户渠道偏好信息 -->
+	<select id="getInvetPerinfoByFlowId" parameterType="java.util.Map" resultType="java.util.HashMap">
+	select t.*,t1.user_name,t2.channel_value from ACIM_F_CI_CUSTOMER t 
+		left join admin_sm_user t1 on t1.login_code=t.belong_mgr
+		left join (select t.cust_id,wm_concat(t1.channel_name)as channel_value from cimp_cm_cust_channel_pre t
+		left join cm_f_rc_channel_mgr t1 on  
+		instr(t.channel_id ,  t1.channel_id )>0 
+		GROUP BY t.CUST_ID) t2 on t2.cust_id=t.cust_id 
+		where t.CUST_ID in (
+			SELECT cust_id FROM cm_f_rc_process_result 
+			WHERE  1=1
+			<choose>
+			    <when test="flowId !=null and flowId !=''">
+			        and action = #{flowId,jdbcType=VARCHAR}
+			    </when>
+			    <otherwise>
+			        and action=''
+			    </otherwise>
+			</choose> 
+		)
+	</select>
+	<!-- 更新营销位内容信息 -->
+	<update id="updateStsByNodeId" parameterType="java.util.HashMap">
+		update CIMP_CM_MARKET_POSIT_CT set STATUS=#{sts,jdbcType=VARCHAR} where CHANNEL_NODE_ID= #{nodeId,jdbcType=VARCHAR}
+	</update>
+</mapper>

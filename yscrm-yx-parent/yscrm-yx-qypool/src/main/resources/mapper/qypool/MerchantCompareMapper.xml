@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.climp.qypool.repository.mapper.MerchantCompareMapper">
+     <!-- 对账主页面查询-->
+    <select id="getCompareList" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+		resultType="java.util.Map">
+		select * from CIMP_CM_MERCHANT_COMPARE t
+		  order by t.ORDER_DATE desc
+	</select>
+	
+	<!-- 对账明细查询 -->
+    <select id="merchantDetil" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+		resultType="java.util.Map">
+		select s1.merchant_name,s3.commodity_code,s3.commodity_name,s6.COMMODITY_NUMBER,s6.COMMODITY_L_VALUE,s6.COMMODITY_M_VALUE,s6.ORDER_START_DATE,s6.ORDER_CUST_ID
+		  from LOY_QY_MERCHANT_INFO s1
+		  left join (select *
+		  
+		               from LOY_QY_COMMODITY_INFO s2
+		                <if test="condition.accountNo != null and condition.accountNo !=''">
+		              		where s2.BELONG_MERCHANT = '#{condition.accountNo}'
+						</if>
+						) s3
+		    on s1.merchant_id = s3.belong_merchant
+		    left join (select *
+		  from LOY_AC_ORDER_LIST s4
+		 where s4.commodity_type = 'R'
+		   and s4.commodity_code in
+		       (select s5.commodity_code
+		          from LOY_QY_COMMODITY_INFO s5
+		          <if test="condition.accountNo != null and condition.accountNo !=''">
+		              		where s5.BELONG_MERCHANT = '#{condition.accountNo}'
+					</if>
+					)) s6 on s3.commodity_code=s6.commodity_code
+					 <if test="condition.accountNo != null and condition.accountNo !=''">
+		              		 where s1.merchant_id = '#{condition.accountNo}'
+					</if>
+		union all
+		select t.MERCHANT_NAME, v1.ticket_no as commodity_code, v1.ticket_name as commodity_name,v2.COMMODITY_NUMBER,v2.COMMODITY_L_VALUE,v2.COMMODITY_M_VALUE,v2.ORDER_START_DATE,v2.ORDER_CUST_ID
+		  from LOY_QY_MERCHANT_INFO t
+		  left join (select *
+		               from LOY_QY_VIRT_TICKET v
+		               <if test="condition.accountNo != null and condition.accountNo !=''">
+		              		 where v.merchant_no = '#{condition.accountNo}'
+						</if>
+		              ) v1
+		    on t.merchant_id = v1.merchant_no
+		  left join (select *
+		               from LOY_AC_ORDER_LIST v2
+		              where v2.commodity_type = 'V'
+		                and v2.commodity_code in
+		                    (select v.ticket_no
+		                       from LOY_QY_VIRT_TICKET v
+		                       <if test="condition.accountNo != null and condition.accountNo !=''">
+		              		 		where v.merchant_no = '#{condition.accountNo}'
+								</if>
+		                      )) v2
+		    on v2.commodity_code = v1.ticket_no
+		    <if test="condition.accountNo != null and condition.accountNo !=''">
+		    	where t.merchant_id = '#{condition.accountNo}'
+			</if>
+	</select>
+</mapper>

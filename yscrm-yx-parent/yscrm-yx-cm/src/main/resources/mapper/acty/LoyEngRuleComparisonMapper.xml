@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.climp.acty.repository.mapper.LoyEngRuleComparisonMapper">
+    <resultMap id="BaseResultMap" type="cn.com.yusys.climp.acty.domain.LoyEngRuleComparison">
+		<result column="ID" jdbcType="NUMERIC" property="id" />
+		<result column="RULE_ID" jdbcType="NUMERIC" property="ruleId" />
+		<result column="VARIABLE_NAME" jdbcType="VARCHAR" property="variableName" />
+		<result column="OPERATOR" jdbcType="VARCHAR" property="operator" />
+		<result column="COMPARISION_VALUE" jdbcType="VARCHAR" property="comparisionValue" />
+		<result column="PROCESS_ORDER" jdbcType="VARCHAR" property="processOrder" />
+		<result column="VARIABLE_TYPE" jdbcType="VARCHAR" property="variableType" />
+    </resultMap>
+    <sql id="Base_Column_List">
+	    ID,RULE_ID,VARIABLE_NAME,OPERATOR,COMPARISION_VALUE,PROCESS_ORDER,VARIABLE_TYPE
+    </sql>
+    
+    <select id="queryRuleCondition" resultType="java.util.Map">
+    	select t.* from LOY_ENG_RULE_COMPARISON t where 1=1 
+    	and t.rule_id =  #{ruleId}
+    </select>
+    
+    <!-- 根据规则id删除规则比较 -->
+    <delete id="delComparison">
+		delete LOY_ENG_RULE_COMPARISON where rule_id = #{ruleId}
+	</delete>
+	
+	<!-- 删除没有规则信息的规则比较 -->
+	<delete id="delOtherCom">
+		 DELETE FROM LOY_ENG_RULE_COMPARISON T1 WHERE T1.RULE_ID NOT IN (SELECT ID FROM LOY_ENG_RULE_INFO ) 
+	</delete>
+	
+</mapper>

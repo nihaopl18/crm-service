@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.sysview.repository.mapper.AcrmRiskWarnInfoMapper">
+
+    <select id="getRiskInfo" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+            resultType="cn.com.yusys.yscrm.sysview.domain.RiskInfo">
+        SELECT TO_CHAR(EVA_DATE, 'yyyy-mm-dd') AS EVA_DATE,RISK_LEV,RISK_STATUS,EVA_CHANNEL,RISK_TYPE FROM ACRM_F_CI_RISK_WARN_INFO where CUST_ID=#{condition.custId, jdbcType=VARCHAR}
+        UNION all
+        SELECT TO_CHAR(EVA_DATE, 'yyyy-mm-dd') AS EVA_DATE,RISK_LEV,RISK_STATUS,EVA_CHANNEL,RISK_TYPE FROM ACRM_F_CI_RISK_WARN_FIN_INFO where CUST_ID=#{condition.custId, jdbcType=VARCHAR}
+    </select>
+
+
+
+</mapper>

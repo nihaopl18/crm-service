@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.custpub.repository.mapper.AdminSmUserAttrMapper">
+    <resultMap id="BaseResultMap" type="cn.com.yusys.yscrm.custpub.domain.AdminSmUserAttr">
+		<id column="ID" jdbcType="VARCHAR" property="id" />
+		<result column="LOGIN_CODE" jdbcType="VARCHAR" property="loginCode" />
+		<result column="BUSI_TYPE" jdbcType="VARCHAR" property="busiType" />
+    </resultMap>
+    <sql id="Base_Column_List">
+	    ID,LOGIN_CODE,BUSI_TYPE
+    </sql>
+    
+    <select id="qryBusiType" parameterType="java.util.Map" resultType="java.util.HashMap">
+		select * from ADMIN_SM_USER_ATTR  where login_code = #{loginCode}
+	</select>
+	<select id="querybyrolests" parameterType="String" resultType="java.util.HashMap">
+		select role_Code,role_name,role_id from admin_sm_role where role_Code not in 
+		<foreach collection="array" item="roles" index="index" open="(" close=")" separator=",">
+         	#{roles}
+        </foreach>
+	</select>
+	<select id="getUserByParams" parameterType="java.util.Map" resultType="java.util.HashMap">
+		 SELECT T_USER.*,T_DPT.ORG_NAME FROM ADMIN_SM_USER T_USER LEFT JOIN ADMIN_SM_ORG T_DPT ON T_DPT.ORG_ID = T_USER.ORG_ID 
+     WHERE T_USER.USER_STS = 'A' 
+		<if test="orgCode != null and orgCode !=''">
+				  and T_USER.org_id = #{orgCode}
+		</if>
+		<if test="userName != null and userName !=''">
+				  and T_USER.user_name = #{userName}
+		</if>
+		<if test="roleId != null and roleId !=''">
+				   AND USER_ID IN (SELECT T2.USER_ID
+                      FROM ADMIN_SM_USER_ROLE_REL T2
+                     WHERE T2.ROLE_ID = #{roleId}
+                       AND T2.REL_STS = 'A')
+		</if>
+		<if test="loginCode != null and loginCode !=''">
+				  and T_USER.LOGIN_CODE = #{loginCode}
+		</if>
+	</select>
+	
+	<update id="editUserAttr" parameterType="java.util.Map" >
+		update ADMIN_SM_USER_ATTR set busi_type = #{busiType}
+		where login_code = #{loginCode}
+	</update>	
+	<update id="updatePwdTime" parameterType="String" >
+		update admin_sm_user set  last_edit_pass_time=to_char(sysdate,'yyyy-MM-dd hh24:mm:ss') where user_id=#{userId}
+	</update>
+	
+</mapper>

@@ -1,0 +1,527 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.mktactivity.repository.mapper.OcrmFMkActivityMapper">
+	<!-- 营销活动查询 -->
+	<select id="actiListQuery" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+		SELECT DISTINCT T.ACTI_ID,T.PARENT_ACTI_ID,T.ACTI_NAME,T.ACTI_TYPE,T.ACTI_MODE,T.ACTI_STAT,
+		T.MKT_APP_STATE,T.ACTI_AIM,ACTI_CONT,T.CONTACT_CUST,R1.USER_NAME AS MKT_RESP_NAME,
+		TO_CHAR(T.PSTART_DATE,'YYYY-MM-DD') AS PSTART_DATE,TO_CHAR(T.PEND_DATE,'YYYY-MM-DD') AS PEND_DATE,
+		T.MKT_CHANEL,T.ACTI_ADDR,T.ACTI_COST,T.ACTI_CUST_DESC,T.ACTI_OPER_DESC,T.ACTI_PROD_DESC,
+		TO_CHAR(T.ASTART_DATE,'YYYY-MM-DD') AS ASTART_DATE,TO_CHAR(T.AEND_DATE,'YYYY-MM-DD') AS AEND_DATE,
+		T.MKT_RESP_PERSON,T.MKT_RESP_PERSON_ORG,T.CPRT_THREE_PART,T.PRACTICE_COST,T.SPECIFIC_COST_DISTR,
+		T.ACTI_REMARK,T.CREATE_USER,TO_CHAR(T.CREATE_DATE,'YYYY-MM-DD') AS CREATE_DATE,T.CREATE_ORG,T.LAST_UPDATE_USER,
+		TO_CHAR(T.LAST_UPDATE_TM,'YYYY-MM-DD') AS LAST_UPDATE_TM,T.LAST_UPDATE_ORG,R.USER_NAME AS CREATE_NAME,O.ORG_NAME AS CREATE_ORG_NAME,
+		(select count(RECORD_ID) from OCRM_F_MK_ACTI_PRODUCT where ACTI_ID= T.ACTI_ID) as PROD_NUM,
+		(select count(RECORD_ID) from OCRM_F_MK_ACTI_CUST where ACTI_ID= T.ACTI_ID) as CUST_NUM
+		FROM OCRM_F_MK_ACTIVITY T
+		LEFT JOIN ADMIN_SM_USER R ON T.CREATE_USER = R.LOGIN_CODE
+		LEFT JOIN ADMIN_SM_USER R1 ON T.MKT_RESP_PERSON=R1.LOGIN_CODE
+		LEFT JOIN ADMIN_SM_ORG O ON O.ORG_ID=T.CREATE_ORG
+        <where>
+        	T.PARENT_ACTI_ID=0
+        	<if test="dataAuth != null">
+        	 and ${dataAuth}
+        	</if>
+        	<if test="condition.mktOff == 1">
+        		AND T.MKT_APP_STATE = '3'
+        	</if>
+        	<if test="condition.userId != '' and condition.userId != null">
+        		AND T.MKT_RESP_PERSON = #{condition.userId,jdbcType=VARCHAR}
+        	</if>
+        	<if test="condition.actiName != null and condition.actiName != ''">
+        	 AND T.ACTI_NAME LIKE CONCAT('%',CONCAT(#{condition.actiName,jdbcType=VARCHAR},'%'))
+        	</if>
+        	<if test="condition.actiStat != null and condition.actiStat != ''">
+        	  AND T.ACTI_STAT = #{condition.actiStat,jdbcType=VARCHAR}
+        	</if>
+        	<if test="condition.mktAppState != null and condition.mktAppState != ''">
+        	 AND T.MKT_APP_STATE = #{condition.mktAppState,jdbcType=VARCHAR}
+        	</if>
+        	<if test="condition.productId != null and condition.productId != ''">
+        	 AND T.ACTI_ID IN(SELECT ACTI_ID FROM OCRM_F_MK_ACTI_PRODUCT WHERE PRODUCT_ID = #{condition.productId,jdbcType=VARCHAR})
+        	</if>	
+        	<if test="condition.createOrg != null and condition.createOrg != ''">
+        	 AND T.CREATE_ORG = #{condition.createOrg,jdbcType=VARCHAR}
+        	</if>
+        	<if test="condition.createUser != null and condition.createUser != ''">
+        	 AND T.CREATE_USER = #{condition.createUser,jdbcType=VARCHAR}
+        	</if>
+        	<if test="condition.pstartDate != null and condition.pstartDate != ''">
+        	 AND TO_CHAR(T.PSTART_DATE,'YYYY-MM-DD') = #{condition.pstartDate,jdbcType=VARCHAR}
+        	</if>
+        	<if test="condition.pendDate != null and condition.pendDate != ''">
+        	 AND TO_CHAR(T.PEND_DATE,'YYYY-MM-DD') = #{condition.pendDate,jdbcType=VARCHAR}
+        	</if>
+        </where>
+        ORDER BY CREATE_DATE DESC
+	</select>
+		<!-- 我的营销活动查询 -->
+	<select id="myActiListQuery" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+		SELECT DISTINCT T.ACTI_ID,T.PARENT_ACTI_ID,T.ACTI_NAME,T.ACTI_TYPE,T.ACTI_MODE,T.ACTI_STAT,
+		T.MKT_APP_STATE,T.ACTI_AIM,ACTI_CONT,T.CONTACT_CUST,R1.USER_NAME AS MKT_RESP_NAME,R2.USER_NAME AS UPDATE_NAME,
+		TO_CHAR(T.PSTART_DATE,'YYYY-MM-DD') AS PSTART_DATE,TO_CHAR(T.PEND_DATE,'YYYY-MM-DD') AS PEND_DATE,
+		T.MKT_CHANEL,T.ACTI_ADDR,T.ACTI_COST,T.ACTI_CUST_DESC,T.ACTI_OPER_DESC,T.ACTI_PROD_DESC,
+		TO_CHAR(T.ASTART_DATE,'YYYY-MM-DD') AS ASTART_DATE,TO_CHAR(T.AEND_DATE,'YYYY-MM-DD') AS AEND_DATE,
+		T.MKT_RESP_PERSON,T.MKT_RESP_PERSON_ORG,T.CPRT_THREE_PART,T.PRACTICE_COST,T.SPECIFIC_COST_DISTR,
+		T.ACTI_REMARK,T.CREATE_USER,TO_CHAR(T.CREATE_DATE,'YYYY-MM-DD') AS CREATE_DATE,T.CREATE_ORG,T.LAST_UPDATE_USER,
+		TO_CHAR(T.LAST_UPDATE_TM,'YYYY-MM-DD') AS LAST_UPDATE_TM,T.LAST_UPDATE_ORG,R.USER_NAME AS CREATE_NAME,O.ORG_NAME AS CREATE_ORG_NAME,
+		(select count(RECORD_ID) from OCRM_F_MK_ACTI_PRODUCT where ACTI_ID= T.ACTI_ID) as PROD_NUM,
+		(select count(RECORD_ID) from OCRM_F_MK_ACTI_CUST where ACTI_ID= T.ACTI_ID) as CUST_NUM,O1.ORG_NAME AS UPDATE_ORG_NAME
+		FROM OCRM_F_MK_ACTIVITY T
+		LEFT JOIN ADMIN_SM_USER R ON T.CREATE_USER = R.LOGIN_CODE
+		LEFT JOIN ADMIN_SM_USER R2 ON T.LAST_UPDATE_USER=R2.LOGIN_CODE
+		LEFT JOIN ADMIN_SM_USER R1 ON T.MKT_RESP_PERSON=R1.LOGIN_CODE
+		LEFT JOIN ADMIN_SM_ORG O ON O.ORG_ID=T.CREATE_ORG
+		LEFT JOIN ADMIN_SM_ORG O1 ON O1.ORG_ID=T.LAST_UPDATE_ORG
+        <where>
+        	
+				T.ACTI_STAT in('2','3','4') AND EXISTS(select 1 from OCRM_F_MK_ACTI_EXCOBJ where 
+				EXE_OBJ_CODE=#{condition.userId,jdbcType=VARCHAR} and ACTI_ID=T.ACTI_ID)
+        	<if test="condition.actiName != null and condition.actiName != ''">
+        	 AND T.ACTI_NAME LIKE CONCAT('%',CONCAT(#{condition.actiName,jdbcType=VARCHAR},'%'))
+        	</if>
+        	<if test="condition.productId != null and condition.productId != ''">
+        	 AND T.ACTI_ID IN(SELECT ACTI_ID FROM OCRM_F_MK_ACTI_PRODUCT WHERE PRODUCT_ID = #{condition.productId,jdbcType=VARCHAR})
+        	</if>	
+        	<if test="condition.createOrg != null and condition.createOrg != ''">
+        	 AND T.CREATE_ORG = #{condition.createOrg,jdbcType=VARCHAR}
+        	</if>
+        	<if test="condition.createUser != null and condition.createUser != ''">
+        	 AND T.CREATE_USER = #{condition.createUser,jdbcType=VARCHAR}
+        	</if>
+        	<if test="condition.pstartDate != null and condition.pstartDate != ''">
+        	 AND TO_CHAR(T.PSTART_DATE,'YYYY-MM-DD') = #{condition.pstartDate,jdbcType=VARCHAR}
+        	</if>
+        	<if test="condition.pendDate != null and condition.pendDate != ''">
+        	 AND TO_CHAR(T.PEND_DATE,'YYYY-MM-DD') = #{condition.pendDate,jdbcType=VARCHAR}
+        	</if>
+        </where>
+        ORDER BY CREATE_DATE DESC
+	</select>
+	<!-- 客户经理监控  -->
+	<select id="cmMonitor" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+		SELECT T7.ORG_ID,T1.EXE_OBJ_NAME,T.ACTI_NAME,
+        COUNT(T4.PRODUCT_ID) AS PROD_NUM,
+        COUNT(T3.CUST_ID) AS CUST_NUM,
+        COUNT(distinct DECODE(T3.PROGRESS_STEP,1,1,NULL)) AS PROCESS_NUM,
+        COUNT(distinct DECODE(T5.RELATION_CUSTOMER,1,1,NULL)) AS RELATION_NUM,
+        COUNT(distinct DECODE(SIGN(T2.ACHIEVE_VALUE-T2.TARGET_VALUE),1,1,NULL)) AS SUCCESS_NUM,
+        COUNT(distinct DECODE(SIGN(T2.ACHIEVE_VALUE-T2.TARGET_VALUE),-1,1,NULL)) AS FAIL_NUM,
+        COUNT(DECODE(SIGN(T2.ACHIEVE_VALUE-T2.TARGET_VALUE),1,1,NULL))/DECODE(SIGN((COUNT(DECODE(SIGN(T2.ACHIEVE_VALUE-T2.TARGET_VALUE),1,1,NULL))+COUNT(DECODE(SIGN(T2.ACHIEVE_VALUE-T2.TARGET_VALUE),-1,1,NULL)))),0,1,NULL) AS SUCCESS_PERCENT,
+        COUNT(DECODE(SIGN(T2.ACHIEVE_VALUE-T2.TARGET_VALUE),-1,1,NULL))/DECODE(SIGN((COUNT(DECODE(SIGN(T2.ACHIEVE_VALUE-T2.TARGET_VALUE),1,1,NULL))+COUNT(DECODE(SIGN(T2.ACHIEVE_VALUE-T2.TARGET_VALUE),-1,1,NULL)))),0,1,NULL) AS FAIL_PERCENT
+        FROM OCRM_F_MK_ACTIVITY T 
+        LEFT JOIN OCRM_F_MK_ACTI_EXCOBJ T1 ON T.ACTI_ID = T1.ACTI_ID
+        LEFT JOIN OCRM_F_MK_ACTI_TARGET T2 ON T.ACTI_ID = T2.ACTI_ID
+        LEFT JOIN OCRM_F_MK_ACTI_CUST T3 ON T.ACTI_ID = T3.ACTI_ID
+        LEFT JOIN OCRM_F_MK_ACTI_PRODUCT T4 ON T.ACTI_ID = T4.ACTI_ID
+        LEFT JOIN OCRM_F_MK_ACTI_EXC_RECORD T5 ON T.ACTI_ID = T5.ACTI_ID
+        LEFT JOIN ADMIN_SM_USER_ROLE_REL T6 ON T6.USER_ID = T1.EXE_OBJ_CODE
+        LEFT JOIN ADMIN_SM_ROLE T7 ON T7.ROLE_ID = T6.ROLE_ID
+        <where>
+        	T1.EXE_OBJ_TYPE = '0'
+        <if test="condition.orgId != '' and condition.orgId != null">
+        	AND T7.ORG_ID = #{condition.orgId,jdbcType=VARCHAR}
+        </if>
+        <if test="condition.exeObjCode != '' and condition.exeObjCode != null">
+        	AND T1.EXE_OBJ_CODE = #{condition.exeObjCode,jdbcType=VARCHAR}
+        </if>
+        <if test="condition.actiName != '' and condition.actiName != null">
+        	AND T.ACTI_NAME LIKE CONCAT('%',CONCAT(#{condition.actiName,jdbcType=VARCHAR},'%'))
+        </if>
+        <if test="condition.actiStat != '' and condition.actiStat != null">
+        	AND T.ACTI_STAT = #{condition.actiStat,jdbcType=VARCHAR}
+        </if>		
+        </where>
+        GROUP BY T1.EXE_OBJ_NAME,T.ACTI_NAME,T7.ORG_ID
+	</select>
+	<!-- 客户经理监控执行中数 -->
+	<select id="cmMonitorRelation" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+		SELECT T1.EXE_OBJ_NAME,T.ACTI_NAME,T3.CUST_NAME,T4.PRODUCT_NAME FROM OCRM_F_MK_ACTIVITY T 
+        LEFT JOIN OCRM_F_MK_ACTI_EXCOBJ T1 ON T.ACTI_ID = T1.ACTI_ID
+        LEFT JOIN OCRM_F_MK_ACTI_TARGET T2 ON T.ACTI_ID = T2.ACTI_ID
+        LEFT JOIN OCRM_F_MK_ACTI_CUST T3 ON T.ACTI_ID = T3.ACTI_ID
+        LEFT JOIN OCRM_F_MK_ACTI_PRODUCT T4 ON T.ACTI_ID = T4.ACTI_ID
+        LEFT JOIN OCRM_F_MK_ACTI_EXC_RECORD T5 ON T.ACTI_ID = T5.ACTI_ID
+        WHERE T3.PROGRESS_STEP = '1' AND T1.EXE_OBJ_NAME = #{condition.exeObjName,jdbcType=VARCHAR} AND T.ACTI_NAME = #{condition.actiName,jdbcType=VARCHAR}
+	</select>
+	<!-- 客户经理监控成功数 -->
+	<select id="cmMonitorSuccess" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+		SELECT DISTINCT T1.EXE_OBJ_NAME,T.ACTI_NAME,T3.CUST_NAME,T4.PRODUCT_NAME FROM OCRM_F_MK_ACTIVITY T 
+        LEFT JOIN OCRM_F_MK_ACTI_EXCOBJ T1 ON T.ACTI_ID = T1.ACTI_ID
+        LEFT JOIN OCRM_F_MK_ACTI_TARGET T2 ON T.ACTI_ID = T2.ACTI_ID
+        LEFT JOIN OCRM_F_MK_ACTI_CUST T3 ON T.ACTI_ID = T3.ACTI_ID
+        LEFT JOIN OCRM_F_MK_ACTI_PRODUCT T4 ON T.ACTI_ID = T4.ACTI_ID
+        LEFT JOIN OCRM_F_MK_ACTI_EXC_RECORD T5 ON T.ACTI_ID = T5.ACTI_ID
+        WHERE SIGN(T2.ACHIEVE_VALUE-T2.TARGET_VALUE) = 1 AND T1.EXE_OBJ_NAME = #{condition.exeObjName,jdbcType=VARCHAR} AND T.ACTI_NAME = #{condition.actiName,jdbcType=VARCHAR}
+	</select>
+	<!-- 客户经理监控失败数 -->
+	<select id="cmMonitorFail" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+		SELECT T1.EXE_OBJ_NAME,T.ACTI_NAME,T3.CUST_NAME,T4.PRODUCT_NAME,T5.REMARK FROM OCRM_F_MK_ACTIVITY T 
+        LEFT JOIN OCRM_F_MK_ACTI_EXCOBJ T1 ON T.ACTI_ID = T1.ACTI_ID
+        LEFT JOIN OCRM_F_MK_ACTI_TARGET T2 ON T.ACTI_ID = T2.ACTI_ID
+        LEFT JOIN OCRM_F_MK_ACTI_CUST T3 ON T.ACTI_ID = T3.ACTI_ID
+        LEFT JOIN OCRM_F_MK_ACTI_PRODUCT T4 ON T.ACTI_ID = T4.ACTI_ID
+        LEFT JOIN OCRM_F_MK_ACTI_EXC_RECORD T5 ON T.ACTI_ID = T5.ACTI_ID
+        WHERE SIGN(T2.ACHIEVE_VALUE-T2.TARGET_VALUE) = -1 AND T1.EXE_OBJ_NAME = #{condition.exeObjName,jdbcType=VARCHAR} AND T.ACTI_NAME = #{condition.actiName,jdbcType=VARCHAR}
+	</select>
+	<!-- 机构监控 -->
+	<select id="orgMonitor" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+		SELECT T1.EXE_OBJ_NAME,T.ACTI_NAME,
+        COUNT(T4.PRODUCT_ID) AS PROD_NUM,
+        COUNT(T3.CUST_ID) AS CUST_NUM,
+        COUNT(distinct DECODE(T3.PROGRESS_STEP,1,1,NULL)) AS PROCESS_NUM,
+        COUNT(distinct DECODE(T5.RELATION_CUSTOMER,1,1,NULL)) AS RELATION_NUM,
+        COUNT(distinct DECODE(SIGN(T2.ACHIEVE_VALUE-T2.TARGET_VALUE),1,1,NULL)) AS SUCCESS_NUM,
+        COUNT(distinct DECODE(SIGN(T2.ACHIEVE_VALUE-T2.TARGET_VALUE),-1,1,NULL)) AS FAIL_NUM,
+        COUNT(DECODE(SIGN(T2.ACHIEVE_VALUE-T2.TARGET_VALUE),1,1,NULL))/DECODE(SIGN((COUNT(DECODE(SIGN(T2.ACHIEVE_VALUE-T2.TARGET_VALUE),1,1,NULL))+COUNT(DECODE(SIGN(T2.ACHIEVE_VALUE-T2.TARGET_VALUE),-1,1,NULL)))),0,1,NULL) AS SUCCESS_PERCENT,
+        COUNT(DECODE(SIGN(T2.ACHIEVE_VALUE-T2.TARGET_VALUE),-1,1,NULL))/DECODE(SIGN((COUNT(DECODE(SIGN(T2.ACHIEVE_VALUE-T2.TARGET_VALUE),1,1,NULL))+COUNT(DECODE(SIGN(T2.ACHIEVE_VALUE-T2.TARGET_VALUE),-1,1,NULL)))),0,1,NULL) AS FAIL_PERCENT,
+        to_char(sysdate,'YYYY-MM-DD') as MONITOR_DATE
+        FROM OCRM_F_MK_ACTIVITY T 
+        LEFT JOIN OCRM_F_MK_ACTI_EXCOBJ T1 ON T.ACTI_ID = T1.ACTI_ID
+        LEFT JOIN OCRM_F_MK_ACTI_TARGET T2 ON T.ACTI_ID = T2.ACTI_ID
+        LEFT JOIN OCRM_F_MK_ACTI_CUST T3 ON T.ACTI_ID = T3.ACTI_ID
+        LEFT JOIN OCRM_F_MK_ACTI_PRODUCT T4 ON T.ACTI_ID = T4.ACTI_ID
+        LEFT JOIN OCRM_F_MK_ACTI_EXC_RECORD T5 ON T.ACTI_ID = T5.ACTI_ID
+        <where>
+        	T1.EXE_OBJ_TYPE = '1'
+        	<if test="condition.exeObjCode != '' and condition.exeObjCode != null">
+        		AND T1.EXE_OBJ_CODE = #{condition.exeObjCode,jdbcType=VARCHAR}
+	        </if>
+	        <if test="condition.actiName != '' and condition.actiName != null">
+	        	AND T.ACTI_NAME LIKE CONCAT('%',CONCAT(#{condition.actiName,jdbcType=VARCHAR},'%'))
+	        </if>
+	        <if test="condition.actiStat != '' and condition.actiStat != null">
+	        	AND T.ACTI_STAT = #{condition.actiStat,jdbcType=VARCHAR}
+	        </if>
+        </where>
+        GROUP BY T1.EXE_OBJ_NAME,T.ACTI_NAME
+	</select>
+	<!-- 机构监控执行中数 -->
+	<select id="orgMonitorRelation" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+		SELECT T1.EXE_OBJ_NAME,T.ACTI_NAME,T3.CUST_NAME,T4.PRODUCT_NAME FROM OCRM_F_MK_ACTIVITY T 
+        LEFT JOIN OCRM_F_MK_ACTI_EXCOBJ T1 ON T.ACTI_ID = T1.ACTI_ID
+        LEFT JOIN OCRM_F_MK_ACTI_TARGET T2 ON T.ACTI_ID = T2.ACTI_ID
+        LEFT JOIN OCRM_F_MK_ACTI_CUST T3 ON T.ACTI_ID = T3.ACTI_ID
+        LEFT JOIN OCRM_F_MK_ACTI_PRODUCT T4 ON T.ACTI_ID = T4.ACTI_ID
+        LEFT JOIN OCRM_F_MK_ACTI_EXC_RECORD T5 ON T.ACTI_ID = T5.ACTI_ID
+        WHERE T3.PROGRESS_STEP = '1' AND T1.EXE_OBJ_NAME = #{condition.exeObjName,jdbcType=VARCHAR} AND T.ACTI_NAME = #{condition.actiName,jdbcType=VARCHAR}
+	</select>
+	<!-- 机构监控成功数 -->
+	<select id="orgMonitorSuccess" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+		SELECT DISTINCT T1.EXE_OBJ_NAME,T.ACTI_NAME,T3.CUST_NAME,T4.PRODUCT_NAME FROM OCRM_F_MK_ACTIVITY T 
+        LEFT JOIN OCRM_F_MK_ACTI_EXCOBJ T1 ON T.ACTI_ID = T1.ACTI_ID
+        LEFT JOIN OCRM_F_MK_ACTI_TARGET T2 ON T.ACTI_ID = T2.ACTI_ID
+        LEFT JOIN OCRM_F_MK_ACTI_CUST T3 ON T.ACTI_ID = T3.ACTI_ID
+        LEFT JOIN OCRM_F_MK_ACTI_PRODUCT T4 ON T.ACTI_ID = T4.ACTI_ID
+        LEFT JOIN OCRM_F_MK_ACTI_EXC_RECORD T5 ON T.ACTI_ID = T5.ACTI_ID
+        WHERE SIGN(T2.ACHIEVE_VALUE-T2.TARGET_VALUE) = 1 AND T1.EXE_OBJ_NAME = #{condition.exeObjName,jdbcType=VARCHAR} AND T.ACTI_NAME = #{condition.actiName,jdbcType=VARCHAR}
+	</select>
+	<!-- 机构监控失败数 -->
+	<select id="orgMonitorFail" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+		SELECT T1.EXE_OBJ_NAME,T.ACTI_NAME,T3.CUST_NAME,T4.PRODUCT_NAME,T5.REMARK FROM OCRM_F_MK_ACTIVITY T 
+        LEFT JOIN OCRM_F_MK_ACTI_EXCOBJ T1 ON T.ACTI_ID = T1.ACTI_ID
+        LEFT JOIN OCRM_F_MK_ACTI_TARGET T2 ON T.ACTI_ID = T2.ACTI_ID
+        LEFT JOIN OCRM_F_MK_ACTI_CUST T3 ON T.ACTI_ID = T3.ACTI_ID
+        LEFT JOIN OCRM_F_MK_ACTI_PRODUCT T4 ON T.ACTI_ID = T4.ACTI_ID
+        LEFT JOIN OCRM_F_MK_ACTI_EXC_RECORD T5 ON T.ACTI_ID = T5.ACTI_ID
+        WHERE SIGN(T2.ACHIEVE_VALUE-T2.TARGET_VALUE) = -1 AND T1.EXE_OBJ_NAME = #{condition.exeObjName,jdbcType=VARCHAR} AND T.ACTI_NAME = #{condition.actiName,jdbcType=VARCHAR}
+	</select>
+	<!-- 活动监控 -->
+	<select id="actiMonitor" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+		SELECT T.ACTI_NAME,
+        COUNT(T4.PRODUCT_ID) AS PROD_NUM,
+        COUNT(T3.CUST_ID) AS CUST_NUM,
+        COUNT(distinct DECODE(T3.PROGRESS_STEP,1,1,NULL)) AS PROCESS_NUM,
+        COUNT(distinct DECODE(T5.RELATION_CUSTOMER,1,1,NULL)) AS RELATION_NUM,
+        COUNT(distinct DECODE(SIGN(T2.ACHIEVE_VALUE-T2.TARGET_VALUE),1,1,NULL)) AS SUCCESS_NUM,
+        COUNT(distinct DECODE(SIGN(T2.ACHIEVE_VALUE-T2.TARGET_VALUE),-1,1,NULL)) AS FAIL_NUM,
+        COUNT(DECODE(SIGN(T2.ACHIEVE_VALUE-T2.TARGET_VALUE),1,1,NULL))/DECODE(SIGN((COUNT(DECODE(SIGN(T2.ACHIEVE_VALUE-T2.TARGET_VALUE),1,1,NULL))+COUNT(DECODE(SIGN(T2.ACHIEVE_VALUE-T2.TARGET_VALUE),-1,1,NULL)))),0,1,NULL) AS SUCCESS_PERCENT,
+        COUNT(DECODE(SIGN(T2.ACHIEVE_VALUE-T2.TARGET_VALUE),-1,1,NULL))/DECODE(SIGN((COUNT(DECODE(SIGN(T2.ACHIEVE_VALUE-T2.TARGET_VALUE),1,1,NULL))+COUNT(DECODE(SIGN(T2.ACHIEVE_VALUE-T2.TARGET_VALUE),-1,1,NULL)))),0,1,NULL) AS FAIL_PERCENT,
+        to_char(sysdate,'YYYY-MM-DD') as MONITOR_DATE
+        FROM OCRM_F_MK_ACTIVITY T 
+        LEFT JOIN OCRM_F_MK_ACTI_EXCOBJ T1 ON T.ACTI_ID = T1.ACTI_ID
+        LEFT JOIN OCRM_F_MK_ACTI_TARGET T2 ON T.ACTI_ID = T2.ACTI_ID
+        LEFT JOIN OCRM_F_MK_ACTI_CUST T3 ON T.ACTI_ID = T3.ACTI_ID
+        LEFT JOIN OCRM_F_MK_ACTI_PRODUCT T4 ON T.ACTI_ID = T4.ACTI_ID
+        LEFT JOIN OCRM_F_MK_ACTI_EXC_RECORD T5 ON T.ACTI_ID = T5.ACTI_ID
+        <where>
+            1=1
+        	<if test="condition.actiName != '' and condition.actiName != null">
+	        AND	T.ACTI_NAME LIKE CONCAT('%',CONCAT(#{condition.actiName,jdbcType=VARCHAR},'%'))
+	        </if>
+	        <if test="condition.actiStat != '' and condition.actiStat != null">
+	        AND	T.ACTI_STAT = #{condition.actiStat,jdbcType=VARCHAR}
+	        </if>
+        </where>
+        GROUP BY T.ACTI_NAME
+	</select>
+	<!-- 活动监控执行中数 -->
+	<select id="actiMonitorRelation" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+		SELECT T1.EXE_OBJ_NAME,T.ACTI_NAME,T3.CUST_NAME,T4.PRODUCT_NAME FROM OCRM_F_MK_ACTIVITY T 
+        LEFT JOIN OCRM_F_MK_ACTI_EXCOBJ T1 ON T.ACTI_ID = T1.ACTI_ID
+        LEFT JOIN OCRM_F_MK_ACTI_TARGET T2 ON T.ACTI_ID = T2.ACTI_ID
+        LEFT JOIN OCRM_F_MK_ACTI_CUST T3 ON T.ACTI_ID = T3.ACTI_ID
+        LEFT JOIN OCRM_F_MK_ACTI_PRODUCT T4 ON T.ACTI_ID = T4.ACTI_ID
+        LEFT JOIN OCRM_F_MK_ACTI_EXC_RECORD T5 ON T.ACTI_ID = T5.ACTI_ID
+        WHERE T3.PROGRESS_STEP = '1' AND T.ACTI_NAME = #{condition.actiName,jdbcType=VARCHAR}
+	</select>
+	<!-- 活动监控成功数 -->
+	<select id="actiMonitorSuccess" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+		SELECT DISTINCT T1.EXE_OBJ_NAME,T.ACTI_NAME,T3.CUST_NAME,T4.PRODUCT_NAME FROM OCRM_F_MK_ACTIVITY T 
+        LEFT JOIN OCRM_F_MK_ACTI_EXCOBJ T1 ON T.ACTI_ID = T1.ACTI_ID
+        LEFT JOIN OCRM_F_MK_ACTI_TARGET T2 ON T.ACTI_ID = T2.ACTI_ID
+        LEFT JOIN OCRM_F_MK_ACTI_CUST T3 ON T.ACTI_ID = T3.ACTI_ID
+        LEFT JOIN OCRM_F_MK_ACTI_PRODUCT T4 ON T.ACTI_ID = T4.ACTI_ID
+        LEFT JOIN OCRM_F_MK_ACTI_EXC_RECORD T5 ON T.ACTI_ID = T5.ACTI_ID
+        WHERE SIGN(T2.ACHIEVE_VALUE-T2.TARGET_VALUE) = 1 AND T.ACTI_NAME = #{condition.actiName,jdbcType=VARCHAR}
+	</select>
+	<!-- 活动监控失败数 -->
+	<select id="actiMonitorFail" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+		SELECT T1.EXE_OBJ_NAME,T.ACTI_NAME,T3.CUST_NAME,T4.PRODUCT_NAME,T5.REMARK FROM OCRM_F_MK_ACTIVITY T 
+        LEFT JOIN OCRM_F_MK_ACTI_EXCOBJ T1 ON T.ACTI_ID = T1.ACTI_ID
+        LEFT JOIN OCRM_F_MK_ACTI_TARGET T2 ON T.ACTI_ID = T2.ACTI_ID
+        LEFT JOIN OCRM_F_MK_ACTI_CUST T3 ON T.ACTI_ID = T3.ACTI_ID
+        LEFT JOIN OCRM_F_MK_ACTI_PRODUCT T4 ON T.ACTI_ID = T4.ACTI_ID
+        LEFT JOIN OCRM_F_MK_ACTI_EXC_RECORD T5 ON T.ACTI_ID = T5.ACTI_ID
+        WHERE SIGN(T2.ACHIEVE_VALUE-T2.TARGET_VALUE) = -1 AND T.ACTI_NAME = #{condition.actiName,jdbcType=VARCHAR}	
+	</select>
+	<!-- 营销活动关联产品信息查询 -->
+	<select id="actiProdListQuery" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+		SELECT T.*,t1.USER_NAME AS CREATE_NAME FROM OCRM_F_MK_ACTI_PRODUCT T 
+		left join admin_sm_user t1 on t1.login_code = T.CREATE_USER
+		WHERE T.ACTI_ID = #{condition.actiId,jdbcType=DECIMAL}
+	</select>
+	<!-- 营销活动关联客户信息查询 -->
+	<select id="actiCustListQuery" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+		SELECT T.*,T1.USER_NAME AS RELATION_USER_NAME,T2.USER_NAME AS CUST_MANAGER_NAME,
+		T3.ORG_NAME AS CUST_MANAGER_ORG_NAME FROM OCRM_F_MK_ACTI_CUST T 
+		left join ADMIN_SM_USER t1 on T1.login_code = T.CREATE_USER
+		left join ADMIN_SM_USER t2 on T2.USER_ID =T.CUST_MANAGER
+		LEFT JOIN ADMIN_SM_ORG T3 ON T3.ORG_ID=T.CUST_MANAGER_ORG
+		WHERE T.ACTI_ID = #{condition.actiId,jdbcType=DECIMAL}
+	</select>
+	<!-- 营销成效指标查询机构类 -->
+	<select id="actiOrgTargetListQuery" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+		SELECT T.* FROM OCRM_F_MK_ACTI_EXCOBJ T 
+		<where>
+		    T.ACTI_ID = #{condition.actiId,jdbcType=DECIMAL} AND T.EXE_OBJ_TYPE ='1'
+		 <if test="condition.org != null and condition.org != ''">
+			AND T.EXE_OBJ_CODE IN(SELECT ORG_ID FROM sys_org_view WHERE ORG_SEQ LIKE CONCAT('%,',CONCAT(#{condition.org,jdbcType=VARCHAR},',%')))
+		</if>
+		</where>
+	</select>
+		<!-- 营销成效指标查询 客户经理类-->
+	<select id="actiUserTargetListQuery" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+		SELECT T.* FROM OCRM_F_MK_ACTI_EXCOBJ T 
+		LEFT JOIN ADMIN_SM_USER T1 ON T1.USER_ID=T.EXE_OBJ_CODE AND T.EXE_OBJ_TYPE='0'
+		<where>
+		T.ACTI_ID = #{condition.actiId,jdbcType=DECIMAL} AND T.EXE_OBJ_TYPE='0'
+		 <if test="condition.org != null and condition.org != ''">
+			AND T1.ORG_ID IN(SELECT ORG_ID FROM sys_org_view WHERE ORG_SEQ LIKE CONCAT('%,',CONCAT(#{condition.org,jdbcType=VARCHAR},',%')))
+		</if>
+		</where>
+	</select>
+	<!-- 营销活动附件信息查询 -->
+	<select id="actiFileListQuery" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+		SELECT T.* FROM ADMIN_FILE_UPLOAD_INFO T WHERE T.BUS_NO = #{condition.busNo,jdbcType=VARCHAR}
+	</select>
+	<!-- 营销活动删除 -->
+	<delete id="actiDel" parameterType="BigDecimal">
+		DELETE FROM OCRM_F_MK_ACTIVITY WHERE ACTI_ID = #{actiId,jdbcType=DECIMAL} or PARENT_ACTI_ID = #{actiId,jdbcType=DECIMAL}
+	</delete>
+		<!-- 删除对应机构下的指标设置数据 -->
+	<delete id="delTargetByOrg" parameterType="java.util.HashMap">
+		DELETE FROM OCRM_F_MK_ACTI_TARGET WHERE ACTI_ID=#{actiId,jdbcType=DECIMAL} 
+		<if test="objCode != null">
+			and EXE_OBJ_CODE in 
+			<foreach collection="objCode" item="item" index="index" open="(" close=")" separator=",">
+        		#{item}
+        	</foreach>
+		</if>
+	</delete>
+			<!-- 删除对应机构下的指标执行对象信息-->
+	<delete id="delTargetObjByOrg" parameterType="java.util.HashMap">
+		DELETE FROM OCRM_F_MK_ACTI_EXCOBJ WHERE ACTI_ID=#{actiId,jdbcType=DECIMAL} 
+		<if test="objCode != null">
+			and EXE_OBJ_CODE in 
+			<foreach collection="objCode" item="item" index="index" open="(" close=")" separator=",">
+        		#{item}
+        	</foreach>
+		</if>
+	</delete>
+	<!-- 营销活动指标分解中的分配更新活动客户表 -->
+	<update id="actiCustDcom" parameterType="java.util.HashMap">
+		UPDATE OCRM_F_MK_ACTI_CUST SET 
+		CUST_MANAGER = #{toUser,jdbcType=VARCHAR},
+		LAST_UPDATE_USER = #{lastUpdateUser,jdbcType=VARCHAR},
+		LAST_UPDATE_TM = #{lastUpdateTm,jdbcType=DATE},
+		LAST_UPDATE_ORG = #{lastUpdateOrg,jdbcType=VARCHAR}
+		WHERE ACTI_ID = #{actiId,jdbcType=DECIMAL} and CUST_MANAGER =#{formUser,jdbcType=VARCHAR}
+	</update>
+	<!-- 营销活动下达 -->
+	<update id="actiRelease" parameterType="java.util.HashMap">
+		UPDATE OCRM_F_MK_ACTIVITY SET 
+		ACTI_STAT = '5',
+		LAST_UPDATE_USER = #{lastUpdateUser,jdbcType=VARCHAR},
+		LAST_UPDATE_TM = #{lastUpdateTm,jdbcType=DATE},
+		LAST_UPDATE_ORG = #{lastUpdateOrg,jdbcType=VARCHAR}
+		WHERE ACTI_ID = #{actiId,jdbcType=DECIMAL}
+	</update>
+	<!-- 修改指标执行对象表 -->
+	<update id="actiCustTaskObj" parameterType="java.util.HashMap">
+		UPDATE OCRM_F_MK_ACTI_EXCOBJ SET 
+		EXE_OBJ_CODE = #{toUser,jdbcType=VARCHAR},
+		EXE_OBJ_NAME =#{toName,jdbcType=VARCHAR},
+		UPDATE_USER = #{lastUpdateUser,jdbcType=VARCHAR},
+		UPDATE_DATE = #{lastUpdateTm,jdbcType=DATE},
+		UPDATE_ORG = #{lastUpdateOrg,jdbcType=VARCHAR}
+		WHERE ACTI_ID = #{actiId,jdbcType=DECIMAL} and EXE_OBJ_CODE =#{formUser,jdbcType=VARCHAR}
+	</update>
+	<!-- 修改指标执行对象表 -->
+	<update id="actiCustTaskInfo" parameterType="java.util.HashMap">
+		UPDATE OCRM_F_MK_ACTI_TARGET SET 
+		EXE_OBJ_CODE = #{toUser,jdbcType=VARCHAR},
+		EXE_OBJ_NAME =#{toName,jdbcType=VARCHAR},
+		UPDATE_USER = #{lastUpdateUser,jdbcType=VARCHAR},
+		UPDATE_DATE = #{lastUpdateTm,jdbcType=DATE},
+		UPDATE_ORG = #{lastUpdateOrg,jdbcType=VARCHAR}
+		WHERE ACTI_ID = #{actiId,jdbcType=DECIMAL} and EXE_OBJ_CODE =#{formUser,jdbcType=VARCHAR}
+	</update>
+	<!-- 营销活动提交 -->
+	<update id="actiApproval" parameterType="cn.com.yusys.yscrm.mktactivity.domain.OcrmFMkActivityInfo">
+		UPDATE OCRM_F_MK_ACTIVITY SET 
+		ACTI_STAT = '1',
+		MKT_APP_STATE = '1',
+		LAST_UPDATE_USER = #{lastUpdateUser,jdbcType=VARCHAR},
+		LAST_UPDATE_TM = #{lastUpdateTm,jdbcType=DATE},
+		LAST_UPDATE_ORG = #{lastUpdateOrg,jdbcType=VARCHAR}
+		WHERE ACTI_ID = #{actiId,jdbcType=DECIMAL}
+	</update>
+	<!-- 营销活动执行 -->
+	<update id="actiExecute" parameterType="cn.com.yusys.yscrm.mktactivity.domain.OcrmFMkActivityInfo">
+		UPDATE OCRM_F_MK_ACTIVITY SET 
+		ACTI_STAT = '2',
+		<if test="pendDate != null">
+		PEND_DATE = #{pendDate,jdbcType=DATE},
+		</if>
+		ASTART_DATE=#{astartDate,jdbcType=DATE},
+		LAST_UPDATE_USER = #{lastUpdateUser,jdbcType=VARCHAR},
+		LAST_UPDATE_TM = #{lastUpdateTm,jdbcType=DATE},
+		LAST_UPDATE_ORG = #{lastUpdateOrg,jdbcType=VARCHAR}
+		WHERE ACTI_ID = #{actiId,jdbcType=DECIMAL}
+	</update>
+	<!-- 营销活动审批成功 -->
+	<update parameterType="cn.com.yusys.yscrm.mktactivity.domain.OcrmFMkActivityInfo" id="actiUpSuccess"> 
+		UPDATE OCRM_F_MK_ACTIVITY SET MKT_APP_STATE = '2', 
+		LAST_UPDATE_USER = #{lastUpdateUser,jdbcType=VARCHAR}, 
+		LAST_UPDATE_TM = #{lastUpdateTm,jdbcType=DATE}, 
+		LAST_UPDATE_ORG = #{lastUpdateOrg,jdbcType=VARCHAR} 
+		WHERE ACTI_ID = #{actiId,jdbcType=DECIMAL} 
+	</update>
+	<!-- 营销活动审批失败 -->
+	<update parameterType="cn.com.yusys.yscrm.mktactivity.domain.OcrmFMkActivityInfo" id="actiUpFailed"> 
+		UPDATE OCRM_F_MK_ACTIVITY SET MKT_APP_STATE = '3', 
+		LAST_UPDATE_USER = #{lastUpdateUser,jdbcType=VARCHAR}, 
+		LAST_UPDATE_TM = #{lastUpdateTm,jdbcType=DATE}, 
+		LAST_UPDATE_ORG = #{lastUpdateOrg,jdbcType=VARCHAR} 
+		WHERE ACTI_ID = #{actiId,jdbcType=DECIMAL} 
+	</update>
+	<!-- 营销活动关闭 -->
+	<update id="actiOff" parameterType="cn.com.yusys.yscrm.mktactivity.domain.OcrmFMkActivityInfo">
+		UPDATE OCRM_F_MK_ACTIVITY SET 
+		ACTI_STAT = '3',
+		AEND_DATE=#{aendDate,jdbcType=DATE},
+		LAST_UPDATE_USER = #{lastUpdateUser,jdbcType=VARCHAR},
+		LAST_UPDATE_TM = #{lastUpdateTm,jdbcType=DATE},
+		LAST_UPDATE_ORG = #{lastUpdateOrg,jdbcType=VARCHAR}
+		WHERE ACTI_ID = #{actiId,jdbcType=DECIMAL}
+	</update>
+	<!-- 营销活动移交 -->
+	<insert id="actiTransfer" parameterType="cn.com.yusys.yscrm.mktactivity.domain.OcrmFMkActiTransApplyInfo">
+		INSERT INTO  OCRM_F_MK_ACTI_TRANS_APPLY (
+		RECORD_ID,
+        ACTI_ID,
+        ACTI_NAME,
+        FROM_USER,
+        TO_USER,
+        MOVE_DATE,
+        REMARK,
+        CREATE_USER,
+        CREATE_DATE,
+        CREATE_ORG,
+        UPDATE_USER,
+        UPDATE_DATE,
+        UPDATE_ORG) VALUES (
+		#{recordId,jdbcType=DECIMAL},
+		#{actiId,jdbcType=DECIMAL},
+		#{actiName,jdbcType=VARCHAR},
+		#{fromUser,jdbcType=VARCHAR},
+		#{toUser,jdbcType=VARCHAR},
+		#{moveDate,jdbcType=DATE},
+		#{remark,jdbcType=VARCHAR},
+		#{createUser,jdbcType=VARCHAR},
+		#{createDate,jdbcType=DATE},
+		#{createOrg,jdbcType=VARCHAR},
+		#{updateUser,jdbcType=VARCHAR},
+		#{updateDate,jdbcType=DATE},
+		#{updateOrg,jdbcType=VARCHAR}
+		)
+	</insert>
+	<!-- 营销活动名称验重 -->
+	<select id="actiSameName" parameterType="cn.com.yusys.yscrm.mktactivity.domain.OcrmFMkActivityInfo" resultType="int">
+		SELECT COUNT(1) FROM OCRM_F_MK_ACTIVITY WHERE ACTI_ID <![CDATA[!= ]]> #{actiId,jdbcType=DECIMAL} AND ACTI_NAME = #{actiName,jdbcType=DECIMAL}
+	</select>
+	<!-- 返回活动数据 -->
+	<select id="getActiById" parameterType="java.math.BigDecimal" resultType="cn.com.yusys.yscrm.mktactivity.domain.OcrmFMkActivityInfo">
+		SELECT * FROM OCRM_F_MK_ACTIVITY WHERE ACTI_ID = #{actiId,jdbcType=DECIMAL}
+	</select>
+	<!-- 自增序列 -->
+	<select id="getSeq" resultType="BigDecimal">
+		SELECT mkt_seq.nextval FROM dual
+	</select>
+	<!-- 返回活动状态 -->
+	<select id="getActiStat" parameterType="BigDecimal" resultType="String">
+		SELECT ACTI_STAT FROM  OCRM_F_MK_ACTIVITY WHERE ACTI_ID = #{actiId,jdbcType=DECIMAL}
+	</select>
+	<!-- 返回子活动信息 -->
+	<select id="getSonNode" parameterType="BigDecimal" resultType="java.util.HashMap">
+		SELECT R.exe_obj_type,r.exe_obj_code,
+		decode(R.exe_obj_type,0,U.USER_NAME,1,O.ORG_NAME,'未知') AS ACTI_NAME
+		FROM OCRM_F_MK_ACTIVITY T
+		LEFT JOIN OCRM_F_MK_ACTI_EXCOBJ R ON T.ACTI_ID = R.ACTI_ID
+		LEFT JOIN ADMIN_SM_USER U ON U.USER_ID = R.EXE_OBJ_CODE
+		LEFT JOIN ADMIN_SM_ORG O ON O.ORG_CODE = R.EXE_OBJ_CODE
+		WHERE T.ACTI_ID = #{actiId,jdbcType=DECIMAL}
+		AND R.exe_obj_type is not null and r.exe_obj_code is not null
+	</select>
+	<!-- 营销活动分析树 -->
+	<select id="actiTree" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+		SELECT T.ACTI_ID,T.PARENT_ACTI_ID,T.ACTI_NAME,T.MKT_RESP_PERSON,
+		T.MKT_RESP_PERSON_ORG,T.ACTI_STAT,T.ASTART_DATE,T.AEND_DATE,T.CREATE_USER,
+		T.CREATE_DATE,T.CREATE_USER,T.CREATE_ORG,
+		T.LAST_UPDATE_USER,T.LAST_UPDATE_TM,T.LAST_UPDATE_ORG,
+		T1.ACTI_NAME AS  PARENT_ACTI_NAME,MAX(T2.UPDATE_DATE) AS OFF_DATE,
+		MAX(T2.UPDATE_USER) AS OFF_USER,MAX(T2.UPDATE_ORG) AS OFF_ORG
+		FROM OCRM_F_MK_ACTIVITY T
+		LEFT JOIN OCRM_F_MK_ACTIVITY T1 ON T1.ACTI_ID = T.PARENT_ACTI_ID
+		LEFT JOIN OCRM_F_MK_ACTI_EXC_RECORD T2 ON T2.ACTI_ID = T.ACTI_ID
+		<where>
+		1=1
+			<if test="condition.actiName != '' and condition.actiName != null">
+			and	t.acti_name like concat('%',concat(#{condition.actiName,jdbcType=VARCHAR},'%'))
+			</if>
+			<if test="condition.actiStat != '' and condition.actiStat != null">
+			and	t.acti_stat = #{condition.actiStat,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.astartDate != '' and condition.astartDate != null">
+			and	to_char(t.astart_date,'YYYY-MM-DD') = #{condition.astartDate,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.aendDate != '' and condition.aendDate != null">
+			and	to_char(t.aend_date,'YYYY-MM-DD') = #{condition.aendDate,jdbcType=VARCHAR}
+			</if>
+		</where>
+		GROUP BY T.ACTI_ID,T.PARENT_ACTI_ID,T.ACTI_NAME,T.MKT_RESP_PERSON,
+		T.MKT_RESP_PERSON_ORG,T.ACTI_STAT,T.ASTART_DATE,T.AEND_DATE,T.CREATE_USER,T.CREATE_DATE,T.CREATE_USER,T.CREATE_ORG,
+		T.LAST_UPDATE_USER,T.LAST_UPDATE_TM,T.LAST_UPDATE_ORG,T1.ACTI_NAME
+	</select>
+</mapper>

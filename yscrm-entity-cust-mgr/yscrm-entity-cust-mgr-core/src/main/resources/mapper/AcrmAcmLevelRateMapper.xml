@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.custmgr.repository.mapper.AcrmAcmLevelRateMapper">
+	<select id="queryPerCustGradeDist" resultType="java.util.Map">
+<!-- 		SELECT T1.LOOKUP_ITEM_NAME AS NAME,T.CUST_COUNT AS VALUE -->
+<!-- 		  FROM ACRM_A_CM_LEVEL_RATE T -->
+<!-- 		  LEFT JOIN ADMIN_SM_LOOKUP_ITEM T1  -->
+<!-- 		  ON T.CUST_LEVEL = T1.LOOKUP_ITEM_CODE AND T1.LOOKUP_CODE = 'CD0032' -->
+select CUST_NUM_SERVICE_LV0,cust_num_service_lv1,CUST_NUM_SERVICE_LV2,CUST_NUM_SERVICE_LV3,
+	CUST_NUM_SERVICE_LV4,CUST_NUM_SERVICE_LV5,CUST_NUM_SERVICE_LV6,CUST_NUM_SERVICE_LV7
+	from ACRM_A_CM_BUSI_SUM T
+		<where>
+			AND T.TARGET_TYPE = '1'
+			AND T.CUST_TYPE = '1'
+			<if  test="mgrId != null and mgrId != ''">
+	       		AND T.TARGET_ID = #{mgrId,jdbcType=VARCHAR}
+		    </if>
+		</where>
+		order by DATA_DATE DESC
+	</select>    
+	<select id="queryOrgCustGradeDist" resultType="java.util.Map">
+<!-- 		  SELECT T1.LOOKUP_ITEM_NAME AS NAME,T.CUST_COUNT AS VALUE -->
+<!-- 		  FROM ACRM_A_CM_LEVEL_RATE T -->
+<!-- 		  LEFT JOIN ADMIN_SM_LOOKUP_ITEM T1  -->
+<!--  		  ON T.CUST_LEVEL = T1.LOOKUP_ITEM_CODE AND T1.LOOKUP_CODE = 'CD0032'  -->
+	select CUST_NUM_SERVICE_LV0,cust_num_service_lv1,CUST_NUM_SERVICE_LV2,CUST_NUM_SERVICE_LV3,
+	CUST_NUM_SERVICE_LV4,CUST_NUM_SERVICE_LV5,CUST_NUM_SERVICE_LV6,CUST_NUM_SERVICE_LV7
+	from ACRM_A_CM_BUSI_SUM T
+		<where>
+			AND T.TARGET_TYPE = '1'
+			AND T.CUST_TYPE = '2'
+			<if  test="mgrId != null and mgrId != ''">
+	       		AND T.TARGET_ID = #{mgrId,jdbcType=VARCHAR}
+		    </if>
+		</where>
+		order by DATA_DATE DESC
+	</select>   
+</mapper>

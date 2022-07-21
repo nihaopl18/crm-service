@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.custpub.repository.mapper.OcrmFciNoadmitBelongMapper">
+    <update id="updateHost" parameterType="String" >
+    
+		UPDATE OCRM_F_CI_ADMIT_BELONG SET ORG_TYPE ='2',MGR_TYPE = '2' WHERE IS_ADMIT_ENTER='0' AND CUST_ID =#{custId, jdbcType=VARCHAR} AND ORG_ID = #{orgId, jdbcType=VARCHAR} AND MGR_ID = #{mgrId, jdbcType=VARCHAR}
+		<!-- UPDATE OCRM_F_CI_NOADMIT_BELONG SET ORG_TYPE ='2',MGR_TYPE = '2' WHERE CUST_ID =#{custId, jdbcType=VARCHAR} AND ORG_ID = #{orgId, jdbcType=VARCHAR} AND MGR_ID = #{mgrId, jdbcType=VARCHAR} -->
+	</update>
+	<delete id="delBelongByCustIdMgrIdOrgId" parameterType="java.util.Map" >
+	    delete from OCRM_F_CI_ADMIT_BELONG  WHERE IS_ADMIT_ENTER='0' AND cust_id=#{custId, jdbcType=VARCHAR} and MGR_ID=#{mgrId, jdbcType=VARCHAR} and ORG_ID=#{orgId, jdbcType=VARCHAR}
+	    <!-- delete from OCRM_F_CI_NOADMIT_BELONG where cust_id=#{custId, jdbcType=VARCHAR} and MGR_ID=#{mgrId, jdbcType=VARCHAR} and ORG_ID=#{orgId, jdbcType=VARCHAR} -->
+	</delete>
+	<update id="updateOrgByCustid" parameterType="cn.com.yusys.yscrm.custpub.domain.OcrmFciAdmitBelong" >
+		UPDATE OCRM_F_CI_ADMIT_BELONG SET LAST_UPDATE_ORG =#{lastUpdateOrg, jdbcType=VARCHAR},ORG_TYPE =#{orgType, jdbcType=VARCHAR},ORG_ID =#{orgId, jdbcType=VARCHAR},ORG_NAME =#{orgName, jdbcType=VARCHAR},MGR_ID =#{mgrId, jdbcType=VARCHAR},MGR_NAME =#{mgrName, jdbcType=VARCHAR} WHERE IS_ADMIT_ENTER='0' AND CUST_ID =#{custId, jdbcType=VARCHAR} AND ORG_TYPE = '1' 
+		<!-- UPDATE OCRM_F_CI_NOADMIT_BELONG SET LAST_UPDATE_ORG =#{lastUpdateOrg, jdbcType=VARCHAR},ORG_TYPE =#{orgType, jdbcType=VARCHAR},ORG_ID =#{orgId, jdbcType=VARCHAR},ORG_NAME =#{orgName, jdbcType=VARCHAR},MGR_ID =#{mgrId, jdbcType=VARCHAR},MGR_NAME =#{mgrName, jdbcType=VARCHAR} WHERE CUST_ID =#{custId, jdbcType=VARCHAR} AND ORG_TYPE = '1' -->
+	</update>
+	<update id="updateByCustid" parameterType="cn.com.yusys.yscrm.custpub.domain.OcrmFciAdmitBelong" >
+		UPDATE OCRM_F_CI_ADMIT_BELONG SET LAST_UPDATE_ORG =#{lastUpdateOrg, jdbcType=VARCHAR},MGR_TYPE =#{mgrType, jdbcType=VARCHAR},MGR_ID =#{mgrId, jdbcType=VARCHAR},MGR_NAME =#{mgrName, jdbcType=VARCHAR} WHERE IS_ADMIT_ENTER='0' AND CUST_ID =#{custId, jdbcType=VARCHAR} AND MGR_TYPE = '1'
+		<!-- UPDATE OCRM_F_CI_NOADMIT_BELONG SET LAST_UPDATE_ORG =#{lastUpdateOrg, jdbcType=VARCHAR},MGR_TYPE =#{mgrType, jdbcType=VARCHAR},MGR_ID =#{mgrId, jdbcType=VARCHAR},MGR_NAME =#{mgrName, jdbcType=VARCHAR} WHERE CUST_ID =#{custId, jdbcType=VARCHAR} AND MGR_TYPE = '1' --> 
+	</update>
+	<delete id="deleteByCustId" parameterType="java.util.Map" >
+	    delete from OCRM_F_CI_ADMIT_BELONG WHERE IS_ADMIT_ENTER='0' AND cust_id=#{custId, jdbcType=VARCHAR} and org_type='2'
+	    <!-- delete from OCRM_F_CI_NOADMIT_BELONG where cust_id=#{custId, jdbcType=VARCHAR} and org_type='2' -->
+	</delete>
+	<delete id="deletemgrByCustId" parameterType="java.util.Map" >
+	   <!--  delete from OCRM_F_CI_NOADMIT_BELONG where cust_id=#{custId, jdbcType=VARCHAR} and MGR_TYPE='2' -->
+	   delete from OCRM_F_CI_ADMIT_BELONG WHERE IS_ADMIT_ENTER='0' AND cust_id=#{custId, jdbcType=VARCHAR} and MGR_TYPE='2' 
+	</delete>
+	<delete id="deletemgrByCustId1" parameterType="java.util.Map" >
+	   <!--  delete from OCRM_F_CI_NOADMIT_BELONG where cust_id=#{custId, jdbcType=VARCHAR} and MGR_TYPE='2' -->
+	   delete from OCRM_F_CI_ADMIT_BELONG WHERE IS_ADMIT_ENTER='0' AND cust_id=#{custId, jdbcType=VARCHAR} and MGR_TYPE='2'  and mgr_id=#{mgrId, jdbcType=VARCHAR}
+	</delete>
+	<!-- 查询当前客户的机构（主办\协办） -->
+	<select id="qryOrgId" parameterType="String" resultType="java.util.Map">
+		select a.org_level,ad.* from OCRM_F_CI_ADMIT_BELONG ad left join ADMIN_SM_ORG a on ad.org_id = a.org_id 
+		where ad.cust_id=#{custId, jdbcType=VARCHAR}
+	</select>
+	
+	<!-- 查询当前客户经理（主办\协办） -->
+	<select id="qryMgrId" parameterType="String" resultType="java.util.Map">
+		select * from OCRM_F_CI_ADMIT_BELONG where  cust_id=#{custId, jdbcType=VARCHAR} and (MGR_TYPE＝'1' or MGR_TYPE＝'2')
+	</select>
+	<!-- 查询非准入客户主办机构 -->
+	<select id="getBelongOrgIdByCustId" parameterType="String" resultType="String">
+		select DISTINCT ORG_ID from OCRM_F_CI_ADMIT_BELONG where  CUST_ID = #{custId, jdbcType=VARCHAR} AND MGR_TYPE = '1'
+	</select>
+</mapper>

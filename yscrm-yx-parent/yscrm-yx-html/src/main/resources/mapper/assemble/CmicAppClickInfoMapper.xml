@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.com.yusys.yscimc.marketmethod.repository.mapper.CmicAppClickInfoMapper">
+    <select id="getClickNumByRecommenderId" parameterType="String" resultType="int">
+        select count(*) from CMIC_APP_CLICK_INFO where RECOMMENDER_ID = #{recommenderId, jdbcType=VARCHAR}
+    </select>
+    
+    <select id="getClickNum" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.Map">
+        select (select count(*) from CMIC_APP_CLICK_INFO where acty_id = #{condition.actyId} and recommender_id = #{condition.recommenderId}) as act_num,t.*,c.cust_name 
+        from CMIC_APP_CLICK_INFO t left join ACIM_F_CI_CUSTOMER c on t.cust_id = c.cust_id where t.acty_id = #{condition.actyId} and t.recommender_id = #{condition.recommenderId}
+    </select>
+</mapper>

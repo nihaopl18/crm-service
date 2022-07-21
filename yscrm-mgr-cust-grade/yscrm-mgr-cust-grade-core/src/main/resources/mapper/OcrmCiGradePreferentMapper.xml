@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper
+	namespace="cn.com.yusys.yscrm.custgrade.repository.mapper.OcrmCiGradePreferentMapper">
+
+	<sql id="Base_Column_List">
+		CORP_ORG_CODE,ID,PREFERENT_ID,PREFERENT_CONTENT,USE_CUST_TYPE,USE_CHANNL,PREFERENT_STATUS,PREFERENT_BEGIN_DATA,PREFERENT_END_DATA,PREFERENT_ORG,CREATE_DATE,CREATE_USER_ID,CREATE_ORG_ID,LAST_UPDATE_DATE,LAST_UPDATE_USER_ID,LAST_UPDATE_ORG_ID,REMARK
+	</sql>
+
+	<select id="querylist" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+		resultType="java.util.HashMap">
+		SELECT T.* , ORG.ORG_NAME ,US.USER_NAME,
+		(SELECT T2.PREFERENT_STR FROM
+		OCRM_CI_GRADE_PREFE_LEVEL T2
+		WHERE
+		T.PREFERENT_ID=T2.PREFERENT_ID AND
+		T2.GRADE_LEVEL='0') AS
+		GRADELEVEL0,
+		(SELECT T2.PREFERENT_STR FROM
+		OCRM_CI_GRADE_PREFE_LEVEL T2
+		WHERE
+		T.PREFERENT_ID=T2.PREFERENT_ID AND
+		T2.GRADE_LEVEL='1') AS
+		GRADELEVEL1,
+		(SELECT T2.PREFERENT_STR FROM
+		OCRM_CI_GRADE_PREFE_LEVEL T2
+		WHERE
+		T.PREFERENT_ID=T2.PREFERENT_ID AND
+		T2.GRADE_LEVEL='2') AS
+		GRADELEVEL2,
+		(SELECT T2.PREFERENT_STR FROM
+		OCRM_CI_GRADE_PREFE_LEVEL T2
+		WHERE
+		T.PREFERENT_ID=T2.PREFERENT_ID AND
+		T2.GRADE_LEVEL='3') AS
+		GRADELEVEL3,
+		(SELECT T2.PREFERENT_STR FROM
+		OCRM_CI_GRADE_PREFE_LEVEL T2
+		WHERE
+		T.PREFERENT_ID=T2.PREFERENT_ID AND
+		T2.GRADE_LEVEL='4') AS
+		GRADELEVEL4,
+		(SELECT T2.PREFERENT_STR FROM
+		OCRM_CI_GRADE_PREFE_LEVEL T2
+		WHERE
+		T.PREFERENT_ID=T2.PREFERENT_ID AND
+		T2.GRADE_LEVEL='5') AS
+		GRADELEVEL5,
+		(SELECT T2.PREFERENT_STR FROM
+		OCRM_CI_GRADE_PREFE_LEVEL T2
+		WHERE
+		T.PREFERENT_ID=T2.PREFERENT_ID AND
+		T2.GRADE_LEVEL='6') AS
+		GRADELEVEL6,
+		(SELECT T2.PREFERENT_STR FROM
+		OCRM_CI_GRADE_PREFE_LEVEL T2
+		WHERE
+		T.PREFERENT_ID=T2.PREFERENT_ID AND
+		T2.GRADE_LEVEL='7') AS
+		GRADELEVEL7
+		FROM OCRM_CI_GRADE_PREFERENT T
+		LEFT JOIN ADMIN_SM_ORG ORG ON ORG.ORG_CODE=T.PREFERENT_ORG
+		LEFT JOIN ADMIN_SM_USER US ON US.USER_CODE=T.LAST_UPDATE_USER_ID
+		<where>
+			<if
+				test="condition.preferentOrg != null and condition.preferentOrg != '' ">
+				T.PREFERENT_ORG=#{condition.preferentOrg,jdbcType=VARCHAR}
+
+			</if>
+			<if test="condition.useCustType != null and condition.useCustType != '' ">
+				AND
+				T.USE_CUST_TYPE=#{condition.useCustType,jdbcType=VARCHAR}
+			</if>
+
+			<if
+				test="condition.preferentContent != null and condition.preferentContent != '' ">
+				AND T.PREFERENT_CONTENT LIKE concat(concat('%',#{condition.preferentContent}),'%')
+			</if>
+
+			<if test="condition.preferentId != null and condition.preferentId != '' ">
+				AND T.PREFERENT_ID LIKE concat(concat('%',#{condition.preferentId}),'%')
+			</if>
+
+			<if
+				test="condition.preferentStatus != null and condition.preferentStatus != '' ">
+				AND
+				T.PREFERENT_STATUS=#{condition.preferentStatus,jdbcType=VARCHAR}
+			</if>
+
+			<if test="condition.servLev != null and condition.servLev != '' ">
+				AND T.PREFERENT_ID IN (
+				SELECT T2.PREFERENT_ID FROM
+				OCRM_CI_GRADE_PREFE_LEVEL T2
+				WHERE T2.GRADE_LEVEL IN
+				<!-- <foreach item="item" index="index" collection="condition.servLev"
+					open="(" separator="," close=")">
+					#{item,jdbcType=VARCHAR}
+				</foreach> -->
+				 (#{condition.servLev,jdbcType=VARCHAR}) ) 
+			</if>
+		</where>
+		order by T.PREFERENT_ID
+	</select>
+
+	<select id="detail" parameterType="String" resultType="java.util.HashMap">
+		select T2.GRADE_LEVEL,T2.PREFERENT_STR from OCRM_CI_GRADE_PREFE_LEVEL
+		T2 Where T2.PREFERENT_ID=#{preferentId,jdbcType=VARCHAR}
+	</select>
+
+	<select id="seacherSeqGradePre" resultType="String">
+		SELECT SEQ_GRADE_PRE.Nextval from dual
+	</select>
+
+	<update id="deletebyPreFerentId" parameterType="String">
+		DELETE FROM OCRM_CI_GRADE_PREFERENT WHERE
+		PREFERENT_ID=#{preferentId,jdbcType=VARCHAR}
+	</update>
+
+	<update id="deleteByPreId" parameterType="String">
+		DELETE FROM OCRM_CI_GRADE_PREFE_LEVEL WHERE
+		PREFERENT_ID=#{preferentId,jdbcType=VARCHAR}
+	</update>
+
+
+</mapper>

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.uimp.business.pma.scheme.schememain.repository.mapper.PmaFSchemeMktRelMapper">
+
+    <delete id="deleteBySchemeId">
+        DELETE FROM PMA_F_SCHEME_MKT_REL WHERE SCHEME_ID=#{schemeId}
+    </delete>
+
+    <select id="selectBySchemeId" resultType="java.util.Map">
+        SELECT MKT_ID param_id ,MKT_NAME param_name FROM PMA_F_SCHEME_MKT_REL WHERE SCHEME_ID=#{schemeId}
+    </select>
+
+
+    <insert id="batchInsert" parameterType="List">
+        INSERT INTO PMA_F_SCHEME_MKT_REL (ID,SCHEME_ID,MKT_ID,MKT_NAME)
+        <foreach collection="list" item="mkt" index="index" separator="union all" >
+            select #{mkt.id},#{mkt.schemeId},#{mkt.mktId},#{mkt.mktName}
+            from dual
+        </foreach>
+    </insert>
+
+
+</mapper>

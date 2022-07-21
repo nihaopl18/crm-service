@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.climp.score.repository.mapper.LoySrScoreCollectMapper">
+    <select id="selectData" parameterType="java.lang.String" resultType="cn.com.yusys.climp.score.domain.LoySrScoreCollect">
+        select T.CUST_NO,'10' as SCORE_DEAL_TYPE,T.ORI_SCORE as THIS_SUM_SCORE,nvl(T1.next_score,0) as LAST_SR_ACCUTE,nvl(T1.next_score,0) + T.ORI_SCORE as CURR_SR_ACCUTE,sysdate as BUSN_DATE
+        from T_CUST_POINT_SUB_ACCT_INF_TMP T
+        left join (
+            select T1.CUST_NO,T1.ACCOUNT_CODE,T1.CURR_SR_ACCUTE as next_score,
+                   row_number() over(partition by T1.CUST_NO,T1.ACCOUNT_CODE order by T1.BUSN_DATE desc) as rn
+            from LOY_SR_SCORE_COLLECT T1) T1 on T1.CUST_NO = T.CUST_NO and T.SDA_ID = T1.ACCOUNT_CODE and T1.rn = 1
+        where exists (
+            select 1 from LOY_SR_SCORE_GAME_FT T2 where T.CUST_NO = T2.ECIF_CUST_NO and T2.IMPORT_CODE = #{importCode}
+                  )
+    </select>
+</mapper>

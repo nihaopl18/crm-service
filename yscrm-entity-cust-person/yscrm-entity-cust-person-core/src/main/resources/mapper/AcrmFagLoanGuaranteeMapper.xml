@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.cust.person.repository.mapper.AcrmFagLoanGuaranteeMapper">
+    <sql id="Base_Column_List">
+	    CORP_ORG_CODE,DATA_DATE,SRC_NO,GUAR_NO,GUAR_NM,RELATION,GUAR_CONT_NO,CUST_NO,CUST_NM,CUST_TYPE_CD,CERT_TYPE_CD,CERT_NO,CCY_CD,GUARANTEE_AMT,COM_LOAN_CARD,GUARANTEE_FORM_CD,GUARANTEE_TYPE_CD,GUARANTEE_MAX_AMT,RISKING_LIMIT_AMT,BCC_DEBT_AMT,START_DT,END_DT,GUARANTEE_MUTUAL_CD,VALID_IND,REMARK_DT,SIGN_DT,REGISTER_DT,REGISTRANT
+    </sql>
+    
+     <select id="querylist" parameterType="java.util.Map"  resultType="java.util.HashMap">
+		select t.corp_org_code,
+		       to_char(to_date(t.data_date, 'yyyy-mm-dd'),'yyyy-mm-dd') as data_dt,
+		       t.src_no,
+		       t.guar_no,
+		       t.guar_cont_no,
+		       t.cust_id as cust_no,
+		       t.cust_nm,
+		       t.cust_type_cd,
+		       t.cert_type_cd,
+		       t.cert_no,
+		       t.ccy_cd,
+		       t.guarantee_amt,
+		       t.com_loan_card,
+		       t.guarantee_form_cd,
+		       t.guarantee_type_cd,
+		       t.guarantee_max_amt,
+		       t.risking_limit_amt,
+		       t.bcc_debt_amt,
+		       t.start_dt,
+		       t.end_dt,
+		       t.guarantee_mutual_cd,
+		       t.valid_ind
+		  from ACRM_F_AG_LOAN_GUARANTEE t
+		  where 1=1
+
+		  <if  test="custId != null and custId != ''">
+	       		and t.cust_id =#{custId,jdbcType=VARCHAR} 
+		  </if>
+	</select>
+</mapper>

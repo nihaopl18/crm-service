@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.custservice.repository.mapper.AcrmFciHoldProdSumMapper">
+   <!--  <resultMap id="BaseResultMap" type="cn.com.yusys.yscrm.custservice.domain.AcrmFciHoldProdSum">
+		<result column="CORP_ORG_CODE" jdbcType="VARCHAR" property="corpOrgCode" />
+		<result column="ORG1_NO" jdbcType="VARCHAR" property="org1No" />
+		<result column="ORG1_NAME" jdbcType="VARCHAR" property="org1Name" />
+		<id column="ORG_NO" jdbcType="VARCHAR" property="orgNo" />
+		<result column="ORG_NAME" jdbcType="VARCHAR" property="orgName" />
+		<result column="HOLD_PROD_8" jdbcType="VARCHAR" property="holdProd8" />
+		<result column="HOLD_PROD_7" jdbcType="VARCHAR" property="holdProd7" />
+		<result column="HOLD_PROD_6" jdbcType="VARCHAR" property="holdProd6" />
+		<result column="HOLD_PROD_5" jdbcType="VARCHAR" property="holdProd5" />
+		<result column="HOLD_PROD_4" jdbcType="VARCHAR" property="holdProd4" />
+		<result column="HOLD_PROD_3" jdbcType="VARCHAR" property="holdProd3" />
+		<result column="HOLD_PROD_2" jdbcType="VARCHAR" property="holdProd2" />
+		<result column="HOLD_PROD_1" jdbcType="VARCHAR" property="holdProd1" />
+		<result column="HOLD_PROD_0" jdbcType="VARCHAR" property="holdProd0" />
+		<result column="HOLD_PROD_DB" jdbcType="VARCHAR" property="holdProdDb" />
+		<id column="DATA_DT" jdbcType="DATE" property="dataDt" />
+    </resultMap>
+    <sql id="Base_Column_List">
+	    CORP_ORG_CODE,ORG1_NO,ORG1_NAME,ORG_NO,ORG_NAME,HOLD_PROD_8,HOLD_PROD_7,HOLD_PROD_6,HOLD_PROD_5,HOLD_PROD_4,HOLD_PROD_3,HOLD_PROD_2,HOLD_PROD_1,HOLD_PROD_0,HOLD_PROD_DB,DATA_DT
+    </sql> -->
+     <select id="queryAll" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+     	select a.* from ACRM_F_CI_HOLD_PROD_SUM a
+     	<where>
+	    	<if test="condition.dataDt !=null and condition.dataDt !=''">
+	    		AND to_char(a.DATA_DT,'yyyy-MM-dd') = #{condition.dataDt,jdbcType=VARCHAR}
+
+	    	</if>
+    	</where>
+     </select>
+</mapper>

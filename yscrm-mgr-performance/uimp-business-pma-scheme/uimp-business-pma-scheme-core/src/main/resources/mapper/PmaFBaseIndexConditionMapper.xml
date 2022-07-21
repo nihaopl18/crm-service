@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.uimp.business.pma.scheme.baseIndex.repository.mapper.PmaFBaseIndexConditionMapper">
+   
+     <!-- 查询基础指标列表数据 -->
+	<select id="querylist" parameterType="String" resultType="java.util.HashMap">
+	       select  t.ID,t.INDEX_ID,t.CDT_TYPE,t.CDT_COLUMN,t.CDT_VALUE_NAME,t.CDT_DIR_TYPE
+	       ,case when t.CDT_TYPE='0' then t.CDT_VALUE_NAME else t.CDT_VALUE end CDT_VALUE     
+	       from   PMA_F_INDEX_CDT_INFO t
+	       where t.index_id=#{indexId}
+	</select>
+	<delete id="delCondition" parameterType="String"  >
+	   delete from   PMA_F_INDEX_CDT_INFO  where id=#{id}
+	</delete>
+	<delete id="delcon" parameterType="String"  >
+	   delete from   PMA_F_INDEX_CDT_INFO  where index_id=#{indexId}
+	</delete>
+</mapper>

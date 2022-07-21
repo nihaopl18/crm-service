@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper
+        namespace="cn.com.yusys.yscrm.fiexdstatement.repository.mapper.OcrmFClBranchtotalMapper">
+    <!-- 条件列表查询 -->
+
+    <select id="queryStatistics" resultType="cn.com.yusys.yscrm.fiexdstatement.domain.OcrmFClBranchtotal">
+   select
+
+      sum(AUTHORIZED_STRENGTH)   as    authorizedStrength,
+      sum(ON_JOB)   as               onJob,
+      sum(EFF_CUSTNUMBER)   as       effCustnumber,
+      sum(YOUHUI_CUSTNUMBER)    as      youhuiCustnumber,
+      sum(XIANZHUO_CUSTNUMBER)     as    xianzhuoCustnumber,
+      sum(AUM_BALANCEAVG_T_HT)    as          aumBalanceavgTHt,
+      sum(AUM_BALANCEAVG_HT_FHT)   as         aumBalanceavgHtFht,
+      sum(AUM_BALANCEAVG_FHT_TM)   as          aumBalanceavgFhtTm,
+      sum(AUM_BALANCEAVG_TM_SM)    as           aumBalanceavgTmSm,
+      sum(AUM_BALANCEAVG_SM_ENDLESS)   as       aumBalanceavgSmEndless,
+      sum(AUM_BALANCE)       as                 aumBalance,
+      sum(AUM_BALANCE_DEL)      as                 aumBalanceDel,
+      sum(AUM_DEPOSIT)    as                         aumDeposit,
+      sum(AUM_DEPOSIT_SORT)   as                      aumDepositSort,
+      sum(AUM_DEPOSIT_DEL)     as                      aumDepositDel,
+      sum(AUM_DEPOSIT_DEL_SORT)    as                aumDepositDelSort,
+      sum(AUM_RATE)      as                           aumRate,
+      sum(AUM_RATE_SORT)     as                       aumRateSort,
+      sum(AUM_RATE_DEL)    as                           aumRateDel,
+      sum(AUM_RATE_DEL_SORT)    as                      aumRateDelSort,
+      sum(AUM_NONRATE)      as                           aumNonrate,
+      sum(AUM_NONRATE_SORT)     as                       aumNonrateSort,
+      sum(AUM_NONRATE_DEL)      as                       aumNonrateDel,
+      sum(AUM_NONRATE_DEL_SORT)        as               aumNonrateDelSort,
+      sum(CONSIGNMENT)         as                        consignment,
+      sum(CONSIGNMENT_SORT)    as                        consignmentSort,
+      sum(CONSIGNMENT_DEL)     as                         consignmentDel,
+      sum(CONSIGNMENT_DEL_SORT)     as                     consignmentDelSort,
+      sum(DANAHARTA)        as                            danaharta,
+      sum(DANAHARTA_SORT)      as                          danahartaSort,
+      sum(DANAHARTA_DEL)    as                            danahartaDel,
+      sum(DANAHARTA_DEL_SORT)     as                     danahartaDelSort,
+      sum(QDII)         as                                qdii,
+      sum(QDII_SORT)    as                                qdiiSort,
+      sum(QDII_DEL)     as                                qdiiDel,
+      sum(QDII_DEL_SORT)    as                            qdiiDelSort,
+      sum(RMBFUND)        as                              rmbfund,
+      sum(RMBFUND_SORT)     as                            rmbfundSort,
+      sum(RMBFUND_DEL)      as                            rmbfundDel,
+      sum(RMBFUND_DEL_SORT)      as                       rmbfundDelSort,
+      sum(INSURRANCE)       as                            insurrance ,
+      sum(INSURRANCE_SORT)    as                          insurranceSort,
+      sum(INSURRANCE_DEL)     as                             insurranceDel,
+      sum(INSURRANCE_DEL_SORT)     as                         insurranceDelSort,
+      sum(PPOP)      as                                   ppop,
+      sum(WEALTHREAP)    as                              wealthreap,
+      sum(WEALTHREAP_DEL)     as                        wealthreapDel
+
+   from OCRM_F_CL_BRANCHTOTAL
+
+    </select>
+
+    <select id="queryBranchTotalList" parameterType="java.util.Map" resultType="java.util.Map">
+       select BRANCH,BRANCH_NO,ON_JOB,EFF_CUSTNUMBER,YOUHUI_CUSTNUMBER,YOUHUI_UPGRATE,YOUHUI_WINBACK,XIANZHUO_CUSTNUMBER,XIANZHUO_UPGRATE,XIANZHUO_WINBACK,AUM_BALANCEAVG_T_HT,AUM_BALANCEAVG_HT_FHT,AUM_BALANCEAVG_FHT_TM,AUM_BALANCEAVG_TM_SM,AUM_BALANCEAVG_SM_ENDLESS,
+              round(AUM_BALANCE/10000,4) as AUM_BALANCE,round(AUM_DEPOSIT/10000,4) as AUM_DEPOSIT,AUM_DEPOSIT_SORT,
+              round(AUM_RATE/10000,4) as AUM_RATE,AUM_RATE_SORT,
+              round(AUM_NONRATE/10000,4) as AUM_NONRATE,AUM_NONRATE_SORT,
+              round(CONSIGNMENT/10000,4) as CONSIGNMENT,CONSIGNMENT_SORT,
+              round(DANAHARTA/10000,4) as DANAHARTA,DANAHARTA_SORT,
+              round(QDII/10000,4) as QDII,QDII_SORT,
+              round(RMBFUND/10000,4) as RMBFUND,RMBFUND_SORT,
+              round(INSURRANCE/10000,4) as INSURRANCE,INSURRANCE_SORT
+       from OCRM_F_CL_BRANCHTOTAL
+    <where>
+       <if test="dataDate != null and dataDate != ''">
+          and DATA_DATE=to_date(#{dataDate},'yyyy-MM-dd')
+       </if>
+        <if test="count != null and count != ''">
+            AND BRANCH_NO != #{count}
+        </if>
+
+    </where>
+    </select>
+   <select id="queryBranchTotalListUnPeople"  parameterType="java.util.Map" resultType="java.util.Map">
+      select BRANCH,BRANCH_NO,ON_JOB,EFF_CUSTNUMBER_PEOPLE as EFF_CUSTNUMBER,
+             YOUHUI_PEOPLE as YOUHUI_CUSTNUMBER,
+             YOUHUI_UPGRATE_PEOPLE as YOUHUI_UPGRATE,
+             XIANZHUO_WINBACK_PEOPLE as YOUHUI_WINBACK,
+             XIANZHUO_PEOPLE as XIANZHUO_CUSTNUMBER ,
+             XIANZHUO_UPGRATE_PEOPLE as XIANZHUO_UPGRATE,
+             XIANZHUO_WINBACK_PEOPLE as XIANZHUO_WINBACK,
+             AUM_BALANCEAVG_T_HT_PEOPLE as AUM_BALANCEAVG_T_HT,
+             AUM_BALANCEAVG_HT_FHT_PEOPLE as AUM_BALANCEAVG_HT_FHT,
+             AUM_BALANCEAVG_FHT_TM_PEOPLE as AUM_BALANCEAVG_FHT_TM,
+             AUM_BALANCEAVG_TM_SM_PEOPLE as AUM_BALANCEAVG_TM_SM,
+             AUM_BALANCEAVG_SM_ENDLESS_PEOPLE as AUM_BALANCEAVG_SM_ENDLESS ,
+       round(AUM_BALANCE_DEL/10000,4) as AUM_BALANCE,
+       round(AUM_DEPOSIT_DEL/10000,4) as AUM_DEPOSIT,
+       AUM_DEPOSIT_DEL_SORT as AUM_DEPOSIT_SORT,
+       round(AUM_RATE_DEL/10000,4) as AUM_RATE,
+       AUM_RATE_DEL_SORT as AUM_RATE_SORT,
+       round(AUM_NONRATE_DEL/10000,4) as AUM_NONRATE,
+       AUM_NONRATE_DEL_SORT as AUM_NONRATE_SORT,
+       round(CONSIGNMENT_DEL/10000,4) as CONSIGNMENT,
+       CONSIGNMENT_DEL_SORT as CONSIGNMENT_SORT,
+       round(DANAHARTA_DEL/10000,4) as DANAHARTA,
+       DANAHARTA_DEL_SORT as DANAHARTA_SORT,
+       round(QDII_DEL/10000,4) as QDII,
+       QDII_DEL_SORT as QDII_SORT,
+       round(RMBFUND_DEL/10000,4) as RMBFUND,
+       RMBFUND_DEL_SORT as RMBFUND_SORT,
+       round(INSURRANCE_DEL/10000,4) as INSURRANCE,
+       INSURRANCE_DEL_SORT as INSURRANCE_SORT
+      from OCRM_F_CL_BRANCHTOTAL
+      <where>
+         <if test="dataDate != null and dataDate != ''">
+            and DATA_DATE=to_date(#{dataDate},'yyyy-MM-dd')
+         </if>
+          <if test="count != null and count != ''">
+              AND BRANCH_NO!=#{count}
+          </if>
+      </where>
+   </select>
+    <select id="getSumBrach" parameterType="java.util.Map" resultType="java.util.Map">
+        select BRANCH,BRANCH_NO,ON_JOB,EFF_CUSTNUMBER,YOUHUI_CUSTNUMBER,YOUHUI_UPGRATE,YOUHUI_WINBACK,XIANZHUO_CUSTNUMBER,XIANZHUO_UPGRATE,XIANZHUO_WINBACK,AUM_BALANCEAVG_T_HT,AUM_BALANCEAVG_HT_FHT,AUM_BALANCEAVG_FHT_TM,AUM_BALANCEAVG_TM_SM,AUM_BALANCEAVG_SM_ENDLESS,
+        round(AUM_BALANCE/10000,4) as AUM_BALANCE,round(AUM_DEPOSIT/10000,4) as AUM_DEPOSIT,AUM_DEPOSIT_SORT,
+        round(AUM_RATE/10000,4) as AUM_RATE,AUM_RATE_SORT,
+        round(AUM_NONRATE/10000,4) as AUM_NONRATE,AUM_NONRATE_SORT,
+        round(CONSIGNMENT/10000,4) as CONSIGNMENT,CONSIGNMENT_SORT,
+        round(DANAHARTA/10000,4) as DANAHARTA,DANAHARTA_SORT,
+        round(QDII/10000,4) as QDII,QDII_SORT,
+        round(RMBFUND/10000,4) as RMBFUND,RMBFUND_SORT,
+        round(INSURRANCE/10000,4) as INSURRANCE,INSURRANCE_SORT
+        from OCRM_F_CL_BRANCHTOTAL
+        <where>
+            <if test="dataDate != null and dataDate != ''">
+                and DATA_DATE=to_date(#{dataDate},'yyyy-MM-dd')
+            </if>
+            <if test="count != null and count != ''">
+                AND BRANCH_NO=#{count}
+            </if>
+        </where>
+    </select>
+    <select id="getSumBrachUnPeople" parameterType="java.util.Map" resultType="java.util.Map">
+        select BRANCH,BRANCH_NO,ON_JOB,EFF_CUSTNUMBER_PEOPLE as EFF_CUSTNUMBER,
+        YOUHUI_PEOPLE as YOUHUI_CUSTNUMBER,
+        YOUHUI_UPGRATE_PEOPLE as YOUHUI_UPGRATE,
+        XIANZHUO_WINBACK_PEOPLE as YOUHUI_WINBACK,
+        XIANZHUO_PEOPLE as XIANZHUO_CUSTNUMBER ,
+        XIANZHUO_UPGRATE_PEOPLE as XIANZHUO_UPGRATE,
+        XIANZHUO_WINBACK_PEOPLE as XIANZHUO_WINBACK,
+        AUM_BALANCEAVG_T_HT_PEOPLE as AUM_BALANCEAVG_T_HT,
+        AUM_BALANCEAVG_HT_FHT_PEOPLE as AUM_BALANCEAVG_HT_FHT,
+        AUM_BALANCEAVG_FHT_TM_PEOPLE as AUM_BALANCEAVG_FHT_TM,
+        AUM_BALANCEAVG_TM_SM_PEOPLE as AUM_BALANCEAVG_TM_SM,
+        AUM_BALANCEAVG_SM_ENDLESS_PEOPLE as AUM_BALANCEAVG_SM_ENDLESS ,
+        round(AUM_BALANCE_DEL/10000,4) as AUM_BALANCE,
+        round(AUM_DEPOSIT_DEL/10000,4) as AUM_DEPOSIT,
+        AUM_DEPOSIT_DEL_SORT as AUM_DEPOSIT_SORT,
+        round(AUM_RATE_DEL/10000,4) as AUM_RATE,
+        AUM_RATE_DEL_SORT as AUM_RATE_SORT,
+        round(AUM_NONRATE_DEL/10000,4) as AUM_NONRATE,
+        AUM_NONRATE_DEL_SORT as AUM_NONRATE_SORT,
+        round(CONSIGNMENT_DEL/10000,4) as CONSIGNMENT,
+        CONSIGNMENT_DEL_SORT as CONSIGNMENT_SORT,
+        round(DANAHARTA_DEL/10000,4) as DANAHARTA,
+        DANAHARTA_DEL_SORT as DANAHARTA_SORT,
+        round(QDII_DEL/10000,4) as QDII,
+        QDII_DEL_SORT as QDII_SORT,
+        round(RMBFUND_DEL/10000,4) as RMBFUND,
+        RMBFUND_DEL_SORT as RMBFUND_SORT,
+        round(INSURRANCE_DEL/10000,4) as INSURRANCE,
+        INSURRANCE_DEL_SORT as INSURRANCE_SORT
+        from OCRM_F_CL_BRANCHTOTAL
+        <where>
+            <if test="dataDate != null and dataDate != ''">
+                and DATA_DATE=to_date(#{dataDate},'yyyy-MM-dd')
+            </if>
+            <if test="count != null and count != ''">
+                AND BRANCH_NO=#{count}
+            </if>
+        </where>
+    </select>
+
+
+</mapper>

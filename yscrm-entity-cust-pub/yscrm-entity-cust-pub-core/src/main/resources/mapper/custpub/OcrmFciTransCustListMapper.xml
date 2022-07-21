@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.custpub.repository.mapper.OcrmFciTransCustListMapper">
+    <resultMap id="BaseResultMap" type="cn.com.yusys.yscrm.custpub.domain.OcrmFciTransCustList">
+		<id column="ID" jdbcType="NUMERIC" property="id" />
+		<result column="APPLY_NO" jdbcType="VARCHAR" property="applyNo" />
+		<result column="CUST_ID" jdbcType="VARCHAR" property="custId" />
+		<result column="CUST_NAME" jdbcType="VARCHAR" property="custName" />
+		<result column="MGR_ID" jdbcType="VARCHAR" property="mgrId" />
+		<result column="MGR_NAME" jdbcType="VARCHAR" property="mgrName" />
+		<result column="MAIN_TYPE" jdbcType="VARCHAR" property="mainType" />
+		<result column="INSTITUTION" jdbcType="VARCHAR" property="institution" />
+		<result column="INSTITUTION_NAME" jdbcType="VARCHAR" property="institutionName" />
+		<result column="MAIN_TYPE_NEW" jdbcType="VARCHAR" property="mainTypeNew" />
+		<result column="IS_SMALL" jdbcType="VARCHAR" property="isSmall" />
+		<result column="IS_GROUP" jdbcType="VARCHAR" property="isGroup" />
+		<result column="IS_WAGES" jdbcType="VARCHAR" property="isWages" />
+		<result column="IS_ONLINE_BANK" jdbcType="VARCHAR" property="isOnlineBank" />
+		<result column="IS_LOAN" jdbcType="VARCHAR" property="isLoan" />
+    </resultMap>
+    <sql id="Base_Column_List">
+	    ID,APPLY_NO,CUST_ID,CUST_NAME,MGR_ID,MGR_NAME,MAIN_TYPE,INSTITUTION,INSTITUTION_NAME,MAIN_TYPE_NEW,IS_SMALL,IS_GROUP,IS_WAGES,IS_ONLINE_BANK,IS_LOAN
+    </sql>
+    
+</mapper>

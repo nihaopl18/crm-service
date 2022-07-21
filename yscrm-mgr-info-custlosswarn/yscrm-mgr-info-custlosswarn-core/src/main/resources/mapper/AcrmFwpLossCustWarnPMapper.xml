@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.info.custlosswarn.repository.mapper.AcrmFwpLossCustWarnPMapper">
+    <resultMap id="BaseResultMap" type="cn.com.yusys.yscrm.info.custlosswarn.domain.AcrmFwpLossCustWarnP">
+		<id column="LOSS_ID" jdbcType="VARCHAR" property="lossId" />
+		<result column="LEVEL_DATE" jdbcType="VARCHAR" property="levelDate" />
+		<result column="CUST_ID" jdbcType="VARCHAR" property="custId" />
+		<result column="CUST_NAME" jdbcType="VARCHAR" property="custName" />
+		<result column="LOSS_WARN_LEV" jdbcType="VARCHAR" property="lossWarnLev" />
+		<result column="IF_DETENTION" jdbcType="VARCHAR" property="ifDetention" />
+		<result column="DETENTION_RESULT" jdbcType="VARCHAR" property="detentionResult" />
+		<result column="AUM_M_BAL_SYB" jdbcType="VARCHAR" property="aumMbalSyb" />
+		<result column="AUM_M_BAL_MJC" jdbcType="VARCHAR" property="aumMbalMjc" />
+		<result column="AUM_M_BAL_MJT" jdbcType="VARCHAR" property="aumMbalMjt" />
+		<result column="CORP_ORG_CODE" jdbcType="VARCHAR" property="corpOrgCode" />
+    </resultMap>
+    <sql id="Base_Column_List">
+	    LOSS_ID,to_char(to_date(LEVEL_DATE,'yyyyMMdd'),'yyyy-MM-dd') AS LEVEL_DATE,CUST_ID,CUST_NAME,LOSS_WARN_LEV,IF_DETENTION,DETENTION_RESULT,AUM_M_BAL_SYB,AUM_M_BAL_MJC,AUM_M_BAL_MJT,CORP_ORG_CODE
+    </sql>
+    
+    <!-- 条件列表查询 -->
+    <select id="queryList" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+        select  a.LOSS_ID,
+          to_char(to_date(a.LEVEL_DATE,'yyyyMMdd'),'yyyy-MM-dd') as LEVEL_DATE, 
+          a.CUST_ID, a.CUST_NAME, a.LOSS_WARN_LEV, a.IF_DETENTION, a.DETENTION_RESULT,
+          '1' as CUST_TYPE 
+        from ACRM_F_WP_LOSS_CUST_WARN_P a
+               left join ACRM_F_CI_PER_ADMIT_INFO c on a.CUST_ID = c.CUST_ID 
+               
+        <where>
+            <if test="condition.levelDate != null and condition.levelDate != ''">
+                AND a.LEVEL_DATE = TO_CHAR(TO_DATE(#{condition.levelDate,jdbcType=DATE}, 'yyyy-MM-dd'),'yyyy-MM-dd')
+            </if>
+            <if test="condition.custId != null and condition.custId != ''">
+                AND a.CUST_ID = #{condition.custId,jdbcType=VARCHAR} 
+            </if>
+            <if test="condition.lossWarnLev != null and condition.lossWarnLev != ''">
+                AND a.LOSS_WARN_LEV = #{condition.lossWarnLev,jdbcType=VARCHAR}
+            </if>
+            <if test="condition.ifDetention != null and condition.ifDetention != ''">
+                AND a.IF_DETENTION = #{condition.ifDetention,jdbcType=VARCHAR}
+            </if>
+            <if test="condition.detentionResult != null and condition.detentionResult != ''">
+                <choose>
+                    <when test="@cn.com.yusys.yusp.commons.mapper.provider.OGNLUtil@like(condition.detentionResult)"> AND a.DETENTION_RESULT like #{condition.detentionResult,jdbcType=VARCHAR }</when>
+                    <otherwise> AND a.DETENTION_RESULT = #{condition.detentionResult,jdbcType=VARCHAR} </otherwise>
+                </choose>
+            </if>
+            <!-- <if test="condition.custType != null and condition.custType != ''">
+                AND b.CUST_TYPE = #{condition.custType,jdbcType=VARCHAR}
+            </if> -->
+<!--             ${condition.uncertain} -->${dataAuth}
+        </where>
+        <if test="sort != null"> order by ${sort} </if>
+    </select>
+    
+    <!-- 根据主键查询 -->
+    <select id="selectByLossId" parameterType="java.lang.String" resultMap="BaseResultMap">
+        select
+        	<include refid="Base_Column_List" />
+        from ACRM_F_WP_LOSS_CUST_WARN_P
+        where LOSS_ID = #{lossId,jdbcType=VARCHAR}
+    </select>
+    
+    <select id="queryOrgId" resultType="java.util.Map">
+		SELECT ORG_ID FROM ADMIN_SM_ORG START WITH ORG_ID=#{orgId,jdbcType=VARCHAR} CONNECT BY PRIOR ORG_ID=UP_ORG_ID
+	</select>
+    
+</mapper>

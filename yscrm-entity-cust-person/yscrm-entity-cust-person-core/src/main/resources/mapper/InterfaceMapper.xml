@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.cust.person.repository.mapper.InterfaceMapper">
+	<select id="queryOne" parameterType="String" resultType="java.util.HashMap">
+		select A.CUST_ID AS cust_No,A.CUST_NAME AS cust_Nm,A.CERT_TYPE AS Crdt_Tp_Cd,A.CERT_NO AS Crd_No,
+		A.AUM_BAL AS AUM, A.VALUE_LEV AS Val_Lvl, A.SERV_LEV AS Svc_Lvl,A.REPORT_SUM AS Cphs_Ctbd,
+		A.BELONG_MGR AS Cst_Mgr_No,A.MOBILE AS Cst_Mgr_Mbl_Ph_No  
+		 from ACRM_F_CI_PER_SERV_INFO A where cust_Id=#{custId}
+	</select>
+	
+	<select id="queryTwo" parameterType="String" resultType="java.util.HashMap">
+		SELECT A.PRODUCT_ID AS Prd_No,
+       (SELECT PROD_NAME
+          FROM ACRM_F_PD_PROD_INFO
+         WHERE PRODUCT_ID = A.PRODUCT_ID) AS Prd_Name
+  FROM ACRM_F_AG_AGREEMENT A
+ WHERE A.CUST_ID = #{custId,jdbcType=VARCHAR}
+	</select>
+	
+	<select id="queryThree" parameterType="String" resultType="java.util.HashMap">
+		SELECT A.PROD_ID AS Prd_No, A.PROD_NAME AS Prd_Name
+  FROM OCRM_F_PD_CUST_FIT_PROD A
+ WHERE A.CUST_ID = #{custId,jdbcType=VARCHAR}
+	</select>
+	
+	<select id="queryCustId" parameterType="java.util.HashMap" resultType="String">
+		SELECT cust_Id from ACRM_F_CI_PER_ADMIT_INFO where CERT_TYPE=#{certType} AND CERT_NO=#{certNo}
+	</select>
+	
+	<select id="queryProp" parameterType="String" resultType="String">
+		SELECT PROP_VALUE FROM ADMIN_SM_PROP WHERE PROP_ID=#{value}
+	</select>
+</mapper>

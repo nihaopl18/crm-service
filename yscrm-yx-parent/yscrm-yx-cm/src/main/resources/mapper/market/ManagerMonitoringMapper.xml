@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.cm.monitoring.repository.mapper.ManagerMonitoringMapper">
+
+	<!-- 客户经理监控查询 -->
+	<select id="getList" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+		resultType="java.util.Map">
+		select t3.activity_id,
+		       t3.duty_user,
+		       t3.customer_no,
+		       nvl(s1.success_no, 0) as success_no,
+		       nvl(s2.fail_no, 0) as fail_no,
+		       nvl(s3.imping_no, 0) as imping_no,
+		       nvl((s1.success_no + s2.fail_no), 0) as contacted_no,
+		       nvl(s4.product_no, 0) as product_no ,
+		       (nvl(s1.success_no, 0) + nvl(s2.fail_no, 0)) as total_no,
+		       Round((nvl(s1.success_no, 0) / nvl(s1.success_no + s2.fail_no, 1)),2) success_rate,
+		       Round((nvl(s2.fail_no, 0) / nvl(s1.success_no + s2.fail_no, 1)),2) fail_rate ,
+		       s5.user_name,
+		       s6.activity_name ,
+		       s7.org_name
+		  from (select a.activity_id, b.duty_user,count(*) as customer_no 
+		          from (select * from CIMP_TC_TASKPOOL_INFO where task_type='BO') a
+		          left join CIMP_TC_NICHE_INFO s
+		            on a.task_id = s.task_id
+		          left join CIMP_TC_MYTASK_INFO b
+		            on a.task_id = b.task_id
+		         where b.duty_user is not null
+		           and a.activity_id is not null and a.task_type='BO'
+		         group by b.duty_user, a.activity_id) t3
+		  left join (select count(*) as success_no, b.duty_user, t1.activity_id
+		               from CIMP_TC_NICHE_INFO t
+		               left join (select * from CIMP_TC_TASKPOOL_INFO where task_type='BO') t1
+		                 on t1.task_id = t.task_id
+		               left join CIMP_TC_MYTASK_INFO b
+		                 on t.task_id = b.task_id
+		              where t1.task_state = 'SUCCESSEND'
+		                and b.duty_user is not null
+		                and t1.activity_id is not null
+		              group by b.duty_user, t1.activity_id) s1
+		    on s1.duty_user = t3.duty_user
+		   and s1.activity_id = t3.activity_id
+		  left join (select count(*) as fail_no, b.duty_user, t1.activity_id
+		               from CIMP_TC_NICHE_INFO t
+		               left join (select * from CIMP_TC_TASKPOOL_INFO where task_type='BO') t1
+		                 on t1.task_id = t.task_id
+		               left join CIMP_TC_MYTASK_INFO b
+		                 on t.task_id = b.task_id
+		              where t1.task_state = 'FAILEND'
+		                and b.duty_user is not null
+		                and t1.activity_id is not null
+		              group by b.duty_user, t1.activity_id) s2
+		    on s2.duty_user = t3.duty_user
+		   and s2.activity_id = t3.activity_id
+		  left join (select count(*) as imping_no, b.duty_user, t1.activity_id
+		               from CIMP_TC_NICHE_INFO t
+		               left join (select * from CIMP_TC_TASKPOOL_INFO where task_type='BO') t1
+		                 on t1.task_id = t.task_id
+		               left join CIMP_TC_MYTASK_INFO b
+		                 on t.task_id = b.task_id
+		              where t1.task_state = 'IMPLEMENTING'
+		                and b.duty_user is not null
+		                and t1.activity_id is not null
+		              group by b.duty_user, t1.activity_id) s3
+		    on s3.duty_user = t3.duty_user
+		   and s3.activity_id = t3.activity_id
+		  left join (select length(n3.form_out_val) -
+		                    length(replace(n3.form_out_val, ',')) + 1 as product_no,
+		                    n1.temp_id
+		               from (select s.node_id, s.temp_id
+		                       from CIMP_CM_NODEINFO s
+		                      where assembly_id in
+		                            (select d.assembly_id
+		                               from CIMP_CM_ASSEMINFO d
+		                              where class_id = '3')) n1
+		               left join CIMP_CM_NODES_DISPLAY n2
+		                 on n1.node_id = n2.node_id
+		               left join CIMP_CM_NODES_DISPLAY_OUTPUT n3
+		                 on n2.form_id = n3.form_id) s4
+		    on s4.temp_id = t3.activity_id
+		  left join admin_sm_user s5
+		    on s5.login_code = t3.duty_user
+		  left join CIMP_CM_MARKETPLAN s6
+		    on t3.activity_id = s6.temp_id
+		  left join admin_sm_org s7
+    		on s7.org_id = s5.org_id
+    	<where>
+    		<if test="condition.org_id != null and condition.org_id !=''">
+				and s7.org_id = #{condition.org_id}
+			</if>		
+			<if test="condition.activityName != null and condition.activityName !=''">
+				and s6.activity_name like '%'||#{condition.activityName}||'%'
+			</if>
+			<if test="condition.userName != null and condition.userName !=''">
+				and t3.duty_user = #{condition.userName}
+			</if>
+		</where>
+	</select>
+	<!-- 新增获取id -->
+	<select id="getSeq" resultType="String">
+		select ysc_sequence.nextval from dual
+	</select>	
+	<!-- 客户经理监控-执行中 查询 -->
+	<select id="getImpList" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.Map">
+		select t1.activity_id,
+		       t4.activity_name,
+		       t5.user_name,
+		       b.duty_user,
+		       a.customer_name,
+		       t2.product_id,
+		       t3.prod_name
+		  from CIMP_TC_NICHE_INFO a
+		  left join CIMP_TC_NICHE_INFO s
+		    on a.task_id = s.task_id
+		  left join CIMP_TC_MYTASK_INFO b
+		    on a.task_id = b.task_id
+		  left join CIMP_TC_TASKPOOL_INFO t1
+		    on t1.task_id = a.task_id
+		  left join cm_f_rc_market_back t2
+		    on t2.task_id = t1.task_id
+		  left join CM_F_RC_PROD_INFO t3
+		    on t3.product_id = t2.product_id
+		  left join CIMP_CM_MARKETPLAN t4
+		    on t4.temp_id = t1.activity_id
+		  left join admin_sm_user t5
+		    on t5.login_code = b.duty_user
+		 <where>
+			<if test="condition.dutyUser != null and condition.dutyUser !=''">
+				and b.duty_user = #{condition.dutyUser}
+			</if>
+			<if test="condition.activityId != null and condition.activityId !=''">
+				and t1.activity_id = #{condition.activityId}
+			</if>
+				and t1.task_state= 'IMPLEMENTING' and t1.task_type='BO'
+		</where>
+	</select>
+	<!-- 客户经理监控-执行成功 查询 -->
+	<select id="getSuccessList" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.Map">
+		select t1.activity_id,
+		       t4.activity_name,
+		       t5.user_name,
+		       b.duty_user,
+		       a.customer_name,
+		       t2.product_id,
+		       t3.prod_name
+		  from CIMP_TC_NICHE_INFO a
+		  left join CIMP_TC_NICHE_INFO s
+		    on a.task_id = s.task_id
+		  left join CIMP_TC_MYTASK_INFO b
+		    on a.task_id = b.task_id
+		  left join CIMP_TC_TASKPOOL_INFO t1
+		    on t1.task_id = a.task_id
+		  left join cm_f_rc_market_back t2
+		    on t2.task_id = t1.task_id
+		  left join CM_F_RC_PROD_INFO t3
+		    on t3.product_id = t2.product_id
+		  left join CIMP_CM_MARKETPLAN t4
+		    on t4.temp_id = t1.activity_id
+		  left join admin_sm_user t5
+		    on t5.login_code = b.duty_user
+		 <where>
+			<if test="condition.dutyUser != null and condition.dutyUser !=''">
+				and b.duty_user = #{condition.dutyUser}
+			</if>
+			<if test="condition.activityId != null and condition.activityId !=''">
+				and t1.activity_id = #{condition.activityId}
+			</if>
+				and t1.task_state= 'SUCCESSEND' and t1.task_type='BO'
+		</where>
+	</select>
+	<!-- 客户经理监控-执行失败 查询 -->
+	<select id="getFailedList" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.Map">
+		select t1.activity_id,
+		       t4.activity_name,
+		       t5.user_name,
+		       b.duty_user,
+		       a.customer_name,
+		       t2.product_id,
+		       t3.prod_name
+		  from CIMP_TC_NICHE_INFO a
+		  left join CIMP_TC_NICHE_INFO s
+		    on a.task_id = s.task_id
+		  left join CIMP_TC_MYTASK_INFO b
+		    on a.task_id = b.task_id
+		  left join CIMP_TC_TASKPOOL_INFO t1
+		    on t1.task_id = a.task_id
+		  left join cm_f_rc_market_back t2
+		    on t2.task_id = t1.task_id
+		  left join CM_F_RC_PROD_INFO t3
+		    on t3.product_id = t2.product_id
+		  left join CIMP_CM_MARKETPLAN t4
+		    on t4.temp_id = t1.activity_id
+		  left join admin_sm_user t5
+		    on t5.login_code = b.duty_user
+		 <where>
+			<if test="condition.dutyUser != null and condition.dutyUser !=''">
+				and b.duty_user = #{condition.dutyUser}
+			</if>
+			<if test="condition.activityId != null and condition.activityId !=''">
+				and t1.activity_id = #{condition.activityId}
+			</if>
+				and t1.task_state= 'FAILEND'  and t1.task_type='BO'
+		</where>
+	</select>
+</mapper>

@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.cm.ruleConfig.repository.mapper.CmFRcEventInfoMapper">
+	<!-- 查询事件信息 -->
+	<select id="getEventInfo" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+		resultType="cn.com.yusys.yusp.cm.ruleConfig.domain.CmFRcEventInfo">
+		SELECT t.*, T1.Event_Type_Name AS event_Type_Name
+      FROM cm_f_rc_event_info t
+      LEFT JOIN cm_f_rc_event_type t1
+        ON t1.event_type_id = t.event_type_id
+      where (t.DELETE_SIGN is null or t.DELETE_SIGN != '1')
+      and t.event_type_id is not null
+      <if test="condition.eventName != null and condition.eventName !=''">
+		and T.EVENT_NAME  LIKE CONCAT(CONCAT('%', #{condition.eventName, jdbcType=VARCHAR}),'%') 
+		</if>
+      <if test="condition.eventTypeId != null and condition.eventTypeId !=''">
+	  	and T.EVENT_TYPE_ID  = #{condition.eventTypeId, jdbcType=VARCHAR}
+	  </if>
+	  <if test="condition.wfApprSts != null and condition.wfApprSts !=''">
+	  	and T.wf_appr_sts  = #{condition.wfApprSts, jdbcType=VARCHAR}
+	  </if>
+	  <if test="condition.useFlag != null and condition.useFlag !=''">
+	  	and T.use_flag  = #{condition.useFlag, jdbcType=VARCHAR}
+	  </if>
+	  <if test="condition.beginDate != null and condition.beginDate !=''">
+	  	and T.begin_Date  &gt;= #{condition.beginDate, jdbcType=VARCHAR}
+	  </if>
+	  <if test="condition.beginDateEnd != null and condition.beginDateEnd !=''">
+	  	and T.begin_Date  &lt;= #{condition.beginDateEnd, jdbcType=VARCHAR}
+	  </if>
+	  <if test="condition.endDate != null and condition.endDate !=''">
+	  	and T.end_Date  &gt;= #{condition.endDate, jdbcType=VARCHAR}
+	  </if>
+	  <if test="condition.endDateEnd != null and condition.endDateEnd !=''">
+	  	and T.end_Date  &lt;= #{condition.endDateEnd, jdbcType=VARCHAR}
+	  </if>
+	</select>
+	<select id="getEventByTrans" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+		resultType="cn.com.yusys.yusp.cm.ruleConfig.domain.CmFRcEventInfo">
+		SELECT t.*
+      FROM cm_f_rc_event_info t
+      where (t.DELETE_SIGN is null or t.DELETE_SIGN != '1')
+	  	and T.TRANSACTION_CODE  in (#{transCode, jdbcType=VARCHAR})
+	</select>
+	
+   <!-- 逻辑删除事件信息-->
+   <update id="updataEventInfoState" parameterType="java.util.Map">  
+         UPDATE cm_f_rc_event_info  
+            SET 
+			DELETE_SIGN = '1',
+			UPDATE_USER	= #{userCode,javaType=java.lang.String},
+			UPDATE_DATE	= #{upDate,javaType=java.lang.String},
+			UPDATE_ORG	= #{orgCode,javaType=java.lang.String}
+            WHERE EVENT_ID = #{eventId,javaType=java.lang.String}
+   </update> 
+   <!-- 更新事件状态 -->
+   <update id="updateSts" >
+		update cm_f_rc_event_info 
+		set 
+			USE_FLAG=#{useflag,javaType=java.lang.String},
+			UPDATE_USER	= #{userCode,javaType=java.lang.String},
+			UPDATE_DATE	= #{upDate,javaType=java.lang.String},
+			UPDATE_ORG	= #{orgCode,javaType=java.lang.String}
+        WHERE EVENT_ID = #{eventId,javaType=java.lang.String}
+	</update>
+</mapper>

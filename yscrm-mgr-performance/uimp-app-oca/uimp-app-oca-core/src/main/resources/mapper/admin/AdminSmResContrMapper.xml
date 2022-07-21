@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.admin.repository.mapper.AdminSmResContrMapper">
+
+	<!--初始化左侧树,层级为模块、业务功能管理 -->
+	<select id="getFuncTree" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+			resultType="java.util.Map">
+			select '0' as up_tree_id ,m.mod_id as node_id ,m.mod_name as node_name,'M' as node_type from admin_sm_func_mod m
+    		union
+    		select mod_id as up_tree_id ,func_id as node_id,func_name as node_name,'F' as node_type from admin_sm_busi_func
+	</select>
+	
+	<!--删除控制点时,查询是否有关联数据权限-->
+	<select id="getDataByContrId" parameterType="String" resultType="String">
+		 select a.auth_id from admin_sm_data_auth a where a.contr_id in
+		 <foreach item="contrIds" index="index" collection="array" open="(" separator="," close=")">  
+ 			#{contrIds} 
+ 		</foreach>
+	</select>
+	
+	<!--保存控制点信息前，查询业务功能是否已关联相同控制操作代码的控制点-->
+	<select id="ifCodeRepeat" parameterType="java.util.Map" resultType="java.util.HashMap">
+		 select c.contr_id from admin_sm_res_contr c where c.contr_code = #{contrCode} and c.func_id = #{funcId}
+		 <if test=" contrId != null and contrId !='' ">
+		 		and c.contr_id &lt;&gt; #{contrId}
+		 </if>
+	</select>
+</mapper>
+    

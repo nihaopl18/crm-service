@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.admin.repository.mapper.AdminSmAuthRecoMapper">
+
+ 	<!-- 批量新增数据 (db2)-->
+	<insert id="insertBatchByOracle" parameterType="List" databaseId="DB2">
+		insert into ADMIN_SM_AUTH_RECO (AUTH_RECO_ID,SYS_ID,AUTHOBJ_TYPE,AUTHOBJ_ID,AUTHRES_TYPE,AUTHRES_ID,
+		LAST_CHG_USR,LAST_CHG_DT) 
+		<foreach collection="list" item="poi" index="index" separator="union all" >  
+         	select #{poi.authRecoId},#{poi.sysId}, #{poi.authobjType}, #{poi.authobjId}, #{poi.authresType}, #{poi.authresId},#{poi.lastChgUsr}, #{poi.lastChgDt}
+         	from SYSIBM.SYSDUMMY1
+    	</foreach> 
+	</insert>   
+    
+    <!-- 根据菜单ID查询所有父节点ID包含本身节点 -->
+    <select id="quryUpIdById" parameterType="java.util.Map" resultType="java.util.Map" databaseId="DB2">
+        WITH RPL (  id,menu_type,UP_MENU_ID,menu_id) AS
+        (
+        SELECT   menu_id as id, 'M' as menu_type,UP_MENU_ID,menu_id FROM admin_sm_menu WHERE  menu_id in
+        <foreach item="menuId" index="index" collection="list" open="(" separator="," close=")">
+            #{menuId}
+        </foreach>
+        UNION ALL
+        SELECT   parent.menu_id as id,'M' as menu_type,parent.UP_MENU_ID,parent.menu_id FROM  RPL child ,admin_sm_menu   parent WHERE parent.menu_id=child.UP_MENU_ID
+        )SELECT * FROM RPL
+    </select>
+
+</mapper>

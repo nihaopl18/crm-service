@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.cim.model.repository.mapper.LoyAcEquCatalogMapper">
+    <select id="list" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="cn.com.yusys.yusp.cim.model.domain.LoyAcEquCatalog">
+        select * from LOY_AC_EQU_CATALOG CL
+        where 1=1
+        <if test="condition.orgCode != null and condition.orgCode != ''">
+            and Cl.CORP_ORG = #{condition.orgCode,jdbcType=VARCHAR}
+        </if>
+    </select>
+</mapper>

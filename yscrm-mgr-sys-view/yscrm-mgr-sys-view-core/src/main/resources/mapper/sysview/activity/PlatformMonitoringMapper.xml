@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.sysview.repository.mapper.activity.PlatformMonitoringMapper">
+
+    <select id="getFunModuleInfo" parameterType="cn.com.yusys.yscrm.sysview.domain.TagAnalysisQuery" resultType="cn.com.yusys.yscrm.sysview.domain.activity.FunModuleStatsVO">
+        SELECT T.VISIT_TIME,U.PLAY_NAME AS MODULE,C.VISIT_COUNT,U.USER_COUNT
+        FROM(
+            select count(distinct R.USER_ID) AS USER_COUNT,LR.PLAY_NAME
+            from ADMIN_SM_AUTH_RECO A
+            inner join ADMIN_SM_USER_ROLE_REL R ON A.AUTHOBJ_ID=R.ROLE_ID
+            inner join ADMIN_SM_USER U on U.USER_ID = R.USER_ID and U.USER_STS='A'
+            inner join ADMIN_SM_MENU M ON M.MENU_ID=A.MENU_ID
+            inner join ADMIN_SM_LOG_RESEACH LR on M.MENU_NAME = LR.SEL_NAME
+            group by LR.PLAY_NAME ) U
+        left join(
+            select count(distinct L.USER_ID) AS VISIT_COUNT,LR.PLAY_NAME
+            from ADMIN_SM_LOG L
+            inner join ADMIN_SM_USER_ROLE_REL UR on UR.USER_ID = L.USER_ID
+            inner join ADMIN_SM_USER U on (UR.USER_ID = U.USER_ID and U.USER_STS='A')
+            inner join ADMIN_SM_LOG_RESEACH LR on L.OPER_OBJ_ID = LR.SEL_NAME
+            where L.LOG_TYPE_ID='7'
+                <if test="startTime != null and startTime != ''">
+                    AND L.OPER_TIME &gt;=#{startTime}
+                </if>
+                <if test="endTime != null and endTime != ''">
+                    AND L.OPER_TIME &lt;= #{endTime}
+                </if>
+            group by LR.PLAY_NAME ) C on U.PLAY_NAME = C.PLAY_NAME
+        left join(
+            select count(distinct L.LOG_ID) AS VISIT_TIME,LR.PLAY_NAME
+            from ADMIN_SM_LOG L
+            inner join ADMIN_SM_USER_ROLE_REL UR on UR.USER_ID = L.USER_ID
+            inner join ADMIN_SM_USER U on (UR.USER_ID = U.USER_ID and U.USER_STS='A')
+            inner join ADMIN_SM_LOG_RESEACH LR on L.OPER_OBJ_ID = LR.SEL_NAME
+            where L.LOG_TYPE_ID='7'
+            <if test="startTime != null and startTime != ''">
+                AND L.OPER_TIME &gt;=#{startTime}
+            </if>
+            <if test="endTime != null and endTime != ''">
+                AND L.OPER_TIME &lt;= #{endTime}
+            </if>
+            group by LR.PLAY_NAME ) T on T.PLAY_NAME = C.PLAY_NAME
+    </select>
+
+    <select id="getUsersCount" resultType="integer">
+        SELECT COUNT(distinct U.USER_ID)
+        FROM ADMIN_SM_USER U
+        inner join ADMIN_SM_USER_ROLE_REL UR on U.USER_ID = UR.USER_ID
+        where U.USER_STS='A'
+    </select>
+
+    <select id="getCurrentMAU" resultType="integer">
+        SELECT COUNT( * )
+        FROM(
+            SELECT DISTINCT L.USER_ID
+            FROM ADMIN_SM_LOG L
+            inner join ADMIN_SM_USER_ROLE_REL UR on UR.USER_ID = L.USER_ID
+            inner join ADMIN_SM_USER U on (UR.USER_ID = U.USER_ID and U.USER_STS='A')
+            WHERE L.OPER_TIME &gt;= to_char(trunc(SYSDATE ,'mm'),'yyyy-MM-dd HH24:mi:ss' ) )
+    </select>
+
+    <select id="getLastMAU" resultType="integer">
+        SELECT COUNT( * )
+        FROM(
+            SELECT DISTINCT L.USER_ID
+            FROM ADMIN_SM_LOG L
+            inner join ADMIN_SM_USER_ROLE_REL UR on UR.USER_ID = L.USER_ID
+            inner join ADMIN_SM_USER U on (UR.USER_ID = U.USER_ID and U.USER_STS='A')
+            WHERE L.OPER_TIME &gt;= to_char(trunc(add_months(SYSDATE,-1) ,'mm'),'yyyy-MM-dd HH24:mi:ss' )
+              AND L.OPER_TIME &lt; to_char(trunc(SYSDATE ,'mm'),'yyyy-MM-dd HH24:mi:ss' ) )
+    </select>
+
+    <select id="getLogins" resultType="integer">
+        SELECT COUNT(distinct L.LOG_ID)
+        FROM ADMIN_SM_LOG L
+        inner join ADMIN_SM_USER_ROLE_REL UR on UR.USER_ID = L.USER_ID
+        inner join ADMIN_SM_USER U on (UR.USER_ID = U.USER_ID and U.USER_STS='A')
+        WHERE L.OPER_TIME &gt;= to_char(trunc(SYSDATE ,'mm'),'yyyy-MM-dd HH24:mi:ss' )
+            AND L.LOG_TYPE_ID='3'
+    </select>
+
+    <select id="getLastLogins" resultType="integer">
+        SELECT COUNT(distinct L.LOG_ID)
+        FROM ADMIN_SM_LOG L
+        inner join ADMIN_SM_USER_ROLE_REL UR on UR.USER_ID = L.USER_ID
+        inner join ADMIN_SM_USER U on (UR.USER_ID = U.USER_ID and U.USER_STS='A')
+        WHERE L.OPER_TIME &gt;= to_char(trunc(add_months(SYSDATE,-1) ,'mm'),'yyyy-MM-dd HH24:mi:ss' )
+            AND L.OPER_TIME &lt; to_char(trunc(SYSDATE ,'mm'),'yyyy-MM-dd HH24:mi:ss' )
+            AND L.LOG_TYPE_ID='3'
+    </select>
+
+    <select id="getMAUFlct" resultType="cn.com.yusys.yscrm.sysview.domain.activity.LineChart">
+        SELECT COUNT,M.MONTH
+        FROM(
+            SELECT TO_CHAR( add_months( trunc(add_months(sysdate,-11)), ROWNUM - 1 ), 'YYYY-MM' ) AS MONTH
+            FROM DUAL CONNECT BY ROWNUM &lt;= 12) M
+        LEFT JOIN (
+            SELECT COUNT(*) AS COUNT,MONTH
+            FROM(
+                SELECT distinct L.USER_ID,SUBSTR(L.OPER_TIME, 1, 7) AS MONTH
+                FROM ADMIN_SM_LOG L
+                inner join ADMIN_SM_USER_ROLE_REL UR on UR.USER_ID = L.USER_ID
+                inner join ADMIN_SM_USER U on (UR.USER_ID = U.USER_ID and U.USER_STS='A')
+                WHERE TO_DATE(L.OPER_TIME, 'YYYY-MM-DD HH24:MI:SS')&gt;=trunc(add_months(sysdate,-11),'mm')
+                GROUP BY SUBSTR(L.OPER_TIME, 1, 7),L.USER_ID)
+            GROUP BY MONTH) C ON M.MONTH=C.MONTH
+        ORDER BY M.MONTH
+    </select>
+
+    <select id="getOrgMAUProportion" resultType="cn.com.yusys.yscrm.sysview.domain.activity.OrgMAUProportion">
+        SELECT P.PROVINCE, P.ORG_ID, SUM(UC.USER_COUNT) USER_COUNT, SUM(C.COUNT) COUNT, O.ORG_NAME
+        FROM OCRM_F_ORG_PROVINCE_REL P
+        LEFT JOIN (
+            SELECT COUNT(DISTINCT U.USER_ID) USER_COUNT,
+            CASE WHEN O.ORG_LEVEL = 3 THEN O.UP_ORG_ID ELSE U.ORG_ID END UP_ORG_ID
+            FROM ADMIN_SM_USER U
+            inner join ADMIN_SM_USER_ROLE_REL UR on U.USER_ID = UR.USER_ID
+            INNER JOIN ADMIN_SM_ORG O ON U.ORG_ID = O.ORG_ID
+            where U.USER_STS='A'
+            GROUP BY CASE WHEN O.ORG_LEVEL = 3 THEN O.UP_ORG_ID ELSE U.ORG_ID END
+            ) UC ON P.ORG_ID = UC.UP_ORG_ID
+        LEFT JOIN (
+            SELECT COUNT(DISTINCT L.USER_ID) COUNT,
+            CASE WHEN O.ORG_LEVEL = 3 THEN O.UP_ORG_ID ELSE L.ORG_ID END UP_ORG_ID
+            FROM ADMIN_SM_LOG L
+            inner join ADMIN_SM_USER_ROLE_REL UR on L.USER_ID = UR.USER_ID
+            inner join ADMIN_SM_USER U on U.USER_ID = UR.USER_ID and U.USER_STS='A'
+            INNER JOIN ADMIN_SM_ORG O ON L.ORG_ID = O.ORG_ID
+            WHERE L.OPER_TIME >= to_char(trunc(SYSDATE ,'mm'),'yyyy-MM-dd HH24:mi:ss' )
+            GROUP BY CASE WHEN O.ORG_LEVEL = 3 THEN O.UP_ORG_ID ELSE L.ORG_ID END
+            ) C ON P.ORG_ID = C.UP_ORG_ID
+        INNER JOIN ADMIN_SM_ORG O ON P.ORG_ID = O.ORG_ID
+        GROUP BY P.PROVINCE, P.ORG_ID, O.ORG_NAME
+    </select>
+
+    <select id="exportNoLoginUser" resultType="cn.com.yusys.yscrm.sysview.domain.activity.UserInfo">
+        select distinct U.LOGIN_CODE,U.USER_NAME,O.ORG_NAME,
+        case when L.LOGIN_STS is null or L.LOGIN_STS = '' then '未登录' else L.LOGIN_STS end LOGIN_STS
+        from admin_sm_user U
+        inner join ADMIN_SM_USER_ROLE_REL UR on UR.USER_ID = U.USER_ID
+        left join ADMIN_SM_ORG O on O.Org_Code = U.org_id
+        left join (
+            select distinct user_id, '登录' as LOGIN_STS from admin_sm_log
+        ) L on L.user_id = U.LOGIN_CODE
+        where U.user_sts = 'A'
+    </select>
+</mapper>

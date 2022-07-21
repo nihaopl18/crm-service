@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.cust.person.repository.mapper.OcrmFciLawsuitInfoMapper">
+    <sql id="Base_Column_List">
+	    DATA_DATE,CRAT_DT,CRAT_ORG_ID,CRAT_USR,LAST_CHG_SYS,LAST_CHG_USR,LAST_CHG_DT,CORP_ORG_CODE,CUST_ID,CUST_TYPE,REG_DATE,UNPD_AMT,LAWSUIT_STAT,LOAN_AMT,OTHER_LAWSUITER,SRC_SYS_CD,INPUT_ID,REMARK
+    </sql>
+    
+    <!-- 诉讼信息查询 -->
+	<select id="querylist" parameterType="java.util.Map" resultType="java.util.Map">
+		select ID,
+			   t.DATA_DATE,
+			   to_char(t.CRAT_DT,'yyyy-mm-dd') as CRAT_DT,
+		       t.CRAT_ORG_ID,
+		       t.CRAT_USR,
+		       t.LAST_CHG_SYS,
+		       t.LAST_CHG_USR,
+		       to_char(t.LAST_CHG_DT,'yyyy-mm-dd') as LAST_CHG_DT,
+		       t.CORP_ORG_CODE,
+		       t.CUST_ID,
+		       t.CUST_TYPE,
+		       to_char(t.REG_DATE,'yyyy-mm-dd') as REG_DATE,
+		       t.UNPD_AMT,
+		       t.LAWSUIT_STAT,
+		       t.LOAN_AMT,
+		       t.OTHER_LAWSUITER,
+		       t.SRC_SYS_CD,
+		       t.INPUT_ID,
+		       t.REMARK,
+		       cust.user_name
+		  from OCRM_F_CI_LAWSUIT_INFO t
+	      left join admin_sm_user cust
+	      on cust.login_code = t.INPUT_ID
+		  where 1=1
+		  
+		  <if  test="custId != null and custId != ''">
+	       		and t.CUST_ID =#{custId,jdbcType=VARCHAR} 
+		  </if>
+	</select>
+</mapper>

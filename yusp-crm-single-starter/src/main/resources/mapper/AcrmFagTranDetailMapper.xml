@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper
+	namespace="cn.com.yusys.yusp.dycrm.transferInfo.repository.mapper.AcrmFagTranDetailMapper">
+	<select id="queryMonth" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+		resultType="java.util.HashMap">
+		select
+		CUST_NO,
+		MAIN_ACCT,
+		SUB_ACCT_NO,
+		TRANS_SERIAL_NO,
+		TRANS_CCY,
+		TRANS_AMT,
+		TO_CHAR(TRANS_DATE,'yyyy-MM-dd HH24:mi:ss') TRANS_DATE,
+		TO_CHAR(TRANS_TIME,'yyyy-MM-dd HH24:mi:ss') TRANS_TIME,
+		TRANS_ORG,
+		TRANS_CLASS,
+		TRANS_TYPE,
+		TRANS_CHANNEL,
+		DEBIT_OR_CREDIT,
+		CASH_TRANSFER_FLAG,
+		INTER_BANK_FLAG,
+		OPPONENT_MAIN_ACCT_NO,
+		OPPONENT_SUB_ACCT_NO,
+		TRANS_TELLER,
+		AGENT_NAME,
+		AGENT_CERT_TYPE,
+		AGENT_CERT_NO
+		from ACRM_F_AG_TRAN_DETAIL
+		<where>
+			CUST_NO =
+			#{condition.custNo,jdbcType=VARCHAR}
+			and SUB_ACCT_NO =
+			#{condition.acctId,jdbcType=VARCHAR}
+			<if
+				test="condition.startDate != null and condition.startDate != '' and condition.endDate != null and condition.endDate != ''">
+                <![CDATA[
+	                AND TRANS_DATE >= to_date(#{condition.startDate,jdbcType=VARCHAR},'yyyy-MM-dd')
+	                AND TRANS_DATE <= to_date(#{condition.endDate,jdbcType=VARCHAR},'yyyy-MM-dd')
+	            ]]>
+			</if>
+			<!-- <if test="condition.transType != null and condition.transType != ''">
+                <![CDATA[
+	                AND TRANS_CLASS = #{condition.transType,jdbcType=VARCHAR}
+	            ]]>
+			</if>
+			<if test="condition.startAmt != null and condition.startAmt != ''">
+				<![CDATA[
+				AND TRANS_AMT >= #{condition.startAmt,jdbcType=VARCHAR}
+				]]>
+			</if>
+			<if test="condition.endAmt != null and condition.endAmt != ''">
+			<![CDATA[
+				AND TRANS_AMT <= #{condition.startAmt,jdbcType=VARCHAR}
+				]]>
+			</if> -->
+		</where>
+	</select>
+
+	<select id="queryAll" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+		resultType="java.util.HashMap">
+		select
+		CUST_NO,
+		MAIN_ACCT,
+		SUB_ACCT_NO,
+		TRANS_SERIAL_NO,
+		TRANS_CCY,
+		TRANS_AMT,
+		TO_CHAR(TRANS_DATE,'yyyy-MM-dd HH24:mi:ss') TRANS_DATE,
+		TO_CHAR(TRANS_TIME,'yyyy-MM-dd HH24:mi:ss') TRANS_TIME,
+		TRANS_ORG,
+		TRANS_CLASS,
+		TRANS_TYPE,
+		TRANS_CHANNEL,
+		DEBIT_OR_CREDIT,
+		CASH_TRANSFER_FLAG,
+		INTER_BANK_FLAG,
+		OPPONENT_MAIN_ACCT_NO,
+		OPPONENT_SUB_AACCT_NO OPPONENT_SUB_ACCT_NO,
+		TRANS_TELLER,
+		AGENT_NAME,
+		AGENT_CERT_TYPE,
+		AGENT_CERT_NO
+		from ACRM_F_AG_TRAN_DETAIL_ALL
+		<where>
+			CUST_NO =
+			#{condition.custNo,jdbcType=VARCHAR}
+			and SUB_ACCT_NO =
+			#{condition.acctId,jdbcType=VARCHAR}
+			<if
+				test="condition.startDate != null and condition.startDate != '' and condition.endDate != null and condition.endDate != ''">
+                <![CDATA[
+	                AND TRANS_DATE >= to_date(#{condition.startDate,jdbcType=VARCHAR},'yyyy-MM-dd')
+	                AND TRANS_DATE <= to_date(#{condition.endDate,jdbcType=VARCHAR},'yyyy-MM-dd')
+	            ]]>
+			</if>
+			<!-- <if test="condition.transType != null and condition.transType != ''">
+                <![CDATA[
+	                AND TRANS_CLASS = #{condition.transType,jdbcType=VARCHAR}
+	            ]]>
+			</if>
+			<if test="condition.startAmt != null and condition.startAmt != ''">
+				<![CDATA[
+				AND TRANS_AMT >= #{condition.startAmt,jdbcType=VARCHAR}
+				]]>
+			</if>
+			<if test="condition.endAmt != null and condition.endAmt != ''">
+			<![CDATA[
+				AND TRANS_AMT <= #{condition.startAmt,jdbcType=VARCHAR}
+				]]>
+			</if> -->
+		</where>
+	</select>
+
+	<select id="excelMonth" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+			resultType="cn.com.yusys.yusp.dycrm.transferInfo.domain.TransferInfoAG">
+		SELECT
+		CUST_NO,
+		PAI.CUST_NAME CUST_NAME,
+		SUB_ACCT_NO,
+		TRANS_SERIAL_NO,
+		LI1.LOOKUP_ITEM_NAME CCY_NAME,
+		TRANS_AMT,
+		TO_CHAR(TRANS_DATE,'yyyy-MM-dd') TRANS_DATE,
+		TO_CHAR(TRANS_TIME,'HH24:mi:ss') TRANS_TIME,
+		O.ORG_NAME,
+		LI2.LOOKUP_ITEM_NAME CLASS_NAME,
+		LI3.LOOKUP_ITEM_NAME TYPE_NAME,
+		LI4.LOOKUP_ITEM_NAME  CHANNEL_NAME,
+		LI5.LOOKUP_ITEM_NAME DEBIT_CREDIT,
+		LI6.LOOKUP_ITEM_NAME CASH_FLAG,
+		LI7.LOOKUP_ITEM_NAME INTER_FLAG,
+		OPPONENT_MAIN_ACCT_NO,
+		OPPONENT_SUB_ACCT_NO,
+		TRANS_TELLER,
+		AGENT_NAME,
+		LI8.LOOKUP_ITEM_NAME CERT_TYPE,
+		AGENT_CERT_NO
+		FROM
+		ACRM_F_AG_TRAN_DETAIL AG
+		LEFT JOIN ACRM_F_CI_PER_ADMIT_INFO PAI ON AG.CUST_NO = PAI.CUST_ID
+		LEFT JOIN ADMIN_SM_ORG O ON AG.TRANS_ORG = O.ORG_ID
+		LEFT JOIN ADMIN_SM_LOOKUP_ITEM LI1 ON LI1.LOOKUP_ITEM_CODE = AG.TRANS_CCY AND LI1.LOOKUP_CODE = 'CD0433'
+		LEFT JOIN ADMIN_SM_LOOKUP_ITEM LI2 ON LI2.LOOKUP_ITEM_CODE = AG.TRANS_CLASS AND LI2.LOOKUP_CODE = 'TRANS_CLASS'
+		LEFT JOIN ADMIN_SM_LOOKUP_ITEM LI3 ON LI3.LOOKUP_ITEM_CODE = AG.TRANS_TYPE AND LI3.LOOKUP_CODE = 'TRANS_TYPE'
+		LEFT JOIN ADMIN_SM_LOOKUP_ITEM LI4 ON LI4.LOOKUP_ITEM_CODE = AG.TRANS_CHANNEL AND LI4.LOOKUP_CODE = 'TRANS_CHANNEL'
+		LEFT JOIN ADMIN_SM_LOOKUP_ITEM LI5 ON LI5.LOOKUP_ITEM_CODE = AG.DEBIT_OR_CREDIT AND LI5.LOOKUP_CODE = 'DEBIT_CREDIT'
+		LEFT JOIN ADMIN_SM_LOOKUP_ITEM LI6 ON LI6.LOOKUP_ITEM_CODE = AG.CASH_TRANSFER_FLAG AND LI6.LOOKUP_CODE = 'TRANS_FLAG'
+		LEFT JOIN ADMIN_SM_LOOKUP_ITEM LI7 ON LI7.LOOKUP_ITEM_CODE = AG.INTER_BANK_FLAG AND LI7.LOOKUP_CODE = 'INTER_FLAG'
+		LEFT JOIN ADMIN_SM_LOOKUP_ITEM LI8 ON LI8.LOOKUP_ITEM_CODE = AG.AGENT_CERT_TYPE AND LI8.LOOKUP_CODE = 'CD0429'
+		<where>
+			AG.CUST_NO =
+			#{condition.custNo,jdbcType=VARCHAR}
+			and AG.SUB_ACCT_NO =
+			#{condition.acctId,jdbcType=VARCHAR}
+			<if test="condition.startDate != null and condition.startDate != '' and condition.endDate != null and condition.endDate != ''">
+				<![CDATA[
+	                AND TRANS_DATE >= to_date(#{condition.startDate,jdbcType=VARCHAR},'yyyy-MM-dd')
+	                AND TRANS_DATE <= to_date(#{condition.endDate,jdbcType=VARCHAR},'yyyy-MM-dd')
+	            ]]>
+			</if>
+		</where>
+	</select>
+
+	<select id="excelAll" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+			resultType="cn.com.yusys.yusp.dycrm.transferInfo.domain.TransferInfoAG">
+		SELECT
+		CUST_NO,
+		PAI.CUST_NAME CUST_NAME,
+		SUB_ACCT_NO,
+		TRANS_SERIAL_NO,
+		LI1.LOOKUP_ITEM_NAME CCY_NAME,
+		TRANS_AMT,
+		TO_CHAR(TRANS_DATE,'yyyy-MM-dd') TRANS_DATE,
+		TO_CHAR(TRANS_TIME,'HH24:mi:ss') TRANS_TIME,
+		O.ORG_NAME,
+		LI2.LOOKUP_ITEM_NAME CLASS_NAME,
+		LI3.LOOKUP_ITEM_NAME TYPE_NAME,
+		LI4.LOOKUP_ITEM_NAME  CHANNEL_NAME,
+		LI5.LOOKUP_ITEM_NAME DEBIT_CREDIT,
+		LI6.LOOKUP_ITEM_NAME CASH_FLAG,
+		LI7.LOOKUP_ITEM_NAME INTER_FLAG,
+		OPPONENT_MAIN_ACCT_NO,
+		OPPONENT_SUB_AACCT_NO OPPONENT_SUB_ACCT_NO,
+		TRANS_TELLER,
+		AGENT_NAME,
+		LI8.LOOKUP_ITEM_NAME CERT_TYPE,
+		AGENT_CERT_NO
+		FROM
+		ACRM_F_AG_TRAN_DETAIL_ALL AG
+		LEFT JOIN ACRM_F_CI_PER_ADMIT_INFO PAI ON AG.CUST_NO = PAI.CUST_ID
+		LEFT JOIN ADMIN_SM_ORG O ON AG.TRANS_ORG = O.ORG_ID
+		LEFT JOIN ADMIN_SM_LOOKUP_ITEM LI1 ON LI1.LOOKUP_ITEM_CODE = AG.TRANS_CCY AND LI1.LOOKUP_CODE = 'CD0433'
+		LEFT JOIN ADMIN_SM_LOOKUP_ITEM LI2 ON LI2.LOOKUP_ITEM_CODE = AG.TRANS_CLASS AND LI2.LOOKUP_CODE = 'TRANS_CLASS'
+		LEFT JOIN ADMIN_SM_LOOKUP_ITEM LI3 ON LI3.LOOKUP_ITEM_CODE = AG.TRANS_TYPE AND LI3.LOOKUP_CODE = 'TRANS_TYPE'
+		LEFT JOIN ADMIN_SM_LOOKUP_ITEM LI4 ON LI4.LOOKUP_ITEM_CODE = AG.TRANS_CHANNEL AND LI4.LOOKUP_CODE = 'TRANS_CHANNEL'
+		LEFT JOIN ADMIN_SM_LOOKUP_ITEM LI5 ON LI5.LOOKUP_ITEM_CODE = AG.DEBIT_OR_CREDIT AND LI5.LOOKUP_CODE = 'DEBIT_CREDIT'
+		LEFT JOIN ADMIN_SM_LOOKUP_ITEM LI6 ON LI6.LOOKUP_ITEM_CODE = AG.CASH_TRANSFER_FLAG AND LI6.LOOKUP_CODE = 'TRANS_FLAG'
+		LEFT JOIN ADMIN_SM_LOOKUP_ITEM LI7 ON LI7.LOOKUP_ITEM_CODE = AG.INTER_BANK_FLAG AND LI7.LOOKUP_CODE = 'INTER_FLAG'
+		LEFT JOIN ADMIN_SM_LOOKUP_ITEM LI8 ON LI8.LOOKUP_ITEM_CODE = AG.AGENT_CERT_TYPE AND LI8.LOOKUP_CODE = 'CD0429'
+		<where>
+			AG.CUST_NO =
+			#{condition.custNo,jdbcType=VARCHAR}
+			and AG.SUB_ACCT_NO =
+			#{condition.acctId,jdbcType=VARCHAR}
+			<if test="condition.startDate != null and condition.startDate != '' and condition.endDate != null and condition.endDate != ''">
+				<![CDATA[
+	                AND TRANS_DATE >= to_date(#{condition.startDate,jdbcType=VARCHAR},'yyyy-MM-dd')
+	                AND TRANS_DATE <= to_date(#{condition.endDate,jdbcType=VARCHAR},'yyyy-MM-dd')
+	            ]]>
+			</if>
+		</where>
+	</select>
+</mapper>

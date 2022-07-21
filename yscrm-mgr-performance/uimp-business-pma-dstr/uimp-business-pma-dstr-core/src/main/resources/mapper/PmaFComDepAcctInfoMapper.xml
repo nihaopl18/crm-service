@@ -1,0 +1,427 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.uimp.distribution.repository.mapper.PmaFComDepAcctInfoMapper">
+
+	<resultMap id="BaseResultMap" type="cn.com.yusys.yusp.uimp.distribution.domain.PmaFComDepAcctInfo">
+		<id column="ID" jdbcType="VARCHAR" property="id"/>
+		<result column="cust_number" jdbcType="VARCHAR" property="custNumber"/>
+		<result column="cust_name" jdbcType="VARCHAR" property="custName"/>
+		<result column="acct_no" jdbcType="VARCHAR" property="acctNo"/>
+		<result column="sub_acct_no" jdbcType="VARCHAR" property="subAcctNo"/>
+		<result column="account_type" jdbcType="VARCHAR" property="accountType"/>
+		<result column="org_id" jdbcType="VARCHAR" property="orgId"/>
+		<result column="org_name" jdbcType="VARCHAR" property="orgName"/>
+		<result column="open_date" jdbcType="VARCHAR" property="openDate"/>
+		<result column="close_date" jdbcType="VARCHAR" property="closeDate"/>
+		<result column="dstr_sts" jdbcType="VARCHAR" property="dstrSts"/>
+		<result column="balance" jdbcType="VARCHAR" property="balance"/>
+
+	</resultMap>
+
+	<resultMap id="OneToManyBaseResultMap" type="cn.com.yusys.yusp.uimp.distribution.domain.PmaFComDepAcctInfo">
+		<id column="ID" jdbcType="VARCHAR" property="id" />
+		<result column="cust_number" jdbcType="VARCHAR" property="custNumber" />
+		<result column="cust_name" jdbcType="VARCHAR" property="custName" />
+		<result column="acct_no" jdbcType="VARCHAR" property="acctNo" />
+		<result column="sub_acct_no" jdbcType="VARCHAR" property="subAcctNo" />
+		<result column="account_type" jdbcType="VARCHAR" property="accountType" />
+		<result column="org_id" jdbcType="VARCHAR" property="orgId" />
+		<result column="org_name" jdbcType="VARCHAR" property="orgName" />
+		<result column="open_date" jdbcType="VARCHAR" property="openDate" />
+		<result column="close_date" jdbcType="VARCHAR" property="closeDate" />
+		<result column="dstr_sts" jdbcType="VARCHAR" property="dstrSts" />
+		<result column="balance" jdbcType="VARCHAR" property="balance" />
+		<result column="apply_sts" jdbcType="VARCHAR" property="applySts" />
+		<collection property="pmaFComDepPeriodList" javaType="java.util.ArrayList" ofType="cn.com.yusys.yusp.uimp.distribution.domain.PmaFComDepPeriod">
+			<result column="ID" property="id"/>
+			<result column="acct_info_no" property="acctInfoNo"/>
+			<result column="acct_no" property="acctNo"/>
+			<result column="sub_acct_no" property="subAcctNo"/>
+			<result column="oper_time" property="operTime"/>
+			<result column="effect_date" property="effectDate"/>
+			<result column="expirate_date" property="expirateDate"/>
+			<result column="oper_user_id" property="operUserId"/>
+			<result column="oper_org_id" property="operOrgId"/>
+			<collection property="pmaFcomDepDistributeInfo" javaType="java.util.ArrayList" ofType="cn.com.yusys.yusp.uimp.distribution.domain.PmaFcomDepDistributeInfo">
+				<result column="ID" property="id"/>
+				<result column="period_id" property="periodId"/>
+				<result column="allot_type" property="allotType"/>
+				<result column="manager_id" property="managerId"/>
+				<result column="distr_rate" property="distrRate"/>
+				<result column="start_amt" property="startAmt"/>
+				<result column="end_amt" property="endAmt"/>
+			</collection>
+		</collection>
+	</resultMap>
+
+	<sql id="whereSql">
+		<where>
+			<if test="condition.id != null and condition.id != ''">
+				AND pa.id = #{condition.id,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.custNumber != null and condition.custNumber != ''">
+				AND pa.cust_number = #{condition.custNumber,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.custName != null and condition.custName != ''">
+				AND pa.cust_name like concat(concat('%',#{condition.custName,jdbcType=VARCHAR}),'%')
+			</if>
+			<if test="condition.acctNo != null and condition.acctNo != ''">
+				AND pa.acct_no = #{condition.acctNo,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.accountType != null and condition.accountType != ''">
+				AND pa.account_type = #{condition.accountType,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.orgId != null and condition.orgId != ''">
+				AND pa.org_id = #{condition.orgId,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.openDateStart != null and condition.openDateStart != ''">
+				<![CDATA[
+	                AND TO_DATE(pa.open_date, 'yyyy-MM-dd hh24:mi:ss') >= TO_DATE(#{condition.openDateStart,jdbcType=VARCHAR}, 'yyyy-MM-dd')
+	            ]]>
+			</if>
+			<if test="condition.openDateEnd != null and condition.openDateEnd != ''">
+				<![CDATA[
+	                AND TO_DATE(pa.open_date, 'yyyy-MM-dd hh24:mi:ss') <= TO_DATE(#{condition.openDateEnd,jdbcType=VARCHAR}, 'yyyy-MM-dd')
+	            ]]>
+			</if>
+			<if test="condition.dstrSts != null and condition.dstrSts != ''">
+				AND pa.dstr_sts = #{condition.dstrSts,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.applySts != null and condition.applySts != ''">
+				AND pa.apply_sts = #{condition.applySts,jdbcType=VARCHAR}
+			</if>
+
+			<if test="condition.applyStsPp != null and condition.applyStsPp != ''">
+				AND (pp.APPLY_STS is null or pp.APPLY_STS = '3' or pp.APPLY_STS = '1')
+			</if>
+
+			<if test="condition.operUserId != null and condition.operUserId != ''">
+				AND pa.oper_user_id = #{condition.operUserId,jdbcType=VARCHAR}
+			</if>
+
+			<if test="condition.operTimeStart != null and condition.operTimeStart != ''">
+				<![CDATA[
+	                AND TO_DATE(pp.oper_time, 'yyyy-MM-dd hh24:mi:ss') >= TO_DATE(#{condition.operTimeStart,jdbcType=VARCHAR}, 'yyyy-MM-dd')
+	            ]]>
+			</if>
+			<if test="condition.operTimeEnd != null and condition.operTimeEnd != ''">
+				<![CDATA[
+	                AND TO_DATE(pp.oper_time, 'yyyy-MM-dd hh24:mi:ss') <= TO_DATE(#{condition.operTimeEnd,jdbcType=VARCHAR}, 'yyyy-MM-dd')
+	            ]]>
+			</if>
+			<if test="condition.operOrgId != null and condition.operOrgId != ''">
+				AND pa.oper_org_id = #{condition.operOrgId,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.sql != null and condition.sql  != ''">
+				:{condition.sql}
+			</if>
+
+			<if test="condition.rateNotNull != null and condition.rateNotNull != ''">
+				AND pd.distr_rate is not null
+			</if>
+			<if test="condition.startAmtNotNull != null and condition.startAmtNotNull != ''">
+				AND pd.start_amt is not null
+			</if>
+			<if test="condition.endAmtNotNull != null and condition.endAmtNotNull != ''">
+				AND pd.end_amt is not null
+			</if>
+
+			<if test="dataAuth != null" >
+				${dataAuth}
+			</if>
+		</where>
+	</sql>
+
+	<select id="queryList2" parameterType="cn.com.yusys.yusp.uimp.distribution.domain.PmaFComDepAcctInfo"
+			resultMap="BaseResultMap">
+		select pa.id,
+		pa.cust_number,
+		pa.cust_name,
+		pa.acct_no,
+		pa.sub_acct_no,
+		pa.account_type,
+		pa.org_id,
+		pa.org_name,
+		pa.open_date,
+		pa.close_date,
+		pa.dstr_sts,
+		pa.balance,
+		pa.creator ,
+		pa.create_date,
+		pa.create_org ,
+		pa.updater_id ,
+		pa.update_date,
+		pa.update_org from PMA_F_COM_DEP_ACCT_INFO pa
+		where = #{id,jdbcType=VARCHAR}
+	</select>
+
+
+	<select id="queryList" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+		select pa.id,
+		pa.cust_number,
+		pa.cust_name,
+		pa.acct_no,
+		pa.sub_acct_no,
+		pa.account_type,
+		pa.org_id,
+		pa.org_name,
+		pa.open_date,
+		pa.close_date,
+		pa.dstr_sts,
+		pa.apply_sts,
+		pa.balance,
+		pa.creator ,
+		pa.create_date,
+		pa.create_org ,
+		pa.updater_id ,
+		pa.update_date,
+		pa.update_org from PMA_F_COM_DEP_ACCT_INFO pa
+		<include refid="whereSql"/>
+		order by pa.CREATE_DATE desc
+	</select>
+
+
+	<delete id="delPmaFComDepAcctInfo" parameterType="cn.com.yusys.yusp.uimp.distribution.domain.PmaFComDepAcctInfo">
+		delete from PMA_F_COM_DEP_ACCT_INFO t where  t.id = #{id}
+	</delete>
+
+	<select id="queryDepositHis" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+			resultType="java.util.HashMap">
+		select pa.id,
+		pa.apply_sts  ,
+		pa.cust_number,
+		pa.cust_name,
+		pa.acct_no,
+		pa.sub_acct_no,
+		pa.account_type,
+		pa.org_id,
+		pa.org_name,
+		pa.open_date,
+		pp.effect_date,
+		pp.expirate_date,
+		pp.oper_user_id,
+		pp.oper_user_name,
+		pp.oper_time,
+		pd.manager_id,
+		pd.manager_name,
+		pd.start_amt,
+		pd.end_amt,
+		pd.distr_rate
+		from PMA_F_COM_DEP_ACCT_INFO pa
+		left join PMA_F_COM_DEP_PERIOD pp
+		on pa.id = pp.acct_info_no
+		left join PMA_F_COM_DEP_DISTRIBUTE pd
+		on pp.id = pd.period_id
+
+		<include refid="whereSql"/>
+
+	</select>
+
+
+	<select id="oneToManyQueryList" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+		select
+		t.id,
+		t.cust_number,
+		t.cust_name,
+		t.acct_no,
+		t.sub_acct_no,
+		t.account_type,
+		t.org_id,
+		t.org_name,
+		t.open_date,
+		t.close_date,
+		t.dstr_sts,
+		t.apply_sts,
+		t.balance,
+		preiod.acct_info_no,
+		preiod.oper_time,
+		preiod.effect_date,
+		preiod.expirate_date,
+		preiod.data_src,
+		preiod.oper_user_id,
+		preiod.oper_org_id,
+		distribute.period_id,
+		distribute.allot_type,
+		distribute.manager_id,
+		distribute.manager_name,
+		distribute.distr_rate,
+		distribute.start_amt,
+		distribute.end_amt
+		from
+		pma_f_com_dep_acct_info t
+		left join admin_sm_user  au on au.login_code=t.org_id
+		left join pma_f_com_dep_period preiod on preiod.acct_info_no = t.id
+		left join pma_f_com_dep_distribute distribute on distribute.period_id = preiod.id
+		<where>
+			<if test="condition.id != null and condition.id != ''">
+				AND t.id = #{condition.id,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.custNumber != null and condition.custNumber != ''">
+				AND t.cust_number = #{condition.custNumber,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.custName != null and condition.custName != ''">
+				AND t.cust_name like concat(concat('%',#{condition.custName,jdbcType=VARCHAR}),'%')
+			</if>
+			<if test="condition.acctNo != null and condition.acctNo != ''">
+				AND t.acct_no = #{condition.acctNo,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.subAcctNo != null and condition.subAcctNo != ''">
+				AND t.sub_acct_no = #{condition.subAcctNo,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.accountType != null and condition.accountType != ''">
+				AND t.account_type = #{condition.accountType,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.orgId != null and condition.orgId != ''">
+				AND t.org_id = #{condition.orgId,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.orgName != null and condition.orgName != ''">
+				AND t.org_name like concat(concat('%',#{condition.orgName,jdbcType=VARCHAR}),'%')
+			</if>
+			<if test="condition.openDate != null and condition.openDate != ''">
+				<![CDATA[
+	                AND TO_DATE(t.open_date, 'yyyy-MM-dd hh24:mi:ss') >= TO_DATE(#{condition.openDate,jdbcType=VARCHAR}, 'yyyy-MM-dd')
+	            ]]>
+			</if>
+			<if test="condition.closeDate != null and condition.closeDate != ''">
+				<![CDATA[
+	                AND TO_DATE(t.close_date, 'yyyy-MM-dd hh24:mi:ss') <= TO_DATE(#{condition.closeDate,jdbcType=VARCHAR}, 'yyyy-MM-dd')
+	            ]]>
+			</if>
+			<if test="condition.dstrSts != null and condition.dstrSts != ''">
+				AND t.dstr_sts = #{condition.dstrSts,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.balance != null and condition.balance != ''">
+				AND t.balance = #{condition.balance,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.applySts != null and condition.applySts != ''">
+				AND t.apply_sts = #{condition.applySts,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.managerId != null and condition.managerId != ''">
+				AND distribute.manager_id = #{condition.managerId,jdbcType=VARCHAR}
+			</if>
+		</where>
+	</select>
+
+
+
+
+	<select id="oneToManyQueryCount" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.lang.Long">
+		select
+		count(1)
+		from
+		pma_f_com_dep_acct_info t
+		left join admin_sm_user  au on au.login_code=t.org_id
+		left join pma_f_com_dep_period preiod on preiod.acct_info_no = t.id
+		left join pma_f_com_dep_distribute distribute on distribute.period_id = preiod.id
+		<where>
+			<if test="condition.id != null and condition.id != ''">
+				AND t.id = #{condition.id,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.custNumber != null and condition.custNumber != ''">
+				AND t.cust_number = #{condition.custNumber,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.custName != null and condition.custName != ''">
+				AND t.cust_name like concat(concat('%',#{condition.custName,jdbcType=VARCHAR}),'%')
+			</if>
+			<if test="condition.acctNo != null and condition.acctNo != ''">
+				AND t.acct_no = #{condition.acctNo,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.subAcctNo != null and condition.subAcctNo != ''">
+				AND t.sub_acct_no = #{condition.subAcctNo,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.accountType != null and condition.accountType != ''">
+				AND t.account_type = #{condition.accountType,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.orgId != null and condition.orgId != ''">
+				AND t.org_id = #{condition.orgId,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.orgName != null and condition.orgName != ''">
+				AND t.org_name like concat(concat('%',#{condition.orgName,jdbcType=VARCHAR}),'%')
+			</if>
+			<if test="condition.openDate != null and condition.openDate != ''">
+				<![CDATA[
+	                AND TO_DATE(t.open_date, 'yyyy-MM-dd hh24:mi:ss') >= TO_DATE(#{condition.openDate,jdbcType=VARCHAR}, 'yyyy-MM-dd')
+	            ]]>
+			</if>
+			<if test="condition.closeDate != null and condition.closeDate != ''">
+				<![CDATA[
+	                AND TO_DATE(t.close_date, 'yyyy-MM-dd hh24:mi:ss') <= TO_DATE(#{condition.closeDate,jdbcType=VARCHAR}, 'yyyy-MM-dd')
+	            ]]>
+			</if>
+			<if test="condition.dstrSts != null and condition.dstrSts != ''">
+				AND t.dstr_sts = #{condition.dstrSts,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.balance != null and condition.balance != ''">
+				AND t.balance = #{condition.balance,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.applySts != null and condition.applySts != ''">
+				AND t.apply_sts = #{condition.applySts,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.managerId != null and condition.managerId != ''">
+				AND distribute.manager_id = #{condition.managerId,jdbcType=VARCHAR}
+			</if>
+		</where>
+	</select>
+
+	<insert id="upsert" parameterType="List">
+		insert into PMA_F_COM_DEP_ACCT_INFO(
+			id,
+			cust_number,
+			cust_name,
+			acct_no,
+			sub_acct_no,
+			account_type,
+			org_id,
+			org_name,
+			open_date,
+			close_date,
+			dstr_sts,
+			apply_sts,
+			balance,
+			creator ,
+			create_date,
+			create_org ,
+			updater_id ,
+			update_date,
+			update_org)
+		<foreach collection="list" item="param" index="index" separator="union all" >
+			select #{param.id,jdbcType=VARCHAR},
+			#{param.custNumber,jdbcType=VARCHAR},
+			#{param.custName,jdbcType=VARCHAR},
+			#{param.acctNo,jdbcType=VARCHAR},
+			#{param.subAcctNo,jdbcType=VARCHAR},
+			#{param.accountType,jdbcType=VARCHAR},
+			#{param.orgId,jdbcType=VARCHAR},
+			#{param.orgName,jdbcType=VARCHAR},
+			#{param.openDate,jdbcType=VARCHAR},
+			#{param.closeDate,jdbcType=VARCHAR},
+			#{param.dstrSts,jdbcType=VARCHAR},
+			#{param.applySts,jdbcType=VARCHAR},
+			#{param.balance,jdbcType=VARCHAR},
+			#{param.creator ,jdbcType=VARCHAR},
+			#{param.createDate,jdbcType=VARCHAR},
+			#{param.createOrg,jdbcType=VARCHAR},
+			#{param.updaterId,jdbcType=VARCHAR},
+			#{param.updateDate,jdbcType=VARCHAR},
+			#{param.updateOrg, jdbcType=VARCHAR}
+			from dual
+		</foreach>
+
+	</insert>
+
+	<update id="updateAcctInfoById" parameterType="java.util.Map">
+		update PMA_F_COM_DEP_ACCT_INFO
+		set apply_Sts = #{applySts,jdbcType=VARCHAR},
+		    dstr_sts = #{dstrSts,jdbcType=VARCHAR}
+		 where id = #{id,jdbcType=VARCHAR}
+	</update>
+
+	<update id="updateAcctInfo" parameterType="cn.com.yusys.yusp.uimp.distribution.domain.PmaFComDepAcctInfo">
+		update PMA_F_COM_DEP_ACCT_INFO
+		set apply_sts = #{applySts,jdbcType=VARCHAR}
+        <if test="dstrSts != null and dstrSts !=''">
+            ,dstr_sts = #{dstrSts,jdbcType=VARCHAR}
+        </if>
+		where id = #{id,jdbcType=VARCHAR}
+	</update>
+</mapper>

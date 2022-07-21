@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.uimp.business.pma.scheme.postParam.repository.mapper.PmaFPersonpostParamInfoMapper">
+    <resultMap id="BaseResultMap" type="cn.com.yusys.yusp.uimp.business.pma.scheme.postParam.domain.PmaFPersonpostParamInfo">
+		<id column="ID" jdbcType="VARCHAR" property="id" />
+		<result column="PARAM_NAME" jdbcType="VARCHAR" property="paramName" />
+		<result column="REMARK" jdbcType="VARCHAR" property="remark" />
+		<result column="ORG_ID" jdbcType="VARCHAR" property="orgId" />
+		<result column="STAT_FLAG" jdbcType="VARCHAR" property="statFlag" />
+		<result column="CREATOR" jdbcType="VARCHAR" property="creator" />
+		<result column="MODIFY_USER" jdbcType="VARCHAR" property="modifyUser" />
+		<result column="DIR_ID" jdbcType="NUMERIC" property="dirId" />
+		<result column="CREATE_DATE" jdbcType="VARCHAR" property="createDate" />
+		<result column="MODIFY_DATE" jdbcType="VARCHAR" property="modifyDate" />
+		<result column="PARAM_VALUE" jdbcType="NUMERIC" property="paramValue" />
+		<result column="PARAM_ID" jdbcType="VARCHAR" property="paramId" />
+		<result column="MIN_LIMIT" jdbcType="NUMERIC" property="minLimit" />
+		<result column="MAX_LIMIT" jdbcType="NUMERIC" property="maxLimit" />
+		<result column="AREA" jdbcType="VARCHAR" property="area" />
+		<result column="BUSS_SYS_NO" jdbcType="VARCHAR" property="bussSysNo" />
+		<result column="EFFECT_POST" jdbcType="VARCHAR" property="effectPost" />
+    </resultMap>
+    <sql id="Base_Column_List">
+	    ID,PARAM_NAME,REMARK,ORG_ID,STAT_FLAG,CREATOR,MODIFY_USER,DIR_ID,CREATE_DATE,MODIFY_DATE,PARAM_VALUE,PARAM_ID,MIN_LIMIT,MAX_LIMIT,AREA,BUSS_SYS_NO,EFFECT_POST
+    </sql>
+     <!-- 查询岗位参数info数据 -->
+	<select id="querylist"  resultType="java.util.HashMap">
+		SELECT DISTINCT T.ID,T.PARAM_NAME,T.REMARK,T.ORG_ID,T.STAT_FLAG,T.CREATOR,T.MODIFY_USER,T.EFFECT_POST
+		,T.DIR_ID,T.CREATE_DATE,T.MODIFY_DATE,T.PARAM_VALUE,T.PARAM_ID,T.MIN_LIMIT,T.MAX_LIMIT
+		,T.AREA,T.BUSS_SYS_NO,AU.USER_NAME,AM.USER_NAME AS M_USER_NAME
+		 FROM PMA_F_PERSONPOST_PARAM_INFO T	
+		 LEFT JOIN ADMIN_SM_USER  AU ON AU.LOGIN_CODE=T.CREATOR
+		 LEFT JOIN ADMIN_SM_USER  AM ON AM.LOGIN_CODE=T.MODIFY_USER
+		 left join PMA_F_PERSONPOST_PARAM_MENU menu on menu.ID = T.DIR_ID
+		<where>
+		     <!-- 参数编号-->
+		    <if test="condition.paramId != null and condition.paramId  != ''">
+	      		AND T.PARAM_ID LIKE concat(concat('%',#{condition.paramId,jdbcType=VARCHAR}),'%')
+		    </if>
+		    <!-- 参数名称-->
+			<if test="condition.paramName != null and condition.paramName  != ''">
+	      		AND T.PARAM_NAME LIKE concat(concat('%',#{condition.paramName,jdbcType=VARCHAR}),'%')
+		    </if>
+		    <!-- 目录编号-->
+			<if test="condition.dirId != null and condition.dirId  != ''">
+	      		AND T.DIR_ID in ( select b.ID from PMA_F_PERSONPOST_PARAM_MENU b start with id=#{condition.dirId,jdbcType=VARCHAR} connect by prior id =parent_dir_id)
+		    </if>
+		    <if  test="condition.sql != null and condition.sql  != ''">
+		        :{condition.sql}
+		    </if>
+		    <if test="condition.menuSql != null and condition.menuSql != ''">
+		    	:{condition.menuSql} 
+		    </if>
+		   </where> 
+	</select>
+	<delete id="deleInfo" parameterType="String"  >
+	   delete from  PMA_F_PERSONPOST_PARAM_INFO  where DIR_ID=#{dirId}
+	</delete>
+	<!-- 查询岗位树，为派生指标引用 -->
+	<select id="querypostlist"  resultType="java.util.HashMap">
+		select p.id,p.dir_name as name,p.parent_dir_id,'01' as type,'' as param_id,'' as param_name
+        from  PMA_F_PERSONPOST_PARAM_MENU p
+        union 
+        select t.id,t.param_id||t.param_name  as name,t.dir_id,'02' as type,t.param_id,t.param_name
+        from PMA_F_PERSONPOST_PARAM_INFO t
+	</select>
+	<select id="queryNameByParamId" resultType="java.lang.String">
+		select PARAM_NAME from PMA_F_PERSONPOST_PARAM_INFO where PARAM_ID=#{paramId, jdbcType=VARCHAR}
+	</select>
+</mapper>

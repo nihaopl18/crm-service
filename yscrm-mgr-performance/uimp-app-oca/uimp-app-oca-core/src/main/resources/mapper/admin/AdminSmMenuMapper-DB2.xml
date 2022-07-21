@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.admin.repository.mapper.AdminSmMenuMapper">
+
+	  <!-- 删除时查询是否有一级、二级...n级子节点菜单，获取选中菜单menuId及相应的子节点菜单menuId -->
+    <select id="getDeleteMenuId" parameterType="String" resultType="String" databaseId="DB2">
+        WITH MENU(MENU_ID,UP_MENU_ID) AS
+         (SELECT MENU_ID, UP_MENU_ID FROM ADMIN_SM_MENU WHERE MENU_ID = #{menuId}
+          UNION ALL
+          SELECT B.MENU_ID, B.UP_MENU_ID FROM MENU A, ADMIN_SM_MENU B WHERE B.UP_MENU_ID = A.MENU_ID)
+        SELECT MENU_ID FROM MENU
+    </select>
+    
+</mapper>

@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.custmgrgroup.repository.mapper.OcrmFcmMktTeamMapper">
+    <!-- 客户经理团队列表查询 -->
+	<select id="queryList" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+		resultType="java.util.Map">
+		SELECT T1.MKT_TEAM_ID,
+			   T1.MKT_TEAM_NAME,
+		       NVL(T1.ORG_NAME, ORG.ORG_NAME) AS ORG_NAME,
+		       T1.ORG_ID,
+		       T1.TEAM_TYPE,
+		       COUNT(DISTINCT T2.USER_ID) AS TEAM_MEMBER_NUM,
+               COUNT(DISTINCT S.USER_ID) AS TEAM_CUST_NUM,
+		       NVL(T1.TEAM_LEADER, USR.USER_NAME) AS TEAM_LEADER,
+		       T1.TEAM_LEADER_ID,
+		       T1.CREATE_USER_ID,
+		       T1.CREATE_USER_NAME,
+		       TO_CHAR(T1.CREATE_DATE, 'yyyy-MM-dd') CREATE_DATE,
+		       TO_CHAR(T1.LAST_CHG_DT, 'yyyy-MM-dd') LAST_CHG_DT
+		  FROM OCRM_F_CM_MKT_TEAM T1 
+		  LEFT JOIN ADMIN_SM_ORG ORG ON T1.ORG_ID=ORG.ORG_ID
+		  LEFT JOIN ADMIN_SM_USER USR ON USR.LOGIN_CODE=T1.TEAM_LEADER_ID
+		  LEFT JOIN OCRM_F_CM_TEAM_CUST_MANAGER T2 ON T1.MKT_TEAM_ID = T2.MKT_TEAM_ID
+		  LEFT JOIN ADMIN_SM_USER S ON T2.USER_ID=S.USER_ID
+		  LEFT JOIN ADMIN_SM_USER_ROLE_REL T ON S.USER_ID=T.USER_ID
+		  LEFT JOIN ADMIN_SM_ROLE SS ON SS.ROLE_ID=T.ROLE_ID
+          <!--LEFT JOIN OCRM_F_CI_ADMIT_BELONG T3 ON T2.CUST_MANAGER_ID = T3.MGR_ID-->
+		<if test="dataAuth != null and condition.orgIdAuth =='500'">
+		</if>
+		<if test="dataAuth != null and condition.orgIdAuth !='500'">
+		<where>
+			<if  test="condition.mktTeamName != null and condition.mktTeamName != ''">
+	       		AND T1.MKT_TEAM_NAME like CONCAT(CONCAT('%', #{condition.mktTeamName,jdbcType=VARCHAR}),'%')
+		    </if>
+		    <if  test="condition.orgId != null and condition.orgId != ''">
+	       		AND T1.ORG_ID = #{condition.orgId,jdbcType=VARCHAR}
+		    </if>
+		    <if  test="condition.teamType != null and condition.teamType != ''">
+	       		AND T1.TEAM_TYPE = #{condition.teamType,jdbcType=VARCHAR}
+		    </if>
+		    <if  test="condition.teamLeaderId != null and condition.teamLeaderId != ''">
+	       		AND T1.TEAM_LEADER_ID = #{condition.teamLeaderId,jdbcType=VARCHAR}
+		    </if>
+		    <if  test="condition.custManagerName != null and condition.custManagerName != ''">
+	       		AND T2.CUST_MANAGER_NAME = #{condition.custManagerName,jdbcType=VARCHAR}
+		    </if>
+		    ${dataAuth}
+		</where>
+	</if>
+		<if test="dataAuth == null">
+			<where>
+				<if  test="condition.mktTeamName != null and condition.mktTeamName != ''">
+					AND T1.MKT_TEAM_NAME like CONCAT(CONCAT('%', #{condition.mktTeamName,jdbcType=VARCHAR}),'%')
+				</if>
+				<if  test="condition.orgId != null and condition.orgId != ''">
+					AND T1.ORG_ID = #{condition.orgId,jdbcType=VARCHAR}
+				</if>
+				<if  test="condition.teamType != null and condition.teamType != ''">
+					AND T1.TEAM_TYPE = #{condition.teamType,jdbcType=VARCHAR}
+				</if>
+				<if  test="condition.teamLeaderId != null and condition.teamLeaderId != ''">
+					AND T1.TEAM_LEADER_ID = #{condition.teamLeaderId,jdbcType=VARCHAR}
+				</if>
+				<if  test="condition.custManagerName != null and condition.custManagerName != ''">
+					AND T2.CUST_MANAGER_NAME = #{condition.custManagerName,jdbcType=VARCHAR}
+				</if>
+			</where>
+		</if>
+		GROUP BY T1.MKT_TEAM_ID,
+                 T1.MKT_TEAM_NAME,
+                 NVL(T1.ORG_NAME, ORG.ORG_NAME),
+                 T1.ORG_ID,
+                 T1.TEAM_TYPE,
+                 NVL(T1.TEAM_LEADER, USR.USER_NAME),
+                 T1.TEAM_LEADER_ID,
+                 T1.CREATE_USER_ID,
+                 T1.CREATE_USER_NAME,
+                 TO_CHAR(T1.CREATE_DATE, 'yyyy-MM-dd'),
+                 TO_CHAR(T1.LAST_CHG_DT, 'yyyy-MM-dd')
+	</select>
+	
+	<!-- 查询表单信息 -->
+	<select id="queryInfo" resultType="java.util.Map">
+		SELECT T1.MKT_TEAM_ID,
+			   T1.MKT_TEAM_NAME,
+		       T1.ORG_NAME,
+		       T1.ORG_ID,
+		       T1.TEAM_TYPE,
+		       (SELECT COUNT(1) FROM OCRM_F_CM_TEAM_CUST_MANAGER T2 WHERE T1.MKT_TEAM_ID = T2.MKT_TEAM_ID) AS TEAM_MEMBER_NUM,
+       		   (SELECT COUNT(1) FROM OCRM_F_CM_TEAM_CUST_MANAGER T2 INNER JOIN OCRM_F_CI_ADMIT_BELONG T3 ON T2.USER_ID = T3.MGR_ID WHERE T1.MKT_TEAM_ID = T2.MKT_TEAM_ID) AS TEAM_CUST_NUM,
+		       T1.TEAM_LEADER,
+		       T1.CREATE_USER_NAME,
+		       TO_CHAR(T1.CREATE_DATE, 'yyyy-MM-dd') CREATE_DATE,
+		       TO_CHAR(T1.LAST_CHG_DT, 'yyyy-MM-dd') LAST_CHG_DT
+		  FROM OCRM_F_CM_MKT_TEAM T1
+		<where>
+			<if  test="mktTeamId != null and mktTeamId != ''">
+	       		AND T1.MKT_TEAM_ID = #{mktTeamId,jdbcType=VARCHAR}
+		    </if>
+		</where>
+	</select>
+	
+	<!-- 客户经理团队客户列表查询 -->
+	<select id="queryCustList" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+		resultType="java.util.Map">
+		SELECT T4.CUST_ID,
+		       T4.CUST_NAME,
+		       T4.CUST_TYPE,
+		       T4.CERT_TYPE,
+		       T4.CERT_NO,
+		       T4.SERV_LEV,
+		       T4.VALUE_LEV,
+		       T4.BELONG_BRCH,
+		       T4.BELONG_MGR,
+		       T6.ORG_NAME,
+		       T5.USER_NAME
+		  FROM OCRM_F_CM_MKT_TEAM T1
+		 INNER JOIN OCRM_F_CM_TEAM_CUST_MANAGER T2 ON T1.MKT_TEAM_ID = T2.MKT_TEAM_ID
+		 INNER JOIN OCRM_F_CI_ADMIT_BELONG T3 ON T2.USER_ID = T3.MGR_ID
+		 <!-- INNER JOIN ACRM_F_CI_CUST_ADMIT_ALL T4 ON T3.CUST_ID = T4.CUST_ID -->
+		 INNER JOIN ACRM_F_CI_CUST_ALL T4 ON T3.CUST_ID = T4.CUST_ID
+		  LEFT JOIN ADMIN_SM_USER T5 ON T5.LOGIN_CODE = T4.BELONG_MGR
+		  LEFT JOIN ADMIN_SM_ORG T6 ON T6.ORG_ID = T4.BELONG_BRCH
+		<where>
+		    <if  test="condition.mktTeamId != null and condition.mktTeamId != ''">
+	       		AND T1.MKT_TEAM_ID = #{condition.mktTeamId,jdbcType=VARCHAR}
+		    </if>
+		    <if  test="condition.custId != null and condition.custId != ''">
+	       		AND T4.CUST_ID = #{condition.custId,jdbcType=VARCHAR}
+		    </if>
+		    <if  test="condition.custName != null and condition.custName != ''">
+	       		AND T4.CUST_NAME like CONCAT(CONCAT('%', #{condition.custName,jdbcType=VARCHAR}),'%')
+		    </if>
+		    <if  test="condition.custType != null and condition.custType != ''">
+	       		AND T4.CUST_TYPE = #{condition.custType,jdbcType=VARCHAR}
+		    </if>
+		    <if  test="condition.certType != null and condition.certType != ''">
+	       		AND T4.CERT_TYPE = #{condition.certType,jdbcType=VARCHAR}
+		    </if>
+		    <if  test="condition.certNo != null and condition.certNo != ''">
+	       		AND T4.CERT_NO = #{condition.certNo,jdbcType=VARCHAR}
+		    </if>
+		    <if  test="condition.servLev != null and condition.servLev != ''">
+	       		AND T4.SERV_LEV = #{condition.servLev,jdbcType=VARCHAR}
+		    </if>
+		    <if  test="condition.valueLev != null and condition.valueLev != ''">
+	       		AND T4.VALUE_LEV = #{condition.valueLev,jdbcType=VARCHAR}
+		    </if>
+		</where>
+	</select>
+	<select id="selectMaxmktTeamId" resultType="String">
+		SELECT MAX(MKT_TEAM_ID) MKT_TEAM_ID FROM OCRM_F_CM_MKT_TEAM WHERE MKT_TEAM_ID LIKE 'G%'
+	</select>
+</mapper>

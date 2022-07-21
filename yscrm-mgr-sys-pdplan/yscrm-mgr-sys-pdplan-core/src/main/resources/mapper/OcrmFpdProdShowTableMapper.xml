@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.mgr.sys.pdplan.repository.mapper.OcrmFpdProdShowTableMapper">
+    <!-- 展示方案关联数据表查询 -->
+    <select id="getListByPlanId" parameterType="String"  resultType="java.util.HashMap">
+    SELECT * FROM (select * FROM OCRM_F_PD_PROD_TABLE WHERE TABLE_ID IN 
+	 (SELECT TABLE_ID FROM OCRM_F_PD_PROD_SHOW_TABLE WHERE PLAN_ID = #{planId, jdbcType=VARCHAR})) A 
+	 LEFT JOIN OCRM_F_PD_PROD_SHOW_TABLE B ON A.TABLE_ID = B.TABLE_ID WHERE PLAN_ID = #{planId, jdbcType=VARCHAR}
+	</select>
+	<!-- 展示方案未关联数据表查询 -->
+	<select id="getListByPlanIdNo" parameterType="String"  resultType="java.util.HashMap">
+	SELECT * FROM (select * FROM OCRM_F_PD_PROD_TABLE WHERE TABLE_ID NOT IN 
+   (SELECT TABLE_ID FROM OCRM_F_PD_PROD_SHOW_TABLE WHERE PLAN_ID = #{planId, jdbcType=VARCHAR})) A 
+   LEFT JOIN OCRM_F_PD_PROD_TABLE B ON A.TABLE_ID = B.TABLE_ID
+	</select>
+	<delete id="deleteByPlanId" parameterType="String">
+	delete OCRM_F_PD_PROD_SHOW_TABLE where PLAN_ID = #{planId,jdbcType=VARCHAR}
+	</delete>
+	
+	<select id="checkSave" parameterType="String"  resultType="int">
+	 SELECT count(*) FROM OCRM_F_PD_PROD_SHOW_TABLE WHERE PLAN_ID = #{planId,jdbcType=VARCHAR} AND TABLE_ID = #{tableId,jdbcType=VARCHAR}
+	 
+	</select>
+	
+</mapper>

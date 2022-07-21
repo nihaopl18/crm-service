@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.cm.cust.repository.mapper.CimpFFqRelationMapper">
+	<select id="getSeq" resultType="long">
+		select ysc_sequence.nextval from dual
+	</select>
+	<select id="getListByModel" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel" resultType="java.util.HashMap">
+		 select c.*,t.table_name as join_left_name,t.obj_name as join_left_table_name,
+		 t3.dbtable_name as join_right_name,t1.group_name as join_right_table_name,
+		 t2.col_name_e as join_left_col_name,t2.col_name_c as join_left_col_remark,
+		  t3.col_name_e as join_right_col_name,t3.col_name_c as join_right_col_remark 
+		 from CIMP_F_FQ_RELATION c 
+		 left join cimp_f_fq_obj t on t.id = c.join_left_table 
+		 left join cimp_f_fq_group t1 on t1.id = c.join_right_table 
+		 left join CIMP_F_FQ_DBCOL t2 on t2.id = c.join_left_col 
+		left join CIMP_F_FQ_DBCOL t3 on t3.id = c.join_right_col where 1 = 1
+		<if test="condition.JOIN_LEFT_NAME != null and condition.JOIN_LEFT_NAME !=''">
+					and c.JOIN_LEFT_TABLE  LIKE CONCAT(CONCAT('%', #{condition.JOIN_LEFT_NAME, jdbcType=VARCHAR}),'%') 
+			</if>
+			<if test="condition.JOIN_RIGHT_NAME != null and condition.JOIN_RIGHT_NAME !=''">
+					and c.JOIN_LEFT_TABLE=#{condition.JOIN_RIGHT_NAME, jdbcType=VARCHAR}
+			</if>
+	</select>
+	
+	<select id="getDataObj"  resultType="java.util.HashMap">
+	select *from cimp_f_fq_obj
+	</select>
+	<select id="getDataObjs" parameterType="string"  resultType="java.util.HashMap">
+		${value} 
+	</select>
+	<select id="getColDataObj" parameterType="string"  resultType="java.util.HashMap">
+		${value} 
+	</select>
+	<select id="getColDataObjs" parameterType="string"  resultType="java.util.HashMap">
+		${value} 
+	</select>
+	<select id="queryRelations" parameterType="string" resultType="cn.com.yusys.yusp.cm.cust.domain.CimpFFqRelation">
+		${value} 
+	</select>
+	<delete id="deletebyid" parameterType="string" >
+		delete from CIMP_F_FQ_RELATION where ID = #{id, jdbcType=INTEGER}
+	</delete>
+	
+	<insert id="addData" parameterType="cn.com.yusys.yusp.cm.cust.domain.CimpFFqRelation">
+		INSERT INTO CIMP_F_FQ_RELATION (ID, JOIN_LEFT_TABLE, JOIN_RIGHT_TABLE, SS_COL_LEFT, JOIN_LEFT_ALIAS, JOIN_RIGHT_ALIAS, JOIN_LEFT_COL, JOIN_RIGHT_COL) VALUES
+		(
+		#{id, jdbcType=INTEGER},
+        #{joinLeftName, jdbcType=INTEGER},
+		#{joinRightName, jdbcType=INTEGER},
+		#{ssColLeft, jdbcType=VARCHAR},
+		#{joinLeftAlias, jdbcType=VARCHAR},
+		#{joinRightAlias, jdbcType=VARCHAR},
+		#{joinLeftColName, jdbcType=INTEGER},
+		#{joinRightColName, jdbcType=INTEGER}
+		)
+	</insert> 
+	
+	<update id="updateData" parameterType="cn.com.yusys.yusp.cm.cust.domain.CimpFFqRelation" >
+		update CIMP_F_FQ_RELATION set
+			JOIN_LEFT_COL = #{joinLeftColName, jdbcType=INTEGER},
+			JOIN_RIGHT_COL = #{joinRightColName, jdbcType=INTEGER},
+			JOIN_LEFT_TABLE =  #{joinLeftName, jdbcType=INTEGER},
+			JOIN_RIGHT_TABLE =#{joinRightName, jdbcType=INTEGER},
+			SS_COL_LEFT = #{ssColLeft, jdbcType=VARCHAR},
+			JOIN_LEFT_ALIAS = #{joinLeftAlias, jdbcType=VARCHAR}
+		where ID = #{id, jdbcType=INTEGER}
+	</update>	
+</mapper>

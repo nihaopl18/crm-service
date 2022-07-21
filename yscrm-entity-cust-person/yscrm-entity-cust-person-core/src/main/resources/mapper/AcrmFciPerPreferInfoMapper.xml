@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.cust.person.repository.mapper.AcrmFciPerPreferInfoMapper">
+     <select id="getPerpreList" parameterType="java.util.Map"  resultType="java.util.HashMap">
+	select  t.DATA_DATE,t.LAST_CHG_SYS,t.LAST_CHG_USR,t.LAST_CHG_DT,t.CORP_ORG_CODE,t.CUST_ID,t.CHN_CD
+	,t.CHN_OTH,t.INV_CD,t.INV_OTH,t.FIN_ADVI_CD,t.FIN_OTH,t.CONT_CD,t.CONT_OTH,t.SALO_CD,t.SALO_OTH,t.HOBB_CD
+	,t.HOBB_OTH,t.CONT_TIME_CD,t.INV_TERM_CD,t.FAITH_CD,t.TABOO,t.SPEC_NEED,t.REMARKS,t.FIN_BUSI_CD,t.FIN_BUSI_OTH
+	,t.ARDER_CD,t.ARDER_OTH,t.MEDIA_CD,t.MEDIA_OTH,t.SPORT_CD,t.SPORT_OTH,t.MAGAZ_CD,t.MAGAZ_OTH,t.TVSHOW_CD
+	,t.TVSHOW_OTH,t.PET_CD,t.PET_OTH,t.COLL_CD,t.COLL_OTH,t.CONS_CD,t.CONS_CHN_CD,t.CONS_BRAND_CD,t.CONS_OTH
+	  from  ACRM_F_CI_PER_PREFER_INFO t
+	   <if  test="custId != null and custId != ''">
+		       		where t.CUST_ID =#{custId,jdbcType=VARCHAR} 
+	   </if>
+	</select>
+    
+</mapper>

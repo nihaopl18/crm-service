@@ -1,0 +1,247 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.climp.cust.repository.mapper.LoyCmCustInfoMapper">
+
+	<!-- 分页查询客户信息 -->
+	<select id="queryCustByPage" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+		resultType="java.util.Map">
+		SELECT * FROM (SELECT ROWNUM AS rowno, t.*
+		FROM (
+		select t.CUST_ID,
+		t.CUST_TYPE, t.IDENT_TYPE, t.IDENT_NO, t.CUST_NAME,
+		t.LINKMAN_NAME,
+		t.LINKMAN_TEL, t.LAST_UPDATE_SYS,
+		t.LAST_UPDATE_USER, t.LAST_UPDATE_TM,
+		t.BIRTH_DATE, t.PROFESS_TYPE, t.POST_INFO,
+		t.WORK_UNIT, t.POST_CODE,
+		t.HANDPHONE, t.ADDRESS_INFO,
+		t.FAX_CODE, t.EMAIL, t.SEX,
+		t.LINKMAN_APPEL,t1.TOTAL_NUM,t1.SCORE_NUM,t1.FREEZE_NUM,nvl(t1.NEXT_INVALID_NUM,0)
+		as NEXT_INVALID_NUM,nvl(t1.nunacc_num,0) as nunacc_num,t1.cost_num
+		from loy_cm_cust_info t
+		left join LOY_SR_CUST_SCORE_VIEW t1 on
+		t1.cust_id=t.cust_id
+		<where>
+			<if test="condition.identNo != null and condition.identNo != ''">
+				and t.IDENT_NO = #{condition.identNo, jdbcType=VARCHAR}
+			</if>
+			<if test="condition.identType != null and condition.identType != ''">
+				and t.IDENT_TYPE = #{condition.identType ,
+				jdbcType=VARCHAR}
+			</if>
+			<if test="condition.custId != null and condition.custId != ''">
+				and t.cust_id like ''||#{condition.custId}||'%'
+			</if>
+			<if test="condition.custName != null and condition.custName != ''">
+				and t.cust_name like ''||#{condition.custName}||'%'
+			</if>
+			<if
+				test="condition.totalNumStart != null and condition.totalNumStart != ''">
+				and t1.TOTAL_NUM &gt;= #{condition.totalNumStart}
+			</if>
+			<if test="condition.totalNumEnd != null and condition.totalNumEnd != ''">
+				and t1.TOTAL_NUM &lt;= #{condition.totalNumEnd}
+			</if>
+			<if
+				test="condition.scoreNumStart != null and condition.scoreNumStart != ''">
+				and t1.SCORE_NUM &gt;= #{condition.scoreNumStart}
+			</if>
+			<if test="condition.scoreNumEnd != null and condition.scoreNumEnd != ''">
+				and t1.SCORE_NUM &lt;= #{condition.scoreNumEnd}
+			</if>
+			<if
+				test="condition.freezeNumStart != null and condition.freezeNumStart != ''">
+				and t1.FREEZE_NUM &gt;= #{condition.freezeNumStart}
+			</if>
+			<if test="condition.freezeNumEnd != null and condition.freezeNumEnd != ''">
+				and t1.FREEZE_NUM &lt;= #{condition.freezeNumEnd}
+			</if>
+		</where>
+		) t
+		WHERE ROWNUM &lt;= #{page}*#{size}) table_alias
+		WHERE
+		table_alias.rowno
+		&gt;= (#{page}-1)*#{size}
+	</select>
+	<!-- 分页查询客户信息-统计数据 -->
+	<select id="queryCustByTotal" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+		resultType="java.util.Map">
+		select count(t.CUST_ID) as total from loy_cm_cust_info t
+		left join
+		LOY_SR_CUST_SCORE_VIEW t1 on t1.cust_id=t.cust_id
+		<where>
+			<if test="condition.identNo != null and condition.identNo != ''">
+				and t.IDENT_NO = #{condition.identNo, jdbcType=VARCHAR}
+			</if>
+			<if test="condition.identType != null and condition.identType != ''">
+				and t.IDENT_TYPE = #{condition.identType ,
+				jdbcType=VARCHAR}
+			</if>
+			<if test="condition.custId != null and condition.custId != ''">
+				and t.cust_id like ''||#{condition.custId}||'%'
+			</if>
+			<if test="condition.custName != null and condition.custName != ''">
+				and t.cust_name like ''||#{condition.custName}||'%'
+			</if>
+			<if
+				test="condition.totalNumStart != null and condition.totalNumStart != ''">
+				and t1.TOTAL_NUM &gt;= #{condition.totalNumStart}
+			</if>
+			<if test="condition.totalNumEnd != null and condition.totalNumEnd != ''">
+				and t1.TOTAL_NUM &lt;= #{condition.totalNumEnd}
+			</if>
+			<if
+				test="condition.scoreNumStart != null and condition.scoreNumStart != ''">
+				and t1.SCORE_NUM &gt;= #{condition.scoreNumStart}
+			</if>
+			<if test="condition.scoreNumEnd != null and condition.scoreNumEnd != ''">
+				and t1.SCORE_NUM &lt;= #{condition.scoreNumEnd}
+			</if>
+			<if
+				test="condition.freezeNumStart != null and condition.freezeNumStart != ''">
+				and t1.FREEZE_NUM &gt;= #{condition.freezeNumStart}
+			</if>
+			<if test="condition.freezeNumEnd != null and condition.freezeNumEnd != ''">
+				and t1.FREEZE_NUM &lt;= #{condition.freezeNumEnd}
+			</if>
+		</where>
+	</select>
+	<!-- 分页查询客户选择器信息 -->
+	<select id="queryCustByPageO" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+		resultType="java.util.Map">
+		SELECT * FROM (SELECT ROWNUM AS rowno, t.*
+		FROM (
+		select t.CUST_ID,
+		t.CUST_TYPE, t.IDENT_TYPE, t.IDENT_NO,
+		t.CUST_NAME,t.HANDPHONE,t.SEX,
+		t1.TOTAL_NUM,t1.SCORE_NUM,t1.FREEZE_NUM,t1.NEXT_INVALID_NUM
+		from
+		loy_cm_cust_info t
+		left join LOY_SR_CUST_SCORE_VIEW t1 on
+		t1.cust_id=t.cust_id
+		<where>
+			<choose>
+				<when test="condition.transType != null and condition.transType != ''">
+					and exists(select 1 from LOY_SR_CUST_FREEZE T2 where
+					T2.cust_id=t.cust_id)
+				</when>
+				<otherwise>
+					and not exists(select 1 from LOY_SR_CUST_FREEZE T2 where
+					T2.cust_id=t.cust_id)
+				</otherwise>
+			</choose>
+			and not exists(select 1 from LOY_SR_SCORE_ADJUST S WHERE
+			S.cust_id=t.cust_id AND S.APPROVE_STATUS in ('000','998','111'))
+			<if test="condition.identNo != null and condition.identNo != ''">
+				and t.IDENT_NO = #{condition.identNo, jdbcType=VARCHAR}
+			</if>
+			<if test="condition.identType != null and condition.identType != ''">
+				and t.IDENT_TYPE = #{condition.identType ,
+				jdbcType=VARCHAR}
+			</if>
+			<if test="condition.custId != null and condition.custId != ''">
+				and t.cust_id like ''||#{condition.custId}||'%'
+			</if>
+			<if test="condition.custName != null and condition.custName != ''">
+				and t.cust_name like ''||#{condition.custName}||'%'
+			</if>
+			<if
+				test="condition.totalNumStart != null and condition.totalNumStart != ''">
+				and t1.TOTAL_NUM &gt;= #{condition.totalNumStart}
+			</if>
+			<if test="condition.totalNumEnd != null and condition.totalNumEnd != ''">
+				and t1.TOTAL_NUM &lt;= #{condition.totalNumEnd}
+			</if>
+			<if
+				test="condition.scoreNumStart != null and condition.scoreNumStart != ''">
+				and t1.SCORE_NUM &gt;= #{condition.scoreNumStart}
+			</if>
+			<if test="condition.scoreNumEnd != null and condition.scoreNumEnd != ''">
+				and t1.SCORE_NUM &lt;= #{condition.scoreNumEnd}
+			</if>
+			<if
+				test="condition.freezeNumStart != null and condition.freezeNumStart != ''">
+				and t1.FREEZE_NUM &gt;= #{condition.freezeNumStart}
+			</if>
+			<if test="condition.freezeNumEnd != null and condition.freezeNumEnd != ''">
+				and t1.FREEZE_NUM &lt;= #{condition.freezeNumEnd}
+			</if>
+		</where>
+		) t
+		WHERE ROWNUM &lt;= #{page}*#{size}) table_alias
+		WHERE
+		table_alias.rowno
+		&gt;= (#{page}-1)*#{size}
+	</select>
+	<!-- 分页查询客户选择器信息-统计数据 -->
+	<select id="queryCustByTotalO" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"
+		resultType="java.util.Map">
+		select count(t.CUST_ID) as total from loy_cm_cust_info t
+		left join
+		LOY_SR_CUST_SCORE_VIEW t1 on t1.cust_id=t.cust_id
+		<where>
+			<choose>
+				<when test="condition.transType != null and condition.transType != ''">
+					and exists(select 1 from LOY_SR_CUST_FREEZE T2 where
+					T2.cust_id=t.cust_id)
+				</when>
+				<otherwise>
+					and not exists(select 1 from LOY_SR_CUST_FREEZE T2 where
+					T2.cust_id=t.cust_id)
+				</otherwise>
+			</choose>
+			and not exists(select 1 from LOY_SR_SCORE_ADJUST S WHERE
+			S.cust_id=t.cust_id AND S.APPROVE_STATUS in ('000','998','111'))
+			<if test="condition.identNo != null and condition.identNo != ''">
+				and t.IDENT_NO = #{condition.identNo, jdbcType=VARCHAR}
+			</if>
+			<if test="condition.identType != null and condition.identType != ''">
+				and t.IDENT_TYPE = #{condition.identType ,
+				jdbcType=VARCHAR}
+			</if>
+			<if test="condition.custId != null and condition.custId != ''">
+				and t.cust_id like ''||#{condition.custId}||'%'
+			</if>
+			<if test="condition.custName != null and condition.custName != ''">
+				and t.cust_name like ''||#{condition.custName}||'%'
+			</if>
+			<if
+				test="condition.totalNumStart != null and condition.totalNumStart != ''">
+				and t1.TOTAL_NUM &gt;= #{condition.totalNumStart}
+			</if>
+			<if test="condition.totalNumEnd != null and condition.totalNumEnd != ''">
+				and t1.TOTAL_NUM &lt;= #{condition.totalNumEnd}
+			</if>
+			<if
+				test="condition.scoreNumStart != null and condition.scoreNumStart != ''">
+				and t1.SCORE_NUM &gt;= #{condition.scoreNumStart}
+			</if>
+			<if test="condition.scoreNumEnd != null and condition.scoreNumEnd != ''">
+				and t1.SCORE_NUM &lt;= #{condition.scoreNumEnd}
+			</if>
+			<if
+				test="condition.freezeNumStart != null and condition.freezeNumStart != ''">
+				and t1.FREEZE_NUM &gt;= #{condition.freezeNumStart}
+			</if>
+			<if test="condition.freezeNumEnd != null and condition.freezeNumEnd != ''">
+				and t1.FREEZE_NUM &lt;= #{condition.freezeNumEnd}
+			</if>
+		</where>
+	</select>
+
+	<!--查询客户可用积分 -->
+	<select id="getScoreNum" parameterType="java.util.Map" resultType="java.lang.Integer">
+		select T.USEABLE_SCORE
+		from LOY_SR_CUST_SCORE_VIEW T
+		where T.CUST_NO = #{custNo, jdbcType=VARCHAR} and T.USEABLE_SCORE >= #{sumScore, jdbcType=VARCHAR}
+	</select>
+
+	<!--查询客户可用账户 -->
+	<select id="getUseableAccount" parameterType="java.lang.String" resultType="java.util.Map">
+		select SDA_ID, USEABLE_SCORE
+		from LOY_SR_SCORE_COLLECT_VIEW
+		where CUST_NO = #{custId, jdbcType=VARCHAR}
+			and SD_STATUS = '10'
+			order by DISABLED_DT asc nulls last,CREATE_DT asc nulls last
+	</select>
+</mapper>

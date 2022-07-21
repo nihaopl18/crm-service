@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.product.repository.mapper.AcrmFpdProdUserFocusMapper">
+    <select id="productUserFocusInfoQuery" parameterType="cn.com.yusys.yscrm.product.domain.AcrmFpdProdUserFocusInfo" resultType="Integer">
+        SELECT COUNT(*)
+        FROM ACRM_F_PD_PROD_USER_FOCUS_INFO UF
+        WHERE UF.USER_ID = #{userId,jdbcType=VARCHAR}
+        <if test="srcProdCode != null and srcProdCode != '' ">
+            AND UF.SRC_PROD_CODE = #{srcProdCode,jdbcType=VARCHAR}
+        </if>
+        <if test="prodCode != null and prodCode != ''" >
+            AND UF.PROD_CODE = #{prodCode,jdbcType=VARCHAR}
+        </if>
+    </select>
+
+    <delete id="deleteProductUserFocusInfo" parameterType="cn.com.yusys.yscrm.product.domain.AcrmFpdProdUserFocusInfo">
+        DELETE FROM ACRM_F_PD_PROD_USER_FOCUS_INFO UF
+        WHERE UF.USER_ID = #{userId,jdbcType=VARCHAR}
+        <if test="srcProdCode != null and srcProdCode != '' ">
+            AND UF.SRC_PROD_CODE = #{srcProdCode,jdbcType=VARCHAR}
+        </if>
+        <if test="prodCode != null and prodCode != ''" >
+            AND UF.PROD_CODE = #{prodCode,jdbcType=VARCHAR}
+        </if>
+    </delete>
+</mapper>

@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yscrm.custpub.repository.mapper.AcrmAcmBusiSumMapper">
+   <select id= "getListByModel" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"  resultType="java.util.HashMap">
+    select * from (select t.* from ACRM_A_CM_BUSI_SUM t where t.TARGET_ID = #{condition.userId, jdbcType=VARCHAR} and TARGET_TYPE='1' order by t.data_date desc ) where rownum &lt; 3
+    </select>
+    <select id= "getListByModel1" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"  resultType="java.util.HashMap">
+     select *
+   		from (select t.*
+           from ACRM_A_CM_BUSI_SUM t
+          where t.TARGET_ID in
+                (select MKT_TEAM_ID
+                   from OCRM_F_CM_MKT_TEAM
+                  where TEAM_LEADER_ID = #{condition.userId, jdbcType=VARCHAR})
+            and TARGET_TYPE = '2'
+          order by t.data_date desc)
+  		where rownum &lt; 3
+    </select>
+    <select id= "getRankPer" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"  resultType="java.util.HashMap">
+    select * from (select *
+  from ACRM_A_CI_PER_BUSI_SUM_D s
+  <!-- left join acrm_f_ci_cust_admit_all c -->
+  left join ACRM_F_CI_PER_ADMIT_INFO c
+    on c.cust_id = s.cust_id
+ where c.IS_ADMIT_ENTER='1' 
+   and c.belong_mgr = #{condition.userId, jdbcType=VARCHAR}
+ order by  s.aum_bal desc ) where  rownum &lt; 6 
+    </select>
+    
+    <select id= "getRankOrg" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"  resultType="java.util.HashMap">
+    select * from (select *
+  from ACRM_A_CI_ORG_BUSI_SUM_D s
+  <!-- left join acrm_f_ci_cust_admit_all c -->
+  left join ACRM_F_CI_ORG_CUST_INFO c
+    on c.cust_id = s.cust_id
+ where c.IS_ADMIT_ENTER='1' 
+   and c.belong_mgr = #{condition.userId, jdbcType=VARCHAR}
+ order by s.aum_bal desc ) where  rownum &lt; 6
+    </select>
+    
+   <select id= "getRankPer2" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"  resultType="java.util.HashMap">
+     		select * from (select *
+  from ACRM_A_CI_PER_BUSI_SUM_D s
+  left join ACRM_F_CI_PER_ADMIT_INFO c
+    on c.cust_id = s.cust_id
+ where c.IS_ADMIT_ENTER='1' 
+   and c.BELONG_BRCH = #{condition.orgCode, jdbcType=VARCHAR}
+ order by s.aum_bal desc ) where  rownum &lt; 6
+     </select>
+    
+ <select id= "getRankOrg2" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"  resultType="java.util.HashMap">
+ 	select * from (select *
+  from ACRM_A_CI_ORG_BUSI_SUM_D s
+  left join ACRM_F_CI_ORG_CUST_INFO c
+    on c.cust_id = s.cust_id
+ where c.IS_ADMIT_ENTER='1' 
+   and c.BELONG_BRCH = #{condition.orgCode, jdbcType=VARCHAR}
+ order by s.aum_bal desc ) where  rownum &lt; 6
+ </select>   
+ 
+ 
+  
+   <select id= "getRankPer3" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"  resultType="java.util.HashMap">
+     		 select * from (select *
+  from ACRM_A_CI_PER_BUSI_SUM_D s
+  left join ACRM_F_CI_PER_ADMIT_INFO c
+    on c.cust_id = s.cust_id
+ where c.IS_ADMIT_ENTER='1' 
+   and (c.belong_mgr in (SELECT USER_ID FROM OCRM_F_CM_TEAM_CUST_MANAGER WHERE MKT_TEAM_ID IN (SELECT DISTINCT MKT_TEAM_ID FROM OCRM_F_CM_MKT_TEAM TEAM_LEADER_ID WHERE TEAM_LEADER_ID =#{condition.userId, jdbcType=VARCHAR})) or c.belong_mgr =#{condition.userId, jdbcType=VARCHAR})
+ order by  s.aum_bal desc ) where  rownum &lt; 6 
+     </select>
+    
+ <select id= "getRankOrg3" parameterType="cn.com.yusys.yusp.commons.mapper.QueryModel"  resultType="java.util.HashMap">
+ 	 select * from (select *
+  from ACRM_A_CI_ORG_BUSI_SUM_D s
+  left join ACRM_F_CI_ORG_CUST_INFO c
+    on c.cust_id = s.cust_id
+ where c.IS_ADMIT_ENTER='1' 
+   and (c.belong_mgr in (SELECT USER_ID FROM OCRM_F_CM_TEAM_CUST_MANAGER WHERE MKT_TEAM_ID IN (SELECT DISTINCT MKT_TEAM_ID FROM OCRM_F_CM_MKT_TEAM TEAM_LEADER_ID WHERE TEAM_LEADER_ID =#{condition.userId, jdbcType=VARCHAR})) or c.belong_mgr =#{condition.userId, jdbcType=VARCHAR})
+ order by s.aum_bal desc ) where  rownum &lt; 6
+ </select> 
+</mapper>

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.yusys.yusp.admin.repository.mapper.UserCacheMapper">
+	<resultMap id="DataAuthMap2" type="cn.com.yusys.yusp.commons.dto.def.DataContrDTO">
+		<result column="AUTH_ID" property="authId" jdbcType="VARCHAR" />
+		<result column="CONTR_ID" property="contrId" jdbcType="VARCHAR" />
+		<result column="AUTH_TMPL_ID" property="authTmplId" jdbcType="VARCHAR" />
+		<result column="SQL_STRING" property="sqlString" jdbcType="VARCHAR" />
+		<result column="CONTR_INCLUDE" property="contrInclude" jdbcType="VARCHAR" />
+		<result column="SQL_NAME" property="sqlName" jdbcType="VARCHAR" />
+		<result column="PRIORITY" property="priority" jdbcType="VARCHAR" />
+		<result column="CONTR_URL" property="contrUrl" jdbcType="VARCHAR" />
+	</resultMap>
+     <select id="selectDataAuthList" parameterType="String" resultMap="DataAuthMap2" databaseId="mysql">
+       SELECT DISTINCT T_DATACTRL.AUTH_ID,T_DATACTRL.CONTR_ID,T_DATACTRL.AUTH_TMPL_ID,cast(T_TMPL.SQL_STRING as char) as SQL_STRING,cast(T_TMPL.CONTR_INCLUDE as char) as CONTR_INCLUDE,
+         T_TMPL.SQL_NAME,T_TMPL.PRIORITY,T_CTRL.CONTR_URL,T_RECO.SYS_ID
+       FROM ADMIN_SM_AUTH_RECO T_RECO
+       JOIN (
+          SELECT T_USER.USER_ID USER_ID,
+            T_USER.ORG_ID ORG_ID,T_USER.DPT_ID DPT_ID,T_ROELREL.ROLE_ID ROLE_ID
+          FROM ADMIN_SM_USER T_USER
+          LEFT JOIN ADMIN_SM_USER_ROLE_REL T_ROELREL ON (T_USER.USER_ID=T_ROELREL.USER_ID)
+          <where>
+                    <if test="loginCode != null">
+                        and T_USER.LOGIN_CODE=#{loginCode}
+                    </if>
+          </where>
+             ) T_AUTHOBJ
+       ON(
+             (T_RECO.AUTHOBJ_TYPE='U' AND T_RECO.AUTHOBJ_ID = T_AUTHOBJ.USER_ID) OR
+             (T_RECO.AUTHOBJ_TYPE='R' AND T_RECO.AUTHOBJ_ID = T_AUTHOBJ.ROLE_ID) OR
+             (T_RECO.AUTHOBJ_TYPE='G' AND T_RECO.AUTHOBJ_ID = T_AUTHOBJ.ORG_ID)  OR
+             (T_RECO.AUTHOBJ_TYPE='D' AND T_RECO.AUTHOBJ_ID = T_AUTHOBJ.DPT_ID)
+       )
+       JOIN ADMIN_SM_DATA_AUTH T_DATACTRL ON(T_RECO.AUTHRES_TYPE ='D' AND T_RECO.AUTHRES_ID=T_DATACTRL.AUTH_ID)
+       JOIN ADMIN_SM_DATA_AUTH_TMPL T_TMPL ON(T_DATACTRL.AUTH_TMPL_ID=T_TMPL.AUTH_TMPL_ID)
+       LEFT JOIN ADMIN_SM_RES_CONTR T_CTRL ON(T_DATACTRL.CONTR_ID=T_CTRL.CONTR_ID)
+        <where>
+         <if test="sysId != null">
+             AND T_RECO.SYS_ID=#{sysId}
+         </if>
+        </where>
+         ORDER BY T_TMPL.PRIORITY
+     </select>
+</mapper>
